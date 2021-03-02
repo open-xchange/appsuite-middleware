@@ -55,10 +55,10 @@ import com.openexchange.ajax.framework.Abstrac2UserAJAXSession;
 import com.openexchange.ajax.mailaccount.actions.MailAccountDeleteRequest;
 import com.openexchange.ajax.mailaccount.actions.MailAccountInsertRequest;
 import com.openexchange.ajax.mailaccount.actions.MailAccountInsertResponse;
-import com.openexchange.configuration.AJAXConfig;
 import com.openexchange.exception.OXException;
 import com.openexchange.mailaccount.MailAccountDescription;
-import com.openexchange.test.pool.TestUser;
+import com.openexchange.test.common.configuration.AJAXConfig;
+import com.openexchange.test.common.test.pool.TestUser;
 
 /**
  * {@link AbstractMailAccountTest}

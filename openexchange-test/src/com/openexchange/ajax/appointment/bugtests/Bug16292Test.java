@@ -29,11 +29,11 @@ import com.openexchange.ajax.framework.ListIDs;
 import com.openexchange.ajax.task.actions.InsertResponse;
 import com.openexchange.ajax.task.actions.TaskUpdatesResponse;
 import com.openexchange.exception.OXException;
-import com.openexchange.groupware.calendar.TimeTools;
 import com.openexchange.groupware.container.Appointment;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.search.Order;
 import com.openexchange.groupware.tasks.Task;
+import com.openexchange.test.common.groupware.calendar.TimeTools;
 
 /**
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>

@@ -62,8 +62,8 @@ import com.openexchange.ajax.mail.actions.GetRequest;
 import com.openexchange.ajax.mail.actions.GetResponse;
 import com.openexchange.ajax.mail.actions.NewMailRequest;
 import com.openexchange.ajax.mail.actions.NewMailResponse;
-import com.openexchange.configuration.AJAXConfig;
 import com.openexchange.exception.OXException;
+import com.openexchange.test.common.configuration.AJAXConfig;
 
 /**
  * {@link GetStructureTest}

@@ -63,7 +63,7 @@ import com.openexchange.ajax.infostore.actions.GetDocumentResponse;
 import com.openexchange.ajax.infostore.actions.NewInfostoreRequest;
 import com.openexchange.ajax.infostore.actions.NewInfostoreResponse;
 import com.openexchange.file.storage.DefaultFile;
-import com.openexchange.test.TestInit;
+import com.openexchange.test.common.test.TestInit;
 
 /**
  * {@link Bug44622Test}

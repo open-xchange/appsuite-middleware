@@ -64,7 +64,7 @@ import org.json.JSONException;
 import org.junit.Test;
 import com.openexchange.ajax.chronos.util.DateTimeUtil;
 import com.openexchange.exception.OXException;
-import com.openexchange.test.pool.TestUser;
+import com.openexchange.test.common.test.pool.TestUser;
 import com.openexchange.testing.httpclient.invoker.ApiClient;
 import com.openexchange.testing.httpclient.invoker.ApiException;
 import com.openexchange.testing.httpclient.models.AppPasswordApplication;

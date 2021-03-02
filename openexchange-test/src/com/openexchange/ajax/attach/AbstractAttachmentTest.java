@@ -77,8 +77,8 @@ import com.openexchange.groupware.attach.AttachmentField;
 import com.openexchange.groupware.attach.AttachmentMetadata;
 import com.openexchange.groupware.attach.impl.AttachmentImpl;
 import com.openexchange.groupware.search.Order;
-import com.openexchange.test.OXTestToolkit;
-import com.openexchange.test.TestClassConfig;
+import com.openexchange.test.common.test.OXTestToolkit;
+import com.openexchange.test.common.test.TestClassConfig;
 
 public abstract class AbstractAttachmentTest extends AttachmentTest {
 

@@ -67,8 +67,8 @@ import com.openexchange.ajax.framework.AbstractAJAXSession;
 import com.openexchange.ajax.framework.CommonAllResponse;
 import com.openexchange.ajax.framework.CommonInsertResponse;
 import com.openexchange.exception.OXException;
-import com.openexchange.groupware.calendar.TimeTools;
 import com.openexchange.groupware.container.Appointment;
+import com.openexchange.test.common.groupware.calendar.TimeTools;
 
 public class Bug12212Test extends AbstractAJAXSession {
 

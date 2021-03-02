@@ -104,7 +104,7 @@ import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.tasks.Task;
 import com.openexchange.java.Charsets;
 import com.openexchange.test.CalendarTestManager;
-import com.openexchange.test.PermissionTools;
+import com.openexchange.test.common.test.PermissionTools;
 import net.fortuna.ical4j.model.component.Available;
 import net.fortuna.ical4j.model.component.VAvailability;
 

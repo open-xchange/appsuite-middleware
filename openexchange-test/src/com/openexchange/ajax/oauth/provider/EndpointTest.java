@@ -87,8 +87,6 @@ import org.junit.runner.RunWith;
 import com.google.code.tempusfugit.concurrency.ConcurrentTestRunner;
 import com.openexchange.ajax.framework.AJAXClient;
 import com.openexchange.ajax.framework.ProvisioningSetup;
-import com.openexchange.configuration.AJAXConfig;
-import com.openexchange.configuration.AJAXConfig.Property;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.util.UUIDs;
 import com.openexchange.oauth.provider.impl.OAuthProviderConstants;
@@ -97,9 +95,11 @@ import com.openexchange.oauth.provider.rmi.client.ClientDataDto;
 import com.openexchange.oauth.provider.rmi.client.ClientDto;
 import com.openexchange.oauth.provider.rmi.client.IconDto;
 import com.openexchange.oauth.provider.rmi.client.RemoteClientManagement;
-import com.openexchange.test.pool.TestContext;
-import com.openexchange.test.pool.TestContextPool;
-import com.openexchange.test.pool.TestUser;
+import com.openexchange.test.common.configuration.AJAXConfig;
+import com.openexchange.test.common.configuration.AJAXConfig.Property;
+import com.openexchange.test.common.test.pool.TestContext;
+import com.openexchange.test.common.test.pool.TestContextPool;
+import com.openexchange.test.common.test.pool.TestUser;
 
 /**
  * {@link EndpointTest}

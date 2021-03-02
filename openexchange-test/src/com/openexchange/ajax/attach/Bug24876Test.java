@@ -65,8 +65,8 @@ import com.openexchange.ajax.framework.ProvisioningSetup;
 import com.openexchange.groupware.attach.AttachmentField;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.java.util.TimeZones;
-import com.openexchange.test.pool.TestContext;
-import com.openexchange.test.pool.TestContextPool;
+import com.openexchange.test.common.test.pool.TestContext;
+import com.openexchange.test.common.test.pool.TestContextPool;
 
 /**
  * {@link Bug24876Test}

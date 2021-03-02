@@ -62,7 +62,7 @@ import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.DefaultFile;
 import com.openexchange.file.storage.File;
 import com.openexchange.groupware.container.FolderObject;
-import com.openexchange.test.TestInit;
+import com.openexchange.test.common.test.TestInit;
 
 /**
  * @author <a href="mailto:tobias.prinz@open-xchange.com">Tobias Prinz</a>

@@ -68,10 +68,10 @@ import com.openexchange.ajax.task.actions.InsertRequest;
 import com.openexchange.ajax.task.actions.InsertResponse;
 import com.openexchange.ajax.task.actions.ListRequest;
 import com.openexchange.exception.OXException;
-import com.openexchange.groupware.tasks.Create;
 import com.openexchange.groupware.tasks.Mapper;
 import com.openexchange.groupware.tasks.Mapping;
 import com.openexchange.groupware.tasks.Task;
+import com.openexchange.test.common.groupware.tasks.Create;
 
 /**
  * Tests actual and target duration and costs set to 0.

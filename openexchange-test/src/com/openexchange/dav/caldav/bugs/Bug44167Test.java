@@ -67,13 +67,13 @@ import com.openexchange.dav.caldav.ICalResource;
 import com.openexchange.dav.caldav.UserAgents;
 import com.openexchange.dav.caldav.ical.SimpleICal;
 import com.openexchange.dav.caldav.ical.SimpleICal.Component;
-import com.openexchange.groupware.calendar.TimeTools;
 import com.openexchange.groupware.container.Appointment;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.container.UserParticipant;
 import com.openexchange.server.impl.OCLPermission;
 import com.openexchange.test.CalendarTestManager;
-import com.openexchange.test.TestClassConfig;
+import com.openexchange.test.common.groupware.calendar.TimeTools;
+import com.openexchange.test.common.test.TestClassConfig;
 
 /**
  * {@link Bug44167Test}

@@ -68,7 +68,7 @@ import com.openexchange.groupware.modules.Module;
 import com.openexchange.server.impl.OCLPermission;
 import com.openexchange.test.ContactTestManager;
 import com.openexchange.test.FolderTestManager;
-import com.openexchange.test.TestClassConfig;
+import com.openexchange.test.common.test.TestClassConfig;
 
 /**
  * {@link DistListPermissionsTest} - Checks the distribution list handling.

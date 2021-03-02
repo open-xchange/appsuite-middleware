@@ -69,8 +69,8 @@ import com.openexchange.ajax.snippet.actions.ListSnippetRequest;
 import com.openexchange.ajax.snippet.actions.ListSnippetResponse;
 import com.openexchange.ajax.snippet.actions.NewSnippetRequest;
 import com.openexchange.ajax.snippet.actions.NewSnippetResponse;
-import com.openexchange.configuration.AJAXConfig;
 import com.openexchange.exception.OXException;
+import com.openexchange.test.common.configuration.AJAXConfig;
 
 /**
  * {@link TestSnippetSignature}

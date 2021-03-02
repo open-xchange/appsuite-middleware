@@ -60,7 +60,7 @@ import com.openexchange.ajax.config.actions.Tree;
 import com.openexchange.ajax.framework.AbstractConfigAwareAPIClientSession;
 import com.openexchange.groupware.modules.Module;
 import com.openexchange.junit.Assert;
-import com.openexchange.test.TestClassConfig;
+import com.openexchange.test.common.test.TestClassConfig;
 import com.openexchange.testing.httpclient.invoker.ApiClient;
 import com.openexchange.testing.httpclient.invoker.ApiException;
 import com.openexchange.testing.httpclient.models.ConfigResponse;

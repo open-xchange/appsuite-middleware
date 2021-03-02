@@ -64,8 +64,8 @@ import com.openexchange.ajax.framework.CommonInsertResponse;
 import com.openexchange.ajax.task.actions.InsertRequest;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.FolderObject;
-import com.openexchange.groupware.tasks.Create;
 import com.openexchange.groupware.tasks.Task;
+import com.openexchange.test.common.groupware.tasks.Create;
 
 /**
  * Verifies that the problem described in bug 28089 does not appear again. The issue is a SQL problem due to different connections used to

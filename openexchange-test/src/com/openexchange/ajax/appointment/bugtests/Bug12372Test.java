@@ -56,8 +56,8 @@ import com.openexchange.ajax.appointment.action.DeleteRequest;
 import com.openexchange.ajax.appointment.action.InsertRequest;
 import com.openexchange.ajax.framework.AbstractAJAXSession;
 import com.openexchange.ajax.framework.CommonInsertResponse;
-import com.openexchange.groupware.calendar.TimeTools;
 import com.openexchange.groupware.container.Appointment;
+import com.openexchange.test.common.groupware.calendar.TimeTools;
 
 /**
  *

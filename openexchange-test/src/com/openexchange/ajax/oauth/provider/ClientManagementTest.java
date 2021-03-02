@@ -69,8 +69,6 @@ import com.openexchange.admin.rmi.dataobjects.Credentials;
 import com.openexchange.ajax.framework.ProvisioningSetup;
 import com.openexchange.calendar.json.AppointmentActionFactory;
 import com.openexchange.chronos.json.oauth.ChronosOAuthScope;
-import com.openexchange.configuration.AJAXConfig;
-import com.openexchange.configuration.AJAXConfig.Property;
 import com.openexchange.contacts.json.ContactActionFactory;
 import com.openexchange.java.Strings;
 import com.openexchange.oauth.provider.authorizationserver.client.ClientManagement;
@@ -82,6 +80,8 @@ import com.openexchange.oauth.provider.rmi.client.IconDto;
 import com.openexchange.oauth.provider.rmi.client.RemoteClientManagement;
 import com.openexchange.oauth.provider.rmi.client.RemoteClientManagementException;
 import com.openexchange.tasks.json.TaskActionFactory;
+import com.openexchange.test.common.configuration.AJAXConfig;
+import com.openexchange.test.common.configuration.AJAXConfig.Property;
 
 /**
  * {@link ClientManagementTest}

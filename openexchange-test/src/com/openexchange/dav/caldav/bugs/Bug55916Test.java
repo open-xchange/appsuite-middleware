@@ -55,8 +55,8 @@ import java.util.Date;
 import org.junit.Test;
 import com.openexchange.dav.StatusCodes;
 import com.openexchange.dav.caldav.CalDAVTest;
-import com.openexchange.groupware.calendar.TimeTools;
 import com.openexchange.groupware.container.Appointment;
+import com.openexchange.test.common.groupware.calendar.TimeTools;
 
 /**
  * {@link Bug55916Test} - after creating an event in korganizer, the cal-dav agent crash

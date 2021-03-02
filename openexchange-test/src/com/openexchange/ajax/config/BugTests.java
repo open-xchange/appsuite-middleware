@@ -60,7 +60,7 @@ import com.openexchange.ajax.config.actions.SetRequest;
 import com.openexchange.ajax.config.actions.SetResponse;
 import com.openexchange.ajax.config.actions.Tree;
 import com.openexchange.ajax.framework.AbstractAJAXSession;
-import com.openexchange.tools.RandomString;
+import com.openexchange.test.common.tools.RandomString;
 
 /**
  * Tests resulting from bug reports.

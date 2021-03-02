@@ -59,11 +59,11 @@ import org.junit.Before;
 import org.junit.Test;
 import com.openexchange.dav.caldav.Abstract2UserCalDAVTest;
 import com.openexchange.dav.caldav.ICalResource;
-import com.openexchange.groupware.calendar.TimeTools;
 import com.openexchange.groupware.container.Appointment;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.test.CalendarTestManager;
-import com.openexchange.test.PermissionTools;
+import com.openexchange.test.common.groupware.calendar.TimeTools;
+import com.openexchange.test.common.test.PermissionTools;
 
 /**
  * {@link Bug52255Test}

@@ -77,12 +77,12 @@ import com.openexchange.advertisement.json.AdConfigRestService;
 import com.openexchange.ajax.framework.AJAXClient;
 import com.openexchange.ajax.framework.AbstractConfigAwareAjaxSession;
 import com.openexchange.config.cascade.ConfigViewScope;
-import com.openexchange.configuration.AJAXConfig;
-import com.openexchange.configuration.AJAXConfig.Property;
 import com.openexchange.rest.advertisement.actions.GetConfigRequest;
 import com.openexchange.rest.advertisement.actions.GetConfigResponse;
-import com.openexchange.test.pool.TestContextPool;
-import com.openexchange.test.pool.TestUser;
+import com.openexchange.test.common.configuration.AJAXConfig;
+import com.openexchange.test.common.configuration.AJAXConfig.Property;
+import com.openexchange.test.common.test.pool.TestContextPool;
+import com.openexchange.test.common.test.pool.TestUser;
 import com.openexchange.testing.restclient.modules.AdvertisementApi;
 import com.openexchange.tools.arrays.Arrays;
 

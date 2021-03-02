@@ -56,9 +56,9 @@ import java.util.Set;
 import com.openexchange.ajax.framework.AbstractAJAXSession;
 import com.openexchange.ajax.framework.UserValues;
 import com.openexchange.groupware.tasks.Task;
-import com.openexchange.groupware.tasks.TaskAsserts;
-import com.openexchange.groupware.tasks.TestTask;
 import com.openexchange.test.TaskTestManager;
+import com.openexchange.test.common.groupware.tasks.TaskAsserts;
+import com.openexchange.test.common.groupware.tasks.TestTask;
 
 public abstract class AbstractTaskTestForAJAXClient extends AbstractAJAXSession {
 

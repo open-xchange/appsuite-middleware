@@ -59,7 +59,7 @@ import com.openexchange.ajax.appointment.action.ConfirmRequest;
 import com.openexchange.ajax.appointment.action.ConfirmResponse;
 import com.openexchange.groupware.container.Appointment;
 import com.openexchange.groupware.container.Participant;
-import com.openexchange.test.TestClassConfig;
+import com.openexchange.test.common.test.TestClassConfig;
 
 /**
  * {@link Bug56359Test}

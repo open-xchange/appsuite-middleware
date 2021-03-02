@@ -63,9 +63,9 @@ import com.openexchange.ajax.task.actions.GetRequest;
 import com.openexchange.ajax.task.actions.InsertRequest;
 import com.openexchange.ajax.task.actions.UpdateRequest;
 import com.openexchange.exception.OXException;
-import com.openexchange.groupware.calendar.TimeTools;
 import com.openexchange.groupware.tasks.Task;
 import com.openexchange.java.util.TimeZones;
+import com.openexchange.test.common.groupware.calendar.TimeTools;
 
 /**
  * Verifies that the next created occurrence does not contain the task_completed attribute.

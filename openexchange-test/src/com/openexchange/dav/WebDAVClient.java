@@ -74,7 +74,7 @@ import com.openexchange.dav.reports.SyncCollectionReportInfo;
 import com.openexchange.dav.reports.SyncCollectionReportMethod;
 import com.openexchange.dav.reports.SyncCollectionResponse;
 import com.openexchange.exception.OXException;
-import com.openexchange.test.pool.TestUser;
+import com.openexchange.test.common.test.pool.TestUser;
 
 /**
  * {@link WebDAVClient}

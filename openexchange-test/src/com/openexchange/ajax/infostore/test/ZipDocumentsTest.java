@@ -61,13 +61,13 @@ import com.openexchange.ajax.framework.Executor;
 import com.openexchange.ajax.infostore.actions.InfostoreTestManager;
 import com.openexchange.ajax.infostore.actions.ZipDocumentsRequest;
 import com.openexchange.ajax.infostore.actions.ZipDocumentsRequest.IdVersionPair;
-import com.openexchange.configuration.AJAXConfig;
 import com.openexchange.file.storage.DefaultFile;
 import com.openexchange.file.storage.File;
 import com.openexchange.folderstorage.Folder;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.test.FolderTestManager;
-import com.openexchange.test.TestInit;
+import com.openexchange.test.common.configuration.AJAXConfig;
+import com.openexchange.test.common.test.TestInit;
 
 /**
  * {@link ZipDocumentsTest}

@@ -64,10 +64,10 @@ import com.openexchange.ajax.framework.CommonInsertResponse;
 import com.openexchange.ajax.framework.Executor;
 import com.openexchange.ajax.importexport.actions.ICalExportRequest;
 import com.openexchange.ajax.importexport.actions.ICalExportResponse;
-import com.openexchange.data.conversion.ical.Assert;
-import com.openexchange.data.conversion.ical.ICalFile;
 import com.openexchange.groupware.container.Appointment;
 import com.openexchange.groupware.container.FolderObject;
+import com.openexchange.test.common.data.conversion.ical.Assert;
+import com.openexchange.test.common.data.conversion.ical.ICalFile;
 
 /**
  *

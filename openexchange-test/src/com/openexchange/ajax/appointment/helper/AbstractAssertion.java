@@ -49,7 +49,7 @@
 
 package com.openexchange.ajax.appointment.helper;
 
-import static com.openexchange.groupware.calendar.TimeTools.D;
+import static com.openexchange.test.common.groupware.calendar.TimeTools.D;
 import java.util.List;
 import java.util.TimeZone;
 import org.junit.Assert;

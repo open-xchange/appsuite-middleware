@@ -60,7 +60,7 @@ import com.openexchange.ajax.user.actions.GetAttributeRequest;
 import com.openexchange.ajax.user.actions.GetAttributeResponse;
 import com.openexchange.ajax.user.actions.SetAttributeRequest;
 import com.openexchange.ajax.user.actions.SetAttributeResponse;
-import com.openexchange.tools.RandomString;
+import com.openexchange.test.common.tools.RandomString;
 
 /**
  * {@link Bug26431Test}

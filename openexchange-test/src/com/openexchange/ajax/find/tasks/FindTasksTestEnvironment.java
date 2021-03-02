@@ -78,7 +78,6 @@ import com.openexchange.ajax.folder.actions.VisibleFoldersRequest;
 import com.openexchange.ajax.folder.actions.VisibleFoldersResponse;
 import com.openexchange.ajax.framework.AJAXClient;
 import com.openexchange.ajax.framework.UserValues;
-import com.openexchange.configuration.AJAXConfig;
 import com.openexchange.exception.OXException;
 import com.openexchange.find.basic.tasks.TaskType;
 import com.openexchange.find.common.CommonFacetType;
@@ -94,6 +93,7 @@ import com.openexchange.groupware.container.UserParticipant;
 import com.openexchange.groupware.tasks.Task;
 import com.openexchange.server.impl.OCLPermission;
 import com.openexchange.test.FolderTaskTestManager;
+import com.openexchange.test.common.configuration.AJAXConfig;
 
 /**
  * {@link FindTasksTestEnvironment}
@@ -478,7 +478,7 @@ public class FindTasksTestEnvironment extends AbstractFindTest {
         builder.setLength(0);
         String body = builder.append("User ").append(client.getValues().getDefaultAddress()).append("'s task in his ").append(ft).append(" folder and have status: ").append(status).toString();
 
-        Task t = com.openexchange.groupware.tasks.Create.createWithDefaults(title, body, status.ordinal() + 1, folder);
+        Task t = com.openexchange.test.common.groupware.tasks.Create.createWithDefaults(title, body, status.ordinal() + 1, folder);
         if (participants.size() > 0) {
             t.setParticipants(participants);
             builder.setLength(0);

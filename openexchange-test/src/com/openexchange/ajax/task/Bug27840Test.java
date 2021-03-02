@@ -62,8 +62,8 @@ import com.openexchange.ajax.task.actions.GetRequest;
 import com.openexchange.ajax.task.actions.GetResponse;
 import com.openexchange.ajax.task.actions.InsertRequest;
 import com.openexchange.exception.OXException;
-import com.openexchange.groupware.tasks.Create;
 import com.openexchange.groupware.tasks.Task;
+import com.openexchange.test.common.groupware.tasks.Create;
 
 /**
  * Verifies that the issue described in bug 27840 does not appear again.

@@ -30,7 +30,7 @@ import com.openexchange.ajax.mail.TestMail;
 import com.openexchange.groupware.search.Order;
 import com.openexchange.mail.MailListField;
 import com.openexchange.mail.dataobjects.MailMessage;
-import com.openexchange.test.TestClassConfig;
+import com.openexchange.test.common.test.TestClassConfig;
 
 public class MailTest extends AbstractAJAXSession {
 

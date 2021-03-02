@@ -61,9 +61,9 @@ import com.openexchange.ajax.infostore.actions.GetInfostoreRequest;
 import com.openexchange.ajax.infostore.actions.GetInfostoreResponse;
 import com.openexchange.ajax.infostore.actions.NewInfostoreRequest;
 import com.openexchange.ajax.infostore.actions.NewInfostoreResponse;
-import com.openexchange.configuration.AJAXConfig;
 import com.openexchange.file.storage.DefaultFile;
 import com.openexchange.file.storage.File;
+import com.openexchange.test.common.configuration.AJAXConfig;
 
 /**
  * {@link TryAddVersionTest}

@@ -62,7 +62,7 @@ import java.util.stream.Collectors;
 import org.junit.Test;
 import com.openexchange.groupware.infostore.InfostoreExceptionCodes;
 import com.openexchange.groupware.infostore.validation.PermissionSizeValidator;
-import com.openexchange.test.TestClassConfig;
+import com.openexchange.test.common.test.TestClassConfig;
 import com.openexchange.testing.httpclient.invoker.ApiException;
 import com.openexchange.testing.httpclient.models.InfoItemPermission;
 import com.openexchange.testing.httpclient.models.InfoItemPermission.BitsEnum;

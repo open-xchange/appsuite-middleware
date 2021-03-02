@@ -67,10 +67,10 @@ import com.openexchange.ajax.framework.AbstractUploadParser;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contact.helpers.ContactField;
 import com.openexchange.groupware.container.FolderObject;
-import com.openexchange.groupware.importexport.ContactTestData;
 import com.openexchange.importexport.Format;
 import com.openexchange.server.impl.OCLPermission;
 import com.openexchange.test.FolderTestManager;
+import com.openexchange.test.common.groupware.importexport.ContactTestData;
 
 /**
  * Test of the ImporterExporter servlet. This class serves as library for all

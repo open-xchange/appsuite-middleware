@@ -60,9 +60,9 @@ import com.openexchange.ajax.session.actions.LoginRequest;
 import com.openexchange.ajax.session.actions.LoginResponse;
 import com.openexchange.exception.OXException;
 import com.openexchange.sessiond.SessionExceptionCodes;
-import com.openexchange.test.pool.TestContext;
-import com.openexchange.test.pool.TestContextPool;
-import com.openexchange.test.pool.TestUser;
+import com.openexchange.test.common.test.pool.TestContext;
+import com.openexchange.test.common.test.pool.TestContextPool;
+import com.openexchange.test.common.test.pool.TestUser;
 
 /**
  * Checks if the server detects correctly a duplicate used authId.

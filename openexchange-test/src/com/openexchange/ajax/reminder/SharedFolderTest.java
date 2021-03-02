@@ -70,11 +70,11 @@ import com.openexchange.ajax.folder.actions.InsertResponse;
 import com.openexchange.ajax.framework.Abstrac2UserAJAXSession;
 import com.openexchange.ajax.reminder.actions.RangeRequest;
 import com.openexchange.ajax.reminder.actions.RangeResponse;
-import com.openexchange.groupware.calendar.TimeTools;
 import com.openexchange.groupware.container.Appointment;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.reminder.ReminderObject;
 import com.openexchange.server.impl.OCLPermission;
+import com.openexchange.test.common.groupware.calendar.TimeTools;
 
 /**
  * We have to check two different reminder related things in shared folders. At first the folder owner must have the right to initially set

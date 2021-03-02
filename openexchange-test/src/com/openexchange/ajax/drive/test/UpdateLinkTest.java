@@ -82,7 +82,7 @@ import com.openexchange.file.storage.FileStorageObjectPermission;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.modules.Module;
 import com.openexchange.java.util.UUIDs;
-import com.openexchange.test.TestInit;
+import com.openexchange.test.common.test.TestInit;
 
 /**
  * {@link UpdateLinkTest}

@@ -56,7 +56,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 import com.openexchange.ajax.chronos.util.DateTimeUtil;
-import com.openexchange.configuration.asset.Asset;
+import com.openexchange.test.common.asset.Asset;
 import com.openexchange.testing.httpclient.models.Alarm;
 import com.openexchange.testing.httpclient.models.Attendee;
 import com.openexchange.testing.httpclient.models.ChronosAttachment;

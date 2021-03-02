@@ -55,12 +55,12 @@ import org.junit.Before;
 import org.junit.Test;
 import com.openexchange.ajax.appointment.action.ConflictObject;
 import com.openexchange.ajax.framework.AbstractAJAXSession;
-import com.openexchange.groupware.calendar.TimeTools;
 import com.openexchange.groupware.container.Appointment;
 import com.openexchange.groupware.container.Participant;
 import com.openexchange.groupware.container.UserParticipant;
 import com.openexchange.test.CalendarTestManager;
-import com.openexchange.test.TestClassConfig;
+import com.openexchange.test.common.groupware.calendar.TimeTools;
+import com.openexchange.test.common.test.TestClassConfig;
 
 /**
  * {@link Bug42018Test}

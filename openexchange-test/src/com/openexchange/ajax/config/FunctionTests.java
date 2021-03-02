@@ -66,7 +66,7 @@ import com.openexchange.ajax.config.actions.Tree;
 import com.openexchange.ajax.framework.AJAXClient;
 import com.openexchange.ajax.framework.AbstractAJAXSession;
 import com.openexchange.ajax.framework.Executor;
-import com.openexchange.tools.RandomString;
+import com.openexchange.test.common.tools.RandomString;
 
 /**
  * This class contains tests for added funtionalities of the configuration tree.

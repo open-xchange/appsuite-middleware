@@ -66,9 +66,9 @@ import org.apache.http.entity.ContentType;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.HttpClients;
 import org.json.JSONObject;
-import com.openexchange.configuration.AJAXConfig;
-import com.openexchange.test.TestClassConfig;
-import com.openexchange.test.pool.TestUser;
+import com.openexchange.test.common.configuration.AJAXConfig;
+import com.openexchange.test.common.test.TestClassConfig;
+import com.openexchange.test.common.test.pool.TestUser;
 
 /**
  * {@link AbstractConfigAwareAPIClientSession} extends the AbstractAPIClientSession with methods to preconfigure reloadable configurations before executing the tests.

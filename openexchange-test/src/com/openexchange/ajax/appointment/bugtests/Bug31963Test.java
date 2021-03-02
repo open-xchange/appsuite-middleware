@@ -55,9 +55,9 @@ import java.util.List;
 import org.junit.Test;
 import com.openexchange.ajax.appointment.action.ConflictObject;
 import com.openexchange.ajax.framework.AbstractAJAXSession;
-import com.openexchange.groupware.calendar.TimeTools;
 import com.openexchange.groupware.container.Appointment;
 import com.openexchange.java.util.TimeZones;
+import com.openexchange.test.common.groupware.calendar.TimeTools;
 
 /**
  * {@link Bug31963Test}

@@ -64,7 +64,7 @@ import com.openexchange.groupware.container.CommonObject;
 import com.openexchange.groupware.container.DataObject;
 import com.openexchange.groupware.container.FolderChildObject;
 import com.openexchange.groupware.container.Participant;
-import com.openexchange.test.OXTestToolkit;
+import com.openexchange.test.common.test.OXTestToolkit;
 
 /**
  * {@link AppointmentTest}

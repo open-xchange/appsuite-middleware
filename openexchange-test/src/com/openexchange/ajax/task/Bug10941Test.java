@@ -54,7 +54,7 @@ import org.junit.Before;
 import org.junit.Test;
 import com.openexchange.ajax.framework.AbstractAJAXSession;
 import com.openexchange.groupware.tasks.Task;
-import com.openexchange.groupware.tasks.TestTask;
+import com.openexchange.test.common.groupware.tasks.TestTask;
 
 /**
  * Test that we can remove start and end date from tasks with an update.

@@ -55,8 +55,8 @@ import java.util.Date;
 import org.junit.Test;
 import com.openexchange.ajax.infostore.actions.InfostoreTestManager;
 import com.openexchange.file.storage.File;
-import com.openexchange.groupware.calendar.TimeTools;
-import com.openexchange.test.TestInit;
+import com.openexchange.test.common.groupware.calendar.TimeTools;
+import com.openexchange.test.common.test.TestInit;
 
 /**
  * {@link Bug67377Test}

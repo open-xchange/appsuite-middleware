@@ -50,8 +50,8 @@
 package com.openexchange.ajax.chronos;
 
 import com.openexchange.ajax.chronos.manager.EventManager;
-import com.openexchange.test.TestClassConfig;
-import com.openexchange.tools.client.EnhancedApiClient;
+import com.openexchange.test.common.test.TestClassConfig;
+import com.openexchange.test.common.tools.client.EnhancedApiClient;
 
 /**
  * {@link AbstractSecondUserChronosTest}

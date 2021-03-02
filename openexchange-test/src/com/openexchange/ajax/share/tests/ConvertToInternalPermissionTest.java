@@ -63,7 +63,7 @@ import com.openexchange.file.storage.FileStorageObjectPermission;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.server.impl.OCLPermission;
 import com.openexchange.share.recipient.RecipientType;
-import com.openexchange.test.pool.TestUser;
+import com.openexchange.test.common.test.pool.TestUser;
 import com.openexchange.test.tryagain.TryAgain;
 
 /**

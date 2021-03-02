@@ -6,7 +6,7 @@ import com.openexchange.ajax.config.actions.SetResponse;
 import com.openexchange.ajax.config.actions.Tree;
 import com.openexchange.ajax.framework.AJAXClient;
 import com.openexchange.exception.OXException;
-import com.openexchange.test.pool.TestUser;
+import com.openexchange.test.common.test.pool.TestUser;
 
 public abstract class AttributeWriter implements Runnable {
 

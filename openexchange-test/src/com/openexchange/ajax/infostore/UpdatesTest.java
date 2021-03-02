@@ -73,7 +73,7 @@ import com.openexchange.groupware.infostore.utils.Metadata;
 import com.openexchange.groupware.search.Order;
 import com.openexchange.java.util.UUIDs;
 import com.openexchange.test.FolderTestManager;
-import com.openexchange.test.TestInit;
+import com.openexchange.test.common.test.TestInit;
 
 /**
  * {@link UpdatesTest}

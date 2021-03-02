@@ -78,8 +78,8 @@ import com.openexchange.admin.rmi.exceptions.StorageException;
 import com.openexchange.admin.rmi.factory.ContextFactory;
 import com.openexchange.admin.rmi.factory.UserFactory;
 import com.openexchange.admin.rmi.util.AssertUtil;
-import com.openexchange.data.conversion.ical.Assert;
 import com.openexchange.java.Autoboxing;
+import com.openexchange.test.common.data.conversion.ical.Assert;
 
 /**
  * {@link UserTest}

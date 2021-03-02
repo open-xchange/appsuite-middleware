@@ -56,7 +56,7 @@ import org.junit.Assert;
 import org.junit.Test;
 import com.openexchange.ajax.chronos.AbstractChronosTest;
 import com.openexchange.ajax.chronos.factory.EventFactory;
-import com.openexchange.test.pool.ProvisioningService;
+import com.openexchange.test.common.test.pool.ProvisioningService;
 import com.openexchange.testing.httpclient.invoker.ApiException;
 import com.openexchange.testing.httpclient.models.Attendee;
 import com.openexchange.testing.httpclient.models.Attendee.CuTypeEnum;

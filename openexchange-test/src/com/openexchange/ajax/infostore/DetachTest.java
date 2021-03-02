@@ -18,7 +18,7 @@ import com.openexchange.ajax.InfostoreAJAXTest;
 import com.openexchange.ajax.framework.AbstractAJAXResponse;
 import com.openexchange.groupware.infostore.utils.Metadata;
 import com.openexchange.groupware.search.Order;
-import com.openexchange.test.TestInit;
+import com.openexchange.test.common.test.TestInit;
 
 public class DetachTest extends InfostoreAJAXTest {
 

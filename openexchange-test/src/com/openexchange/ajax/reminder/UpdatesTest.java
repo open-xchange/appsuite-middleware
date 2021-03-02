@@ -57,10 +57,10 @@ import java.util.Date;
 import java.util.List;
 import java.util.TimeZone;
 import org.junit.Test;
-import com.openexchange.groupware.calendar.TimeTools;
 import com.openexchange.groupware.container.Appointment;
 import com.openexchange.groupware.reminder.ReminderObject;
 import com.openexchange.test.CalendarTestManager;
+import com.openexchange.test.common.groupware.calendar.TimeTools;
 
 public class UpdatesTest extends ReminderTest {
 

@@ -118,7 +118,7 @@ import com.openexchange.ajax.mail.netsol.actions.NetsolSendRequest;
 import com.openexchange.ajax.mail.netsol.actions.NetsolSendResponse;
 import com.openexchange.mail.MailJSONField;
 import com.openexchange.mail.MailListField;
-import com.openexchange.test.TestClassConfig;
+import com.openexchange.test.common.test.TestClassConfig;
 import com.openexchange.tools.stream.UnsynchronizedByteArrayInputStream;
 
 /**

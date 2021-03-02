@@ -61,9 +61,9 @@ import com.openexchange.dav.WebDAVClient;
 import com.openexchange.dav.caldav.Abstract2UserCalDAVTest;
 import com.openexchange.dav.caldav.ICalResource;
 import com.openexchange.dav.caldav.ical.SimpleICal.Property;
-import com.openexchange.groupware.calendar.TimeTools;
 import com.openexchange.groupware.container.Appointment;
 import com.openexchange.groupware.container.Participant;
+import com.openexchange.test.common.groupware.calendar.TimeTools;
 
 /**
  * {@link Bug60193Test}

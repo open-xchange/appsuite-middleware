@@ -68,8 +68,8 @@ import com.openexchange.ajax.task.actions.UpdateResponse;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.Participant;
 import com.openexchange.groupware.container.UserParticipant;
-import com.openexchange.groupware.tasks.Create;
 import com.openexchange.groupware.tasks.Task;
+import com.openexchange.test.common.groupware.tasks.Create;
 
 /**
  * {@link Bug12926Test}

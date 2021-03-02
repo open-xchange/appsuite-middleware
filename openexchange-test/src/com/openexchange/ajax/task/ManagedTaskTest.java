@@ -5,9 +5,9 @@ import java.util.Calendar;
 import java.util.UUID;
 import org.junit.Before;
 import com.openexchange.ajax.framework.AbstractAJAXSession;
-import com.openexchange.groupware.calendar.TimeTools;
 import com.openexchange.groupware.modules.Module;
 import com.openexchange.groupware.tasks.Task;
+import com.openexchange.test.common.groupware.calendar.TimeTools;
 
 public abstract class ManagedTaskTest extends AbstractAJAXSession {
 

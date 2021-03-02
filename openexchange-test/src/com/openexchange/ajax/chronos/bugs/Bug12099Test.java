@@ -66,13 +66,13 @@ import com.openexchange.ajax.chronos.factory.AttendeeFactory;
 import com.openexchange.ajax.chronos.factory.EventFactory;
 import com.openexchange.ajax.chronos.manager.EventManager;
 import com.openexchange.ajax.chronos.util.DateTimeUtil;
-import com.openexchange.test.TestClassConfig;
-import com.openexchange.test.pool.TestUser;
+import com.openexchange.test.common.test.TestClassConfig;
+import com.openexchange.test.common.test.pool.TestUser;
+import com.openexchange.test.common.tools.client.EnhancedApiClient;
 import com.openexchange.testing.httpclient.models.Attendee;
 import com.openexchange.testing.httpclient.models.EventData;
 import com.openexchange.testing.httpclient.models.EventId;
 import com.openexchange.testing.httpclient.models.FolderPermission;
-import com.openexchange.tools.client.EnhancedApiClient;
 
 /**
  * Checks if series gets changed_from set to 0.

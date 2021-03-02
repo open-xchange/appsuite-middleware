@@ -50,7 +50,7 @@
 package com.openexchange.ajax.appointment;
 
 import static com.openexchange.ajax.folder.Create.ocl;
-import static com.openexchange.groupware.calendar.TimeTools.D;
+import static com.openexchange.test.common.groupware.calendar.TimeTools.D;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 import java.util.Date;
@@ -69,7 +69,7 @@ import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.Appointment;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.server.impl.OCLPermission;
-import com.openexchange.test.TestClassConfig;
+import com.openexchange.test.common.test.TestClassConfig;
 
 /**
  * {@link GetChangeExceptionsTest}

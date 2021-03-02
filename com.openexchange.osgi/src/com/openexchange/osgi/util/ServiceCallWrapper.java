@@ -101,7 +101,7 @@ public class ServiceCallWrapper {
 
     static final ConcurrentMap<ServiceKey<?>, ServiceValue<?>> SERVICE_CACHE = new ConcurrentHashMap<>(16, 0.9F, 1);
 
-    static final AtomicReference<BundleContextProvider> BC_PROVIDER_REF = new AtomicReference<BundleContextProvider>(new BundleContextProvider());
+    public static final AtomicReference<BundleContextProvider> BC_PROVIDER_REF = new AtomicReference<BundleContextProvider>(new BundleContextProvider());
 
     private static <S> String generateServiceFilter(Class<S> serviceClass) {
         return new StringBuilder(48).append("(").append(Constants.OBJECTCLASS).append('=').append(serviceClass.getName()).append(")").toString();
@@ -324,7 +324,7 @@ public class ServiceCallWrapper {
 
     }
 
-    static class BundleContextProvider {
+    public static class BundleContextProvider {
 
         /**
          * Returns the {@link BundleContext} to retrieve the needed service. If possible the returned context
@@ -335,7 +335,7 @@ public class ServiceCallWrapper {
          * @return The bundle context, never <code>null</code>
          * @throws ServiceException if no bundle context could be determined
          */
-        BundleContext getBundleContext(Class<?> caller, Class<?> clazz) throws ServiceException {
+        public BundleContext getBundleContext(Class<?> caller, Class<?> clazz) throws ServiceException {
             Bundle bundle = FrameworkUtil.getBundle(caller);
             if (bundle == null) {
                 throw new ServiceException("Class '" + caller.getName() + "' was loaded outside from OSGi!", clazz);

@@ -79,10 +79,10 @@ import com.openexchange.ajax.mail.actions.GetRequest;
 import com.openexchange.ajax.mail.actions.GetResponse;
 import com.openexchange.ajax.mail.actions.ImportMailRequest;
 import com.openexchange.ajax.mail.actions.ImportMailResponse;
-import com.openexchange.configuration.AJAXConfig;
-import com.openexchange.configuration.AJAXConfig.Property;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.Streams;
+import com.openexchange.test.common.configuration.AJAXConfig;
+import com.openexchange.test.common.configuration.AJAXConfig.Property;
 
 /**
  * {@link AbortAttachmentDownloadTest}

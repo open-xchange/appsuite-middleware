@@ -1,8 +1,8 @@
 
 package com.openexchange.ajax.appointment;
 
-import static com.openexchange.groupware.calendar.TimeTools.D;
 import static com.openexchange.java.Autoboxing.I;
+import static com.openexchange.test.common.groupware.calendar.TimeTools.D;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;

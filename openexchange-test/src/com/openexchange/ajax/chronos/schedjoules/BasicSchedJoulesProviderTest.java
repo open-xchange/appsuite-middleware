@@ -61,8 +61,8 @@ import com.fasterxml.jackson.databind.JsonMappingException;
 import com.openexchange.ajax.chronos.factory.CalendarFolderConfig;
 import com.openexchange.ajax.chronos.factory.CalendarFolderExtendedProperty;
 import com.openexchange.ajax.chronos.manager.ChronosApiException;
-import com.openexchange.configuration.asset.Asset;
-import com.openexchange.configuration.asset.AssetType;
+import com.openexchange.test.common.asset.Asset;
+import com.openexchange.test.common.asset.AssetType;
 import com.openexchange.testing.httpclient.models.FolderData;
 
 /**

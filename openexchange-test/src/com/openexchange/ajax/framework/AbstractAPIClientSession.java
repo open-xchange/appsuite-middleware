@@ -51,8 +51,8 @@ package com.openexchange.ajax.framework;
 
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
-import com.openexchange.configuration.AJAXConfig;
-import com.openexchange.test.TestClassConfig;
+import com.openexchange.test.common.configuration.AJAXConfig;
+import com.openexchange.test.common.test.TestClassConfig;
 import com.openexchange.testing.httpclient.invoker.ApiClient;
 import com.openexchange.testing.httpclient.invoker.ApiException;
 import com.openexchange.testing.httpclient.models.CommonResponse;

@@ -68,8 +68,8 @@ import com.openexchange.exception.OXException;
 import com.openexchange.group.Group;
 import com.openexchange.groupware.container.GroupParticipant;
 import com.openexchange.groupware.container.Participant;
-import com.openexchange.groupware.tasks.Create;
 import com.openexchange.groupware.tasks.Task;
+import com.openexchange.test.common.groupware.tasks.Create;
 
 /**
  * {@link Bug15291Test}

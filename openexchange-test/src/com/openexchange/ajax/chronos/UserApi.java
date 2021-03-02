@@ -50,13 +50,13 @@
 package com.openexchange.ajax.chronos;
 
 import java.util.concurrent.TimeUnit;
-import com.openexchange.test.pool.TestUser;
+import com.openexchange.test.common.test.pool.TestUser;
+import com.openexchange.test.common.tools.client.EnhancedApiClient;
 import com.openexchange.testing.httpclient.invoker.ApiClient;
 import com.openexchange.testing.httpclient.modules.ChronosApi;
 import com.openexchange.testing.httpclient.modules.FindApi;
 import com.openexchange.testing.httpclient.modules.FoldersApi;
 import com.openexchange.testing.httpclient.modules.JSlobApi;
-import com.openexchange.tools.client.EnhancedApiClient;
 
 /**
  * {@link UserApi}

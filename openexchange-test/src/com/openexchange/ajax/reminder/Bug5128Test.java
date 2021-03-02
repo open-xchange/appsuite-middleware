@@ -55,9 +55,9 @@ import org.junit.Test;
 import com.openexchange.ajax.framework.Executor;
 import com.openexchange.ajax.reminder.actions.RangeRequest;
 import com.openexchange.ajax.reminder.actions.RangeResponse;
-import com.openexchange.groupware.calendar.TimeTools;
 import com.openexchange.groupware.container.Appointment;
 import com.openexchange.groupware.reminder.ReminderObject;
+import com.openexchange.test.common.groupware.calendar.TimeTools;
 
 public class Bug5128Test extends ReminderTest {
 

@@ -59,8 +59,6 @@ import com.openexchange.admin.rmi.dataobjects.Credentials;
 import com.openexchange.ajax.framework.AbstractSmtpAJAXSession;
 import com.openexchange.calendar.json.AppointmentActionFactory;
 import com.openexchange.chronos.json.oauth.ChronosOAuthScope;
-import com.openexchange.configuration.AJAXConfig;
-import com.openexchange.configuration.AJAXConfig.Property;
 import com.openexchange.contacts.json.ContactActionFactory;
 import com.openexchange.oauth.provider.resourceserver.scope.Scope;
 import com.openexchange.oauth.provider.rmi.client.ClientDataDto;
@@ -68,8 +66,10 @@ import com.openexchange.oauth.provider.rmi.client.ClientDto;
 import com.openexchange.oauth.provider.rmi.client.IconDto;
 import com.openexchange.oauth.provider.rmi.client.RemoteClientManagement;
 import com.openexchange.tasks.json.TaskActionFactory;
-import com.openexchange.test.pool.TestContextPool;
-import com.openexchange.test.pool.TestUser;
+import com.openexchange.test.common.configuration.AJAXConfig;
+import com.openexchange.test.common.configuration.AJAXConfig.Property;
+import com.openexchange.test.common.test.pool.TestContextPool;
+import com.openexchange.test.common.test.pool.TestUser;
 
 /**
  * {@link AbstractOAuthTest}

@@ -61,11 +61,11 @@ import com.openexchange.ajax.appointment.action.DeleteRequest;
 import com.openexchange.ajax.framework.AbstractAJAXSession;
 import com.openexchange.ajax.framework.CommonDeleteResponse;
 import com.openexchange.exception.OXException;
-import com.openexchange.groupware.calendar.TimeTools;
 import com.openexchange.groupware.container.Appointment;
 import com.openexchange.groupware.container.ExternalUserParticipant;
 import com.openexchange.groupware.container.Participant;
 import com.openexchange.groupware.container.UserParticipant;
+import com.openexchange.test.common.groupware.calendar.TimeTools;
 
 /**
  * Verifies that the new iTIP/iMIP implementation properly deletes appointment if the last internal participants tries to delete it.

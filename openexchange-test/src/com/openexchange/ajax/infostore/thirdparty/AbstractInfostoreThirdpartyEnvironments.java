@@ -62,8 +62,8 @@ import com.openexchange.ajax.oauth.client.actions.InitOAuthAccountResponse;
 import com.openexchange.ajax.oauth.client.actions.OAuthService;
 import com.openexchange.exception.OXException;
 import com.openexchange.subscribe.AbstractSubscribeTestEnvironment;
-import com.openexchange.test.pool.TestContext;
-import com.openexchange.test.pool.TestContextPool;
+import com.openexchange.test.common.test.pool.TestContext;
+import com.openexchange.test.common.test.pool.TestContextPool;
 
 /**
  * {@link AbstractInfostoreThirdpartyEnvironments}

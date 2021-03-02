@@ -7,7 +7,6 @@
 	<classpathentry kind="lib" path="lib/jersey-entity-filtering-2.26.jar" sourcepath="lib/source/jersey-entity-filtering-2.26-sources.jar"/>
 	<classpathentry kind="lib" path="lib/jersey-media-json-jackson-2.26.jar" sourcepath="lib/source/jersey-media-json-jackson-2.26-sources.jar"/>
 	<classpathentry kind="lib" path="lib/jersey-media-multipart-2.26.jar" sourcepath="lib/source/jersey-media-multipart-2.26-sources.jar"/>
-	<classpathentry kind="src" path="common"/>
 	<classpathentry kind="src" path="src"/>
 	<classpathentry kind="lib" path="lib/httpunit-1.7.jar" sourcepath="lib/source/httpunit-1.7-sources.zip"/>
 	<classpathentry kind="lib" path="lib/junit-4.12.jar" sourcepath="lib/source/junit-4.12-sources.jar"/>

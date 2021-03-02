@@ -64,10 +64,10 @@ import org.junit.runner.RunWith;
 import com.google.code.tempusfugit.concurrency.ConcurrentTestRunner;
 import com.google.code.tempusfugit.concurrency.annotations.Concurrent;
 import com.openexchange.exception.OXException;
-import com.openexchange.test.TestClassConfig;
-import com.openexchange.test.pool.TestContext;
-import com.openexchange.test.pool.TestContextPool;
-import com.openexchange.test.pool.TestUser;
+import com.openexchange.test.common.test.TestClassConfig;
+import com.openexchange.test.common.test.pool.TestContext;
+import com.openexchange.test.common.test.pool.TestContextPool;
+import com.openexchange.test.common.test.pool.TestUser;
 import com.openexchange.test.tryagain.TryAgain;
 import com.openexchange.test.tryagain.TryAgainTestRule;
 

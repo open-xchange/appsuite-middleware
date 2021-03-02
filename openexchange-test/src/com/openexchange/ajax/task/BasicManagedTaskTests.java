@@ -49,7 +49,7 @@
 
 package com.openexchange.ajax.task;
 
-import static com.openexchange.groupware.calendar.TimeTools.removeMilliseconds;
+import static com.openexchange.test.common.groupware.calendar.TimeTools.removeMilliseconds;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.fail;

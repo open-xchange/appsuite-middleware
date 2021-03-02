@@ -58,7 +58,7 @@ import java.util.Collections;
 import java.util.List;
 import org.junit.Test;
 import com.openexchange.groupware.infostore.utils.Metadata;
-import com.openexchange.test.TestClassConfig;
+import com.openexchange.test.common.test.TestClassConfig;
 import com.openexchange.testing.httpclient.models.InfoItemData;
 import com.openexchange.testing.httpclient.models.InfoItemListElement;
 import com.openexchange.testing.httpclient.models.InfoItemsResponse;

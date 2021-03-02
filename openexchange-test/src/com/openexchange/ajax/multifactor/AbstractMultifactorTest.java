@@ -61,7 +61,7 @@ import javax.ws.rs.core.HttpHeaders;
 import org.apache.commons.codec.binary.Base64;
 import org.junit.runner.RunWith;
 import com.openexchange.ajax.framework.AbstractConfigAwareAPIClientSession;
-import com.openexchange.configuration.AJAXConfig;
+import com.openexchange.test.common.configuration.AJAXConfig;
 import com.openexchange.testing.httpclient.invoker.ApiException;
 import com.openexchange.testing.httpclient.models.CommonResponse;
 import com.openexchange.testing.httpclient.models.MultifactorDeleteResponse;

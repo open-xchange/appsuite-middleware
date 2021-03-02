@@ -10,7 +10,7 @@ import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.container.UserParticipant;
 import com.openexchange.test.CalendarTestManager;
 import com.openexchange.test.FolderTestManager;
-import com.openexchange.test.TestClassConfig;
+import com.openexchange.test.common.test.TestClassConfig;
 
 public class ConfirmTest extends AppointmentTest {
 

@@ -66,7 +66,7 @@ import com.openexchange.ajax.folder.actions.PathResponse;
 import com.openexchange.ajax.framework.Abstrac2UserAJAXSession;
 import com.openexchange.folderstorage.FolderStorage;
 import com.openexchange.groupware.container.FolderObject;
-import com.openexchange.test.PermissionTools;
+import com.openexchange.test.common.test.PermissionTools;
 
 /**
  * {@link Bug16163Test}

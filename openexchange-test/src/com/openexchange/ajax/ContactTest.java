@@ -64,13 +64,13 @@ import com.openexchange.ajax.fields.DistributionListFields;
 import com.openexchange.ajax.framework.AJAXClient;
 import com.openexchange.ajax.framework.AbstractAJAXSession;
 import com.openexchange.ajax.parser.DataParser;
-import com.openexchange.contact.Data;
 import com.openexchange.groupware.container.CommonObject;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.container.DataObject;
 import com.openexchange.groupware.container.DistributionListEntryObject;
 import com.openexchange.groupware.container.FolderChildObject;
-import com.openexchange.test.OXTestToolkit;
+import com.openexchange.test.common.contact.Data;
+import com.openexchange.test.common.test.OXTestToolkit;
 
 public class ContactTest extends AbstractAJAXSession {
 

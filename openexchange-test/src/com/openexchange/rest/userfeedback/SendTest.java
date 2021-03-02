@@ -66,8 +66,8 @@ import com.openexchange.exception.OXException;
 import com.openexchange.groupware.search.Order;
 import com.openexchange.mail.MailListField;
 import com.openexchange.mail.dataobjects.MailMessage;
+import com.openexchange.test.common.tools.RandomString;
 import com.openexchange.testing.restclient.invoker.ApiException;
-import com.openexchange.tools.RandomString;
 import com.openexchange.userfeedback.rest.services.SendUserFeedbackService;
 
 /**

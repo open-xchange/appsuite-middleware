@@ -60,9 +60,9 @@ import com.openexchange.ajax.chronos.AbstractExternalProviderChronosTest;
 import com.openexchange.ajax.chronos.factory.CalendarFolderConfig;
 import com.openexchange.ajax.chronos.factory.CalendarFolderExtendedProperty;
 import com.openexchange.ajax.proxy.MockRequestMethod;
-import com.openexchange.configuration.asset.Asset;
-import com.openexchange.configuration.asset.AssetType;
-import com.openexchange.test.TestClassConfig;
+import com.openexchange.test.common.asset.Asset;
+import com.openexchange.test.common.asset.AssetType;
+import com.openexchange.test.common.test.TestClassConfig;
 import com.openexchange.testing.httpclient.models.FolderData;
 
 /**

@@ -63,10 +63,10 @@ import com.openexchange.ajax.task.actions.SearchRequest;
 import com.openexchange.ajax.task.actions.SearchResponse;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.search.TaskSearchObject;
-import com.openexchange.groupware.tasks.Create;
 import com.openexchange.groupware.tasks.Task;
 import com.openexchange.server.impl.OCLPermission;
-import com.openexchange.test.TestClassConfig;
+import com.openexchange.test.common.groupware.tasks.Create;
+import com.openexchange.test.common.test.TestClassConfig;
 
 /**
  * Checks if bug 11650 appears again.

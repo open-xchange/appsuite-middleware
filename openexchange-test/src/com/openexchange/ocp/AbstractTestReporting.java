@@ -69,9 +69,9 @@ import org.junit.BeforeClass;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import com.google.common.collect.ImmutableList;
-import com.openexchange.configuration.AJAXConfig;
 import com.openexchange.database.Databases;
 import com.openexchange.exception.OXException;
+import com.openexchange.test.common.configuration.AJAXConfig;
 
 /**
  * {@link AbstractTestReporting}

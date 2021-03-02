@@ -58,9 +58,9 @@ import com.openexchange.ajax.framework.Abstrac2UserAJAXSession;
 import com.openexchange.ajax.framework.CommonDeleteResponse;
 import com.openexchange.ajax.reminder.actions.RangeRequest;
 import com.openexchange.ajax.reminder.actions.RangeResponse;
-import com.openexchange.groupware.calendar.TimeTools;
 import com.openexchange.groupware.container.Appointment;
 import com.openexchange.groupware.reminder.ReminderObject;
+import com.openexchange.test.common.groupware.calendar.TimeTools;
 
 /**
  * @author <a href="mailto:martin.herfurth@open-xchange.com">Martin Herfurth</a>

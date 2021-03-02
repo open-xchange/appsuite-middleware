@@ -64,9 +64,9 @@ import com.openexchange.ajax.folder.actions.EnumAPI;
 import com.openexchange.ajax.framework.AJAXClient;
 import com.openexchange.ajax.framework.AbstractAJAXSession;
 import com.openexchange.ajax.participant.ParticipantTools;
-import com.openexchange.groupware.calendar.TimeTools;
 import com.openexchange.groupware.container.Appointment;
 import com.openexchange.server.impl.OCLPermission;
+import com.openexchange.test.common.groupware.calendar.TimeTools;
 
 /**
  * Tests move from shared folder to the private folder.

@@ -62,7 +62,7 @@ import com.openexchange.file.storage.File;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.modules.Module;
 import com.openexchange.test.FolderTestManager;
-import com.openexchange.test.TestInit;
+import com.openexchange.test.common.test.TestInit;
 
 public class InfostoreAJAXTest extends AbstractAJAXSession {
 

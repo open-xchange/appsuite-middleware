@@ -62,8 +62,9 @@ import java.util.TimeZone;
 import com.openexchange.ajax.chronos.manager.CalendarFolderManager;
 import com.openexchange.ajax.chronos.manager.EventManager;
 import com.openexchange.chronos.common.CalendarUtils;
-import com.openexchange.configuration.asset.AssetManager;
 import com.openexchange.exception.OXException;
+import com.openexchange.test.common.asset.AssetManager;
+import com.openexchange.test.common.tools.client.EnhancedApiClient;
 import com.openexchange.testing.httpclient.invoker.ApiClient;
 import com.openexchange.testing.httpclient.invoker.ApiException;
 import com.openexchange.testing.httpclient.models.CommonResponse;
@@ -77,7 +78,6 @@ import com.openexchange.testing.httpclient.models.NewFolderBodyFolder;
 import com.openexchange.testing.httpclient.models.UpdateEventBody;
 import com.openexchange.testing.httpclient.modules.ChronosApi;
 import com.openexchange.testing.httpclient.modules.FoldersApi;
-import com.openexchange.tools.client.EnhancedApiClient;
 
 /**
  * {@link AbstractChronosTest}

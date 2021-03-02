@@ -67,9 +67,9 @@ import org.apache.commons.httpclient.HttpClient;
 import org.junit.Before;
 import org.junit.Test;
 import com.openexchange.ajax.AJAXServlet;
-import com.openexchange.groupware.calendar.TimeTools;
 import com.openexchange.java.Charsets;
-import com.openexchange.test.json.JSONAssertion;
+import com.openexchange.test.common.groupware.calendar.TimeTools;
+import com.openexchange.test.common.test.json.JSONAssertion;
 import com.openexchange.tools.encoding.Base64;
 
 /**

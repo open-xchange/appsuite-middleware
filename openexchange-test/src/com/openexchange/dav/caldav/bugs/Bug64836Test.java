@@ -70,8 +70,8 @@ import com.openexchange.dav.caldav.CalDAVTest;
 import com.openexchange.dav.caldav.reports.CalendarQueryReportInfo;
 import com.openexchange.dav.caldav.reports.CompFilter;
 import com.openexchange.dav.caldav.reports.TimeRangeFilter;
-import com.openexchange.groupware.calendar.TimeTools;
 import com.openexchange.groupware.container.Appointment;
+import com.openexchange.test.common.groupware.calendar.TimeTools;
 
 /**
  * {@link Bug64836Test} - "The requested appointment was not found." when editing a series

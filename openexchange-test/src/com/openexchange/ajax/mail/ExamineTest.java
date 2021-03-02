@@ -68,10 +68,10 @@ import com.openexchange.ajax.mail.actions.ExamineRequest;
 import com.openexchange.ajax.mail.actions.ExamineResponse;
 import com.openexchange.ajax.mail.actions.ImportMailRequest;
 import com.openexchange.ajax.mail.actions.ImportMailResponse;
-import com.openexchange.configuration.AJAXConfig;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.java.Streams;
+import com.openexchange.test.common.configuration.AJAXConfig;
 
 public class ExamineTest extends AbstractMailTest {
 

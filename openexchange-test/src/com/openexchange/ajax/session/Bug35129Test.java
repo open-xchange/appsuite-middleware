@@ -58,7 +58,7 @@ import com.openexchange.ajax.framework.AJAXClient;
 import com.openexchange.ajax.framework.AbstractAJAXSession;
 import com.openexchange.ajax.session.actions.EmptyHttpAuthRequest;
 import com.openexchange.ajax.session.actions.HttpAuthResponse;
-import com.openexchange.configuration.AJAXConfig;
+import com.openexchange.test.common.configuration.AJAXConfig;
 
 /**
  * Test proper server response if Authentication header is not sent.

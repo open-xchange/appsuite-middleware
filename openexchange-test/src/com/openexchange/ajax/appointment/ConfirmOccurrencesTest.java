@@ -49,7 +49,7 @@
 
 package com.openexchange.ajax.appointment;
 
-import static com.openexchange.groupware.calendar.TimeTools.D;
+import static com.openexchange.test.common.groupware.calendar.TimeTools.D;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import java.util.Calendar;
@@ -67,7 +67,7 @@ import com.openexchange.groupware.container.Participant;
 import com.openexchange.groupware.container.UserParticipant;
 import com.openexchange.groupware.container.participants.ConfirmableParticipant;
 import com.openexchange.test.CalendarTestManager;
-import com.openexchange.test.TestClassConfig;
+import com.openexchange.test.common.test.TestClassConfig;
 
 /**
  * {@link ConfirmOccurrencesTest}

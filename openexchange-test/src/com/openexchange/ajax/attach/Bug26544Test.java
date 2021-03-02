@@ -69,8 +69,8 @@ import com.openexchange.exception.OXException;
 import com.openexchange.groupware.attach.AttachmentMetadata;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.search.Order;
-import com.openexchange.test.pool.TestContext;
-import com.openexchange.test.pool.TestContextPool;
+import com.openexchange.test.common.test.pool.TestContext;
+import com.openexchange.test.common.test.pool.TestContextPool;
 
 /**
  * {@link Bug26544Test}

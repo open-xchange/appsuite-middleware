@@ -102,7 +102,7 @@ import com.openexchange.oauth.provider.resourceserver.scope.Scope;
 import com.openexchange.server.impl.OCLPermission;
 import com.openexchange.tasks.json.TaskActionFactory;
 import com.openexchange.test.FolderTestManager;
-import com.openexchange.test.TestClassConfig;
+import com.openexchange.test.common.test.TestClassConfig;
 import com.openexchange.test.concurrent.ParallelParameterized;
 import com.openexchange.test.tryagain.TryAgain;
 

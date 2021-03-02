@@ -74,7 +74,7 @@ import com.openexchange.groupware.container.CalendarObject;
 import com.openexchange.groupware.container.UserParticipant;
 import com.openexchange.mail.MailJSONField;
 import com.openexchange.mail.MailListField;
-import com.openexchange.test.TestClassConfig;
+import com.openexchange.test.common.test.TestClassConfig;
 import com.openexchange.tools.stream.UnsynchronizedByteArrayInputStream;
 
 /**

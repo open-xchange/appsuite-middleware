@@ -63,11 +63,11 @@ import com.openexchange.admin.rmi.dataobjects.Context;
 import com.openexchange.admin.rmi.dataobjects.Credentials;
 import com.openexchange.admin.rmi.dataobjects.User;
 import com.openexchange.admin.rmi.exceptions.StorageException;
-import com.openexchange.configuration.AJAXConfig;
 import com.openexchange.ocp.AbstractTestReporting;
 import com.openexchange.ocp.DatabaseReportingEvent;
 import com.openexchange.ocp.OCPConfig;
 import com.openexchange.ocp.OCPConfig.Property;
+import com.openexchange.test.common.configuration.AJAXConfig;
 
 /**
  * {@link AbstractTestProvisioningReporting}

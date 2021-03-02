@@ -16,7 +16,7 @@ import org.junit.Test;
 import com.google.common.collect.Iterables;
 import com.openexchange.ajax.InfostoreAJAXTest;
 import com.openexchange.file.storage.DefaultFile;
-import com.openexchange.test.TestInit;
+import com.openexchange.test.common.test.TestInit;
 
 public class NewTest extends InfostoreAJAXTest {
 

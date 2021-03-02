@@ -66,11 +66,11 @@ import com.openexchange.ajax.mail.actions.GetResponse;
 import com.openexchange.ajax.mail.actions.SendRequest;
 import com.openexchange.ajax.mail.actions.SendResponse;
 import com.openexchange.ajax.mail.contenttypes.MailContentType;
-import com.openexchange.configuration.AJAXConfig;
 import com.openexchange.exception.OXException;
 import com.openexchange.folder.json.FolderField;
 import com.openexchange.mail.MailJSONField;
 import com.openexchange.mail.MailListField;
+import com.openexchange.test.common.configuration.AJAXConfig;
 
 /**
  * {@link AbstractMailTest}

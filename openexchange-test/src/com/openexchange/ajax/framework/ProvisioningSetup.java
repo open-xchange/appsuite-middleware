@@ -56,12 +56,12 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.Properties;
 import java.util.concurrent.atomic.AtomicBoolean;
-import com.openexchange.configuration.AJAXConfig;
 import com.openexchange.configuration.ConfigurationExceptionCodes;
-import com.openexchange.configuration.TestConfig;
 import com.openexchange.exception.OXException;
-import com.openexchange.test.pool.TestContextPool;
-import com.openexchange.test.pool.TestUser;
+import com.openexchange.test.common.configuration.AJAXConfig;
+import com.openexchange.test.common.configuration.TestConfig;
+import com.openexchange.test.common.test.pool.TestContextPool;
+import com.openexchange.test.common.test.pool.TestUser;
 
 /**
  * {@link ProvisioningSetup}

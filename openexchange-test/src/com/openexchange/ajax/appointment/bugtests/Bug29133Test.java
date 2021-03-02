@@ -1,7 +1,7 @@
 
 package com.openexchange.ajax.appointment.bugtests;
 
-import static com.openexchange.groupware.calendar.TimeTools.D;
+import static com.openexchange.test.common.groupware.calendar.TimeTools.D;
 import static org.junit.Assert.assertEquals;
 import java.util.Date;
 import org.junit.Before;
@@ -12,7 +12,7 @@ import com.openexchange.groupware.container.Appointment;
 import com.openexchange.groupware.container.Participant;
 import com.openexchange.groupware.container.UserParticipant;
 import com.openexchange.test.CalendarTestManager;
-import com.openexchange.test.TestClassConfig;
+import com.openexchange.test.common.test.TestClassConfig;
 
 /**
  * {@link Bug29133Test}

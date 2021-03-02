@@ -65,10 +65,10 @@ import com.openexchange.ajax.appointment.helper.PositiveAssertionOnCreateAndUpda
 import com.openexchange.ajax.appointment.helper.PositiveAssertionOnDeleteException;
 import com.openexchange.ajax.appointment.helper.PositiveAssertionOnUpdateOnly;
 import com.openexchange.ajax.framework.UserValues;
-import com.openexchange.groupware.calendar.TimeTools;
 import com.openexchange.groupware.container.Appointment;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.modules.Module;
+import com.openexchange.test.common.groupware.calendar.TimeTools;
 
 /**
  * @author <a href="mailto:tobias.prinz@open-xchange.com">Tobias Prinz</a>

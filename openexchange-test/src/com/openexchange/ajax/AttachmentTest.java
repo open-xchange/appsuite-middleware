@@ -52,7 +52,7 @@ package com.openexchange.ajax;
 import java.io.File;
 import org.junit.Before;
 import com.openexchange.ajax.framework.AbstractAJAXSession;
-import com.openexchange.configuration.AJAXConfig;
+import com.openexchange.test.common.configuration.AJAXConfig;
 
 public abstract class AttachmentTest extends AbstractAJAXSession {
 

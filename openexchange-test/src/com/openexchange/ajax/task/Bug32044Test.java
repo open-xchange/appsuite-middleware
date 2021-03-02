@@ -68,13 +68,13 @@ import com.openexchange.ajax.task.actions.UpdateRequest;
 import com.openexchange.ajax.task.actions.UpdateResponse;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.Types;
-import com.openexchange.groupware.calendar.TimeTools;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.reminder.ReminderObject;
-import com.openexchange.groupware.tasks.Create;
 import com.openexchange.groupware.tasks.Task;
 import com.openexchange.java.util.TimeZones;
 import com.openexchange.server.impl.OCLPermission;
+import com.openexchange.test.common.groupware.calendar.TimeTools;
+import com.openexchange.test.common.groupware.tasks.Create;
 
 /**
  * Preconditions: Two users have access to a task. Both users created a reminder.

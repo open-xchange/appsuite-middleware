@@ -54,7 +54,7 @@ import static org.junit.Assert.fail;
 import java.io.FileInputStream;
 import org.apache.commons.codec.binary.Base64;
 import org.junit.Test;
-import com.openexchange.configuration.AJAXConfig;
+import com.openexchange.test.common.configuration.AJAXConfig;
 import com.openexchange.testing.httpclient.models.ContactData;
 
 /**

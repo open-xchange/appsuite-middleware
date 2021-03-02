@@ -58,9 +58,9 @@ import java.util.Map;
 import org.junit.Test;
 import com.google.common.io.BaseEncoding;
 import com.openexchange.client.onboarding.OnboardingExceptionCodes;
-import com.openexchange.configuration.AJAXConfig;
 import com.openexchange.java.Strings;
 import com.openexchange.sms.sipgate.SipgateSMSExceptionCode;
+import com.openexchange.test.common.configuration.AJAXConfig;
 import com.openexchange.test.tryagain.TryAgain;
 import com.openexchange.testing.httpclient.models.CommonResponse;
 

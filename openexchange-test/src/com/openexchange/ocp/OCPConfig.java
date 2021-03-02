@@ -49,10 +49,10 @@
 
 package com.openexchange.ocp;
 
-import com.openexchange.configuration.AJAXConfig;
 import com.openexchange.configuration.ConfigurationExceptionCodes;
-import com.openexchange.configuration.TestConfig;
 import com.openexchange.exception.OXException;
+import com.openexchange.test.common.configuration.AJAXConfig;
+import com.openexchange.test.common.configuration.TestConfig;
 import com.openexchange.tools.conf.AbstractConfig;
 
 /**

@@ -68,9 +68,9 @@ import com.openexchange.ajax.framework.UserValues;
 import com.openexchange.ajax.mail.actions.DeleteRequest;
 import com.openexchange.ajax.mail.actions.ImportMailRequest;
 import com.openexchange.ajax.mail.actions.ImportMailResponse;
-import com.openexchange.configuration.AJAXConfig;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.Streams;
+import com.openexchange.test.common.configuration.AJAXConfig;
 
 /**
  * {@link Bug32351Test}

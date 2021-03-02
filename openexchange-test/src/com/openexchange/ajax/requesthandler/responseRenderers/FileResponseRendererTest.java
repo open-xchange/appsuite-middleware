@@ -79,7 +79,6 @@ import com.openexchange.ajax.requesthandler.responseRenderers.FileResponseRender
 import com.openexchange.ajax.requesthandler.responseRenderers.FileResponseRendererTools.Disposition;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.config.SimConfigurationService;
-import com.openexchange.configuration.AJAXConfig;
 import com.openexchange.exception.OXException;
 import com.openexchange.html.HtmlService;
 import com.openexchange.html.SimHtmlService;
@@ -92,6 +91,7 @@ import com.openexchange.imagetransformation.java.impl.JavaImageTransformationPro
 import com.openexchange.java.Strings;
 import com.openexchange.mail.mime.MimeType2ExtMap;
 import com.openexchange.server.services.ServerServiceRegistry;
+import com.openexchange.test.common.configuration.AJAXConfig;
 import com.openexchange.tools.image.WrappingImageTransformationService;
 import com.openexchange.tools.servlet.http.Tools;
 import com.openexchange.tools.session.SimServerSession;

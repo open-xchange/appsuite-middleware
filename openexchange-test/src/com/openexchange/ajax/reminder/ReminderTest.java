@@ -52,7 +52,7 @@ package com.openexchange.ajax.reminder;
 import static org.junit.Assert.assertEquals;
 import com.openexchange.ajax.framework.AbstractAJAXSession;
 import com.openexchange.groupware.reminder.ReminderObject;
-import com.openexchange.test.OXTestToolkit;
+import com.openexchange.test.common.test.OXTestToolkit;
 
 public abstract class ReminderTest extends AbstractAJAXSession {
 

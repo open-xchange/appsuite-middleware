@@ -63,12 +63,12 @@ import com.openexchange.ajax.folder.actions.InsertResponse;
 import com.openexchange.ajax.framework.AJAXClient;
 import com.openexchange.ajax.framework.AbstractAJAXSession;
 import com.openexchange.ajax.framework.CommonDeleteResponse;
-import com.openexchange.configuration.AJAXConfig;
 import com.openexchange.groupware.calendar.Constants;
 import com.openexchange.groupware.container.Appointment;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.server.impl.OCLPermission;
 import com.openexchange.test.CalendarTestManager;
+import com.openexchange.test.common.configuration.AJAXConfig;
 
 /**
  * {@link ClearTest}

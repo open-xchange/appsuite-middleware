@@ -61,9 +61,9 @@ import com.openexchange.ajax.framework.AbstractAJAXSession;
 import com.openexchange.ajax.framework.Executor;
 import com.openexchange.ajax.reminder.actions.RangeRequest;
 import com.openexchange.ajax.reminder.actions.RemindAgainRequest;
-import com.openexchange.groupware.calendar.TimeTools;
 import com.openexchange.groupware.reminder.ReminderObject;
 import com.openexchange.groupware.tasks.Task;
+import com.openexchange.test.common.groupware.calendar.TimeTools;
 
 /**
  * {@link RemindAgainTest}
@@ -81,7 +81,7 @@ public class RemindAgainTest extends AbstractAJAXSession {
          * Create task
          */
         final int folderId = client.getValues().getPrivateTaskFolder();
-        final Task task = com.openexchange.groupware.tasks.Create.createTask();
+        final Task task = com.openexchange.test.common.groupware.tasks.Create.createTask();
         final Calendar c = TimeTools.createCalendar(timeZone);
         c.set(Calendar.HOUR_OF_DAY, 0);
         task.setParentFolderID(folderId);

@@ -50,9 +50,9 @@
 package com.openexchange.ajax.chronos;
 
 import com.openexchange.ajax.framework.AbstractConfigAwareAPIClientSession;
-import com.openexchange.test.TestClassConfig;
+import com.openexchange.test.common.test.TestClassConfig;
+import com.openexchange.test.common.tools.client.EnhancedApiClient;
 import com.openexchange.testing.httpclient.invoker.ApiException;
-import com.openexchange.tools.client.EnhancedApiClient;
 
 /**
  * {@link AbstractEnhancedApiClientSession}

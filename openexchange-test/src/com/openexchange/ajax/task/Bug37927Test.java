@@ -49,7 +49,7 @@
 
 package com.openexchange.ajax.task;
 
-import static com.openexchange.groupware.calendar.TimeTools.D;
+import static com.openexchange.test.common.groupware.calendar.TimeTools.D;
 import static org.junit.Assert.assertFalse;
 import java.util.ArrayList;
 import java.util.List;

@@ -55,7 +55,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import org.apache.commons.io.IOUtils;
 import com.openexchange.ajax.container.ByteArrayFileHolder;
-import com.openexchange.configuration.AJAXConfig;
+import com.openexchange.test.common.configuration.AJAXConfig;
 
 /**
  * {@link FileResponseRendererTools}

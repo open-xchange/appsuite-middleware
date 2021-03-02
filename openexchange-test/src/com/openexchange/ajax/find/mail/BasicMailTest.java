@@ -78,7 +78,6 @@ import com.openexchange.ajax.find.actions.AutocompleteResponse;
 import com.openexchange.ajax.find.actions.TestDisplayItem;
 import com.openexchange.ajax.user.actions.GetRequest;
 import com.openexchange.ajax.user.actions.GetResponse;
-import com.openexchange.configuration.AJAXConfig;
 import com.openexchange.exception.OXException;
 import com.openexchange.find.Module;
 import com.openexchange.find.RequestOptions;
@@ -98,6 +97,7 @@ import com.openexchange.java.util.TimeZones;
 import com.openexchange.mail.MailField;
 import com.openexchange.mail.MailJSONField;
 import com.openexchange.mail.MailListField;
+import com.openexchange.test.common.configuration.AJAXConfig;
 
 /**
  * {@link BasicMailTest}

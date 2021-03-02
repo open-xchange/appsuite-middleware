@@ -59,7 +59,7 @@ import com.openexchange.calendar.json.AppointmentActionFactory;
 import com.openexchange.contacts.json.ContactActionFactory;
 import com.openexchange.oauth.provider.authorizationserver.grant.GrantView;
 import com.openexchange.oauth.provider.resourceserver.scope.Scope;
-import com.openexchange.test.TestClassConfig;
+import com.openexchange.test.common.test.TestClassConfig;
 
 /**
  * {@link JSONApiTest}

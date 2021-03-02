@@ -62,7 +62,7 @@ import org.json.JSONObject;
 import org.jsoup.Jsoup;
 import org.junit.Test;
 import com.openexchange.ajax.apiclient.oauth.AbstractOAuthAPIClient;
-import com.openexchange.test.TestClassConfig;
+import com.openexchange.test.common.test.TestClassConfig;
 import com.openexchange.testing.httpclient.invoker.ApiException;
 import com.openexchange.testing.httpclient.models.FolderResponse;
 import com.openexchange.testing.httpclient.models.FoldersVisibilityResponse;

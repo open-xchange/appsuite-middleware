@@ -58,9 +58,9 @@ import com.openexchange.ajax.attach.actions.AttachResponse;
 import com.openexchange.ajax.framework.Abstrac2UserAJAXSession;
 import com.openexchange.ajax.task.actions.InsertRequest;
 import com.openexchange.groupware.container.FolderObject;
-import com.openexchange.groupware.tasks.Create;
 import com.openexchange.groupware.tasks.Task;
 import com.openexchange.java.util.UUIDs;
+import com.openexchange.test.common.groupware.tasks.Create;
 
 /**
  * {@link Bug65799Test}

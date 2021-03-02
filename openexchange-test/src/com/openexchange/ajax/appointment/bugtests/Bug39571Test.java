@@ -58,11 +58,11 @@ import org.junit.Before;
 import org.junit.Test;
 import com.openexchange.ajax.appointment.AbstractResourceAwareAjaxSession;
 import com.openexchange.ajax.resource.ResourceTools;
-import com.openexchange.groupware.calendar.TimeTools;
 import com.openexchange.groupware.container.Appointment;
 import com.openexchange.groupware.container.Participant;
 import com.openexchange.groupware.container.ResourceParticipant;
 import com.openexchange.groupware.container.UserParticipant;
+import com.openexchange.test.common.groupware.calendar.TimeTools;
 
 /**
  * {@link Bug39571Test}

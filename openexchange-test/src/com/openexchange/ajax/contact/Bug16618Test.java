@@ -61,8 +61,8 @@ import com.openexchange.ajax.framework.AbstractAJAXSession;
 import com.openexchange.ajax.framework.CommonAllResponse;
 import com.openexchange.ajax.framework.CommonListResponse;
 import com.openexchange.ajax.framework.ListIDs;
-import com.openexchange.contact.Data;
 import com.openexchange.groupware.container.Contact;
+import com.openexchange.test.common.contact.Data;
 
 /**
  * {@link Bug16618Test}

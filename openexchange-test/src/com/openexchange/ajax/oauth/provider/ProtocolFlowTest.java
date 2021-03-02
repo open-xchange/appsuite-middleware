@@ -81,12 +81,12 @@ import com.openexchange.ajax.oauth.provider.protocol.OAuthParams;
 import com.openexchange.ajax.oauth.provider.protocol.POSTRequest;
 import com.openexchange.ajax.oauth.provider.protocol.POSTResponse;
 import com.openexchange.ajax.oauth.provider.protocol.Protocol;
-import com.openexchange.configuration.AJAXConfig;
-import com.openexchange.configuration.AJAXConfig.Property;
 import com.openexchange.oauth.provider.authorizationserver.client.ClientManagement;
 import com.openexchange.oauth.provider.impl.grant.OAuthGrantStorage;
 import com.openexchange.oauth.provider.rmi.client.ClientDto;
 import com.openexchange.oauth.provider.rmi.client.RemoteClientManagement;
+import com.openexchange.test.common.configuration.AJAXConfig;
+import com.openexchange.test.common.configuration.AJAXConfig.Property;
 
 /**
  * {@link ProtocolFlowTest}

@@ -57,7 +57,7 @@ import org.junit.Test;
 import com.openexchange.ajax.framework.AbstractSmtpAJAXSession;
 import com.openexchange.ajax.onboarding.actions.ExecuteRequest;
 import com.openexchange.ajax.onboarding.actions.OnboardingTestResponse;
-import com.openexchange.test.TestClassConfig;
+import com.openexchange.test.common.test.TestClassConfig;
 
 /**
  * {@link EASSyncProfileTest}

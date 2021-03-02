@@ -97,11 +97,11 @@ import com.openexchange.ajax.framework.AJAXRequest.FieldParameter;
 import com.openexchange.ajax.framework.AJAXRequest.FileParameter;
 import com.openexchange.ajax.framework.AJAXRequest.Method;
 import com.openexchange.ajax.framework.AJAXRequest.Parameter;
-import com.openexchange.configuration.AJAXConfig;
-import com.openexchange.configuration.AJAXConfig.Property;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.Charsets;
-import com.openexchange.tools.URLParameter;
+import com.openexchange.test.common.configuration.AJAXConfig;
+import com.openexchange.test.common.configuration.AJAXConfig.Property;
+import com.openexchange.test.common.tools.URLParameter;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
 
 /**

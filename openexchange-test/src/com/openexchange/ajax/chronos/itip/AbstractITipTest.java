@@ -60,9 +60,10 @@ import org.exparity.hamcrest.date.DateMatchers;
 import org.jdom2.IllegalDataException;
 import com.openexchange.ajax.chronos.AbstractChronosTest;
 import com.openexchange.ajax.chronos.manager.EventManager;
-import com.openexchange.test.TestClassConfig;
-import com.openexchange.test.pool.TestContext;
-import com.openexchange.test.pool.TestUser;
+import com.openexchange.test.common.test.TestClassConfig;
+import com.openexchange.test.common.test.pool.TestContext;
+import com.openexchange.test.common.test.pool.TestUser;
+import com.openexchange.test.common.tools.client.EnhancedApiClient;
 import com.openexchange.testing.httpclient.invoker.ApiClient;
 import com.openexchange.testing.httpclient.invoker.ApiException;
 import com.openexchange.testing.httpclient.models.ActionResponse;
@@ -72,7 +73,6 @@ import com.openexchange.testing.httpclient.models.MailData;
 import com.openexchange.testing.httpclient.models.UserResponse;
 import com.openexchange.testing.httpclient.modules.ChronosApi;
 import com.openexchange.testing.httpclient.modules.UserApi;
-import com.openexchange.tools.client.EnhancedApiClient;
 
 /**
  * {@link AbstractITipTest}

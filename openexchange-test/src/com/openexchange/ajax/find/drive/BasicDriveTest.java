@@ -77,7 +77,6 @@ import com.openexchange.ajax.infostore.actions.ListInfostoreRequest.ListItem;
 import com.openexchange.ajax.infostore.actions.ListInfostoreResponse;
 import com.openexchange.ajax.infostore.actions.SearchInfostoreRequest;
 import com.openexchange.ajax.infostore.actions.SearchInfostoreResponse;
-import com.openexchange.configuration.AJAXConfig;
 import com.openexchange.file.storage.DefaultFile;
 import com.openexchange.file.storage.File;
 import com.openexchange.file.storage.File.Field;
@@ -99,6 +98,7 @@ import com.openexchange.find.facet.Filter;
 import com.openexchange.find.facet.SimpleFacet;
 import com.openexchange.folderstorage.Folder;
 import com.openexchange.groupware.container.FolderObject;
+import com.openexchange.test.common.configuration.AJAXConfig;
 
 /**
  * {@link BasicDriveTest}

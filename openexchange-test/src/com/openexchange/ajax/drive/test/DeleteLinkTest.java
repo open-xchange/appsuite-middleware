@@ -71,7 +71,7 @@ import com.openexchange.file.storage.DefaultFile;
 import com.openexchange.file.storage.FileStorageObjectPermission;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.modules.Module;
-import com.openexchange.test.TestInit;
+import com.openexchange.test.common.test.TestInit;
 
 /**
  * {@link DeleteLinkTest}

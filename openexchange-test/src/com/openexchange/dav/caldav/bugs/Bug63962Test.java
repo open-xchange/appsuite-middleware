@@ -56,9 +56,9 @@ import org.junit.Test;
 import com.openexchange.dav.StatusCodes;
 import com.openexchange.dav.caldav.CalDAVTest;
 import com.openexchange.dav.caldav.ICalResource;
-import com.openexchange.groupware.calendar.TimeTools;
 import com.openexchange.groupware.container.Appointment;
 import com.openexchange.groupware.container.Participant;
+import com.openexchange.test.common.groupware.calendar.TimeTools;
 
 /**
  * {@link Bug63962Test} - org.jdom2.IllegalDataException for character 0x001a during CalDAV sync

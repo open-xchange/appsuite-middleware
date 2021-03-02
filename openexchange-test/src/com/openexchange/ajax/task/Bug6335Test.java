@@ -55,9 +55,9 @@ import com.openexchange.ajax.framework.AJAXClient;
 import com.openexchange.ajax.task.actions.InsertRequest;
 import com.openexchange.ajax.task.actions.InsertResponse;
 import com.openexchange.exception.OXException;
-import com.openexchange.groupware.tasks.Create;
 import com.openexchange.groupware.tasks.Task;
 import com.openexchange.groupware.tasks.TaskExceptionCode;
+import com.openexchange.test.common.groupware.tasks.Create;
 
 /**
  * Tests if bug 6335 appears again in tasks.

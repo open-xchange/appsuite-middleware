@@ -1,7 +1,7 @@
 
 package com.openexchange.ajax.framework;
 
-import com.openexchange.test.TestClassConfig;
+import com.openexchange.test.common.test.TestClassConfig;
 
 /**
  * 

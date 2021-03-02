@@ -11,8 +11,8 @@ import org.junit.Before;
 import org.junit.Test;
 import com.openexchange.ajax.InfostoreAJAXTest;
 import com.openexchange.ajax.infostore.actions.GetDocumentResponse;
-import com.openexchange.test.OXTestToolkit;
-import com.openexchange.test.TestInit;
+import com.openexchange.test.common.test.OXTestToolkit;
+import com.openexchange.test.common.test.TestInit;
 
 public class DocumentTest extends InfostoreAJAXTest {
 

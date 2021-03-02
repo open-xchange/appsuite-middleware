@@ -8,7 +8,7 @@ import org.junit.Test;
 import com.openexchange.ajax.contact.action.GetRequest;
 import com.openexchange.ajax.contact.action.GetResponse;
 import com.openexchange.groupware.container.Contact;
-import com.openexchange.test.OXTestToolkit;
+import com.openexchange.test.common.test.OXTestToolkit;
 
 /**
  *

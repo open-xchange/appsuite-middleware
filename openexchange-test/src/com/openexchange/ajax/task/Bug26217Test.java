@@ -65,11 +65,11 @@ import com.openexchange.ajax.task.actions.InsertResponse;
 import com.openexchange.ajax.task.actions.UpdateRequest;
 import com.openexchange.ajax.task.actions.UpdateResponse;
 import com.openexchange.exception.OXException;
-import com.openexchange.groupware.calendar.TimeTools;
 import com.openexchange.groupware.container.FolderObject;
-import com.openexchange.groupware.tasks.Create;
 import com.openexchange.groupware.tasks.Task;
 import com.openexchange.java.util.TimeZones;
+import com.openexchange.test.common.groupware.calendar.TimeTools;
+import com.openexchange.test.common.groupware.tasks.Create;
 
 /**
  * This test ensures that bug 26217 does not occur again. The bug mentions a problem that moving a task creating in the private default

@@ -10,8 +10,8 @@ import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.util.Arrays;
 import org.junit.Test;
-import com.openexchange.configuration.AJAXConfig;
 import com.openexchange.junit.Assert;
+import com.openexchange.test.common.configuration.AJAXConfig;
 import com.openexchange.testing.httpclient.models.InfoItemData;
 import com.openexchange.tools.io.IOTools;
 

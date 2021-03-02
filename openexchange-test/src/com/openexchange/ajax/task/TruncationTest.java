@@ -57,7 +57,7 @@ import com.openexchange.ajax.task.actions.InsertResponse;
 import com.openexchange.exception.OXException.ProblematicAttribute;
 import com.openexchange.exception.OXException.Truncated;
 import com.openexchange.groupware.tasks.Task;
-import com.openexchange.tools.RandomString;
+import com.openexchange.test.common.tools.RandomString;
 
 /**
  * Tests if too long values for task attributes are correctly catched in the

@@ -71,7 +71,7 @@ import com.openexchange.file.storage.composition.FileID;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.infostore.InfostoreExceptionCodes;
 import com.openexchange.share.recipient.GuestRecipient;
-import com.openexchange.test.TestClassConfig;
+import com.openexchange.test.common.test.TestClassConfig;
 
 /**
  * {@link SharedFilesFolderTest}

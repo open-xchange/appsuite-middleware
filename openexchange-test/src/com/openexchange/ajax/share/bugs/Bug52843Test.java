@@ -63,7 +63,7 @@ import com.openexchange.ajax.share.actions.NotifyFolderRequest;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.server.impl.OCLPermission;
 import com.openexchange.share.recipient.RecipientType;
-import com.openexchange.test.TestClassConfig;
+import com.openexchange.test.common.test.TestClassConfig;
 import com.openexchange.test.tryagain.TryAgain;
 import com.openexchange.testing.httpclient.models.MailData;
 

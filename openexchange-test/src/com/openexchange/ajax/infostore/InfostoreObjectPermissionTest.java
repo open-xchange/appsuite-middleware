@@ -73,7 +73,6 @@ import com.openexchange.ajax.infostore.actions.InfostoreTestManager;
 import com.openexchange.ajax.infostore.actions.ListInfostoreRequest;
 import com.openexchange.ajax.infostore.actions.ListInfostoreRequest.ListItem;
 import com.openexchange.ajax.infostore.actions.ListInfostoreResponse;
-import com.openexchange.configuration.AJAXConfig;
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.DefaultFile;
 import com.openexchange.file.storage.DefaultFileStorageObjectPermission;
@@ -84,6 +83,7 @@ import com.openexchange.groupware.infostore.InfostoreExceptionCodes;
 import com.openexchange.groupware.infostore.utils.Metadata;
 import com.openexchange.groupware.search.Order;
 import com.openexchange.java.util.UUIDs;
+import com.openexchange.test.common.configuration.AJAXConfig;
 
 /**
  * {@link InfostoreObjectPermissionTest}

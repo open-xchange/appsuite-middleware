@@ -49,7 +49,7 @@
 
 package com.openexchange.ajax.appointment.bugtests;
 
-import static com.openexchange.groupware.calendar.TimeTools.D;
+import static com.openexchange.test.common.groupware.calendar.TimeTools.D;
 import java.util.ArrayList;
 import java.util.UUID;
 import org.junit.Before;
@@ -67,7 +67,7 @@ import com.openexchange.ajax.participant.ParticipantTools;
 import com.openexchange.groupware.container.Appointment;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.server.impl.OCLPermission;
-import com.openexchange.test.TestClassConfig;
+import com.openexchange.test.common.test.TestClassConfig;
 
 /**
  * @author <a href="mailto:martin.herfurth@open-xchange.org">Martin Herfurth</a>

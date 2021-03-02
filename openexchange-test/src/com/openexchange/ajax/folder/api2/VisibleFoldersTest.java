@@ -61,7 +61,7 @@ import com.openexchange.ajax.folder.actions.VisibleFoldersRequest;
 import com.openexchange.ajax.folder.actions.VisibleFoldersResponse;
 import com.openexchange.ajax.framework.Abstrac2UserAJAXSession;
 import com.openexchange.groupware.container.FolderObject;
-import com.openexchange.test.PermissionTools;
+import com.openexchange.test.common.test.PermissionTools;
 
 /**
  * {@link VisibleFoldersTest}

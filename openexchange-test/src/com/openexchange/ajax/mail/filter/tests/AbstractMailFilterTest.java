@@ -122,7 +122,7 @@ import com.openexchange.ajax.mail.filter.api.dao.action.Action;
 import com.openexchange.ajax.mail.filter.api.dao.action.argument.ActionArgument;
 import com.openexchange.ajax.mail.filter.api.dao.test.Test;
 import com.openexchange.groupware.container.DataObject;
-import com.openexchange.test.AjaxInit;
+import com.openexchange.test.common.test.AjaxInit;
 
 public class AbstractMailFilterTest extends AbstractAJAXSession {
 

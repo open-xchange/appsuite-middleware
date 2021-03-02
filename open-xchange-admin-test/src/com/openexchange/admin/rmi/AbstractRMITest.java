@@ -81,9 +81,9 @@ import com.openexchange.admin.rmi.manager.ServerManager;
 import com.openexchange.admin.rmi.manager.TaskManagementManager;
 import com.openexchange.admin.rmi.manager.UserManager;
 import com.openexchange.admin.rmi.util.AssertUtil;
-import com.openexchange.configuration.AJAXConfig;
-import com.openexchange.configuration.AJAXConfig.Property;
 import com.openexchange.exception.OXException;
+import com.openexchange.test.common.configuration.AJAXConfig;
+import com.openexchange.test.common.configuration.AJAXConfig.Property;
 
 /**
  * {@link AbstractRMITest}

@@ -50,7 +50,7 @@
 package com.openexchange.ajax.framework;
 
 import com.openexchange.ajax.smtptest.MailManager;
-import com.openexchange.test.pool.TestUser;
+import com.openexchange.test.common.test.pool.TestUser;
 import com.openexchange.testing.httpclient.invoker.ApiClient;
 
 public abstract class AbstractSmtpAJAXSession extends AbstractAPIClientSession {

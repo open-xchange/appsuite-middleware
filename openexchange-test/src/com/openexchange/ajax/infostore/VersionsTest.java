@@ -20,7 +20,7 @@ import com.openexchange.ajax.framework.AbstractAJAXResponse;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.infostore.utils.Metadata;
 import com.openexchange.groupware.search.Order;
-import com.openexchange.test.TestInit;
+import com.openexchange.test.common.test.TestInit;
 
 public class VersionsTest extends InfostoreAJAXTest {
 

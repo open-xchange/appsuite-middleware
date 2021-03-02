@@ -63,7 +63,7 @@ import org.json.JSONException;
 import org.junit.Test;
 import com.openexchange.ajax.infostore.apiclient.InfostoreApiClientTest;
 import com.openexchange.exception.OXException;
-import com.openexchange.test.TestClassConfig;
+import com.openexchange.test.common.test.TestClassConfig;
 import com.openexchange.testing.httpclient.invoker.ApiClient;
 import com.openexchange.testing.httpclient.invoker.ApiException;
 import com.openexchange.testing.httpclient.models.DriveAction;

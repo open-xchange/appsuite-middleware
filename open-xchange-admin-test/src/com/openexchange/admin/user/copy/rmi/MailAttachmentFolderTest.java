@@ -73,7 +73,6 @@ import com.openexchange.ajax.infostore.actions.InfostoreTestManager;
 import com.openexchange.ajax.session.LoginTools;
 import com.openexchange.ajax.session.actions.LoginRequest;
 import com.openexchange.ajax.session.actions.LoginResponse;
-import com.openexchange.configuration.AJAXConfig;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.i18n.FolderStrings;
@@ -82,7 +81,8 @@ import com.openexchange.groupware.infostore.database.impl.DocumentMetadataImpl;
 import com.openexchange.groupware.infostore.utils.Metadata;
 import com.openexchange.groupware.search.Order;
 import com.openexchange.test.FolderTestManager;
-import com.openexchange.test.TestInit;
+import com.openexchange.test.common.configuration.AJAXConfig;
+import com.openexchange.test.common.test.TestInit;
 
 /**
  * A test for https://bugs.open-xchange.com/show_bug.cgi?id=30245.

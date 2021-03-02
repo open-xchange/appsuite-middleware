@@ -62,10 +62,10 @@ import org.junit.Test;
 import com.openexchange.dav.SyncToken;
 import com.openexchange.dav.caldav.Abstract2UserCalDAVTest;
 import com.openexchange.dav.caldav.ICalResource;
-import com.openexchange.groupware.calendar.TimeTools;
 import com.openexchange.groupware.container.Appointment;
 import com.openexchange.groupware.container.UserParticipant;
 import com.openexchange.test.CalendarTestManager;
+import com.openexchange.test.common.groupware.calendar.TimeTools;
 
 /**
  * {@link Bug26293Test}

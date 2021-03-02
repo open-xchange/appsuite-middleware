@@ -63,9 +63,9 @@ import com.openexchange.ajax.task.actions.GetRequest;
 import com.openexchange.ajax.task.actions.GetResponse;
 import com.openexchange.ajax.task.actions.InsertRequest;
 import com.openexchange.ajax.task.actions.InsertResponse;
-import com.openexchange.groupware.calendar.TimeTools;
 import com.openexchange.groupware.tasks.Task;
 import com.openexchange.java.util.TimeZones;
+import com.openexchange.test.common.groupware.calendar.TimeTools;
 
 /**
  * {@link Bug16006Test}

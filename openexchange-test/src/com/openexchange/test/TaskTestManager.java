@@ -87,8 +87,8 @@ import com.openexchange.groupware.search.Order;
 import com.openexchange.groupware.tasks.Mapper;
 import com.openexchange.groupware.tasks.Mapping;
 import com.openexchange.groupware.tasks.Task;
-import com.openexchange.groupware.tasks.TestTask;
 import com.openexchange.java.ConcurrentLinkedList;
+import com.openexchange.test.common.groupware.tasks.TestTask;
 
 /**
  * {@link TaskTestManager}

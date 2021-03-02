@@ -49,7 +49,7 @@
 
 package com.openexchange.ajax.folder;
 
-import static com.openexchange.groupware.calendar.TimeTools.D;
+import static com.openexchange.test.common.groupware.calendar.TimeTools.D;
 import static org.junit.Assert.assertEquals;
 import java.util.UUID;
 import org.junit.Before;

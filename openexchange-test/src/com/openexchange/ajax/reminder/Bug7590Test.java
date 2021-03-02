@@ -63,9 +63,9 @@ import com.openexchange.ajax.framework.AbstractAJAXSession;
 import com.openexchange.ajax.reminder.actions.RangeRequest;
 import com.openexchange.ajax.reminder.actions.RangeResponse;
 import com.openexchange.exception.OXException;
-import com.openexchange.groupware.calendar.TimeTools;
 import com.openexchange.groupware.container.Appointment;
 import com.openexchange.groupware.reminder.ReminderObject;
+import com.openexchange.test.common.groupware.calendar.TimeTools;
 
 public class Bug7590Test extends AbstractAJAXSession {
 

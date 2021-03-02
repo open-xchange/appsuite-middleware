@@ -69,7 +69,7 @@ import com.openexchange.ajax.proxy.MockRequest;
 import com.openexchange.ajax.proxy.MockRequestMethod;
 import com.openexchange.ajax.proxy.MockResponse;
 import com.openexchange.exception.OXException;
-import com.openexchange.test.TestClassConfig;
+import com.openexchange.test.common.test.TestClassConfig;
 import com.openexchange.testing.httpclient.invoker.ApiException;
 import com.openexchange.testing.httpclient.models.FolderCalendarConfig;
 import com.openexchange.testing.httpclient.models.FolderCalendarExtendedProperties;

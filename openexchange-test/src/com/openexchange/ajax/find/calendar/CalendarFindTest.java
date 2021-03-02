@@ -57,9 +57,9 @@ import com.openexchange.ajax.find.AbstractFindTest;
 import com.openexchange.ajax.find.PropDocument;
 import com.openexchange.find.Module;
 import com.openexchange.find.facet.ActiveFacet;
-import com.openexchange.groupware.calendar.TimeTools;
 import com.openexchange.groupware.container.Appointment;
 import com.openexchange.test.CalendarTestManager;
+import com.openexchange.test.common.groupware.calendar.TimeTools;
 
 /**
  * {@link CalendarFindTest}

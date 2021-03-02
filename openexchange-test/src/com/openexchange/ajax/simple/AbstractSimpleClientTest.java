@@ -62,7 +62,7 @@ import java.util.Map;
 import java.util.Properties;
 import org.apache.commons.httpclient.HttpMethod;
 import org.json.JSONObject;
-import com.openexchange.test.json.JSONAssertion;
+import com.openexchange.test.common.test.json.JSONAssertion;
 
 /**
  * Yet another OX testing framework. This one is for simple cases, when the full blown framework would be too much.

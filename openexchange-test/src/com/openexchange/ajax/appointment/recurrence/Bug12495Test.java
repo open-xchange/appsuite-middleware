@@ -22,9 +22,9 @@ import com.openexchange.ajax.framework.CommonAllResponse;
 import com.openexchange.ajax.framework.CommonListResponse;
 import com.openexchange.ajax.framework.ListIDs;
 import com.openexchange.exception.OXException;
-import com.openexchange.groupware.calendar.TimeTools;
 import com.openexchange.groupware.container.Appointment;
 import com.openexchange.groupware.container.UserParticipant;
+import com.openexchange.test.common.groupware.calendar.TimeTools;
 
 /**
  * User 1 creates an appointment series, user 2 deletes one exception, check whether

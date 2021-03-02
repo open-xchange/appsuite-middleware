@@ -60,7 +60,7 @@ import com.openexchange.ajax.contact.AbstractManagedContactTest;
 import com.openexchange.ajax.framework.AbstractAJAXResponse;
 import com.openexchange.ajax.importexport.actions.CSVImportRequest;
 import com.openexchange.groupware.container.Contact;
-import com.openexchange.groupware.importexport.ContactTestData;
+import com.openexchange.test.common.groupware.importexport.ContactTestData;
 
 /**
  * This bug is concerned with data sent as UTF8 stream with a Byte Order Mark (BOM).

@@ -65,9 +65,9 @@ import com.openexchange.ajax.mail.actions.GetResponse;
 import com.openexchange.ajax.mail.actions.MultipleAttachmentRequest;
 import com.openexchange.ajax.mail.actions.NewMailRequest;
 import com.openexchange.ajax.mail.actions.NewMailResponse;
-import com.openexchange.configuration.AJAXConfig;
 import com.openexchange.mail.MailJSONField;
 import com.openexchange.mail.MailListField;
+import com.openexchange.test.common.configuration.AJAXConfig;
 
 /**
  * {@link MultipleAttachmentTest}

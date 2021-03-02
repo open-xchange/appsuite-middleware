@@ -107,7 +107,7 @@ public class VersionsRequest extends AbstractFileRequest<VersionsResponse> {
             params.add(new Parameter("id", folderId));
         }
         if ((this.columns != null) && (this.columns.length > 0)) {
-            String colsArray2String = com.openexchange.tools.URLParameter.colsArray2String(this.columns);
+            String colsArray2String = com.openexchange.test.common.tools.URLParameter.colsArray2String(this.columns);
             params.add(new Parameter(AJAXServlet.PARAMETER_COLUMNS, colsArray2String));
         }
         if (this.sort != -1) {

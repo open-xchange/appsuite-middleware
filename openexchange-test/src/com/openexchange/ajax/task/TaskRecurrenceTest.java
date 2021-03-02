@@ -51,7 +51,7 @@ package com.openexchange.ajax.task;
 
 import org.junit.Test;
 import com.openexchange.groupware.tasks.Task;
-import com.openexchange.groupware.tasks.TestTask;
+import com.openexchange.test.common.groupware.tasks.TestTask;
 
 /**
  * {@link TaskRecurrenceTest}

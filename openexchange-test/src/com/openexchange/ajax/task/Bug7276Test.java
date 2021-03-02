@@ -63,10 +63,10 @@ import com.openexchange.ajax.task.actions.InsertResponse;
 import com.openexchange.ajax.task.actions.UpdateRequest;
 import com.openexchange.ajax.task.actions.UpdateResponse;
 import com.openexchange.exception.OXException;
-import com.openexchange.groupware.tasks.Create;
 import com.openexchange.groupware.tasks.Task;
 import com.openexchange.groupware.tasks.TaskExceptionCode;
-import com.openexchange.test.TestClassConfig;
+import com.openexchange.test.common.groupware.tasks.Create;
+import com.openexchange.test.common.test.TestClassConfig;
 
 /**
  * Tests problem described in bug #7276.

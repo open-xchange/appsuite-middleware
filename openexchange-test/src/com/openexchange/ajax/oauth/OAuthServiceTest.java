@@ -67,8 +67,8 @@ import com.openexchange.ajax.oauth.actions.GetOAuthServiceRequest;
 import com.openexchange.ajax.oauth.actions.OAuthServicesResponse;
 import com.openexchange.ajax.oauth.types.OAuthService;
 import com.openexchange.exception.OXException;
-import com.openexchange.test.pool.TestContext;
-import com.openexchange.test.pool.TestContextPool;
+import com.openexchange.test.common.test.pool.TestContext;
+import com.openexchange.test.common.test.pool.TestContextPool;
 
 /**
  * Instances of com.openexchange.oauth.OAuthServiceMetaData should be invisible if their according

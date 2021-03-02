@@ -50,7 +50,7 @@
 package com.openexchange.dav.caldav;
 
 import com.openexchange.ajax.framework.AJAXClient;
-import com.openexchange.test.TestClassConfig;
+import com.openexchange.test.common.test.TestClassConfig;
 import com.openexchange.testing.httpclient.invoker.ApiClient;
 
 /**

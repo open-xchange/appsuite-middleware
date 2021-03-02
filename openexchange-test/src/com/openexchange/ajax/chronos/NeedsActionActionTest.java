@@ -67,8 +67,9 @@ import com.openexchange.ajax.chronos.util.AssertUtil;
 import com.openexchange.ajax.chronos.util.DateTimeUtil;
 import com.openexchange.chronos.ParticipationStatus;
 import com.openexchange.chronos.common.CalendarUtils;
-import com.openexchange.test.TestClassConfig;
-import com.openexchange.test.pool.TestUser;
+import com.openexchange.test.common.test.TestClassConfig;
+import com.openexchange.test.common.test.pool.TestUser;
+import com.openexchange.test.common.tools.client.EnhancedApiClient;
 import com.openexchange.testing.httpclient.invoker.ApiClient;
 import com.openexchange.testing.httpclient.invoker.ApiException;
 import com.openexchange.testing.httpclient.models.Attendee;
@@ -76,7 +77,6 @@ import com.openexchange.testing.httpclient.models.AttendeeAndAlarm;
 import com.openexchange.testing.httpclient.models.CalendarUser;
 import com.openexchange.testing.httpclient.models.EventData;
 import com.openexchange.testing.httpclient.models.EventsResponse;
-import com.openexchange.tools.client.EnhancedApiClient;
 
 /**
  * {@link NeedsActionActionTest}

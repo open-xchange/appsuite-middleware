@@ -59,10 +59,10 @@ import com.openexchange.ajax.framework.AbstractAJAXSession;
 import com.openexchange.ajax.task.actions.InsertRequest;
 import com.openexchange.ajax.task.actions.UpdateRequest;
 import com.openexchange.ajax.task.actions.UpdateResponse;
-import com.openexchange.groupware.calendar.TimeTools;
-import com.openexchange.groupware.tasks.Create;
 import com.openexchange.groupware.tasks.Task;
 import com.openexchange.groupware.tasks.TaskExceptionCode;
+import com.openexchange.test.common.groupware.calendar.TimeTools;
+import com.openexchange.test.common.groupware.tasks.Create;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
 
 /**

@@ -57,9 +57,9 @@ import org.json.JSONException;
 import org.junit.Test;
 import com.openexchange.ajax.mailaccount.actions.MailAccountValidateRequest;
 import com.openexchange.ajax.mailaccount.actions.MailAccountValidateResponse;
-import com.openexchange.configuration.AJAXConfig;
 import com.openexchange.exception.OXException;
 import com.openexchange.mailaccount.MailAccountDescription;
+import com.openexchange.test.common.configuration.AJAXConfig;
 
 /**
  * {@link MailAccountValidateTest}

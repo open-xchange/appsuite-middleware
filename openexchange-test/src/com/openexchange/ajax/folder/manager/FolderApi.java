@@ -50,7 +50,7 @@
 package com.openexchange.ajax.folder.manager;
 
 import org.json.JSONObject;
-import com.openexchange.test.pool.TestUser;
+import com.openexchange.test.common.test.pool.TestUser;
 import com.openexchange.testing.httpclient.invoker.ApiClient;
 import com.openexchange.testing.httpclient.models.LoginResponse;
 import com.openexchange.testing.httpclient.modules.FoldersApi;

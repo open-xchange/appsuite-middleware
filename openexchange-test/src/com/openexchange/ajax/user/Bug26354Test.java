@@ -66,7 +66,7 @@ import com.openexchange.ajax.user.actions.SetAttributeRequest;
 import com.openexchange.ajax.user.actions.SetAttributeResponse;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.util.TimeZones;
-import com.openexchange.tools.RandomString;
+import com.openexchange.test.common.tools.RandomString;
 
 /**
  * {@link Bug26354Test}

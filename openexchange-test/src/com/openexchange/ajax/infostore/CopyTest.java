@@ -64,8 +64,8 @@ import com.google.common.collect.Iterables;
 import com.openexchange.ajax.InfostoreAJAXTest;
 import com.openexchange.ajax.framework.AbstractAJAXResponse;
 import com.openexchange.groupware.infostore.utils.Metadata;
-import com.openexchange.test.OXTestToolkit;
-import com.openexchange.test.TestInit;
+import com.openexchange.test.common.test.OXTestToolkit;
+import com.openexchange.test.common.test.TestInit;
 
 public class CopyTest extends InfostoreAJAXTest {
 

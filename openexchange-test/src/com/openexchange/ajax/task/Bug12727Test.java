@@ -61,8 +61,8 @@ import com.openexchange.ajax.framework.ListIDs;
 import com.openexchange.ajax.task.actions.ListRequest;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.tasks.Task;
-import com.openexchange.groupware.tasks.TestTask;
 import com.openexchange.test.TaskTestManager;
+import com.openexchange.test.common.groupware.tasks.TestTask;
 
 /**
  *

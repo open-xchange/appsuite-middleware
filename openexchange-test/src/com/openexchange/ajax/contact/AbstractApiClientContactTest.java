@@ -72,7 +72,7 @@ import com.openexchange.ajax.framework.AbstractAPIClientSession;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.DistributionListEntryObject;
 import com.openexchange.java.UnsynchronizedByteArrayOutputStream;
-import com.openexchange.test.OXTestToolkit;
+import com.openexchange.test.common.test.OXTestToolkit;
 import com.openexchange.testing.httpclient.invoker.ApiClient;
 import com.openexchange.testing.httpclient.models.ContactData;
 import com.openexchange.testing.httpclient.models.ContactResponse;

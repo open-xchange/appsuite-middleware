@@ -62,8 +62,8 @@ import com.openexchange.ajax.appointment.action.UpdateResponse;
 import com.openexchange.ajax.fields.AppointmentFields;
 import com.openexchange.ajax.framework.AJAXClient;
 import com.openexchange.ajax.framework.AbstractAJAXSession;
-import com.openexchange.groupware.calendar.TimeTools;
 import com.openexchange.groupware.container.Appointment;
+import com.openexchange.test.common.groupware.calendar.TimeTools;
 
 /**
  * Verifies the until date of a full time daily series appointment.

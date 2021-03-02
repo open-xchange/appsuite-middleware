@@ -63,7 +63,7 @@ import com.meterware.httpunit.WebRequest;
 import com.meterware.httpunit.WebResponse;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.importexport.Format;
-import com.openexchange.test.OXTestToolkit;
+import com.openexchange.test.common.test.OXTestToolkit;
 
 /**
  * Tests the VCard imports and exports by using the servlets.

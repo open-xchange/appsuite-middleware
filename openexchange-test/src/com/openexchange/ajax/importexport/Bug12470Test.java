@@ -65,9 +65,9 @@ import com.openexchange.ajax.importexport.actions.ICalImportResponse;
 import com.openexchange.ajax.task.actions.GetRequest;
 import com.openexchange.ajax.task.actions.GetResponse;
 import com.openexchange.exception.OXException;
-import com.openexchange.groupware.calendar.TimeTools;
 import com.openexchange.groupware.importexport.ImportResult;
 import com.openexchange.groupware.tasks.Task;
+import com.openexchange.test.common.groupware.calendar.TimeTools;
 
 /**
  *

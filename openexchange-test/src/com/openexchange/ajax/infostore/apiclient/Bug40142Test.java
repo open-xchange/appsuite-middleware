@@ -57,7 +57,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import org.junit.Test;
-import com.openexchange.test.TestInit;
+import com.openexchange.test.common.test.TestInit;
 import com.openexchange.testing.httpclient.invoker.ApiException;
 import com.openexchange.testing.httpclient.models.ConfigResponse;
 import com.openexchange.testing.httpclient.models.InfoItemBody;

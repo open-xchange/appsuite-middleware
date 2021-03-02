@@ -103,7 +103,7 @@ import com.openexchange.groupware.container.DistributionListEntryObject;
 import com.openexchange.groupware.container.FolderChildObject;
 import com.openexchange.groupware.search.ContactSearchObject;
 import com.openexchange.java.UnsynchronizedByteArrayOutputStream;
-import com.openexchange.test.OXTestToolkit;
+import com.openexchange.test.common.test.OXTestToolkit;
 
 /**
  * {@link AbstractContactTest}

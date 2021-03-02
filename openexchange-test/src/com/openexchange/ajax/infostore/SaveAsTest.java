@@ -16,8 +16,8 @@ import com.openexchange.groupware.attach.impl.AttachmentImpl;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.modules.Module;
 import com.openexchange.test.FolderTestManager;
-import com.openexchange.test.OXTestToolkit;
-import com.openexchange.test.TestInit;
+import com.openexchange.test.common.test.OXTestToolkit;
+import com.openexchange.test.common.test.TestInit;
 
 public class SaveAsTest extends InfostoreAJAXTest {
 
