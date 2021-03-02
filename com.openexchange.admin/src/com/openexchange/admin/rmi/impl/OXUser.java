@@ -2525,7 +2525,7 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
             List<UserProperty> userProperties = new ArrayList<>(capabilitiesSource.size());
             for (ConfigurationProperty property : capabilitiesSource) {
                 String value = isBlacklisted(property, optionalAdditionalConfigCheckPattern) ? "<OBFUSCATED>" : property.getValue();
-                userProperties.add(new UserProperty(property.getScope(), property.getName(), value, property.getMetadata()));
+                userProperties.add(new UserProperty(property.getScope(), property.getName(), value, property.getMetadata(), property.isSysEnvVariable()));
             }
 
             Collections.sort(userProperties, OXUserPropertySorter.getInstance());

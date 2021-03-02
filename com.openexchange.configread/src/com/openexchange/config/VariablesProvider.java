@@ -47,75 +47,29 @@
  *
  */
 
-package com.openexchange.event.impl;
+package com.openexchange.config;
 
-import static com.openexchange.java.Autoboxing.I;
-import java.util.Properties;
-import com.openexchange.groupware.configuration.AbstractConfigWrapper;
 
 /**
- * {@link EventConfigImpl}
+ * {@link VariablesProvider} - Provides a variable value for a given variable key.
  *
- * @author <a href="mailto:sebastian.kauss@open-xchange.org">Sebastian Kauss</a>
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @since v8.0.0
  */
-public class EventConfigImpl extends AbstractConfigWrapper implements EventConfig {
+public interface VariablesProvider {
 
-    private boolean isEventQueueEnabled;
+    /**
+     * Gets the value for given variable key.
+     *
+     * @param variableKey The variable key to look-up
+     * @return The value or <code>null</code>
+     */
+    String getForKey(String variableKey);
 
-    private int eventQueueDelay = 60000;
-
-    //private boolean isInit;
-
-    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(EventConfigImpl.class);
-
-    public EventConfigImpl() {
-
-    }
-
-    public EventConfigImpl(final Properties props) {
-        /*-
-         * This if statement always yields false
-         *
-        if (isInit) {
-            return;
-        }
-        */
-
-        if (props == null) {
-            LOG.error("missing propfile");
-            return;
-        }
-
-        isEventQueueEnabled = parseProperty(props, "com.openexchange.event.isEventQueueEnabled", false);
-        LOG.debug("Event property: com.openexchange.event.isEventQueueEnabled={}", isEventQueueEnabled ? Boolean.TRUE : Boolean.FALSE);
-
-        eventQueueDelay = parseProperty(props, "com.openexchange.event.eventQueueDelay", eventQueueDelay);
-        LOG.debug("Event property: com.openexchange.event.eventQueueDelay={}", I(eventQueueDelay));
-
-        /*-
-         * Field "isInit" is never used
-         *
-        isInit = true;
-        */
-    }
-
-    @Override
-    public boolean isEventQueueEnabled() {
-        return isEventQueueEnabled;
-    }
-
-    @Override
-    public void setEventQueueEnabled(final boolean isEventQueueEnabled) {
-        this.isEventQueueEnabled = isEventQueueEnabled;
-    }
-
-    @Override
-    public int getEventQueueDelay() {
-        return eventQueueDelay;
-    }
-
-    @Override
-    public void setEventQueueDelay(final int eventQueueDelay) {
-        this.eventQueueDelay = eventQueueDelay;
-    }
+    /**
+     * Gets the name of this provider.
+     *
+     * @return The provider name
+     */
+    String getName();
 }

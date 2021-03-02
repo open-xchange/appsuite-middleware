@@ -52,18 +52,45 @@ package com.openexchange.config.utils;
 import java.io.FilterReader;
 import java.io.IOException;
 import java.io.Reader;
-import java.util.Map;
+import java.util.Iterator;
+import java.util.concurrent.atomic.AtomicReference;
+import org.slf4j.Logger;
+import com.openexchange.config.VariablesProvider;
 import com.openexchange.java.Strings;
+import com.openexchange.osgi.ServiceListing;
 
 /**
- * {@link TokenReplacingReader} - A reader which interpolates keyword values into a character stream.
+ * {@link TokenReplacingReader} - A reader which interpolates token values into a character stream.
  * <p>
- * Tokens are recognized when enclosed between starting and ending delimiter strings. The token values are fetched from a map.
+ * By default the <code>"{{"</code> and the <code>"}}"</code> sequences mark the start and end of a token. A token is interpreted as:
+ * <pre>
+ *   "{{" + ([source-id] + " ")? + [variable-name] + (":" + [default-value]) + "}}"
+ *           ^^^^^^^^^^^^^^^^^                        ^^^^^^^^^^^^^^^^^^^^^
+ *               optional                                 optional
+ * </pre>
+ * The source identifier tells from what source to look-up the given variable name and the default value defines the value to use in case no
+ * such variable is available in looked-up source.
+ *
+ * <h3>Supported source identifiers</h3>
+ * <ul>
+ * <li><code>"env"</code> determines that system environment is supposed to be looked-up for a certain variable name. Furthermore,
+ * it is assumed as default in case no source identifier is present.</li>
+ * <li><code>"file"</code> sets that a certain .properties file is supposed to be looked-up. Moreover, this identifier expects
+ * specification of the actual .properties file in surrounding arrow brackets; e.g. <code>"file<tokenvalues.properties>"</code>.
+ * That .properties file is supposed to reside in the <code>/opt/open-xchange/etc</code> directory or any of its sub-directories.</li>
+ * <li>Any other source identifier refers to a programmatically registered instance of <code>com.openexchange.config.VariablesProvider</code>
+ * in case a custom source needs to be used.</li>
+ * </ul>
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since v8.0.0
  */
 public class TokenReplacingReader extends FilterReader {
+
+    /** Simple class to delay initialization until needed */
+    private static class LoggerHolder {
+        static final Logger LOG = org.slf4j.LoggerFactory.getLogger(TokenReplacingReader.class);
+    }
 
     /** Default begin token. */
     private static final String DEFAULT_BEGIN_TOKEN = "{{";
@@ -71,55 +98,46 @@ public class TokenReplacingReader extends FilterReader {
     /** Default end token. */
     private static final String DEFAULT_END_TOKEN = "}}";
 
+    private static final AtomicReference<ServiceListing<VariablesProvider>> VARIABLES_PROVIDER_LISTING = new AtomicReference<>(null);
+
+    /**
+     * Sets the variables provider listing.
+     *
+     * @param variablesProviderListing The listing to set
+     */
+    public static void setVariablesProviderListing(ServiceListing<VariablesProvider> variablesProviderListing) {
+        VARIABLES_PROVIDER_LISTING.set(variablesProviderListing);
+    }
+
     // -------------------------------------------------------------------------------------------------------------------------------------
 
-    /** replacement text from a token */
-    private String replaceData;
-
-    /** Index into replacement data */
-    private int replaceIndex = -1;
-
-    /** Index into previous data */
-    private int previousIndex = -1;
-
-    /** Map for the name/value pairs */
-    private final Map<String, String> variables;
-
-    /** Character marking the beginning of a token. */
     private final String beginToken;
-
-    /** Character marking the end of a token. */
     private final String endToken;
-
-    /** Length of begin token. */
     private final int beginTokenLength;
-
-    /** Length of end token. */
     private final int endTokenLength;
+
+    private String replaceData;
+    private int replaceIndex = -1;
+    private int previousIndex = -1;
 
     /**
      * Initializes a new {@link TokenReplacingReader}.
      *
      * @param in The reader to be wrapped for interpolation
-     * @param variables The name/value pairs to be interpolated into the character stream
-     * @param beginToken An interpolation target begins with this
-     * @param endToken An interpolation target ends with this
      */
     public TokenReplacingReader(Reader in) {
-        this(in, System.getenv(), DEFAULT_BEGIN_TOKEN, DEFAULT_END_TOKEN);
+        this(in, DEFAULT_BEGIN_TOKEN, DEFAULT_END_TOKEN);
     }
 
     /**
      * Initializes a new {@link TokenReplacingReader}.
      *
      * @param in The reader to be wrapped for interpolation
-     * @param variables The name/value pairs to be interpolated into the character stream
      * @param beginToken An interpolation target begins with this
      * @param endToken An interpolation target ends with this
      */
-    public TokenReplacingReader(Reader in, Map<String, String> variables, String beginToken, String endToken) {
+    public TokenReplacingReader(Reader in, String beginToken, String endToken) {
         super(in);
-        this.variables = variables;
         this.beginToken = beginToken;
         this.endToken = endToken;
         beginTokenLength = beginToken.length();
@@ -254,24 +272,10 @@ public class TokenReplacingReader extends FilterReader {
                 return beginToken.charAt(0);
             }
 
-            String variableKey = key.substring(beginTokenLength - 1, key.length() - endTokenLength).trim();
-            String defaultValue;
-            {
-                String[] keyAndDefaultVal = checkAndParseDefaultValue(variableKey);
-                if (keyAndDefaultVal == null) {
-                    defaultValue = null;
-                } else {
-                    variableKey = keyAndDefaultVal[0];
-                    defaultValue = keyAndDefaultVal[1];
-                }
-            }
-            String value = variables.get(variableKey);
-            if (value == null && defaultValue != null) {
-                value = defaultValue;
-            }
-            if (value != null) {
-                if (value.length() != 0) {
-                    replaceData = value;
+            String optValue = determineValueFor(key);
+            if (optValue != null) {
+                if (optValue.length() != 0) {
+                    replaceData = optValue;
                     replaceIndex = 0;
                 }
                 return read();
@@ -286,19 +290,146 @@ public class TokenReplacingReader extends FilterReader {
         return ch;
     }
 
-    private static String[] checkAndParseDefaultValue(String variableKey) {
-        int colonPos = variableKey.indexOf(':');
-        if (colonPos <= 0) {
-            // No colon present or at illegal position
+    /**
+     * Determines the value to interpolate for given key.
+     *
+     * @param key The key; e.g. <code>"{{ env SOME_PROP:true }}"</code>
+     * @return The value or <code>null</code> if there is value associated with given key
+     */
+    private String determineValueFor(StringBuilder key) {
+        try {
+            String variableKey = key.substring(beginTokenLength - 1, key.length() - endTokenLength).trim();
+            ParseResult result = parseVariableKey(variableKey);
+            return (result.value != null ? result.value : (result.defaultValue != null ? result.defaultValue : null));
+        } catch (IllegalTokenException e) {
+            LoggerHolder.LOG.error("", e);
             return null;
         }
+    }
 
-        String defaultValue = colonPos + 1 >= variableKey.length() ? "" : variableKey.substring(colonPos + 1);
+    /**
+     * Parses the given token and resolves it to corresponding value that is supposed to be interpolated into character stream.
+     * A token is interpreted as:
+     * <pre>
+     *   "{{" + [source-id] + " " + [variable-name] + ":" + [default-value] + "}}"
+     * </pre>
+     *
+     * @param token The token to parse; e.g. <code>"env SOME_PROP:true"</code>
+     * @return The parse result for given token
+     * @throws IllegalTokenException If passed token is invalid and cannot be parsed
+     */
+    private static ParseResult parseVariableKey(String token) throws IllegalTokenException {
+        int spacePos = token.indexOf(' ');
+        if (spacePos <= 0) {
+            // No space present or at illegal position
+            int colonPos = token.indexOf(':');
+            if (colonPos <= 0) {
+                return new ParseResult(token, null, SysEnvVariablesProvider.getInstance());
+            }
+
+            String defaultValue = token.substring(colonPos + 1);
+            if (defaultValue.length() > 0 && Strings.isEmpty(defaultValue)) {
+                defaultValue = "";
+            }
+            return new ParseResult(token.substring(0, colonPos), defaultValue, SysEnvVariablesProvider.getInstance());
+        }
+
+        // <source> + " " + <variable-name> + ":" + <default-value>
+        // env SOME_PROPERTY  or  env SOME_PROPERTY:true
+
+        // file(values.properties):SOME_PROPERTY:true
+        VariablesProvider variablesProvider;
+        {
+            String providerName = token.substring(0, spacePos).trim();
+            if ("env".equals(providerName)) {
+                variablesProvider = SysEnvVariablesProvider.getInstance();
+            } else if (providerName.startsWith("file")) {
+                int arrowStartPos = providerName.indexOf('<');
+                if (arrowStartPos < 0) {
+                    // Illegal identifier
+                    throw new IllegalTokenException("Illegal token: \"" + token + "\". Missing .properties file specification.");
+                }
+                int arrowEndPos = providerName.indexOf('>', arrowStartPos + 1);
+                if (arrowEndPos < 0) {
+                    // Illegal identifier
+                    throw new IllegalTokenException("Illegal token: \"" + token + "\". Missing .properties file specification.");
+                }
+                String fileName = providerName.substring(arrowStartPos + 1, arrowEndPos);
+                if (Strings.isEmpty(fileName)) {
+                    // Illegal identifier
+                    throw new IllegalTokenException("Illegal token: \"" + token + "\". Missing .properties file specification.");
+                }
+                fileName = fileName.trim();
+                variablesProvider = FileVariablesProvider.getInstanceFor(fileName);
+                if (variablesProvider == null) {
+                    // Illegal identifier
+                    throw new IllegalTokenException("Illegal token: \"" + token + "\". No such .properties file: " + fileName);
+                }
+            } else {
+                variablesProvider = null;
+                ServiceListing<VariablesProvider> listing = VARIABLES_PROVIDER_LISTING.get();
+                if (listing != null) {
+                    for (Iterator<VariablesProvider> it = listing.iterator(); variablesProvider == null && it.hasNext();) {
+                        VariablesProvider vp = it.next();
+                        if (providerName.equals(vp.getName())) {
+                            variablesProvider = vp;
+                        }
+                    }
+                }
+                if (variablesProvider == null) {
+                    throw new IllegalTokenException("Illegal token: \"" + token + "\". No such registered provider: " + providerName);
+                }
+            }
+        }
+
+        String varKey = token.substring(spacePos + 1).trim();
+        int colonPos = varKey.indexOf(':');
+        if (colonPos <= 0) {
+            return new ParseResult(varKey, null, variablesProvider);
+        }
+
+        if (colonPos + 1 >= varKey.length()) {
+            return new ParseResult(varKey.substring(0, colonPos), "", variablesProvider);
+        }
+
+        String defaultValue = varKey.substring(colonPos + 1);
         if (defaultValue.length() > 0 && Strings.isEmpty(defaultValue)) {
             defaultValue = "";
         }
-        return new String[] { variableKey.substring(0, colonPos), defaultValue };
+        return new ParseResult(varKey.substring(0, colonPos), defaultValue, variablesProvider);
 
+    }
+
+    // -------------------------------------------------------------------------------------------------------------------------------------
+
+    private static class ParseResult {
+
+        final String value;
+        final String defaultValue;
+
+        ParseResult(String key, String defaultValue, VariablesProvider variablesProvider) {
+            this(variablesProvider.getForKey(key), defaultValue);
+        }
+
+        ParseResult(String value, String defaultValue) {
+            super();
+            this.value = value;
+            this.defaultValue = defaultValue;
+        }
+    }
+
+    private static class IllegalTokenException extends Exception {
+
+        private static final long serialVersionUID = -4805746003498666565L;
+
+        /**
+         * Initializes a new {@link IllegalTokenException}.
+         *
+         * @param message The message
+         */
+        IllegalTokenException(String message) {
+            super(message);
+        }
     }
 
 }

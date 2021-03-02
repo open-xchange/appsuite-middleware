@@ -50,10 +50,12 @@
 package com.openexchange.config;
 
 import java.io.File;
+import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
+import java.util.Set;
 import com.openexchange.exception.OXException;
 import com.openexchange.osgi.annotation.SingletonService;
 
@@ -241,5 +243,14 @@ public interface ConfigurationService {
      * @throws IllegalStateException If YAML file cannot be loaded
      */
     Map<String, Object> getYamlInFolder(String dirName);
+
+    /**
+     * Gets those properties grouped by associated file, whose value originates from a system environment variable.
+     *
+     * @return The properties originating from system environment variables grouped by file
+     */
+    default Map<File, Set<String>> getSysEnvProperties() {
+        return Collections.emptyMap();
+    }
 
 }

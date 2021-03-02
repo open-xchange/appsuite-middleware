@@ -47,75 +47,37 @@
  *
  */
 
-package com.openexchange.event.impl;
+package com.openexchange.config.utils;
 
-import static com.openexchange.java.Autoboxing.I;
-import java.util.Properties;
-import com.openexchange.groupware.configuration.AbstractConfigWrapper;
+import java.util.Map;
 
 /**
- * {@link EventConfigImpl}
+ * {@link SysEnv} - Provides access to already obtained unmodifiable string map view of the current system environment.
  *
- * @author <a href="mailto:sebastian.kauss@open-xchange.org">Sebastian Kauss</a>
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @since v8.0.0
  */
-public class EventConfigImpl extends AbstractConfigWrapper implements EventConfig {
+public class SysEnv {
 
-    private boolean isEventQueueEnabled;
-
-    private int eventQueueDelay = 60000;
-
-    //private boolean isInit;
-
-    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(EventConfigImpl.class);
-
-    public EventConfigImpl() {
-
+    /**
+     * Initializes a new {@link SysEnv}.
+     */
+    private SysEnv() {
+        super();
     }
 
-    public EventConfigImpl(final Properties props) {
-        /*-
-         * This if statement always yields false
-         *
-        if (isInit) {
-            return;
-        }
-        */
+    private static final Map<String, String> SYS_ENV = System.getenv();
 
-        if (props == null) {
-            LOG.error("missing propfile");
-            return;
-        }
 
-        isEventQueueEnabled = parseProperty(props, "com.openexchange.event.isEventQueueEnabled", false);
-        LOG.debug("Event property: com.openexchange.event.isEventQueueEnabled={}", isEventQueueEnabled ? Boolean.TRUE : Boolean.FALSE);
-
-        eventQueueDelay = parseProperty(props, "com.openexchange.event.eventQueueDelay", eventQueueDelay);
-        LOG.debug("Event property: com.openexchange.event.eventQueueDelay={}", I(eventQueueDelay));
-
-        /*-
-         * Field "isInit" is never used
-         *
-        isInit = true;
-        */
+    /**
+     * Gets already obtained unmodifiable string map view of the current system environment.
+     * <p>
+     * Avoids the need to pass security manager on every invocation of {@link System#getenv()}.
+     *
+     * @return The unmodifiable string map view of the current system environment
+     */
+    public static Map<String, String> getSystemEnvironment() {
+        return SYS_ENV;
     }
 
-    @Override
-    public boolean isEventQueueEnabled() {
-        return isEventQueueEnabled;
-    }
-
-    @Override
-    public void setEventQueueEnabled(final boolean isEventQueueEnabled) {
-        this.isEventQueueEnabled = isEventQueueEnabled;
-    }
-
-    @Override
-    public int getEventQueueDelay() {
-        return eventQueueDelay;
-    }
-
-    @Override
-    public void setEventQueueDelay(final int eventQueueDelay) {
-        this.eventQueueDelay = eventQueueDelay;
-    }
 }

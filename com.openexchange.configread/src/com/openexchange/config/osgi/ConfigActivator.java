@@ -60,6 +60,7 @@ import org.osgi.service.cm.ManagedService;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.config.ForcedReloadable;
 import com.openexchange.config.Reloadable;
+import com.openexchange.config.VariablesProvider;
 import com.openexchange.config.cascade.ConfigProviderService;
 import com.openexchange.config.cascade.ConfigViewScope;
 import com.openexchange.config.internal.ConfigProviderServiceImpl;
@@ -72,6 +73,7 @@ import com.openexchange.config.rmi.impl.RemoteConfigurationServiceImpl;
 import com.openexchange.management.ManagementService;
 import com.openexchange.management.osgi.HousekeepingManagementTracker;
 import com.openexchange.osgi.HousekeepingActivator;
+import com.openexchange.osgi.RankingAwareNearRegistryServiceTracker;
 
 /**
  * {@link ConfigActivator} - Activator for <code>com.openexchange.configread</code> bundle
@@ -99,6 +101,10 @@ public final class ConfigActivator extends HousekeepingActivator {
         org.slf4j.Logger logger = org.slf4j.LoggerFactory.getLogger(ConfigActivator.class);
         logger.info("starting bundle: com.openexchange.configread");
         try {
+            RankingAwareNearRegistryServiceTracker<VariablesProvider> variablesProviderTracker = new RankingAwareNearRegistryServiceTracker<>(context, VariablesProvider.class);
+            rememberTracker(variablesProviderTracker);
+            com.openexchange.config.utils.TokenReplacingReader.setVariablesProviderListing(variablesProviderTracker);
+
             ConfigProviderTracker configProviderServiceTracker = new ConfigProviderTracker(context);
             ConfigurationImpl configService = new ConfigurationImpl(configProviderServiceTracker.getReinitQueue());
             ConfigurationImpl.setConfigReference(configService);
@@ -132,9 +138,11 @@ public final class ConfigActivator extends HousekeepingActivator {
             }
 
             // Register RMI stub
-            Dictionary<String, Object> props = new Hashtable<>(2);
-            props.put("RMIName", RemoteConfigurationService.RMI_NAME);
-            registerService(Remote.class, new RemoteConfigurationServiceImpl(configService), props);
+            {
+                Dictionary<String, Object> props = new Hashtable<>(2);
+                props.put("RMIName", RemoteConfigurationService.RMI_NAME);
+                registerService(Remote.class, new RemoteConfigurationServiceImpl(configService), props);
+            }
 
             // Register shell command
             registerService(CommandProvider.class, new ReloadConfigurationCommandProvider(configService));
@@ -145,9 +153,9 @@ public final class ConfigActivator extends HousekeepingActivator {
             track(ManagementService.class, new HousekeepingManagementTracker(context, ConfigReloadMBean.class.getName(), ConfigReloadMBean.DOMAIN, new ConfigReloadMBeanImpl(ConfigReloadMBean.class, configService)));
             track(ConfigProviderService.class, configProviderServiceTracker);
             openTrackers();
-        } catch (Throwable t) {
-            logger.error("", t);
-            throw t instanceof Exception ? (Exception) t : new Exception(t);
+        } catch (Exception e) {
+            logger.error("", e);
+            throw e;
         }
     }
 
@@ -165,9 +173,10 @@ public final class ConfigActivator extends HousekeepingActivator {
 
             super.stopBundle();
             ConfigurationImpl.setConfigReference(null);
-        } catch (Throwable t) {
-            logger.error("", t);
-            throw t instanceof Exception ? (Exception) t : new Exception(t);
+            com.openexchange.config.utils.TokenReplacingReader.setVariablesProviderListing(null);
+        } catch (Exception e) {
+            logger.error("", e);
+            throw e;
         }
     }
 

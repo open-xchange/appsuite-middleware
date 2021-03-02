@@ -81,7 +81,6 @@ import org.slf4j.LoggerFactory;
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
 import com.openexchange.config.ConfigurationService;
-import com.openexchange.config.ConfigurationServices;
 import com.openexchange.config.DefaultInterests;
 import com.openexchange.config.Interests;
 import com.openexchange.config.Reloadable;
@@ -309,7 +308,7 @@ public final class MailFilterServiceImpl implements MailFilterService, Reloadabl
      */
     private void checkConfigfile(ConfigurationService config) throws OXException {
         try {
-            Properties file = ConfigurationServices.loadPropertiesFrom(config.getFileByName("mailfilter.properties"));
+            Properties file = config.getFile("mailfilter.properties");
             if (file.isEmpty()) {
                 throw MailFilterExceptionCode.NO_PROPERTIES_FILE_FOUND.create();
             }
@@ -323,8 +322,10 @@ public final class MailFilterServiceImpl implements MailFilterService, Reloadabl
             } catch (NumberFormatException e) {
                 throw MailFilterExceptionCode.PROPERTY_ERROR.create("Property " + MailFilterProperty.connectionTimeout.getFQPropertyName() + " is not an integer value", e);
             }
-        } catch (IOException e) {
-            throw MailFilterExceptionCode.IO_ERROR.create(e.getMessage(), e);
+        } catch (OXException e) {
+            throw e;
+        } catch (Exception e) {
+            throw MailFilterExceptionCode.PROBLEM.create(e.getMessage(), e);
         }
 
         // Check password source

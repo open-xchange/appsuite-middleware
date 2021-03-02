@@ -50,16 +50,15 @@
 package com.openexchange.tools.conf;
 
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.Iterator;
 import java.util.Properties;
 import com.openexchange.config.ConfigurationService;
+import com.openexchange.config.ConfigurationServices;
 import com.openexchange.configuration.ConfigurationException;
 import com.openexchange.configuration.ConfigurationExceptionCodes;
 import com.openexchange.exception.OXException;
-import com.openexchange.java.Streams;
 
 /**
  * Class holding configuration options loaded from property files can extend this class to inherit usefull methods.
@@ -182,17 +181,12 @@ public abstract class AbstractConfig {
      * @param propFile file containing the system.properties.
      */
     protected final void loadProperties(final File propFile) throws OXException {
-        props = new Properties();
-        FileInputStream fis = null;
         try {
-            fis = new FileInputStream(propFile);
-            props.load(fis);
+            props = ConfigurationServices.loadPropertiesFrom(propFile, true);
         } catch (FileNotFoundException e) {
             throw ConfigurationExceptionCodes.FILE_NOT_FOUND.create(e, propFile.getAbsolutePath());
         } catch (IOException e) {
             throw ConfigurationExceptionCodes.READ_ERROR.create(e, propFile.getAbsolutePath());
-        } finally {
-            Streams.close(fis);
         }
     }
 

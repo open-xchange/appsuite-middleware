@@ -178,8 +178,7 @@ public abstract class WebDavServlet extends HttpServlet {
 
     protected String getDisabledMessage() {
         ConfigurationService config = ServerServiceRegistry.getInstance().getService(ConfigurationService.class);
-        String text = config.getText("webdav-disabled-message.txt");
-        return text;
+        return config.getText("webdav-disabled-message.txt");
     }
 
     /**

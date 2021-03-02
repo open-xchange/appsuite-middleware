@@ -89,7 +89,7 @@ public class EventInit implements Initialization {
         if (infoEnabled) {
 			LOG.info("Parse Event properties");
 		}
-		final EventConfig eventConfig = new EventConfigImpl(ServerServiceRegistry.getInstance().getService(ConfigurationService.class).getFileByName("event.properties"));
+		final EventConfig eventConfig = new EventConfigImpl(ServerServiceRegistry.getInstance().getService(ConfigurationService.class).getFile("event.properties"));
 		//final EventQueue eventQueue = new EventQueue(eventConfig);
 		EventQueue.init(eventConfig);
 
@@ -97,7 +97,7 @@ public class EventInit implements Initialization {
 			LOG.info("Adding Notification Listener");
 		}
         final ParticipantNotify notify = new ParticipantNotify();
-		EventQueue.addModernListener((TaskEventInterface) notify);
+		EventQueue.addModernListener(notify);
 
 		if (infoEnabled) {
 			LOG.info("Adding AttachmentCleaner");

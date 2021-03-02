@@ -49,7 +49,6 @@
 
 package com.openexchange.authentication.ldap;
 
-import java.io.IOException;
 import java.util.Properties;
 import java.util.concurrent.atomic.AtomicReference;
 import javax.naming.AuthenticationException;
@@ -69,7 +68,6 @@ import com.openexchange.authentication.ContextAndUserInfo;
 import com.openexchange.authentication.LoginExceptionCodes;
 import com.openexchange.authentication.LoginInfo;
 import com.openexchange.config.ConfigurationService;
-import com.openexchange.config.ConfigurationServices;
 import com.openexchange.config.DefaultInterests;
 import com.openexchange.config.Interests;
 import com.openexchange.config.Reloadable;
@@ -440,9 +438,9 @@ public class LDAPAuthentication implements AuthenticationService, Reloadable {
     @Override
     public void reloadConfiguration(ConfigurationService configService) {
         try {
-            Properties properties = ConfigurationServices.loadPropertiesFrom(configService.getFileByName("ldapauth.properties"));
+            Properties properties = configService.getFile("ldapauth.properties");
             propsAndConfigReference.set(init(properties));
-        } catch (OXException | IOException e) {
+        } catch (Exception e) {
             LOG.error("Error reloading configuration for bundle com.openexchange.authentication.ldap: {}", e);
         }
     }

@@ -50,7 +50,6 @@
 package com.openexchange.contact.storage.ldap.internal;
 
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FilenameFilter;
 import java.io.IOException;
@@ -61,11 +60,11 @@ import javax.naming.NamingException;
 import javax.naming.ldap.LdapContext;
 import org.slf4j.Logger;
 import com.openexchange.config.ConfigurationService;
+import com.openexchange.config.ConfigurationServices;
 import com.openexchange.contact.SortOptions;
 import com.openexchange.contact.storage.ldap.LdapExceptionCodes;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contact.ContactExceptionCodes;
-import com.openexchange.java.Streams;
 import com.openexchange.l10n.SuperCollator;
 import com.openexchange.tools.iterator.SearchIterator;
 import com.openexchange.tools.iterator.SearchIterators;
@@ -86,19 +85,13 @@ public final class Tools  {
     }
 
     public static Properties loadProperties(String fileName) throws OXException {
-        Properties properties = new Properties();
-        FileInputStream in = null;
         try {
-            in = new FileInputStream(getFile(fileName));
-            properties.load(in);
+            return ConfigurationServices.loadPropertiesFrom(getFile(fileName), true);
         } catch (FileNotFoundException e) {
             throw LdapExceptionCodes.ERROR.create(e, e.getMessage());
         } catch (IOException e) {
             throw LdapExceptionCodes.ERROR.create(e, e.getMessage());
-        } finally {
-            Streams.close(in);
         }
-        return properties;
     }
 
     private static File getFile(String fileName) throws OXException {
@@ -111,19 +104,13 @@ public final class Tools  {
     }
 
     public static Properties loadProperties(File file) throws OXException {
-        Properties properties = new Properties();
-        FileInputStream in = null;
         try {
-            in = new FileInputStream(file);
-            properties.load(in);
+            return ConfigurationServices.loadPropertiesFrom(file, true);
         } catch (FileNotFoundException e) {
             throw LdapExceptionCodes.ERROR.create(e, e.getMessage());
         } catch (IOException e) {
             throw LdapExceptionCodes.ERROR.create(e, e.getMessage());
-        } finally {
-            Streams.close(in);
         }
-        return properties;
     }
 
     public static File[] listPropertyFiles() throws OXException {
@@ -132,7 +119,7 @@ public final class Tools  {
 
             @Override
             public boolean accept(File dir, String name) {
-                return null != name && name.toLowerCase().endsWith(".properties");
+                return null != name && name.toLowerCase(Locale.US).endsWith(".properties");
             }
         });
     }

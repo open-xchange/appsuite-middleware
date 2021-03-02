@@ -52,7 +52,6 @@ package com.openexchange.hazelcast.configuration.internal;
 
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.FilenameFilter;
 import java.io.IOException;
 import java.lang.reflect.Field;
@@ -63,6 +62,7 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Properties;
 import java.util.stream.Collectors;
@@ -87,6 +87,7 @@ import com.hazelcast.core.HazelcastInstance;
 import com.hazelcast.nio.serialization.ClassDefinition;
 import com.hazelcast.spi.properties.ClusterProperty;
 import com.openexchange.config.ConfigurationService;
+import com.openexchange.config.ConfigurationServices;
 import com.openexchange.config.WildcardNamePropertyFilter;
 import com.openexchange.configuration.ConfigurationExceptionCodes;
 import com.openexchange.exception.OXException;
@@ -672,24 +673,16 @@ public class HazelcastConfigurationServiceImpl implements HazelcastConfiguration
 
             @Override
             public boolean accept(File dir, String name) {
-                return null != name && name.toLowerCase().endsWith(".properties");
+                return null != name && name.toLowerCase(Locale.US).endsWith(".properties");
             }
         });
     }
 
     private static Properties loadProperties(File file) throws OXException {
-        FileInputStream in = null;
         try {
-            in = new FileInputStream(file);
-            Properties properties = new Properties();
-            properties.load(in);
-            return properties;
-        } catch (FileNotFoundException e) {
+            return ConfigurationServices.loadPropertiesFrom(file, true);
+        } catch (Exception e) {
             throw ConfigurationExceptionCodes.READ_ERROR.create(file);
-        } catch (IOException e) {
-            throw ConfigurationExceptionCodes.READ_ERROR.create(file);
-        } finally {
-            Streams.close(in);
         }
     }
 

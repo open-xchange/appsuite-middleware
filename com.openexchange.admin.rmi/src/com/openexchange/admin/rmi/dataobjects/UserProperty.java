@@ -67,27 +67,45 @@ public class UserProperty implements Serializable {
     private final String name;
     private final String value;
     private final Map<String, String> metadata;
+    private final boolean sysEnvVariable;
 
     /**
      *
      * Initializes a new {@link UserProperty}.
-     * 
+     *
      * @param scope The scope
      * @param name The name of the property
      * @param value The value of the property
+     * @param sysEnvVariable <code>true</code> to signal that a server-scoped property's value originates from a system environment variable; otherwise <code>false</code>
      */
-    public UserProperty(String scope, String name, String value) {
-        this(scope, name, value, ImmutableMap.of());
+    public UserProperty(String scope, String name, String value, boolean sysEnvVariable) {
+        this(scope, name, value, ImmutableMap.of(), sysEnvVariable);
     }
 
     /**
      * Initializes a new {@link UserProperty}.
+     *
+     * @param scope The scope
+     * @param name The name
+     * @param value The value
+     * @param metadata The metadata
+     * @param sysEnvVariable <code>true</code> to signal that a server-scoped property's value originates from a system environment variable; otherwise <code>false</code>
      */
-    public UserProperty(String scope, String name, String value, Map<String, String> metadata) {
+    public UserProperty(String scope, String name, String value, Map<String, String> metadata, boolean sysEnvVariable) {
         this.scope = scope;
         this.name = name;
         this.value = value;
         this.metadata = metadata;
+        this.sysEnvVariable = sysEnvVariable;
+    }
+
+    /**
+     * Checks if server-scoped property value originates from a system environment variable.
+     *
+     * @return <code>true</code> if value originates from a system environment variable; otherwise <code>false</code>
+     */
+    public boolean isSysEnvVariable() {
+        return sysEnvVariable;
     }
 
     /**
@@ -138,6 +156,7 @@ public class UserProperty implements Serializable {
         if (false == metadata.isEmpty()) {
             builder.append("; Metadata: ").append(metadata);
         }
+        builder.append("; Env-Variable: ").append(sysEnvVariable);
         return builder.toString();
     }
 }

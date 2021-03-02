@@ -69,6 +69,7 @@ public final class ConfigurationProperty implements Serializable {
     private final String name;
     private final String value;
     private final Map<String, String> metadata;
+    private final boolean sysEnvVariable;
 
     /**
      *
@@ -77,9 +78,10 @@ public final class ConfigurationProperty implements Serializable {
      * @param scope The scope
      * @param name The name
      * @param value The value
+     * @param sysEnvVariable <code>true</code> to signal that a server-scoped property's value originates from a system environment variable; otherwise <code>false</code>
      */
-    public ConfigurationProperty(String scope, String name, String value) {
-        this(scope, name, value, ImmutableMap.of());
+    public ConfigurationProperty(String scope, String name, String value, boolean sysEnvVariable) {
+        this(scope, name, value, ImmutableMap.of(), sysEnvVariable);
     }
 
     /**
@@ -90,12 +92,23 @@ public final class ConfigurationProperty implements Serializable {
      * @param name The name
      * @param value The value
      * @param metadata The metadata
+     * @param sysEnvVariable <code>true</code> to signal that a server-scoped property's value originates from a system environment variable; otherwise <code>false</code>
      */
-    public ConfigurationProperty(String scope, String name, String value, Map<String, String> metadata) {
+    public ConfigurationProperty(String scope, String name, String value, Map<String, String> metadata, boolean sysEnvVariable) {
         this.scope = scope;
         this.name = name;
         this.value = value;
         this.metadata = metadata;
+        this.sysEnvVariable = sysEnvVariable;
+    }
+
+    /**
+     * Checks if server-scoped property value originates from a system environment variable.
+     *
+     * @return <code>true</code> if value originates from a system environment variable; otherwise <code>false</code>
+     */
+    public boolean isSysEnvVariable() {
+        return sysEnvVariable;
     }
 
     /**

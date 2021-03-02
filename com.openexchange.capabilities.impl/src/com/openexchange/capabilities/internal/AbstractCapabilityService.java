@@ -90,6 +90,7 @@ import com.openexchange.config.ConfigurationService;
 import com.openexchange.config.cascade.ComposedConfigProperty;
 import com.openexchange.config.cascade.ConfigView;
 import com.openexchange.config.cascade.ConfigViewFactory;
+import com.openexchange.config.cascade.ConfigViewScope;
 import com.openexchange.context.ContextService;
 import com.openexchange.database.DatabaseService;
 import com.openexchange.database.Databases;
@@ -140,7 +141,7 @@ public abstract class AbstractCapabilityService implements CapabilityService {
 
     private static interface PropertyHandler {
 
-        void handleProperty(String propValue, CapabilitySet capabilities) throws OXException;
+        void handleProperty(String propValue, CapabilitySet capabilities, boolean sysEnvVariable) throws OXException;
     }
 
     /** The property handlers for special config-cascade properties */
@@ -152,15 +153,15 @@ public abstract class AbstractCapabilityService implements CapabilityService {
         map.put("com.openexchange.caldav.enabled", new PropertyHandler() {
 
             @Override
-            public void handleProperty(final String propValue, final CapabilitySet capabilities) throws OXException {
-                doHandleProperty(propValue, (CapabilitySetImpl) capabilities);
+            public void handleProperty(final String propValue, final CapabilitySet capabilities, boolean sysEnvVariable) throws OXException {
+                doHandleProperty(propValue, (CapabilitySetImpl) capabilities, sysEnvVariable);
             }
 
-            private void doHandleProperty(final String propValue, final CapabilitySetImpl capabilities) {
+            private void doHandleProperty(final String propValue, final CapabilitySetImpl capabilities, boolean sysEnvVariable) {
                 if (Boolean.parseBoolean(propValue)) {
-                    capabilities.add(getCapability(Permission.CALDAV), CapabilitySource.CONFIGURATION, "Through property \"com.openexchange.caldav.enabled\"");
+                    capabilities.add(getCapability(Permission.CALDAV), CapabilitySource.CONFIGURATION, "Through property \"com.openexchange.caldav.enabled\" + (sysEnvVariable ? \" set through system environment variable\" : \"\")");
                 } else {
-                    capabilities.remove(Permission.CALDAV.getCapabilityName(), CapabilitySource.CONFIGURATION, "Through property \"com.openexchange.caldav.enabled\"");
+                    capabilities.remove(Permission.CALDAV.getCapabilityName(), CapabilitySource.CONFIGURATION, "Through property \"com.openexchange.caldav.enabled\"" + (sysEnvVariable ? " set through system environment variable" : ""));
                 }
             }
         });
@@ -168,15 +169,15 @@ public abstract class AbstractCapabilityService implements CapabilityService {
         map.put("com.openexchange.carddav.enabled", new PropertyHandler() {
 
             @Override
-            public void handleProperty(final String propValue, final CapabilitySet capabilities) throws OXException {
-                doHandleProperty(propValue, (CapabilitySetImpl) capabilities);
+            public void handleProperty(final String propValue, final CapabilitySet capabilities, boolean sysEnvVariable) throws OXException {
+                doHandleProperty(propValue, (CapabilitySetImpl) capabilities, sysEnvVariable);
             }
 
-            private void doHandleProperty(final String propValue, final CapabilitySetImpl capabilities) {
+            private void doHandleProperty(final String propValue, final CapabilitySetImpl capabilities, boolean sysEnvVariable) {
                 if (Boolean.parseBoolean(propValue)) {
-                    capabilities.add(getCapability(Permission.CARDDAV), CapabilitySource.CONFIGURATION, "Through property \"com.openexchange.carddav.enabled\"");
+                    capabilities.add(getCapability(Permission.CARDDAV), CapabilitySource.CONFIGURATION, "Through property \"com.openexchange.carddav.enabled\"" + (sysEnvVariable ? " set through system environment variable" : ""));
                 } else {
-                    capabilities.remove(Permission.CARDDAV.getCapabilityName(), CapabilitySource.CONFIGURATION, "Through property \"com.openexchange.carddav.enabled\"");
+                    capabilities.remove(Permission.CARDDAV.getCapabilityName(), CapabilitySource.CONFIGURATION, "Through property \"com.openexchange.carddav.enabled\"" + (sysEnvVariable ? " set through system environment variable" : ""));
                 }
             }
         });
@@ -377,13 +378,15 @@ public abstract class AbstractCapabilityService implements CapabilityService {
             applyDeclaredCapabilities(capabilities, session, putIntoCache);
         }
         applyGuestFilter(capabilities, user);
+        ConfigurationService optConfigService = services.getOptionalService(ConfigurationService.class);
         for (Map.Entry<Capability, ValueAndScope> forcedCapability : forcedCapabilities.entrySet()) {
             Capability capability = forcedCapability.getKey();
             ValueAndScope vas = forcedCapability.getValue();
+            boolean sysEnvVariable = originatesFromSysEnv("com.openexchange.capability.forced." + capability.getId(), vas.scope, optConfigService);
             if (vas.value.booleanValue()) {
-                capabilities.add(capability, CapabilitySource.CONFIGURATION, "Forced through \"com.openexchange.capability.forced." + capability.getId() + "\" with final scope " + vas.scope);
+                capabilities.add(capability, CapabilitySource.CONFIGURATION, "Forced through \"com.openexchange.capability.forced." + capability.getId() + "\" with final scope " + vas.scope + (sysEnvVariable ? " set through system environment variable" : ""));
             } else {
-                capabilities.remove(capability, CapabilitySource.CONFIGURATION, "Forced through \"com.openexchange.capability.forced." + capability.getId() + "\" with final scope " + vas.scope);
+                capabilities.remove(capability, CapabilitySource.CONFIGURATION, "Forced through \"com.openexchange.capability.forced." + capability.getId() + "\" with final scope " + vas.scope + (sysEnvVariable ? " set through system environment variable" : ""));
             }
         }
 
@@ -593,26 +596,29 @@ public abstract class AbstractCapabilityService implements CapabilityService {
             return;
         }
         ConfigView view = configViews.getView(userId, contextId);
+        ConfigurationService optConfigService = services.getOptionalService(ConfigurationService.class);
         String property = PERMISSION_PROPERTY;
         for (String scope : configViews.getSearchPath()) {
             String permissions = view.property(property, String.class).precedence(scope).get();
             if (permissions == null) {
                 continue;
             }
+            boolean sysEnvVariable = originatesFromSysEnv(property, scope, optConfigService);
             for (String permissionModifier : Strings.splitByComma(permissions)) {
                 if (Strings.isEmpty(permissionModifier)) {
                     continue;
                 }
+
                 char firstChar = permissionModifier.charAt(0);
                 if ('-' == firstChar) {
-                    capabilities.remove(permissionModifier.substring(1), CapabilitySource.CONFIGURATION, "Through \"permissions\" property in file 'permissions.properties'");
+                    capabilities.remove(permissionModifier.substring(1), CapabilitySource.CONFIGURATION, "Through \"permissions\" property in file 'permissions.properties'" + (sysEnvVariable ? " set through system environment variable" : ""));
                 } else {
                     if ('+' == firstChar) {
                         String name = permissionModifier.substring(1);
-                        capabilities.add(name, () -> getCapability(name), CapabilitySource.CONFIGURATION, "Through \"permissions\" property in file 'permissions.properties'");
+                        capabilities.add(name, () -> getCapability(name), CapabilitySource.CONFIGURATION, "Through \"permissions\" property in file 'permissions.properties'" + (sysEnvVariable ? " set through system environment variable" : ""));
                     } else {
                         String name = permissionModifier;
-                        capabilities.add(name, () -> getCapability(name), CapabilitySource.CONFIGURATION, "Through \"permissions\" property in file 'permissions.properties'");
+                        capabilities.add(name, () -> getCapability(name), CapabilitySource.CONFIGURATION, "Through \"permissions\" property in file 'permissions.properties'" + (sysEnvVariable ? " set through system environment variable" : ""));
                     }
                 }
             }
@@ -644,10 +650,11 @@ public abstract class AbstractCapabilityService implements CapabilityService {
                 capabilities.addForced(name, () -> getCapability(capName), new ValueAndScope(Boolean.valueOf(value), scope));
             } else {
                 String capName = name;
+                boolean sysEnvVariable = originatesFromSysEnv(propName, scope, optConfigService);
                 if (Boolean.parseBoolean(value)) {
-                    capabilities.add(name, () -> getCapability(capName), CapabilitySource.CONFIGURATION, "scope: " + scope);
+                    capabilities.add(name, () -> getCapability(capName), CapabilitySource.CONFIGURATION, "scope: " + scope + (sysEnvVariable ? " set through system environment variable" : ""));
                 } else {
-                    capabilities.remove(name, CapabilitySource.CONFIGURATION, "scope: " + scope);
+                    capabilities.remove(name, CapabilitySource.CONFIGURATION, "scope: " + scope + (sysEnvVariable ? " set through system environment variable" : ""));
                 }
             }
             /*
@@ -663,7 +670,8 @@ public abstract class AbstractCapabilityService implements CapabilityService {
         for (Map.Entry<String, PropertyHandler> entry : PROPERTY_HANDLERS.entrySet()) {
             ComposedConfigProperty<String> composedConfigProperty = all.get(entry.getKey());
             if (null != composedConfigProperty) {
-                entry.getValue().handleProperty(composedConfigProperty.get(), capabilities.getCapabilitySet());
+                boolean sysEnvVariable = originatesFromSysEnv(entry.getKey(), composedConfigProperty.getScope(), optConfigService);
+                entry.getValue().handleProperty(composedConfigProperty.get(), capabilities.getCapabilitySet(), sysEnvVariable);
             }
         }
     }
@@ -839,13 +847,20 @@ public abstract class AbstractCapabilityService implements CapabilityService {
             return;
         }
         ConfigView view = configViews.getView(user.getId(), context.getContextId());
-        String value = view.opt("com.openexchange.share.staticGuestCapabilities", String.class, "");
+        String propertyName = "com.openexchange.share.staticGuestCapabilities";
+        ComposedConfigProperty<String> property = view.property(propertyName, String.class);
+        String value = property.get();
         if (Strings.isEmpty(value)) {
             return;
         }
+        boolean sysEnvVariable = false;
+        if (ConfigViewScope.SERVER.getScopeName().equals(property.getScope())) {
+            ConfigurationService optConfigService = services.getOptionalService(ConfigurationService.class);
+            sysEnvVariable = originatesFromSysEnv(propertyName, property.getScope(), optConfigService);
+        }
         List<String> staticCapabilities = Strings.splitAndTrim(value, ",");
         for (String cap : staticCapabilities) {
-            capabilities.add(getCapability(cap), CapabilitySource.CONFIGURATION, "Through property \"com.openexchange.share.staticGuestCapabilities\"");
+            capabilities.add(getCapability(cap), CapabilitySource.CONFIGURATION, "Through property \"com.openexchange.share.staticGuestCapabilities\"" + (sysEnvVariable ? " set through system environment variable" : ""));
         }
     }
 
@@ -991,6 +1006,7 @@ public abstract class AbstractCapabilityService implements CapabilityService {
         }
 
         Map<String, ComposedConfigProperty<String>> all = view.all();
+        ConfigurationService optConfigService = services.getOptionalService(ConfigurationService.class);
         List<ConfigurationProperty> properties = new ArrayList<ConfigurationProperty>(all.size());
         for (Map.Entry<String, ComposedConfigProperty<String>> entry : all.entrySet()) {
             String key = entry.getKey();
@@ -1002,18 +1018,33 @@ public abstract class AbstractCapabilityService implements CapabilityService {
                 } else {
                     List<String> metadataNames = property.getMetadataNames();
                     if (metadataNames.isEmpty()) {
-                        properties.add(new ConfigurationProperty(property.getScope(), key, value, ImmutableMap.of()));
+                        boolean sysEnvVariable = originatesFromSysEnv(key, property.getScope(), optConfigService);
+                        properties.add(new ConfigurationProperty(property.getScope(), key, value, ImmutableMap.of(), sysEnvVariable));
                     } else {
                         ImmutableMap.Builder<String, String> metadata = ImmutableMap.builderWithExpectedSize(metadataNames.size());
                         for (String metadataName : property.getMetadataNames()) {
                             metadata.put(metadataName, property.get(metadataName));
                         }
-                        properties.add(new ConfigurationProperty(property.getScope(), key, value, metadata.build()));
+                        boolean sysEnvVariable = originatesFromSysEnv(key, property.getScope(), optConfigService);
+                        properties.add(new ConfigurationProperty(property.getScope(), key, value, metadata.build(), sysEnvVariable));
                     }
                 }
             }
         }
         return properties;
+    }
+
+    private boolean originatesFromSysEnv(String key, String scope, ConfigurationService optConfigService) {
+        if (optConfigService == null || ConfigViewScope.SERVER.getScopeName().equals(scope) == false) {
+            return false;
+        }
+
+        for (Set<String> propertyNames : optConfigService.getSysEnvProperties().values()) {
+            if (propertyNames.contains(key)) {
+                return false;
+            }
+        }
+        return false;
     }
 
     /**
@@ -1133,10 +1164,12 @@ public abstract class AbstractCapabilityService implements CapabilityService {
                 }
 
                 // Check for a property handler
+                ConfigurationService optConfigService = services.getOptionalService(ConfigurationService.class);
                 for (final Map.Entry<String, PropertyHandler> entry : PROPERTY_HANDLERS.entrySet()) {
                     final ComposedConfigProperty<String> composedConfigProperty = all.get(entry.getKey());
                     if (null != composedConfigProperty) {
-                        entry.getValue().handleProperty(composedConfigProperty.get(), grantedCapabilities);
+                        boolean sysEnvVariable = originatesFromSysEnv(entry.getKey(), composedConfigProperty.getScope(), optConfigService);
+                        entry.getValue().handleProperty(composedConfigProperty.get(), grantedCapabilities, sysEnvVariable);
                     }
                 }
 

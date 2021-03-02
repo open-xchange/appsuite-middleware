@@ -68,6 +68,7 @@ import java.util.regex.Pattern;
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
 import com.openexchange.config.ConfigurationService;
+import com.openexchange.config.ConfigurationServices;
 import com.openexchange.config.cascade.ConfigView;
 import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.config.cascade.ConfigViews;
@@ -1236,13 +1237,13 @@ public final class MailProperties implements IMailProperties {
             String javaMailPropertiesStr = configuration.getProperty("com.openexchange.mail.JavaMailProperties");
             if (null != javaMailPropertiesStr) {
                 javaMailPropertiesStr = javaMailPropertiesStr.trim();
-                final File javaMailPropsFile = configuration.getFileByName(javaMailPropertiesStr);
                 try {
-                    javaMailProperties = readPropertiesFromFile(new FileInputStream(javaMailPropsFile));
+                    Properties javaMailProps = configuration.getFile(javaMailPropertiesStr);
+                    javaMailProperties = javaMailProps;
                     if (javaMailProperties.isEmpty()) {
                         javaMailProperties = null;
                     }
-                } catch (FileNotFoundException e) {
+                } catch (Exception e) {
                     LOG.debug("", e);
                     javaMailProperties = null;
                 }
@@ -1318,9 +1319,7 @@ public final class MailProperties implements IMailProperties {
      */
     protected static Properties readPropertiesFromFile(InputStream in) throws OXException {
         try {
-            Properties properties = new Properties();
-            properties.load(in);
-            return properties;
+            return ConfigurationServices.loadPropertiesFrom(in, true);
         } catch (IOException e) {
             throw MailConfigException.create(new StringBuilder(256).append("I/O error: ").append(e.getMessage()).toString(), e);
         } finally {

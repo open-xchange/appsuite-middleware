@@ -168,7 +168,7 @@ public class HTMLServiceActivator extends HousekeepingActivator {
         final Map<Character, String> htmlCharMap;
         final Map<String, Character> htmlEntityMap;
         {
-            final Object[] maps = getHTMLEntityMaps(configurationService.getFileByName("HTMLEntities.properties"));
+            final Object[] maps = getHTMLEntityMaps(configurationService.getFile("HTMLEntities.properties"));
             htmlCharMap = (Map<Character, String>) maps[0];
             htmlEntityMap = (Map<String, Character>) maps[1];
             /*
@@ -185,10 +185,8 @@ public class HTMLServiceActivator extends HousekeepingActivator {
         registerService(HtmlService.class, htmlService, null);
     }
 
-    public static Object[] getHTMLEntityMaps(final File htmlEntityFile) {
-        final Map<Character, String> htmlCharMap = new HashMap<>();
-        final Map<String, Character> htmlEntityMap = new HashMap<>();
-        final Properties htmlEntities = new Properties();
+    public static Object[] getHTMLEntityMaps(File htmlEntityFile) {
+        Properties htmlEntities = new Properties();
         InputStream in = null;
         try {
             in = new FileInputStream(htmlEntityFile);
@@ -200,14 +198,20 @@ public class HTMLServiceActivator extends HousekeepingActivator {
             Streams.close(in);
             in = null;
         }
+        return getHTMLEntityMaps(htmlEntities);
+    }
+
+    public static Object[] getHTMLEntityMaps(Properties htmlEntities) {
+        Map<Character, String> htmlCharMap = new HashMap<>();
+        Map<String, Character> htmlEntityMap = new HashMap<>();
         /*
          * Build up map
          */
-        final Iterator<Map.Entry<Object, Object>> iter = htmlEntities.entrySet().iterator();
-        final int size = htmlEntities.size();
+        Iterator<Map.Entry<Object, Object>> iter = htmlEntities.entrySet().iterator();
+        int size = htmlEntities.size();
         for (int i = 0; i < size; i++) {
-            final Map.Entry<Object, Object> entry = iter.next();
-            final Character c = Character.valueOf((char) Integer.parseInt((String) entry.getValue()));
+            Map.Entry<Object, Object> entry = iter.next();
+            Character c = Character.valueOf((char) Integer.parseInt((String) entry.getValue()));
             htmlEntityMap.put((String) entry.getKey(), c);
             htmlCharMap.put(c, (String) entry.getKey());
         }

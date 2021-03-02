@@ -201,7 +201,7 @@ public class ConfigurationReader {
      * @param folderPermissions
      * @param config
      */
-    private void addVariable(ArrayList<FolderPermission> folderPermissions, String var) {
+    private void addVariable(List<FolderPermission> folderPermissions, String var) {
         if (var == null) {
             return;
         }
@@ -230,7 +230,7 @@ public class ConfigurationReader {
      * @param config Config to pull from the config file
      * @throws OXException
      */
-    private void addConfiguration(ArrayList<FolderPermission> folderPermissions, String config) throws OXException {
+    private void addConfiguration(List<FolderPermission> folderPermissions, String config) throws OXException {
         SecurityAddition toAdd = getSecurityAddition(config);  // Parse the configuration requirement for permissions
         Map<String, String> properties;
         if (toAdd.getPath().contains("*")) {
@@ -267,7 +267,7 @@ public class ConfigurationReader {
      * @param folderPermissions
      * @param folder The folder to add
      */
-    private void addFolder(ArrayList<FolderPermission> folderPermissions, String folder) {
+    private void addFolder(List<FolderPermission> folderPermissions, String folder) {
         Allow allow = getAllow(folder);
         FolderPermission.Type type = folder.startsWith(FILE_PREFIX) ? FolderPermission.Type.FILE : FolderPermission.Type.RECURSIVE;
         final String directory = cleanup(folder);
@@ -319,13 +319,11 @@ public class ConfigurationReader {
         List<String> configurations = new ConfigurationFileParser(configService).getConfigList();
         missing.clear();
         reloadableConfigurationPaths = new ArrayList<String>(configurations.size());
-        ArrayList<FolderPermission> folderPermissions = new ArrayList<FolderPermission>(configurations.size());
+        List<FolderPermission> folderPermissions = new ArrayList<FolderPermission>(configurations.size());
         for (String config : configurations) {
             if (config.startsWith("$")) {
                 addVariable(folderPermissions, config);
-                continue;
-            }
-            if (config.startsWith(File.separator) || config.startsWith(FILE_PREFIX + File.separator)) {
+            } else if (config.startsWith(File.separator) || config.startsWith(FILE_PREFIX + File.separator)) {
                 addFolder(folderPermissions, config);
             } else {
                 addConfiguration(folderPermissions, config);

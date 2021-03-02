@@ -51,9 +51,7 @@ package com.openexchange.config.internal;
 
 import java.io.File;
 import java.io.FileFilter;
-import java.io.FileReader;
 import java.io.IOException;
-import java.io.Reader;
 import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -65,13 +63,16 @@ import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Properties;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.atomic.AtomicReference;
+import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Iterators;
 import com.openexchange.annotation.NonNull;
 import com.openexchange.config.ConfigurationService;
@@ -85,7 +86,7 @@ import com.openexchange.config.Reloadables;
 import com.openexchange.config.WildcardFilter;
 import com.openexchange.config.cascade.ReinitializableConfigProviderService;
 import com.openexchange.exception.OXException;
-import com.openexchange.java.Streams;
+import com.openexchange.java.Reference;
 import com.openexchange.java.Strings;
 import com.openexchange.startup.StaticSignalStartedService;
 import com.openexchange.startup.StaticSignalStartedService.State;
@@ -117,7 +118,7 @@ public final class ConfigurationImpl implements ConfigurationService {
                 return true;
             }
             String name = pathname.getName();
-            return name.toLowerCase().endsWith(ext) || mpasswd.equals(name);
+            return name.toLowerCase(Locale.US).endsWith(ext) || mpasswd.equals(name);
         }
 
     }
@@ -213,6 +214,9 @@ public final class ConfigurationImpl implements ConfigurationService {
 
     private final File[] dirs;
 
+    /** The set to file-wise track properties that were replaced by a system environment variable. */
+    private final ConcurrentMap<File, Set<String>> sysEnvPropertiesByFile;
+
     /** Maps file paths of the .properties file to their properties. */
     private final Map<File, Properties> propertiesByFile;
 
@@ -258,6 +262,7 @@ public final class ConfigurationImpl implements ConfigurationService {
         this.matchingPrefixProperty = new ConcurrentHashMap<String, List<Reloadable>>(128, 0.9f, 1);
         this.matchingFile = new ConcurrentHashMap<String, List<Reloadable>>(128, 0.9f, 1);
 
+        sysEnvPropertiesByFile = new ConcurrentHashMap<>(16, 0.9f, 1);
         propertiesByFile = new HashMap<File, Properties>(256);
         texts = new ConcurrentHashMap<String, String>(1024, 0.9f, 1);
         properties = new ConcurrentHashMap<String, String>(2048, 0.9f, 1);
@@ -379,7 +384,7 @@ public final class ConfigurationImpl implements ConfigurationService {
         }
     }
 
-    void processPropertiesFile(final File propFile, boolean debug) {
+    void processPropertiesFile(File propFile, boolean debug) {
         try {
             if (!propFile.exists()) {
                 return;
@@ -387,8 +392,11 @@ public final class ConfigurationImpl implements ConfigurationService {
             if (!propFile.canRead()) {
                 throw new IOException("No read permission");
             }
-            Properties tmp = ConfigurationServices.loadPropertiesFrom(propFile);
+
+            Reference<Set<String>> sysEnvPropertiesReference = new Reference<>(null);
+            Properties tmp = ConfigurationServices.loadPropertiesFrom(propFile, true, sysEnvPropertiesReference);
             propertiesByFile.put(propFile, tmp);
+            addToTrackedSysEnvVariables(sysEnvPropertiesReference, propFile);
 
             String propFilePath = propFile.getPath();
             for (Map.Entry<Object, Object> e : tmp.entrySet()) {
@@ -409,6 +417,24 @@ public final class ConfigurationImpl implements ConfigurationService {
             LOG.warn("A malformed Unicode escape sequence in .properties file \"{}\".", propFile, encodingError);
         } catch (RuntimeException e) {
             LOG.warn("An error occurred while processing .properties file \"{}\".", propFile, e);
+        }
+    }
+
+    private void addToTrackedSysEnvVariables(Reference<Set<String>> sysEnvPropertiesReference, File propFile) {
+        Set<String> sysEnvProperties = sysEnvPropertiesReference.getValue();
+        if (sysEnvProperties == null || sysEnvProperties.isEmpty()) {
+            return;
+        }
+
+        Set<String> existent = sysEnvPropertiesByFile.putIfAbsent(propFile, ImmutableSet.copyOf(sysEnvProperties));
+        while (existent != null) {
+            Set<String> newSysEnvProperties = new HashSet<>(existent);
+            newSysEnvProperties.addAll(sysEnvProperties);
+            if (sysEnvPropertiesByFile.replace(propFile, existent, ImmutableSet.copyOf(newSysEnvProperties))) {
+                existent = null;
+            } else {
+                existent = sysEnvPropertiesByFile.get(propFile);
+            }
         }
     }
 
@@ -459,6 +485,11 @@ public final class ConfigurationImpl implements ConfigurationService {
         }
 
         return new Properties();
+    }
+
+    @Override
+    public Map<File, Set<String>> getSysEnvProperties() {
+        return Collections.unmodifiableMap(sysEnvPropertiesByFile);
     }
 
     @Override
@@ -524,6 +555,16 @@ public final class ConfigurationImpl implements ConfigurationService {
 
     @Override
     public File getFileByName(final String fileName) {
+        return doGetFileByName(fileName);
+    }
+
+    /**
+     * Gets the file denoted by given file name.
+     *
+     * @param fileName The file name
+     * @return The file or <code>null</code>
+     */
+    public static File doGetFileByName(final String fileName) {
         if (null == fileName) {
             return null;
         }
@@ -554,7 +595,7 @@ public final class ConfigurationImpl implements ConfigurationService {
         return null;
     }
 
-    private File traverseForFile(final File file, final String fileName) {
+    private static File traverseForFile(final File file, final String fileName) {
         if (null == file) {
             return null;
         }
@@ -627,13 +668,13 @@ public final class ConfigurationImpl implements ConfigurationService {
 
     @Override
     public String getText(final String fileName) {
-        final String text = texts.get(fileName);
+        String text = texts.get(fileName);
         if (text != null) {
             return text;
         }
 
-        for (final String dir : getDirectories()) {
-            final String s = traverse(new File(dir), fileName);
+        for (String dir : getDirectories()) {
+            String s = traverse(new File(dir), fileName);
             if (s != null) {
                 texts.put(fileName, s);
                 return s;
@@ -646,43 +687,29 @@ public final class ConfigurationImpl implements ConfigurationService {
         if (null == file) {
             return null;
         }
+
         if (file.isFile()) {
             if (file.getName().equals(filename)) {
-                return readFile(file);
+                try {
+                    return ConfigurationServices.readFile(file);
+                } catch (IOException e) {
+                    LOG.error("Can't read file: {}", file, e);
+                    return null;
+                }
             }
             return null;
         }
-        final File[] files = file.listFiles();
+
+        File[] files = file.listFiles();
         if (files != null) {
-            for (final File f : files) {
-                final String s = traverse(f, filename);
+            for (File f : files) {
+                String s = traverse(f, filename);
                 if (s != null) {
                     return s;
                 }
             }
         }
         return null;
-    }
-
-    String readFile(final File file) {
-        Reader reader = null;
-        try {
-            reader = new FileReader(file);
-
-            StringBuilder builder = new StringBuilder((int) file.length());
-            int buflen = 8192;
-            char[] cbuf = new char[buflen];
-
-            for (int read; (read = reader.read(cbuf, 0, buflen)) > 0;) {
-                builder.append(cbuf, 0, read);
-            }
-            return builder.toString();
-        } catch (IOException x) {
-            LOG.error("Can't read file: {}", file, x);
-            return null;
-        } finally {
-            Streams.close(reader);
-        }
     }
 
     @Override
@@ -752,10 +779,12 @@ public final class ConfigurationImpl implements ConfigurationService {
         properties.clear();
         propertiesByFile.clear();
         propertiesFiles.clear();
+        sysEnvPropertiesByFile.clear();
         texts.clear();
         yamlFiles.clear();
         yamlPaths.clear();
         xmlFiles.clear();
+        com.openexchange.config.utils.FileVariablesProvider.clearInstances();
 
         // (Re-)load configuration
         loadConfiguration(getDirectories());

@@ -50,11 +50,11 @@
 package com.openexchange.mail.cache;
 
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.util.concurrent.atomic.AtomicBoolean;
 import com.openexchange.caching.CacheService;
 import com.openexchange.config.ConfigurationService;
+import com.openexchange.config.ConfigurationServices;
 import com.openexchange.configuration.ConfigurationExceptionCodes;
 import com.openexchange.exception.OXException;
 import com.openexchange.mail.MailExceptionCode;
@@ -97,8 +97,8 @@ public final class MailCacheConfiguration implements Initialization {
             throw ConfigurationExceptionCodes.PROPERTY_MISSING.create("mailcache.ccf");
         }
         try {
-            ServerServiceRegistry.getInstance().getService(CacheService.class).loadConfiguration(new FileInputStream(cacheConfigFile));
-        } catch (FileNotFoundException e) {
+            ServerServiceRegistry.getInstance().getService(CacheService.class).loadConfiguration(ConfigurationServices.loadPropertiesFrom(cacheConfigFile, true));
+        } catch (IOException e) {
             throw MailExceptionCode.IO_ERROR.create(e, e.getMessage());
         }
     }

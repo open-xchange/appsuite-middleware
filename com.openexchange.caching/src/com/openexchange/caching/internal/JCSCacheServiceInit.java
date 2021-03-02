@@ -49,6 +49,7 @@
 
 package com.openexchange.caching.internal;
 
+import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -71,6 +72,7 @@ import org.apache.jcs.engine.control.CompositeCacheManager;
 import com.openexchange.caching.CacheExceptionCode;
 import com.openexchange.caching.events.CacheEventService;
 import com.openexchange.config.ConfigurationService;
+import com.openexchange.config.ConfigurationServices;
 import com.openexchange.exception.OXException;
 import com.openexchange.server.ServiceExceptionCode;
 
@@ -192,19 +194,11 @@ public final class JCSCacheServiceInit {
     }
 
     private static Properties loadProperties(final InputStream in) throws OXException {
-        final Properties props = new Properties();
         try {
-            props.load(in);
+            return ConfigurationServices.loadPropertiesFrom(in, true);
         } catch (IOException e) {
             throw CacheExceptionCode.IO_ERROR.create(e, e.getMessage());
-        } finally {
-            try {
-                in.close();
-            } catch (IOException e) {
-                LOG.error("", e);
-            }
         }
-        return props;
     }
 
     private void configure(final Properties properties) throws OXException {
@@ -408,7 +402,8 @@ public final class JCSCacheServiceInit {
             return;
         }
         try {
-            final Properties properties = loadProperties(new FileInputStream(configurationService.getFileByName(cacheConfigFileName)));
+            File file = configurationService.getFileByName(cacheConfigFileName);
+            final Properties properties = loadProperties(new FileInputStream(file));
             initializeCompositeCacheManager(obtainMutex);
             configure(properties);
             defaultCacheRegions = Collections.unmodifiableSet(new HashSet<String>(Arrays.asList(ccmInstance.getCacheNames())));

@@ -71,7 +71,6 @@ import com.openexchange.authentication.AuthenticationService;
 import com.openexchange.authentication.LoginExceptionCodes;
 import com.openexchange.authentication.LoginInfo;
 import com.openexchange.config.ConfigurationService;
-import com.openexchange.config.ConfigurationServices;
 import com.openexchange.configuration.ConfigurationException;
 import com.openexchange.context.ContextService;
 import com.openexchange.exception.OXException;
@@ -127,7 +126,7 @@ public class IMAPAuthentication implements AuthenticationService {
 
     /**
      * Default constructor.
-     * 
+     *
      * @throws IOException if an I/O error is occurred
      */
     public IMAPAuthentication(ServiceLookup services) throws IOException {
@@ -144,7 +143,7 @@ public class IMAPAuthentication implements AuthenticationService {
         }
 
         // Initialize configuration properties
-        props = ConfigurationServices.loadPropertiesFrom(configService.getFileByName("imapauth.properties"));
+        props = configService.getFile("imapauth.properties");
     }
 
     @Override

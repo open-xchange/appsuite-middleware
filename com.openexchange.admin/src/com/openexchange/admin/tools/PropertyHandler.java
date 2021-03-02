@@ -60,7 +60,6 @@ import java.util.Properties;
 import com.openexchange.admin.properties.AdminProperties;
 import com.openexchange.admin.services.AdminServiceRegistry;
 import com.openexchange.config.ConfigurationService;
-import com.openexchange.config.ConfigurationServices;
 
 /**
  * {@link PropertyHandler}
@@ -413,8 +412,8 @@ public class PropertyHandler {
             return null;
         }
         try {
-            return ConfigurationServices.loadPropertiesFrom(service.getFileByName(propertiesFile));
-        } catch (IOException e) {
+            return service.getFile(propertiesFile);
+        } catch (Exception e) {
             LOGGER.error("Properties file '{}' file cannot be opened for reading!", propertiesFile, e);
             return null;
         }

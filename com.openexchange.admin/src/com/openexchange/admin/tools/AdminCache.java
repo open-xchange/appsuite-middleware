@@ -89,7 +89,6 @@ import com.openexchange.admin.storage.sqlStorage.OXAdminPoolDBPool;
 import com.openexchange.admin.storage.sqlStorage.OXAdminPoolInterface;
 import com.openexchange.caching.CacheService;
 import com.openexchange.config.ConfigurationService;
-import com.openexchange.config.ConfigurationServices;
 import com.openexchange.database.Databases;
 import com.openexchange.database.JdbcProperties;
 import com.openexchange.exception.OXException;
@@ -424,8 +423,8 @@ public class AdminCache {
             throw new IllegalStateException("Absent service: " + ConfigurationService.class.getName());
         }
         try {
-            return ConfigurationServices.loadPropertiesFrom(service.getFileByName("ModuleAccessDefinitions.properties"));
-        } catch (IOException e) {
+            return service.getFile("ModuleAccessDefinitions.properties");
+        } catch (Exception e) {
             throw new OXGenericException("ModuleAccessDefinitions.properties file cannot be opened for reading!", e);
         }
     }

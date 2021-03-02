@@ -49,7 +49,6 @@
 
 package com.openexchange.groupware.update.internal;
 
-import java.io.IOException;
 import java.util.Collections;
 import java.util.Map;
 import java.util.Properties;
@@ -59,7 +58,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import com.google.common.collect.ImmutableSet;
 import com.openexchange.config.ConfigurationService;
-import com.openexchange.config.ConfigurationServices;
 
 /**
  * This class contains the list of excluded update tasks. The configuration can be done by the configuration file
@@ -127,8 +125,8 @@ public class ExcludedSet implements UpdateTaskSet<String> {
      */
     private Properties loadProperties(ConfigurationService configService) {
         try {
-            return ConfigurationServices.loadPropertiesFrom(configService.getFileByName(CONFIG_FILE_NAME));
-        } catch (IOException e) {
+            return configService.getFile(CONFIG_FILE_NAME);
+        } catch (Exception e) {
             LOG.warn("No '{}' file found in configuration folder with excluded update tasks.", CONFIG_FILE_NAME, e);
             return new Properties();
         }

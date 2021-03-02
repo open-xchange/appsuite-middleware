@@ -47,75 +47,50 @@
  *
  */
 
-package com.openexchange.event.impl;
+package com.openexchange.config.utils;
 
-import static com.openexchange.java.Autoboxing.I;
-import java.util.Properties;
-import com.openexchange.groupware.configuration.AbstractConfigWrapper;
+import java.util.Map;
+import com.openexchange.config.VariablesProvider;
 
 /**
- * {@link EventConfigImpl}
+ * {@link SysEnvVariablesProvider} - The variables provider using system environment for look-up.
  *
- * @author <a href="mailto:sebastian.kauss@open-xchange.org">Sebastian Kauss</a>
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @since v8.0.0
  */
-public class EventConfigImpl extends AbstractConfigWrapper implements EventConfig {
+public class SysEnvVariablesProvider implements VariablesProvider {
 
-    private boolean isEventQueueEnabled;
+    private static final SysEnvVariablesProvider INSTANCE = new SysEnvVariablesProvider();
 
-    private int eventQueueDelay = 60000;
-
-    //private boolean isInit;
-
-    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(EventConfigImpl.class);
-
-    public EventConfigImpl() {
-
+    /**
+     * Gets the instance.
+     *
+     * @return The instance
+     */
+    public static SysEnvVariablesProvider getInstance() {
+        return INSTANCE;
     }
 
-    public EventConfigImpl(final Properties props) {
-        /*-
-         * This if statement always yields false
-         *
-        if (isInit) {
-            return;
-        }
-        */
+    // -------------------------------------------------------------------------------------------------------------------------------------
 
-        if (props == null) {
-            LOG.error("missing propfile");
-            return;
-        }
+    private final Map<String, String> variables;
 
-        isEventQueueEnabled = parseProperty(props, "com.openexchange.event.isEventQueueEnabled", false);
-        LOG.debug("Event property: com.openexchange.event.isEventQueueEnabled={}", isEventQueueEnabled ? Boolean.TRUE : Boolean.FALSE);
-
-        eventQueueDelay = parseProperty(props, "com.openexchange.event.eventQueueDelay", eventQueueDelay);
-        LOG.debug("Event property: com.openexchange.event.eventQueueDelay={}", I(eventQueueDelay));
-
-        /*-
-         * Field "isInit" is never used
-         *
-        isInit = true;
-        */
+    /**
+     * Initializes a new {@link SysEnvVariablesProvider}.
+     */
+    private SysEnvVariablesProvider() {
+        super();
+        variables = SysEnv.getSystemEnvironment();
     }
 
     @Override
-    public boolean isEventQueueEnabled() {
-        return isEventQueueEnabled;
+    public String getForKey(String variableKey) {
+        return variableKey == null ? null : variables.get(variableKey);
     }
 
     @Override
-    public void setEventQueueEnabled(final boolean isEventQueueEnabled) {
-        this.isEventQueueEnabled = isEventQueueEnabled;
+    public String getName() {
+        return "env";
     }
 
-    @Override
-    public int getEventQueueDelay() {
-        return eventQueueDelay;
-    }
-
-    @Override
-    public void setEventQueueDelay(final int eventQueueDelay) {
-        this.eventQueueDelay = eventQueueDelay;
-    }
 }
