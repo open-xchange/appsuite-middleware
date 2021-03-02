@@ -50,12 +50,12 @@
 
 package com.openexchange.authentication.application.impl;
 
-import java.util.Arrays;
-import java.util.List;
+import java.util.Set;
 import org.slf4j.Logger;
 import com.openexchange.ajax.requesthandler.AJAXActionService;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AbstractAJAXActionAnnotationProcessor;
+import com.openexchange.authentication.application.AppPasswordUtils;
 import com.openexchange.authentication.application.ajax.RestrictedAction;
 import com.openexchange.authentication.application.exceptions.AppPasswordExceptionCodes;
 import com.openexchange.exception.OXException;
@@ -105,10 +105,10 @@ public class AppPasswordAnnotationProcessor extends AbstractAJAXActionAnnotation
         }
 
         // Check the scopes of authentication for this session
-        if (false == (restrParam instanceof String[])) {
+        if (false == (restrParam instanceof String)) {
             throw AppPasswordExceptionCodes.APPLICATION_PASSWORD_GENERIC_ERROR.create("Unkown restricted session type");
         }
-        List<String> restrictedScopes = Arrays.asList((String[]) restrParam);
+        Set<String> restrictedScopes = AppPasswordUtils.getRestrictedScopes(session);
         LOG.debug("Restricted session hit for module " + requestData.getModule() + " action:" + requestData.getAction() + " required:" + requiredScope);
         if (RestrictedAction.GRANT_ALL.equals(requiredScope)) {
             return;

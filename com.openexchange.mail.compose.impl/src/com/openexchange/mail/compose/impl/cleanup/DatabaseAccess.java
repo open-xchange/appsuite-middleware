@@ -47,45 +47,67 @@
  *
  */
 
-package com.openexchange.carddav.resources;
+package com.openexchange.mail.compose.impl.cleanup;
 
-import java.util.List;
-import com.openexchange.carddav.GroupwareCarddavFactory;
+import java.sql.Connection;
+import java.util.Optional;
 import com.openexchange.exception.OXException;
-import com.openexchange.folderstorage.UserizedFolder;
-import com.openexchange.webdav.protocol.WebdavPath;
-import com.openexchange.webdav.protocol.WebdavProtocolException;
 
 /**
- * {@link ReducedAggregatedCollection} - CardDAV collection aggregating the contents
- * of a reduced set of folders.
+ * {@link DatabaseAccess} - A database access for clean-up task.
  *
- * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @since v7.10.5
  */
-public class ReducedAggregatedCollection extends CardDAVCollection {
-
-    private final String displayName;
+public interface DatabaseAccess {
 
     /**
-     * Initializes a new {@link AggregatedCollection}.
+     * Gets the representative context identifier.
      *
-     * @param factory The factory
-     * @param url The WebDAV path
-     * @param displayName The displayname to use
+     * @return The representative context identifier
      */
-    public ReducedAggregatedCollection(GroupwareCarddavFactory factory, WebdavPath url, String displayName) throws OXException {
-        super(factory, url, factory.getState().getDefaultFolder());
-        this.displayName = displayName;
-    }
+    int getRepresentativeContextId();
 
-    @Override
-    protected List<UserizedFolder> getFolders() throws OXException {
-        return factory.getState().getReducedFolders();
-    }
+    /**
+     * Gets the name of the database schema that is accessed.
+     *
+     * @return The schema name
+     */
+    Optional<String> getSchema();
 
-    @Override
-    public String getDisplayName() throws WebdavProtocolException {
-        return displayName;
-    }
+    // ------------------------------------------------------------------------------
+
+    /**
+     * Acquires a read-only connection.
+     *
+     * @return A read-only connection
+     * @throws OXException If a read-only connection cannot be established
+     */
+    Connection acquireReadOnly() throws OXException;
+
+    /**
+     * Releases a previously acquired read-only connection.
+     *
+     * @param con The read-only connection to release
+     */
+    void releaseReadOnly(Connection con);
+
+    // ------------------------------------------------------------------------------
+
+    /**
+     * Acquires a read-write connection.
+     *
+     * @return A read-write connection
+     * @throws OXException If a read-write connection cannot be established
+     */
+    Connection acquireWritable() throws OXException;
+
+    /**
+     * Releases a previously acquired read-write connection.
+     *
+     * @param con The read-write connection to release
+     * @param forReading <code>true</code> if read-write connection was only used for reading and no modification was performed; otherwise <code>false</code>
+     */
+    void releaseWritable(Connection con, boolean forReading);
 
 }

@@ -49,7 +49,6 @@
 
 package com.openexchange.authentication.application.impl;
 
-import java.util.ArrayList;
 import java.util.List;
 import com.google.common.collect.ImmutableList;
 import com.openexchange.exception.OXException;
@@ -64,11 +63,11 @@ import com.openexchange.sessionstorage.SessionStorageParameterNamesProvider;
  */
 public class AppPasswordSessionStorageParameterNamesProvider implements SessionStorageParameterNamesProvider {
 
+    /** The parameter marking the session as having restricted capabilities, contains comma-separated string of allowed restricted scopes. */
     static final String PARAM_RESTRICTED = Session.PARAM_RESTRICTED;
 
     /** Holds the identifier of the app-specific password that was used for authentication */
     static final String PARAM_APP_PASSWORD_ID = "com.openexchange.authentication.application.passwordId";
-
 
     private final List<String> parameterNames;
 
@@ -77,10 +76,7 @@ public class AppPasswordSessionStorageParameterNamesProvider implements SessionS
      */
     public AppPasswordSessionStorageParameterNamesProvider() {
         super();
-        List<String> parameterNames = new ArrayList<String>(2);
-        parameterNames.add(PARAM_RESTRICTED);
-        parameterNames.add(PARAM_APP_PASSWORD_ID);
-        this.parameterNames = ImmutableList.copyOf(parameterNames);
+        this.parameterNames = ImmutableList.of(PARAM_RESTRICTED, PARAM_APP_PASSWORD_ID);
     }
 
     @Override

@@ -51,7 +51,6 @@ package com.openexchange.oauth.api;
 
 import org.scribe.builder.api.DefaultApi20;
 import org.scribe.extractors.AccessTokenExtractor;
-import org.scribe.extractors.JsonTokenExtractor;
 import org.scribe.model.OAuthConfig;
 import org.scribe.model.OAuthConstants;
 import org.scribe.model.OAuthRequest;
@@ -62,6 +61,7 @@ import org.scribe.model.Verifier;
 import org.scribe.oauth.OAuth20ServiceImpl;
 import org.scribe.oauth.OAuthService;
 import org.scribe.utils.OAuthEncoder;
+import com.openexchange.oauth.AccessTokenSecretExtractor20;
 
 /**
  * {@link YahooApi2}
@@ -107,8 +107,7 @@ public class YahooApi2 extends DefaultApi20 {
 
     @Override
     public AccessTokenExtractor getAccessTokenExtractor() {
-        // Yahoo returns a JSONObject thus we need the JsonTokenExtractor to extract the 'access_token'
-        return new JsonTokenExtractor();
+        return new AccessTokenSecretExtractor20();
     }
 
     /**

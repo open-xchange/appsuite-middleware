@@ -54,7 +54,7 @@
     "description" : "The multiple module allows to bundle multiple requests to most other modules in a single request."
   }, {
     "name" : "Quota",
-    "description" : "The quota module allows accessing information about the limit and current usage of a certain storage type."
+    "description" : "The filestore module allows accessing information about the use and quota of the filestore."
   }, {
     "name" : "Import",
     "description" : "The module import allows to import specific module data (like Contacts, Tasks or Appointments) in several formats (iCal, vCard, CSV) into a folder. Please note: The callback for all actions of this bundle is `callback_import`, not `callback_$actionname` for legacy purposes."
@@ -69,7 +69,7 @@
     "description" : "The module token delivers several core API extensions to support token based logins."
   }, {
     "name" : "Mailfilter",
-    "description" : "The mailfilter module is used to access all mail filter related options.\n\nFirst of all the main structure of a mail filter script is, that it has different rules. Each of them contains one command. This command takes a test condition which executes the actions given in that command if the test condition is true.\nThe test condition consists of a test command and some arguments for this on the mail filter server, these tests must be determined at runtime. So that no test field is transferred to the server which it isn't able to handle. Examples for tests are `address`, `allof` and `anyof`.\nEach test has a special comparison. The list of available comparisons depends on the test given and the mail filter server configuration so they have to be determined at runtime too. See chapter [Mail filter](#mail-filter) for more information.\n"
+    "description" : "The mailfilter module is used to access all mail filter related options.\n\nFirst of all the main structure of a mail filter script is, that it has different rules. Each of them contains one command. This command takes a test condition which executes the actions given in that command if the test condition is true.\nThe test condition consists of a test command and some arguments for this command depending on the command itself. Because the available tests depend on the mail filter server, these tests must be determined at runtime. So that no test field is transferred to the server which it isn't able to handle. Examples for tests are `address`, `allof` and `anyof`.\nEach test has a special comparison. The list of available comparisons depends on the test given and the mail filter server configuration so they have to be determined at runtime too. See chapter [Mail filter](#mail-filter) for more information.\n"
   }, {
     "name" : "File",
     "description" : "The ajax file upload module offers to store files in server's dedicated download directory for a configurable amount of time. The files are then accessible for further operations like inline images in (html) mails."
@@ -122,9 +122,6 @@
   }, {
     "name" : "Share/Management",
     "description" : "The share/management module can create and manage share links via different actions. Dedicated actions to list all shares of a\nuser can be found in the corresponding modules, like `/folders?action=shares` of module \"folders\" or `/infostore?action=shares`\nof module \"infostore\".\n"
-  }, {
-    "name" : "Share/Redeem",
-    "description" : "The share/redeem module is used to redeem previously reserved tokens during  the share login workflow.\n"
   }, {
     "name" : "Passwordchange",
     "description" : "Via the passwordchange module the users can change their password."
@@ -1030,14 +1027,12 @@
         "operationId" : "updateJSlob",
         "tags" : [ "JSlob" ],
         "summary" : "Updates a JSlob.",
-        "description" : "When updating a JSlob entry there are two different ways to do so:\n1. Using a path and value field in the request body The same as in 1. but the path is provided in the request body as 'path' and the value is provided as 'value'. For example: <code> {\n \"path\":\"path/to/the/sub/tree\"\n \"value\": {...}\n} </code> 2. Performing a merge In case no path is given the provided value is merged with the existing jslob entry and only provided fields are updated.",
         "parameters" : [ {
           "$ref" : "#/components/parameters/gblQueryParamSession"
         }, {
           "in" : "query",
           "name" : "id",
           "description" : "The JSlob indentifier.",
-          "required" : true,
           "schema" : {
             "type" : "string"
           }
@@ -1070,7 +1065,7 @@
               }
             }
           },
-          "description" : "Either a JSON object which contains the new JSON configuration or a json object which contains a path and value field which provides the JSlob sub path and its value respectively. In case the configuration is provided directly it is either merged in case no path is given or it is used to update the subpath.\nUse `/jslob?action=set` to delete fields or entire JSlob.",
+          "description" : "The JSON object containing the updated JSON configuration to store. Fields that are not included are thus not affected and survive the change. Use `/jslob?action=set` to delete fields or entire JSlob.",
           "required" : true
         }
       }
@@ -1412,53 +1407,6 @@
           },
           "description" : "A JSON array with the identifiers of the requested attachments.",
           "required" : true
-        }
-      }
-    },
-    "/jslob/{jslobPath}?action=get" : {
-      "get" : {
-        "operationId" : "getJSlob",
-        "tags" : [ "JSlob" ],
-        "summary" : "Gets a single JSlob.",
-        "parameters" : [ {
-          "$ref" : "#/components/parameters/gblQueryParamSession"
-        }, {
-          "in" : "query",
-          "name" : "serviceId",
-          "description" : "The identifier for the JSlob service, default is \"com.openexchange.jslob.config\".",
-          "required" : false,
-          "schema" : {
-            "type" : "string"
-          }
-        }, {
-          "in" : "query",
-          "name" : "id",
-          "description" : "The JSlob identifier.",
-          "required" : true,
-          "schema" : {
-            "type" : "string"
-          }
-        }, {
-          "in" : "path",
-          "name" : "jslobPath",
-          "schema" : {
-            "type" : "string"
-          },
-          "required" : false,
-          "description" : "The path to the jslob entry"
-        } ],
-        "responses" : {
-          "200" : {
-            "description" : "A jsob object containing either the complete jslob or the specific jslob segment if it exists.\nIn case of errors the responsible fields in the response are filled (see [Error handling](#error-handling)).\n",
-            "content" : {
-              "application/json" : {
-                "schema" : {
-                  "description" : null,
-                  "type" : "string"
-                }
-              }
-            }
-          }
         }
       }
     },
@@ -2122,6 +2070,14 @@
           "in" : "query",
           "name" : "account",
           "description" : "The account identifier within the module to get quota information for.",
+          "required" : false,
+          "schema" : {
+            "type" : "string"
+          }
+        }, {
+          "in" : "query",
+          "name" : "folder",
+          "description" : "The folder to get the quota for.",
           "required" : false,
           "schema" : {
             "type" : "string"
@@ -4011,7 +3967,7 @@
         "operationId" : "patchMailComposeById",
         "tags" : [ "MailCompose" ],
         "summary" : "Patches the composition space",
-        "description" : "Payload is JSON that reflects changes. Response is the current composition space message model after update.\nNote that it is not possible to change the attachments collection during this call.",
+        "description" : "Payload is JSON that reflects changes. Response is the current composition space message model after update.",
         "parameters" : [ {
           "$ref" : "#/components/parameters/gblQueryParamSession"
         }, {
@@ -6765,64 +6721,6 @@
         }
       }
     },
-    "/jslob/{jslobPath}?action=update" : {
-      "put" : {
-        "operationId" : "updateJSlobByPath",
-        "tags" : [ "JSlob" ],
-        "summary" : "Updates a JSlob.",
-        "description" : "When a valid jslobPath is provided the JSlob sub path is replaced by the given request data.    ",
-        "parameters" : [ {
-          "$ref" : "#/components/parameters/gblQueryParamSession"
-        }, {
-          "in" : "query",
-          "name" : "id",
-          "description" : "The JSlob indentifier.",
-          "required" : true,
-          "schema" : {
-            "type" : "string"
-          }
-        }, {
-          "in" : "query",
-          "name" : "serviceId",
-          "description" : "The identifier for the JSlob service, default is \"com.openexchange.jslob.config\".",
-          "required" : false,
-          "schema" : {
-            "type" : "string"
-          }
-        }, {
-          "in" : "path",
-          "name" : "jslobPath",
-          "schema" : {
-            "type" : "string"
-          },
-          "required" : true,
-          "description" : "The path to the jslob entry"
-        } ],
-        "responses" : {
-          "200" : {
-            "description" : "In case of errors the responsible fields in the response are filled (see [Error handling](#error-handling)).",
-            "content" : {
-              "application/json" : {
-                "schema" : {
-                  "$ref" : "#/components/schemas/CommonResponse"
-                }
-              }
-            }
-          }
-        },
-        "requestBody" : {
-          "content" : {
-            "application/json" : {
-              "schema" : {
-                "type" : "object"
-              }
-            }
-          },
-          "description" : "A JSON object which contains the new JSON configuration.\nUse `/jslob?action=set` to delete fields or entire JSlob.",
-          "required" : true
-        }
-      }
-    },
     "/snippet?action=detach" : {
       "put" : {
         "operationId" : "removeSnippetAttachments",
@@ -7744,8 +7642,6 @@
           "schema" : {
             "type" : "string"
           }
-        }, {
-          "$ref" : "#/components/parameters/glbQueryParamsAllowEnqueue"
         } ],
         "responses" : {
           "200" : {
@@ -12881,7 +12777,6 @@
     "/share/redeem/token" : {
       "get" : {
         "operationId" : "get",
-        "tags" : [ "Share/Redeem" ],
         "summary" : "Redeems a previously reserved token for extended parameters of the redirect location.",
         "parameters" : [ {
           "in" : "query",
@@ -13425,7 +13320,7 @@
                 "title" : "postMailComposeSendBody",
                 "properties" : {
                   "JSON" : {
-                    "description" : "Represents the request body as JSON string containing the [MailMessageModel](#/definitions/MailComposeMessageModel).\nNote that it is not possible to change the attachments collection during this call. Furthermore changing shared attachments or Guard options during this call is discouraged and might lead to unexpected results.",
+                    "description" : "Represents the request body as JSON string containing the [MailMessageModel](#/definitions/MailComposeMessageModel).",
                     "type" : "string"
                   },
                   "file" : {
@@ -13878,28 +13773,6 @@
           },
           "500" : {
             "description" : "HTML error page"
-          }
-        }
-      }
-    },
-    "/quota?action=unified" : {
-      "get" : {
-        "operationId" : "getUnifiedUsage",
-        "tags" : [ "Quota" ],
-        "summary" : "Gets the unified usage data.",
-        "parameters" : [ {
-          "$ref" : "#/components/parameters/gblQueryParamSession"
-        } ],
-        "responses" : {
-          "200" : {
-            "description" : "A JSON object containing the unified quota. In case of errors the responsible\nfields in the response are filled (see [Error handling](#error-handling)).\n",
-            "content" : {
-              "application/json" : {
-                "schema" : {
-                  "$ref" : "#/components/schemas/QuotaResponse"
-                }
-              }
-            }
           }
         }
       }
@@ -32889,24 +32762,11 @@
           }
         }
       },
-      "MailComposeMailPathModel" : {
-        "type" : "object",
-        "properties" : {
-          "id" : {
-            "type" : "string",
-            "description" : "The mail identifier within the folder"
-          },
-          "folderId" : {
-            "type" : "string",
-            "description" : "The mail folder identifier"
-          }
-        }
-      },
       "MailComposeAttachmentResponse" : {
         "type" : "object",
         "properties" : {
           "data" : {
-            "$ref" : "#/components/schemas/MailComposeAttachmentResult"
+            "$ref" : "#/components/schemas/MailComposeAttachment"
           },
           "error" : {
             "type" : "string",
@@ -32957,7 +32817,10 @@
         "type" : "object",
         "properties" : {
           "data" : {
-            "$ref" : "#/components/schemas/MailComposeAttachmentResult"
+            "type" : "array",
+            "items" : {
+              "$ref" : "#/components/schemas/MailComposeAttachment"
+            }
           },
           "error" : {
             "type" : "string",
@@ -33046,7 +32909,7 @@
         "type" : "object",
         "properties" : {
           "data" : {
-            "$ref" : "#/components/schemas/MailComposeMailPathModel"
+            "type" : "string"
           },
           "error" : {
             "type" : "string",
@@ -33097,7 +32960,7 @@
         "type" : "object",
         "properties" : {
           "data" : {
-            "$ref" : "#/components/schemas/MailComposeMailPathModel"
+            "type" : "string"
           },
           "error" : {
             "type" : "string",
@@ -33141,47 +33004,6 @@
             "type" : "integer",
             "format" : "int64",
             "description" : "The latest timestamp of the returned data (see [Updates](#updates))."
-          }
-        }
-      },
-      "MailComposeAttachmentResult" : {
-        "type" : "object",
-        "title" : "Attachment result",
-        "description" : "An attachment object.",
-        "properties" : {
-          "attachments" : {
-            "type" : "array",
-            "items" : {
-              "$ref" : "#/components/schemas/MailComposeAttachment"
-            }
-          },
-          "compositionSpace" : {
-            "$ref" : "#/components/schemas/MailComposeInfo"
-          }
-        }
-      },
-      "MailComposeInfo" : {
-        "type" : "object",
-        "title" : "Attachment",
-        "description" : "A compositon space info object.",
-        "properties" : {
-          "id" : {
-            "type" : "string",
-            "description" : "The composition space id"
-          },
-          "mailPath" : {
-            "type" : "object",
-            "description" : "The path to the draft message reflecting composition space",
-            "properties" : {
-              "id" : {
-                "type" : "string",
-                "description" : "The identifier of the draft message"
-              },
-              "folderId" : {
-                "type" : "string",
-                "description" : "The identifier of the folder in which the draft message resides"
-              }
-            }
           }
         }
       },

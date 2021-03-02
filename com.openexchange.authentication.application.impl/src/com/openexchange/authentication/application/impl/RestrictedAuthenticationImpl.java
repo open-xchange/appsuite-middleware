@@ -56,6 +56,7 @@ import com.openexchange.authentication.application.AppPasswordMailOauthService;
 import com.openexchange.authentication.application.RestrictedAuthentication;
 import com.openexchange.authentication.application.storage.AuthenticatedApplicationPassword;
 import com.openexchange.exception.OXException;
+import com.openexchange.java.Strings;
 import com.openexchange.mail.api.AuthType;
 import com.openexchange.mail.api.MailConfig;
 import com.openexchange.server.ServiceLookup;
@@ -92,7 +93,7 @@ public class RestrictedAuthenticationImpl implements RestrictedAuthentication {
             @Override
             public void enhanceSession(Session session) {
                 session.setParameter(PARAM_APP_PASSWORD_ID, appPassword.getApplicationPassword().getGUID());
-                session.setParameter(PARAM_RESTRICTED, scopes);
+                session.setParameter(PARAM_RESTRICTED, Strings.toCommaSeparatedList(scopes));
                 try {
                     AuthType mailAuthType = MailConfig.getConfiguredAuthType(true, session);
                     if (AuthType.isOAuthType(mailAuthType)) {

@@ -81,10 +81,11 @@ public class CollectionsTest extends CardDAVTest {
 
     @Test
     public void testMacOSClients() throws Exception {
+        String aggregatedCollectionName = getDefaultCollectionName();
         for (String userAgent : UserAgents.MACOS_ALL) {
             super.getWebDAVClient().setUserAgent(userAgent);
             discoverRoot();
-            discoverAggregatedCollection(true);
+            discoverAggregatedCollection(aggregatedCollectionName, true);
             discoverContactsCollection(false);
             discoverGABCollection(false);
         }
@@ -92,10 +93,11 @@ public class CollectionsTest extends CardDAVTest {
 
     @Test
     public void testIOSClients() throws Exception {
+        String aggregatedCollectionName = getDefaultCollectionName();
         for (String userAgent : UserAgents.IOS_ALL) {
             super.getWebDAVClient().setUserAgent(userAgent);
             discoverRoot();
-            discoverAggregatedCollection(false);
+            discoverAggregatedCollection(aggregatedCollectionName, false);
             discoverContactsCollection(true);
             discoverGABCollection(true);
         }
@@ -103,10 +105,11 @@ public class CollectionsTest extends CardDAVTest {
 
     @Test
     public void testOtherClients() throws Exception {
+        String aggregatedCollectionName = getDefaultCollectionName();
         for (String userAgent : UserAgents.OTHER_ALL) {
             super.getWebDAVClient().setUserAgent(userAgent);
             discoverRoot();
-            discoverAggregatedCollection(false);
+            discoverAggregatedCollection(aggregatedCollectionName, false);
             discoverContactsCollection(true);
             discoverGABCollection(true);
         }
@@ -123,7 +126,7 @@ public class CollectionsTest extends CardDAVTest {
         assertMatches(PropertyNames.COLLECTION, node);
     }
 
-    private void discoverAggregatedCollection(boolean shouldExists) throws Exception {
+    private void discoverAggregatedCollection(String aggregatedCollectionName, boolean shouldExists) throws Exception {
         DavPropertyNameSet props = new DavPropertyNameSet();
         props.add(PropertyNames.ADD_MEMBER);
         props.add(PropertyNames.CURRENT_USER_PRIVILEGE_SET);
@@ -143,7 +146,7 @@ public class CollectionsTest extends CardDAVTest {
         PropFindMethod propFind = new PropFindMethod(super.getWebDAVClient().getBaseURI() + Config.getPathPrefix() + "/carddav/", DavConstants.PROPFIND_BY_PROPERTY, props, DavConstants.DEPTH_1);
         MultiStatusResponse aggregatedCollectionResponse = null;
         for (MultiStatusResponse response : super.getWebDAVClient().doPropFind(propFind)) {
-            if (response.getHref().equals(Config.getPathPrefix() + "/carddav/Contacts/")) {
+            if (response.getHref().equals(buildCollectionHref(aggregatedCollectionName))) {
                 aggregatedCollectionResponse = response;
                 break;
             }

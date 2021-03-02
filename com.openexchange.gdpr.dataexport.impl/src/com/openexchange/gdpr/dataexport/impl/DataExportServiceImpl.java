@@ -75,6 +75,7 @@ import com.openexchange.config.cascade.ConfigView;
 import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.config.cascade.ConfigViews;
 import com.openexchange.context.ContextService;
+import com.openexchange.database.DatabaseService;
 import com.openexchange.exception.OXException;
 import com.openexchange.gdpr.dataexport.DataExport;
 import com.openexchange.gdpr.dataexport.DataExportArguments;
@@ -305,7 +306,7 @@ public class DataExportServiceImpl implements DataExportService {
             }
 
             if (exists.booleanValue()) {
-                if (userExists(contextId, contextId, userService) == false) {
+                if (userExists(dataExportTask.getUserId(), contextId, userService) == false) {
                     // Remove task
                     it.remove();
                     if (tasksToDelete == null) {
@@ -895,67 +896,87 @@ public class DataExportServiceImpl implements DataExportService {
     }
 
     synchronized void startProcessingTasks() throws OXException {
-        // Grab thread pool service
+        // Grab services
         ThreadPoolService threadPool = services.getServiceSafe(ThreadPoolService.class);
+        DatabaseService databaseService = services.getServiceSafe(DatabaseService.class);
 
-        // Obtain and check executions mapping
-        final Map<Future<Void>, DataExportTaskExecution> executions = this.executions;
-        for (Iterator<Entry<Future<Void>, DataExportTaskExecution>> it = executions.entrySet().iterator(); it.hasNext();) {
-            Map.Entry<Future<Void>, DataExportTaskExecution> executionEntry = it.next();
-            DataExportTaskExecution execution = executionEntry.getValue();
-            if (execution.isInvalid()) {
-                it.remove();
-                execution.stop();
-                executionEntry.getKey().cancel(true);
-            }
-        }
-
-        // Start new executions as needed
-        int count = 1;
-        while (executions.size() < config.getNumberOfConcurrentTasks()) {
-            Optional<DataExportJob> dataExportJob = storageService.getNextDataExportJob();
-            if (!dataExportJob.isPresent()) {
-                // No pending/paused/expired tasks available
-                LOG.debug("Currently there are no data export tasks to execute");
+        DataExportLock lock = DataExportLock.getInstance();
+        boolean acquired = false;
+        try {
+            acquired = lock.acquireCleanUpTaskLock(false, databaseService);
+            if (acquired == false) {
+                // Failed to acquire clean-up lock
+                LOG.info("Failed to acquire clean-up lock for data export files. Skipping job execution run...");
                 return;
             }
 
-            // Get job
-            DataExportJob job = dataExportJob.get();
+            // Obtain and check executions mapping
+            final Map<Future<Void>, DataExportTaskExecution> executions = this.executions;
+            for (Iterator<Entry<Future<Void>, DataExportTaskExecution>> it = executions.entrySet().iterator(); it.hasNext();) {
+                Map.Entry<Future<Void>, DataExportTaskExecution> executionEntry = it.next();
+                DataExportTaskExecution execution = executionEntry.getValue();
+                if (execution.isInvalid()) {
+                    it.remove();
+                    execution.stop();
+                    executionEntry.getKey().cancel(true);
+                }
+            }
 
-            // Artificial delay
-            long nanosToWait = TimeUnit.NANOSECONDS.convert((count++ * 1000) + ((long) (Math.random() * 1000)), TimeUnit.MILLISECONDS);
-            LockSupport.parkNanos(nanosToWait);
+            // Start new executions as needed
+            int count = 1;
+            while (executions.size() < config.getNumberOfConcurrentTasks()) {
+                Optional<DataExportJob> dataExportJob = storageService.getNextDataExportJob();
+                if (!dataExportJob.isPresent()) {
+                    // No pending/paused/expired tasks available
+                    LOG.debug("Currently there are no data export tasks to execute");
+                    return;
+                }
 
-            // Diagnostics report
-            DiagnosticsReportOptions reportOptions = DiagnosticsReportOptions.builder()
-                .withAddDiagnosticsReport(isAddDiagnosticsReport(job))
-                .withConsiderPermissionDeniedErrors(isConsiderPermissionDeniedErrors(job))
-                .build();
+                // Get job
+                DataExportJob job = dataExportJob.get();
 
-            // Some variables for clean-up
-            DataExportTaskExecution execution = null;
-            Future<Void> future = null;
-            boolean openedForProcessing = false;
-            try {
-                // Initialize execution & submit it to thread pool
-                execution = new DataExportTaskExecution(job, reportOptions, config, storageService, providerRegistry, services);
-                future = threadPool.submit(execution);
+                // Artificial delay
+                long nanosToWait = TimeUnit.NANOSECONDS.convert((count++ * 1000) + ((long) (Math.random() * 1000)), TimeUnit.MILLISECONDS);
+                LockSupport.parkNanos(nanosToWait);
 
-                // Store execution in map. Then open it for being processed while registering a clean-up task that ensures execution is removed from map when finished
-                executions.put(future, execution);
-                execution.allowProcessing(new AllowProcessingRunnable(future, executions));
-                openedForProcessing = true;
-            } finally {
-                if (!openedForProcessing) {
-                    if (execution != null) {
-                        execution.stop();
+                // Diagnostics report
+                DiagnosticsReportOptions reportOptions = DiagnosticsReportOptions.builder()
+                    .withAddDiagnosticsReport(isAddDiagnosticsReport(job))
+                    .withConsiderPermissionDeniedErrors(isConsiderPermissionDeniedErrors(job))
+                    .build();
+
+                // Some variables for clean-up
+                DataExportTaskExecution execution = null;
+                Future<Void> future = null;
+                boolean openedForProcessing = false;
+                try {
+                    // Initialize execution & submit it to thread pool
+                    execution = new DataExportTaskExecution(job, reportOptions, config, storageService, providerRegistry, services);
+                    future = threadPool.submit(execution);
+
+                    // Store execution in map. Then open it for being processed while registering a clean-up task that ensures execution is removed from map when finished
+                    executions.put(future, execution);
+                    execution.allowProcessing(new AllowProcessingRunnable(future, executions));
+                    openedForProcessing = true;
+                } finally {
+                    if (!openedForProcessing) {
+                        if (execution != null) {
+                            execution.stop();
+                        }
+
+                        if (future != null) {
+                            executions.remove(future);
+                            future.cancel(true);
+                        }
                     }
-
-                    if (future != null) {
-                        executions.remove(future);
-                        future.cancel(true);
-                    }
+                }
+            }
+        } finally {
+            if (acquired) {
+                try {
+                    lock.releaseCleanUpTaskLock(false, databaseService);
+                } catch (Exception e) {
+                    LOG.warn("Failed to release clean-up lock for data export files", e);
                 }
             }
         }

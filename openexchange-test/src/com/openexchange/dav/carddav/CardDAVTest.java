@@ -83,6 +83,7 @@ import org.junit.Before;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 import org.junit.runners.Parameterized.Parameters;
+import org.w3c.dom.Node;
 import com.openexchange.ajax.folder.actions.EnumAPI;
 import com.openexchange.ajax.folder.actions.GetResponse;
 import com.openexchange.ajax.folder.actions.InsertResponse;
@@ -99,6 +100,7 @@ import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.container.DistributionListEntryObject;
 import com.openexchange.groupware.container.FolderObject;
+import com.openexchange.java.Strings;
 import net.sourceforge.cardme.engine.VCardEngine;
 import net.sourceforge.cardme.io.CompatibilityMode;
 import net.sourceforge.cardme.vcard.exceptions.VCardException;
@@ -116,7 +118,7 @@ public abstract class CardDAVTest extends WebDAVTest {
 
     private int folderId;
     private VCardEngine vCardEngine;
-
+    private String defaultCollectionHref;
 
     @Parameters(name = "AuthMethod={0}")
     public static Iterable<Object[]> params() {
@@ -137,6 +139,55 @@ public abstract class CardDAVTest extends WebDAVTest {
     @Override
     protected String getDefaultUserAgent() {
         return UserAgents.MACOS_10_7_3;
+    }
+
+    protected String getDefaultCollectionName() throws Exception {
+        return getDefaultCollectionName(false);
+    }
+
+    protected String getDefaultCollectionName(boolean rediscover) throws Exception {
+        if (rediscover || null == defaultCollectionHref) {
+            defaultCollectionHref = discoverDefaultCollectionName();
+        }
+        return defaultCollectionHref;
+    }
+
+    protected String buildVCardHref(String contactUid) throws Exception {
+        return buildVCardHref(getDefaultCollectionName(), contactUid);
+    }
+
+    protected String buildVCardHref(String collectionName, String contactUid) {
+        return buildCollectionHref(collectionName) + contactUid + ".vcf";
+    }
+
+    protected String buildCollectionHref(String collectionName) {
+        return Config.getPathPrefix() + "/carddav/" + collectionName + '/';
+    }
+
+    private static String trimSlashes(String string) {
+        return Strings.trimStart(Strings.trimEnd(string, '/'), '/');
+    }
+
+    protected String discoverDefaultCollectionName() throws Exception {
+        DavPropertyNameSet propertyNames = new DavPropertyNameSet();
+        propertyNames.add(PropertyNames.DISPLAYNAME);
+        propertyNames.add(PropertyNames.RESOURCETYPE);
+        PropFindMethod propFind = new PropFindMethod(getBaseUri() + Config.getPathPrefix() + "/carddav/", propertyNames, DavConstants.DEPTH_1);
+        MultiStatusResponse[] responses = getWebDAVClient().doPropFind(propFind, StatusCodes.SC_MULTISTATUS);
+        for (MultiStatusResponse response : responses) {
+            for (Node node : extractNodeListValue(PropertyNames.RESOURCETYPE, response)) {
+                if (PropertyNames.NS_CARDDAV.getURI().equals(node.getNamespaceURI()) && "addressbook".equals(node.getLocalName())) {
+                    String href = response.getHref();
+                    assertNotNull("got no href from response", href);
+                    int idx = href.indexOf("/carddav/");
+                    if (-1 == idx) {
+                        fail("no /carddav/ in href");
+                    }
+                    return trimSlashes(href.substring(idx + 9));
+                }
+            }
+        }
+        return null;
     }
 
     /**
@@ -170,11 +221,14 @@ public abstract class CardDAVTest extends WebDAVTest {
         return this.vCardEngine;
     }
 
-    protected int delete(final String uid) throws Exception {
+    protected int delete(String contactUid) throws Exception {
+        return delete(getDefaultCollectionName(), contactUid);
+    }
+
+    protected int delete(String collectionName, String contactUid) throws Exception {
         DeleteMethod delete = null;
         try {
-            final String href = Config.getPathPrefix() + "/carddav/Contacts/" + uid + ".vcf";
-            delete = new DeleteMethod(getBaseUri() + href);
+            delete = new DeleteMethod(getBaseUri() + buildVCardHref(collectionName, contactUid));
             return getWebDAVClient().executeMethod(delete);
         } finally {
             release(delete);
@@ -190,7 +244,7 @@ public abstract class CardDAVTest extends WebDAVTest {
         try {
             DavPropertyNameSet props = new DavPropertyNameSet();
             props.add(PropertyNames.GETCTAG);
-            propFind = new PropFindMethod(getBaseUri() + Config.getPathPrefix() + "/carddav/Contacts/", DavConstants.PROPFIND_BY_PROPERTY, props, DavConstants.DEPTH_0);
+            propFind = new PropFindMethod(getBaseUri() + buildCollectionHref(getDefaultCollectionName()), DavConstants.PROPFIND_BY_PROPERTY, props, DavConstants.DEPTH_0);
             MultiStatusResponse response = assertSingleResponse(getWebDAVClient().doPropFind(propFind, StatusCodes.SC_MULTISTATUS));
             return this.extractTextContent(PropertyNames.GETCTAG, response);
         } finally {
@@ -199,13 +253,13 @@ public abstract class CardDAVTest extends WebDAVTest {
     }
 
     public int putVCard(String uid, String vCard) throws Exception {
-        return putVCard(uid, vCard, "Contacts");
+        return putVCard(uid, vCard, getDefaultCollectionName());
     }
 
     protected int putVCard(String uid, String vCard, String collection) throws Exception {
         PutMethod put = null;
         try {
-            final String href = Config.getPathPrefix() + "/carddav/" + collection + "/" + uid + ".vcf";
+            final String href = buildVCardHref(collection, uid);
             put = new PutMethod(getBaseUri() + href);
             put.addRequestHeader(Headers.IF_NONE_MATCH, "*");
             put.setRequestEntity(new StringRequestEntity(vCard, "text/vcard", "UTF-8"));
@@ -216,7 +270,7 @@ public abstract class CardDAVTest extends WebDAVTest {
     }
 
     protected String postVCard(String vCard, float maxSimilarity) throws Exception {
-        return postVCard(vCard, "Contacts", maxSimilarity);
+        return postVCard(vCard, getDefaultCollectionName(), maxSimilarity);
     }
 
     protected String postVCard(String vCard, String collection, float maxSimilarity) throws Exception {
@@ -239,7 +293,7 @@ public abstract class CardDAVTest extends WebDAVTest {
     }
 
     protected int putVCardUpdate(String uid, String vCard, String ifMatchEtag) throws Exception {
-        return putVCardUpdate(uid, vCard, "Contacts", ifMatchEtag);
+        return putVCardUpdate(uid, vCard, getDefaultCollectionName(), ifMatchEtag);
     }
 
     protected int putVCardUpdate(String uid, String vCard, String collection, String ifMatchEtag) throws Exception {
@@ -258,7 +312,7 @@ public abstract class CardDAVTest extends WebDAVTest {
     }
 
     protected String fetchSyncToken() throws Exception {
-        return fetchSyncToken("Contacts");
+        return fetchSyncToken(getDefaultCollectionName());
     }
 
     @Override
@@ -277,7 +331,7 @@ public abstract class CardDAVTest extends WebDAVTest {
      * @throws DavException
      */
     protected Map<String, String> syncCollection(final String syncToken) throws Exception {
-        return syncCollection("Contacts", syncToken);
+        return syncCollection(getDefaultCollectionName(), syncToken);
     }
 
     @Override
@@ -286,7 +340,7 @@ public abstract class CardDAVTest extends WebDAVTest {
     }
 
     protected SyncCollectionResponse syncCollection(SyncToken syncToken) throws Exception {
-        return super.syncCollection(syncToken, "/carddav/Contacts");
+        return syncCollection(getDefaultCollectionName(), syncToken);
     }
 
     protected SyncCollectionResponse syncCollection(String collection, SyncToken syncToken) throws Exception {
@@ -369,7 +423,7 @@ public abstract class CardDAVTest extends WebDAVTest {
         final Map<String, String> eTags = new HashMap<String, String>();
         final DavPropertyNameSet propertyNames = new DavPropertyNameSet();
         propertyNames.add(PropertyNames.GETETAG);
-        final PropFindMethod propFind = new PropFindMethod(getBaseUri() + Config.getPathPrefix() + "/carddav/Contacts", propertyNames, DavConstants.DEPTH_1);
+        final PropFindMethod propFind = new PropFindMethod(getBaseUri() + buildCollectionHref(getDefaultCollectionName()), propertyNames, DavConstants.DEPTH_1);
         final MultiStatusResponse[] responses = this.getWebDAVClient().doPropFind(propFind, StatusCodes.SC_MULTISTATUS);
         for (final MultiStatusResponse response : responses) {
             if (response.getProperties(StatusCodes.SC_OK).contains(PropertyNames.GETETAG)) {
@@ -391,7 +445,7 @@ public abstract class CardDAVTest extends WebDAVTest {
      * @return The vCard resources
      */
     protected List<VCardResource> addressbookMultiget(final Collection<String> hrefs) throws Exception {
-        return addressbookMultiget("Contacts", hrefs);
+        return addressbookMultiget(getDefaultCollectionName(), hrefs);
     }
 
     /**
@@ -421,7 +475,7 @@ public abstract class CardDAVTest extends WebDAVTest {
     protected List<VCardResource> addressbookMultiget(String collection, Collection<String> hrefs, PropContainer props) throws Exception {
         List<VCardResource> addressData = new ArrayList<VCardResource>();
         ReportInfo reportInfo = new AddressbookMultiGetReportInfo(hrefs.toArray(new String[hrefs.size()]), props);
-        MultiStatusResponse[] responses = this.getWebDAVClient().doReport(reportInfo, getBaseUri() + Config.getPathPrefix() + "/carddav/" + collection + '/');
+        MultiStatusResponse[] responses = this.getWebDAVClient().doReport(reportInfo, getBaseUri() + buildCollectionHref(collection));
         for (MultiStatusResponse response : responses) {
             if (response.getProperties(StatusCodes.SC_OK).contains(PropertyNames.GETETAG)) {
                 String href = response.getHref();
@@ -437,7 +491,7 @@ public abstract class CardDAVTest extends WebDAVTest {
     }
 
     protected VCardResource getVCard(final String uid) throws Exception {
-        final String href = Config.getPathPrefix() + "/carddav/Contacts/" + uid + ".vcf";
+        final String href = buildVCardHref(uid);
         final List<VCardResource> vCards = this.addressbookMultiget(Arrays.asList(href));
         assertNotNull("no vCards found", vCards);
         assertEquals("zero or more than one vCards found", 1, vCards.size());
@@ -447,7 +501,7 @@ public abstract class CardDAVTest extends WebDAVTest {
     }
 
     protected VCardResource getVCard(final String uid, String collection) throws Exception {
-        String href = Config.getPathPrefix() + "/carddav/" + collection + "/" + uid + ".vcf";
+        String href = buildVCardHref(collection, uid);
         return getVCardResource(href);
     }
 

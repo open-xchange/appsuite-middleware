@@ -50,17 +50,23 @@
 package com.openexchange.carddav;
 
 import static com.openexchange.java.Autoboxing.I;
+import static com.openexchange.java.Autoboxing.L;
+import static com.openexchange.java.Autoboxing.i;
+import static com.openexchange.java.Autoboxing.l;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import javax.servlet.http.HttpServletResponse;
 import com.openexchange.carddav.resources.RootCollection;
-import com.openexchange.config.cascade.ComposedConfigProperty;
-import com.openexchange.config.cascade.ConfigView;
 import com.openexchange.config.cascade.ConfigViewFactory;
+import com.openexchange.config.lean.DefaultProperty;
+import com.openexchange.config.lean.LeanConfigurationService;
+import com.openexchange.config.lean.Property;
 import com.openexchange.contact.ContactService;
 import com.openexchange.contact.vcard.VCardService;
 import com.openexchange.contact.vcard.storage.VCardStorageFactory;
@@ -101,9 +107,7 @@ import com.openexchange.webdav.protocol.helpers.AbstractResource;
  */
 public class GroupwareCarddavFactory extends DAVFactory {
 
-    private static final String OVERRIDE_NEXT_SYNC_TOKEN_PROPERTY = "com.openexchange.carddav.overridenextsynctoken";
-    private static final String FOLDER_BLACKLIST_PROPERTY = "com.openexchange.carddav.ignoreFolders";
-    private static final String FOLDER_TRRE_ID_PROPERTY = "com.openexchange.carddav.tree";
+    private static final String OVERRIDE_NEXT_SYNC_TOKEN_PROPERTY = "carddav:overridenextsynctoken";
     static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(GroupwareCarddavFactory.class);
 
     private final ThreadLocal<State> stateHolder;
@@ -199,25 +203,6 @@ public class GroupwareCarddavFactory extends DAVFactory {
         return null;
     }
 
-    public String getConfigValue(String key, String defaultValue) throws OXException {
-        ConfigView view = getService(ConfigViewFactory.class).getView(getUser().getId(), getContext().getContextId());
-        ComposedConfigProperty<String> property = view.property(key, String.class);
-        return property.isDefined() ? property.get() : defaultValue;
-    }
-
-    /**
-     * (Optionally) Gets coerced property value from configuration.
-     *
-     * @param property The property name
-     * @param coerceTo The type to coerce to
-     * @param defaultValue The default value
-     * @return The coerced value or <code>defaultValue</code> if absent
-     */
-    public <T> T optConfigValue(String property, Class<T> coerceTo, T defaultValue) throws OXException {
-        ConfigView view = getService(ConfigViewFactory.class).getView(getUser().getId(), getContext().getContextId());
-        return view.opt(property, coerceTo, defaultValue);
-    }
-
     /**
      * Sets the next sync token for the current user to <code>"0"</code>,
      * enforcing the next sync status report to contain all changes
@@ -287,7 +272,7 @@ public class GroupwareCarddavFactory extends DAVFactory {
         private final GroupwareCarddavFactory factory;
         private List<UserizedFolder> allFolders = null;
         private List<UserizedFolder> reducedFolders = null;
-        private HashSet<String> folderBlacklist = null;
+        private Set<String> folderBlacklist = null;
         private UserizedFolder defaultFolder = null;
         private String treeID = null;
         private Long maxVCardSize = null;
@@ -316,12 +301,30 @@ public class GroupwareCarddavFactory extends DAVFactory {
             return defaultFolder;
         }
 
-        /**
-         * Gets a list of all synchronized contact folders.
-         *
-         * @return The contact folders
-         */
-        public List<UserizedFolder> getFolders() throws OXException {
+        public List<UserizedFolder> getVisibleFolders(boolean usedForSyncOnly) throws OXException {
+            List<UserizedFolder> allFolders = getAllFolders();
+            return usedForSyncOnly ? filterNotUsedForSync(allFolders) : allFolders;
+        }
+
+        public List<UserizedFolder> getReducedVisibleFolders(boolean usedForSyncOnly) throws OXException {
+            List<UserizedFolder> reducedFolders = getReducedFolders();
+            return usedForSyncOnly ? filterNotUsedForSync(reducedFolders) : reducedFolders;
+        }
+
+        private static List<UserizedFolder> filterNotUsedForSync(List<UserizedFolder> folders) {
+            if (null == folders || folders.isEmpty()) {
+                return folders;
+            }
+            List<UserizedFolder> filteredFolders = new ArrayList<UserizedFolder>(folders.size());
+            for (UserizedFolder folder : folders) {
+                if (folder.isSubscribed() && (null == folder.getUsedForSync() || folder.getUsedForSync().isUsedForSync())) {
+                    filteredFolders.add(folder);
+                }
+            }
+            return filteredFolders;
+        }
+
+        private List<UserizedFolder> getAllFolders() throws OXException {
             if (null == allFolders) {
                 allFolders = getVisibleFolders();
             }
@@ -333,7 +336,7 @@ public class GroupwareCarddavFactory extends DAVFactory {
          *
          * @return The contact folders
          */
-        public List<UserizedFolder> getReducedFolders() throws OXException {
+        private List<UserizedFolder> getReducedFolders() throws OXException {
             if (null == reducedFolders) {
                 reducedFolders = new ArrayList<UserizedFolder>();
                 UserizedFolder defaultContactsFolder = getDefaultFolder();
@@ -386,10 +389,7 @@ public class GroupwareCarddavFactory extends DAVFactory {
             FolderResponse<UserizedFolder[]> visibleFoldersResponse = folderService.getVisibleFolders(FolderStorage.REAL_TREE_ID, ContactContentType.getInstance(), type, true, this.factory.getSession(), null);
             UserizedFolder[] response = visibleFoldersResponse.getResponse();
             for (UserizedFolder folder : response) {
-                if (Permission.READ_OWN_OBJECTS < folder.getOwnPermission().getReadPermission() &&
-                    false == isBlacklisted(folder) &&
-                    folder.isSubscribed() &&
-                    folder.getUsedForSync().isUsedForSync()) {
+                if (Permission.READ_OWN_OBJECTS < folder.getOwnPermission().getReadPermission() && false == isBlacklisted(folder)) {
                     folders.add(folder);
                 }
             }
@@ -409,7 +409,7 @@ public class GroupwareCarddavFactory extends DAVFactory {
             UserizedFolder[][] response = updatedFoldersResponse.getResponse();
             if (2 <= response.length && null != response[1] && 0 < response[1].length) {
                 for (UserizedFolder folder : response[1]) {
-                    if (Permission.READ_OWN_OBJECTS < folder.getOwnPermission().getReadPermission() && false == this.isBlacklisted(folder) && ContactContentType.getInstance().equals(folder.getContentType()) && folder.getUsedForSync().isUsedForSync()) {
+                    if (Permission.READ_OWN_OBJECTS < folder.getOwnPermission().getReadPermission() && false == isBlacklisted(folder) && ContactContentType.getInstance().equals(folder.getContentType())) {
                         folders.add(folder);
                     }
                 }
@@ -424,35 +424,36 @@ public class GroupwareCarddavFactory extends DAVFactory {
          * @return
          */
         private boolean isBlacklisted(UserizedFolder userizedFolder) {
-            if (null == this.folderBlacklist) {
-                String ignoreFolders = null;
+            if (null == folderBlacklist) {
+                String ignoreFolders;
                 try {
-                    ignoreFolders = factory.getConfigValue(FOLDER_BLACKLIST_PROPERTY, null);
+                    ignoreFolders = factory.getServiceSafe(LeanConfigurationService.class).getProperty(CardDAVProperty.IGNORE_FOLDERS);
                 } catch (OXException e) {
                     LOG.error("", e);
+                    ignoreFolders = CardDAVProperty.IGNORE_FOLDERS.getDefaultValue(String.class);
                 }
-                if (null == ignoreFolders || 0 >= ignoreFolders.length()) {
-                    this.folderBlacklist = new HashSet<String>(0);
+                if (Strings.isEmpty(ignoreFolders)) {
+                    folderBlacklist = Collections.emptySet();
                 } else {
-                    this.folderBlacklist = new HashSet<String>(Arrays.asList(Strings.splitByComma(ignoreFolders)));
+                    folderBlacklist = new HashSet<String>(Arrays.asList(Strings.splitByComma(ignoreFolders)));
                 }
             }
-            return this.folderBlacklist.contains(userizedFolder.getID());
+            return folderBlacklist.contains(userizedFolder.getID());
         }
 
         /**
          * Gets the used folder tree identifier for folder operations.
          */
         private String getTreeID() {
-            if (null == this.treeID) {
+            if (null == treeID) {
                 try {
-                    treeID = factory.getConfigValue(FOLDER_TRRE_ID_PROPERTY, FolderStorage.REAL_TREE_ID);
+                    treeID = factory.getServiceSafe(LeanConfigurationService.class).getProperty(CardDAVProperty.TREE);
                 } catch (OXException e) {
-                    LOG.warn("falling back to tree id ''{}''.", FolderStorage.REAL_TREE_ID, e);
-                    treeID = FolderStorage.REAL_TREE_ID;
+                    treeID = CardDAVProperty.TREE.getDefaultValue(String.class);
+                    LOG.warn("falling back to tree id ''{}''.", treeID, e);
                 }
             }
-            return this.treeID;
+            return treeID;
         }
 
         /**
@@ -462,15 +463,15 @@ public class GroupwareCarddavFactory extends DAVFactory {
          */
         public long getMaxVCardSize() {
             if (null == maxVCardSize) {
-                Long defaultValue = Long.valueOf(4194304);
+                Property property = DefaultProperty.valueOf("com.openexchange.contact.maxVCardSize", L(4194304));
                 try {
-                    maxVCardSize = this.factory.optConfigValue("com.openexchange.contact.maxVCardSize", Long.class, defaultValue);
+                    maxVCardSize = L(factory.getServiceSafe(LeanConfigurationService.class).getLongProperty(property));
                 } catch (OXException e) {
-                    LOG.warn("error reading value for \"com.openexchange.contact.maxVCardSize\", falling back to {}.", defaultValue, e);
-                    maxVCardSize = defaultValue;
+                    maxVCardSize = property.getDefaultValue(Long.class);
+                    LOG.warn("error reading value for \"{}\", falling back to {}.", property, maxVCardSize, e);
                 }
             }
-            return maxVCardSize.longValue();
+            return l(maxVCardSize);
         }
 
         /**
@@ -480,15 +481,15 @@ public class GroupwareCarddavFactory extends DAVFactory {
          */
         public long getMaxUploadSize() {
             if (null == maxUploadSize) {
-                Long defaultValue = Long.valueOf(104857600);
+                Property property = DefaultProperty.valueOf("MAX_UPLOAD_SIZE", L(104857600));
                 try {
-                    maxUploadSize = factory.optConfigValue("MAX_UPLOAD_SIZE", Long.class, defaultValue);
+                    maxUploadSize = L(factory.getServiceSafe(LeanConfigurationService.class).getLongProperty(property));
                 } catch (OXException e) {
-                    LOG.warn("error reading value for \"MAX_UPLOAD_SIZE\", falling back to {}.", defaultValue, e);
-                    maxUploadSize = defaultValue;
+                    maxUploadSize = property.getDefaultValue(Long.class);
+                    LOG.warn("error reading value for \"{}\", falling back to {}.", property, maxVCardSize, e);
                 }
             }
-            return maxUploadSize.longValue();
+            return l(maxUploadSize);
         }
 
         /**
@@ -498,11 +499,13 @@ public class GroupwareCarddavFactory extends DAVFactory {
          * @return The contact limit, or <code>0</code> for no limitations
          */
         public int getContactLimit() {
-            int limit = 25000;
+            Property property = DefaultProperty.valueOf("com.openexchange.webdav.recursiveMarshallingLimit", I(25000));
+            int limit;
             try {
-                limit = Integer.parseInt(factory.getConfigValue("com.openexchange.webdav.recursiveMarshallingLimit", String.valueOf(limit)));
+                limit = factory.getServiceSafe(LeanConfigurationService.class).getIntProperty(property);
             } catch (OXException e) {
-                LOG.warn("error getting \"com.openexchange.webdav.recursiveMarshallingLimit\", falling back to \"{}\".", I(limit), e);
+                limit = i(property.getDefaultValue(Integer.class));
+                LOG.warn("error getting \"{}\", falling back to \"{}\".", property, I(limit), e);
             }
             return 0 >= limit ? 0 : 1 + limit;
         }

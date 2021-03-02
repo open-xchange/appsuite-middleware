@@ -67,19 +67,21 @@ properties:
       file: carddav.properties
       packageName: open-xchange-dav
       tags: ["CardDAV"]
-    - key: com.openexchange.carddav.reducedAggregatedCollection
+    - key: com.openexchange.carddav.aggregatedCollectionFolders
       description: |
-        Specifies if all visible folders are used to create the aggregated 
-        collection, or if a reduced set of folders only containing the global 
-        addressbook and the personal contacts folders should be used. This setting
-        only influences the aggregated collection that is used for clients that
-        don't support multiple collections. Possible values are <code>true</code> and <code>false</code>.
-      defaultValue: false
-      version:
+        Configures which contact folders are exposed through the special aggregated collection. This setting
+        only influences the aggregated collection that is used for clients that don't support multiple collections.
+        Possible values are:
+        <li><code>all</code>: All visible contact folders are exposed</li>
+        <li><code>all_synced</code>: All folders that are marked to be <i>used for sync</i> are exposed</li>
+        <li><code>reduced</code>: Only the default personal and the global addressbook folders are exposed</li>
+        <li><code>reduced_synced</code>: Only the default personal and the global addressbook folders are exposed, if marked to be <i>used for sync</i></li>
+        <li><code>default_only</code>: Only the default personal contact folder is exposed</li>
+      defaultValue: all_synced
+      version: 7.10.5
       reloadable: true
       configcascadeAware: true
-      related: 
+      related: com.openexchange.carddav.userAgentForAggregatedCollection
       file: carddav.properties
       packageName: open-xchange-dav
       tags: ["CardDAV", "Folder"]
-      

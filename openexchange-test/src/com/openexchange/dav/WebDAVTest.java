@@ -59,9 +59,11 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.TimeZone;
 import java.util.UUID;
 import javax.servlet.http.HttpServletResponse;
@@ -89,11 +91,12 @@ import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import com.meterware.httpunit.dom.NodeListImpl;
+import com.openexchange.ajax.chronos.AbstractEnhancedApiClientSession;
+import com.openexchange.ajax.chronos.UserApi;
 import com.openexchange.ajax.folder.actions.EnumAPI;
 import com.openexchange.ajax.folder.actions.VisibleFoldersRequest;
 import com.openexchange.ajax.folder.actions.VisibleFoldersResponse;
 import com.openexchange.ajax.framework.AJAXClient;
-import com.openexchange.ajax.framework.AbstractAJAXSession;
 import com.openexchange.ajax.oauth.provider.AbstractOAuthTest;
 import com.openexchange.ajax.oauth.provider.OAuthSession;
 import com.openexchange.ajax.oauth.provider.protocol.Grant;
@@ -109,6 +112,18 @@ import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.java.util.UUIDs;
 import com.openexchange.oauth.provider.rmi.client.ClientDto;
+import com.openexchange.test.CalendarTestManager;
+import com.openexchange.test.ContactTestManager;
+import com.openexchange.test.FolderTestManager;
+import com.openexchange.test.ResourceTestManager;
+import com.openexchange.test.TaskTestManager;
+import com.openexchange.test.TestManager;
+import com.openexchange.testing.httpclient.models.FolderBody;
+import com.openexchange.testing.httpclient.models.FolderData;
+import com.openexchange.testing.httpclient.models.FolderResponse;
+import com.openexchange.testing.httpclient.models.FolderUpdateResponse;
+import com.openexchange.testing.httpclient.models.NewFolderBody;
+import com.openexchange.testing.httpclient.models.NewFolderBodyFolder;
 
 /**
  * {@link WebDAVTest} - Common base class for WebDAV tests
@@ -116,11 +131,12 @@ import com.openexchange.oauth.provider.rmi.client.ClientDto;
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  */
-public abstract class WebDAVTest extends AbstractAJAXSession {
+public abstract class WebDAVTest extends AbstractEnhancedApiClientSession {
 
     private static final boolean AUTODISCOVER_AUTH = true;
 
     protected static final int TIMEOUT = 10000;
+    protected static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(WebDAVTest.class);
 
     private Map<Long, WebDAVClient> webDAVClients;
 
@@ -210,14 +226,68 @@ public abstract class WebDAVTest extends AbstractAJAXSession {
 
     // --- END: Optional OAuth Configuration --------------------------------------------------------------------------------
 
+    private Set<String> folderIdsToDelete = new HashSet<String>();
+    private List<TestManager> testManagers = new ArrayList<TestManager>();
+
+    protected CalendarTestManager catm;
+    protected ContactTestManager cotm;
+    protected FolderTestManager ftm;
+    protected TaskTestManager ttm;
+    protected ResourceTestManager resTm;
+
+    protected UserApi testUserApi;
+
     @Override
     @Before
     public void setUp() throws Exception {
         super.setUp();
-
         this.webDAVClients = new HashMap<Long, WebDAVClient>();
-        getAJAXClient().setHostname(getHostname());
-        getAJAXClient().setProtocol(getProtocol());
+        AJAXClient client = getClient();
+        client.setHostname(getHostname());
+        client.setProtocol(getProtocol());
+
+        catm = new CalendarTestManager(client);
+        testManagers.add(catm);
+        cotm = new ContactTestManager(client);
+        testManagers.add(cotm);
+        ftm = new FolderTestManager(client);
+        testManagers.add(ftm);
+        ttm = new TaskTestManager(client);
+        testManagers.add(ttm);
+        resTm = new ResourceTestManager(client);
+        testManagers.add(resTm);
+
+        testUserApi = new UserApi(getApiClient(), getEnhancedApiClient(), testUser, false);
+    }
+
+    @Override
+    public void tearDown() throws Exception {
+        try {
+            if (0 < folderIdsToDelete.size()) {
+                try {
+                    testUserApi.getFoldersApi().deleteFolders(getApiClient().getSession(), new ArrayList<String>(folderIdsToDelete), null, null, null, Boolean.TRUE, Boolean.FALSE, null, null);
+                } catch (Exception e) {
+                    LOG.error("", e);
+                }
+            }
+            for (TestManager manager : testManagers) {
+                try {
+                    manager.cleanUp();
+                } catch (Exception e) {
+                    LOG.error("", e);
+                }
+            }
+        } finally {
+            super.tearDown();
+        }
+    }
+
+    protected UserApi getUserApi() {
+        return testUserApi;
+    }
+
+    protected boolean rememberFolderIdForCleanup(String folderId) {
+        return folderIdsToDelete.add(folderId);
     }
 
     protected abstract String getDefaultUserAgent();
@@ -388,6 +458,34 @@ public abstract class WebDAVTest extends AbstractAJAXSession {
 
     protected AJAXClient getAJAXClient() {
         return getClient();
+    }
+
+    protected FolderData createSubfolder(String parentId, String title) throws Exception {
+        return createSubfolder(getFolderData(parentId), title);
+    }
+
+    protected FolderData getFolderData(String id) throws Exception {
+        FolderResponse response = getUserApi().getFoldersApi().getFolder(getApiClient().getSession(), id, null, null, null);
+        return checkResponse(response.getError(), response.getErrorDesc(), response.getData());
+    }
+
+    protected FolderData createSubfolder(FolderData parentFolder, String title) throws Exception {
+        NewFolderBodyFolder newFolder = new NewFolderBodyFolder().module(parentFolder.getModule()).title(title).permissions(null);
+        NewFolderBody newFolderBody = new NewFolderBody();
+        newFolderBody.setFolder(newFolder);
+        FolderUpdateResponse response = getUserApi().getFoldersApi().createFolder(parentFolder.getId(), getApiClient().getSession(), newFolderBody, null, null, null, null);
+        String newId = checkResponse(response.getError(), response.getErrorDesc(), response.getData());
+        rememberFolderIdForCleanup(newId);
+        return getFolderData(newId);
+    }
+
+    protected FolderData updateFolder(String id, FolderData folderUpdate) throws Exception {
+        FolderBody folderBody = new FolderBody();
+        folderBody.setFolder(folderUpdate);
+        FolderUpdateResponse response = getUserApi().getFoldersApi().updateFolder(getApiClient().getSession(), id, folderBody, null, null, null, null, null, null, null);
+        String newId = checkResponse(response.getError(), response.getErrorDesc(), response.getData());
+        rememberFolderIdForCleanup(newId);
+        return getFolderData(newId);
     }
 
     protected String fetchSyncToken(String relativeUrl) throws Exception {

@@ -4,27 +4,27 @@ icon: fab fa-yahoo
 tags: 3rd Party, Yahoo, Installation, Configuration, Contacts
 ---
 
+# WARNING
+
+Yahoo! has removed the Contacts permission from newly created Apps as seen below, while retained the permission in already existing Apps. This means that if you re-create your App you will LOSE the contacts permission and you won't be able to get it back. No clue if this is a malfunction or they are making preparations for something else. There hasn't been any official announcement yet.
+
+![](yahoo/yahoo_create_app_sshot.png)
+
+Their OAuth documentation still references the appropriate [scopes](https://developer.yahoo.com/oauth2/guide/yahoo_scopes/) for the contacts API, but since it is not possible to enable it on newly created apps is basically obsolete. However, in [this](https://developer.yahoo.com/oauth2/guide/openid_connect/getting_started.html) guide, there is a hint of Premium API Services. In the screenshots in the previous mentioned link, the Contacts API permission is still available, along with some other permissions that are not available when trying to create a new app. Now, either the documentation is outdated (more likely), or there is indeed a Premium API Services.
+
+The documentation [link](https://developer.yahoo.com/social/rest_api_guide/contacts_table.html) regarding their social API stopped working, including that of the contacts API. The only announcement regarding their social API (and probably their contacts API) is [this one](https://developer.yahoo.com/oauth/social-directory-eol/).
+
 # Preparation
 
-## Creating the Yahoo! application
+## Get the Tokens
 
-First things first. As with every OAuth provider, you will first need to create a Yahoo! App. You can do this as follows:
+You should already have a Yahoo! App with the Contacts Permission enabled as shown in the screenshot below. If not, then you won't be able to use the Yahoo! integration as explained in the warning above.
+
+![](yahoo/yahoo_old_app_sshot.png)
 
 * Go [here](https://developer.yahoo.com/apps/create/) and sign into Yahoo!. It is recommended to use a company account for this where the credentials are known to more than one person.
-* You will see a list of all Yahoo! applications associated with the current account. Click "*Create an App*" on the right.
-
-![](yahoo/projects_list.png)
-
-* Enter a name and description for the Yahoo! application in fields "*Application Name*" and "*Description*" respectively. Both will be shown to your users when allowing access the application later.
-* Select **Web Application** for *Application Type*.
-* Enter the domain of your company's website in field "*Home Page URL*"
-* Enter in the *Callback Domain* field the domain where your Open-Xchange server will run. This is important as the API key and API secret that will be generated later for your application will only work for this domain.
-* Under *API Permissions* check the "**Contacts**" options and select the "**Read**" option.
-* Then click "*Create App*"
-
-![](yahoo/create_project.png)
-
-* Once the application is created, Yahoo! will generate a *Cliend ID* (the consumer key or API key) and a *Client Secret* (the consumer secret or API secret). These values need to be added to the `/opt/openexchange/etc/groupware/yahoooauth.properties` file under `com.openexchange.oauth.yahoo.apiKey` and `com.openexchange.oauth.yahoo.apiSecret` respectively.
+* You will see a list of all Yahoo! applications associated with the current account. Click on your App.
+* Copy the *Client ID* (the consumer key or API key) and a *Client Secret* (the consumer secret or API secret). These values need to be added to the `/opt/openexchange/etc/groupware/yahoooauth.properties` file under `com.openexchange.oauth.yahoo.apiKey` and `com.openexchange.oauth.yahoo.apiSecret` respectively.
 
 ![](yahoo/key_pair.png)
 
