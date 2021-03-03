@@ -125,7 +125,7 @@ public class PlistSMSTest extends AbstractPlistSMSTest {
     @Test
     @TryAgain
     public void testDownload() throws Exception {
-        PListDownloadTestHelper helper = new PListDownloadTestHelper(PlistSMSTest.class.getName());
+        PListDownloadTestHelper helper = new PListDownloadTestHelper();
         int userId = testUser.getUserId();
         int ctxId = testUser.getContextId();
         String hostname = AJAXConfig.getProperty(AJAXConfig.Property.HOSTNAME);

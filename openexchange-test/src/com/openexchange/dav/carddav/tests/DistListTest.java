@@ -152,6 +152,7 @@ public class DistListTest extends CardDAVTest {
         assertNotNull("contact not found in list", entry1);
         assertEquals("entry id wrong", contact1.getObjectID(), entry1.getEntryID());
         assertNotNull("user contact not found in list", userContact);
+        assertNotNull(entryUser);
         assertEquals("entry id wrong", userContact.getObjectID(), entryUser.getEntryID());
     }
 
@@ -231,6 +232,7 @@ public class DistListTest extends CardDAVTest {
         assertNotNull("contact not found in list", entry1);
         assertEquals("entry id wrong", contact1.getObjectID(), entry1.getEntryID());
         assertNotNull("user contact not found in list", userContact);
+        assertNotNull(entryUser);
         assertEquals("entry id wrong", userContact.getObjectID(), entryUser.getEntryID());
     }
 

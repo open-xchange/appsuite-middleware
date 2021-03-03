@@ -115,7 +115,7 @@ public class PermissionLimitTest extends AbstractConfigAwareAPIClientSession {
         assertTrue("Not enough users to perform this test.", allEntities.size() > 3);
         validPerms = allEntities.stream().limit(2).toArray(Integer[]::new);
         invalidPerms = allEntities.stream().toArray(Integer[]::new);
-        defaultFolder = getDefaultFolder(getSessionId());
+        defaultFolder = getDefaultFolder();
     }
 
     @Override
@@ -166,12 +166,11 @@ public class PermissionLimitTest extends AbstractConfigAwareAPIClientSession {
     /**
      * Retrieves the default contact folder of the user with the specified session
      *
-     * @param session The session of the user
      * @return The default contact folder of the user
      * @throws Exception if the default contact folder cannot be found
      */
     @SuppressWarnings("unchecked")
-    private String getDefaultFolder(String session) throws Exception {
+    private String getDefaultFolder() throws Exception {
         FoldersVisibilityResponse visibleFolders = folderApi.getVisibleFolders("infostore", "1,308", "0", null, null);
         if (visibleFolders.getError() != null) {
             throw new OXException(new Exception(visibleFolders.getErrorDesc()));

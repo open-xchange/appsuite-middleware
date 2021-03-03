@@ -164,9 +164,8 @@ public class AJAXClient {
             // TODO: Maybe assume http as default protocol
             if (sleep != -1) {
                 return Executor.execute(getSession(), request, getProtocol(), getHostname(), sleep);
-            } else {
-                return Executor.execute(getSession(), request, getProtocol(), getHostname());
             }
+            return Executor.execute(getSession(), request, getProtocol(), getHostname());
         }
 
         return Executor.execute(this, request);

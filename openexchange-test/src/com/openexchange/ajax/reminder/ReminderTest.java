@@ -56,7 +56,7 @@ import com.openexchange.test.OXTestToolkit;
 
 public abstract class ReminderTest extends AbstractAJAXSession {
 
-    public static void compareReminder(final ReminderObject reminderObj1, final ReminderObject reminderObj2) throws Exception {
+    public static void compareReminder(final ReminderObject reminderObj1, final ReminderObject reminderObj2) {
         assertEquals("id", reminderObj1.getObjectId(), reminderObj2.getObjectId());
         assertEquals("folder", reminderObj1.getFolder(), reminderObj2.getFolder());
         OXTestToolkit.assertEqualsAndNotNull("alarm", reminderObj1.getDate(), reminderObj2.getDate());

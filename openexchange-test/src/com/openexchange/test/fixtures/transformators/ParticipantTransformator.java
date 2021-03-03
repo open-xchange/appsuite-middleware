@@ -115,6 +115,7 @@ public class ParticipantTransformator implements Transformator {
         }
     }
 
+    @SuppressWarnings("deprecation")
     private Participant getExternalUserParticipant(final String fixtureName, final String fixtureEntry) throws OXException {
         final Contact contact = fixtureLoader.getFixtures(fixtureName, Contact.class).getEntry(fixtureEntry).getEntry();
         String email = null;

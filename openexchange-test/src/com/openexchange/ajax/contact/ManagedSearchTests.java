@@ -105,6 +105,7 @@ public class ManagedSearchTests extends AbstractManagedContactTest {
         }
     }
 
+    @SuppressWarnings("deprecation")
     @Test
     public void testSearchPattern() {
         for (String name : sinographs) {

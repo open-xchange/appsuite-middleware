@@ -80,6 +80,7 @@ public class CSVImportExportServletTest extends AbstractManagedContactTest {
         super();
     }
 
+    @SuppressWarnings("deprecation")
     public Map<ContactField, Integer> getPositions(List<List<String>> csv) {
         HashMap<ContactField, Integer> result = new HashMap<ContactField, Integer>();
         List<String> headers = csv.get(0);

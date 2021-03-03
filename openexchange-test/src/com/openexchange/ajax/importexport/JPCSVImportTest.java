@@ -94,7 +94,7 @@ public class JPCSVImportTest extends AbstractConfigAwareAPIClientSession {
         super.setUp();
         this.importApi = new ImportApi(getApiClient());
         foldersApi = new FoldersApi(getApiClient());
-        folderId = createAndRememberNewFolder(foldersApi, getDefaultFolder(getSessionId()), getApiClient().getUserId().intValue());
+        folderId = createAndRememberNewFolder(foldersApi, getDefaultFolder(), getApiClient().getUserId().intValue());
         contactsApi = new ContactsApi(getApiClient());
     }
 
@@ -154,7 +154,7 @@ public class JPCSVImportTest extends AbstractConfigAwareAPIClientSession {
      * @throws Exception if the default contact folder cannot be found
      */
     @SuppressWarnings("unchecked")
-    private String getDefaultFolder(String session) throws Exception {
+    private String getDefaultFolder() throws Exception {
         FoldersVisibilityResponse visibleFolders = foldersApi.getVisibleFolders("contacts", "1,308", "0", null, Boolean.TRUE);
         if (visibleFolders.getError() != null) {
             throw new OXException(new Exception(visibleFolders.getErrorDesc()));

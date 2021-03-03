@@ -55,7 +55,6 @@ import static com.openexchange.ajax.chronos.itip.ITipAssertion.assertSingleEvent
 import static com.openexchange.ajax.chronos.itip.ITipUtil.changeCalendarSettings;
 import static com.openexchange.ajax.chronos.itip.ITipUtil.constructBody;
 import static com.openexchange.ajax.chronos.itip.ITipUtil.convertToAttendee;
-import static com.openexchange.ajax.chronos.itip.ITipUtil.getJSLoabForCalendar;
 import static com.openexchange.ajax.chronos.itip.ITipUtil.receiveIMip;
 import static com.openexchange.java.Autoboxing.I;
 import static org.hamcrest.Matchers.containsStringIgnoringCase;
@@ -68,7 +67,6 @@ import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
-import java.util.Map;
 import java.util.UUID;
 import org.jdom2.IllegalDataException;
 import org.junit.Before;
@@ -108,8 +106,6 @@ public class InternalNotificationTest extends AbstractITipAnalyzeTest {
 
     private ApiClient apiClient2C1;
 
-    private Map<Object, Object> jslob;
-
     private JSlobApi jslobApi;
     
     /**
@@ -135,7 +131,6 @@ public class InternalNotificationTest extends AbstractITipAnalyzeTest {
         internalAttendee.setPartStat(PartStat.NEEDS_ACTION.getStatus());
 
         jslobApi = new JSlobApi(apiClient2C1);
-        jslob = getJSLoabForCalendar(jslobApi);
         changeCalendarSettings(jslobApi, true, true, true, false);
 
         /*

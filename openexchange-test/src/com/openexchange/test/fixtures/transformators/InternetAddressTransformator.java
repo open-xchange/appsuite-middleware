@@ -131,9 +131,8 @@ public class InternetAddressTransformator implements Transformator {
             : fixtureLoader.getFixtures(fixtureName, Contact.class).getEntry(fixtureEntry).getEntry(); //contacts
         if (null == contact) {
             throw OXException.general("Unable to convert " + fixtureName + ":" + fixtureEntry + " into a contact.");
-        } else {
-            return getAddresses(contact, plainFlags);
         }
+        return getAddresses(contact, plainFlags);
     }
 
     private List<InternetAddress> getAddresses(final Contact contact, final boolean plainFlags) throws OXException {

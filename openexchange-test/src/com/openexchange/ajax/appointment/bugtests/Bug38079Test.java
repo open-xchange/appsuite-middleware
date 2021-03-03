@@ -57,8 +57,6 @@ import java.util.TimeZone;
 import org.json.JSONException;
 import org.junit.Before;
 import org.junit.Test;
-import com.openexchange.ajax.config.actions.GetRequest;
-import com.openexchange.ajax.config.actions.GetResponse;
 import com.openexchange.ajax.config.actions.SetRequest;
 import com.openexchange.ajax.config.actions.Tree;
 import com.openexchange.ajax.framework.AbstractAJAXSession;
@@ -74,7 +72,6 @@ import com.openexchange.groupware.container.Appointment;
 public class Bug38079Test extends AbstractAJAXSession {
 
     private Appointment appointment;
-    private String origTimeZone;
 
     public Bug38079Test() {
         super();
@@ -84,10 +81,6 @@ public class Bug38079Test extends AbstractAJAXSession {
     @Before
     public void setUp() throws Exception {
         super.setUp();
-
-        GetRequest getRequest = new GetRequest(Tree.TimeZone);
-        GetResponse getResponse = getClient().execute(getRequest);
-        origTimeZone = getResponse.getString();
 
         appointment = new Appointment();
         appointment.setTitle("Bug 38079 Test");

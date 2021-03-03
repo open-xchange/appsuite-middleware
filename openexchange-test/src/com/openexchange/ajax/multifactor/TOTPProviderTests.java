@@ -51,8 +51,8 @@ package com.openexchange.ajax.multifactor;
 
 import static com.openexchange.java.Autoboxing.B;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.emptyOrNullString;
 import static org.hamcrest.Matchers.is;
-import static org.hamcrest.Matchers.isEmptyOrNullString;
 import static org.hamcrest.Matchers.not;
 import static org.hamcrest.Matchers.nullValue;
 import java.util.HashMap;
@@ -126,7 +126,7 @@ public class TOTPProviderTests extends AbstractMultifactorProviderTest {
             B(matcher.matches()), is(Boolean.TRUE));
 
         //Chat that some QR-Barcode data was returned
-        assertThat(challenge.getBase64Image(), not(isEmptyOrNullString()));
+        assertThat(challenge.getBase64Image(), not(is(emptyOrNullString())));
     }
 
     @Override

@@ -50,9 +50,9 @@
 package com.openexchange.ajax.multifactor;
 
 import static org.hamcrest.Matchers.empty;
+import static org.hamcrest.Matchers.emptyString;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.is;
-import static org.hamcrest.Matchers.isEmptyString;
 import static org.hamcrest.Matchers.not;
 import static org.hamcrest.Matchers.nullValue;
 import static org.junit.Assert.assertThat;
@@ -125,7 +125,7 @@ public class U2FProviderTest extends AbstractMultifactorProviderTest  {
     @Override
     protected void validateStartRegistrationResponse(MultifactorStartRegistrationResponseData startRegistrationData) throws Exception {
         MultifactorStartRegistrationResponseDataChallenge challenge = startRegistrationData.getChallenge();
-        assertThat(challenge.getRequestId(), not(isEmptyString()));
+        assertThat(challenge.getRequestId(), not(is(emptyString())));
         assertThat(challenge.getRegisterRequests(), is(not(nullValue())));
         assertThat(challenge.getRegisterRequests(), is(not(empty())));
 

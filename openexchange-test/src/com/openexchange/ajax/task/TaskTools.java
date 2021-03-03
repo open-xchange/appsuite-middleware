@@ -220,7 +220,7 @@ public final class TaskTools extends ParticipantTools {
      * @param taskObj2 The actual {@link Task}
      * @throws Exception if an error is occurred
      */
-    public static void compareObject(final Task taskObj1, final Task taskObj2) throws Exception {
+    public static void compareObject(final Task taskObj1, final Task taskObj2) {
         assertEquals("id is not equals", taskObj1.getObjectID(), taskObj2.getObjectID());
         assertEqualsAndNotNull("title is not equals", taskObj1.getTitle(), taskObj2.getTitle());
         assertEqualsAndNotNull("start is not equals", taskObj1.getStartDate(), taskObj2.getStartDate());

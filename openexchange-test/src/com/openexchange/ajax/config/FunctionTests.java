@@ -256,12 +256,14 @@ public class FunctionTests extends AbstractAJAXSession {
         }
     }
 
+    @SuppressWarnings("deprecation")
     @Test
     public void testOLOX20Module() throws Throwable {
         final GetResponse response = client.execute(new GetRequest(Tree.OLOX20Module));
         assertFalse("Module for OLOX20 must be always false to prevent UI plugin loading.", response.getBoolean());
     }
 
+    @SuppressWarnings("deprecation")
     @Test
     public void testOLOX20Active() throws Throwable {
         final GetResponse response = client.execute(new GetRequest(Tree.OLOX20Active));

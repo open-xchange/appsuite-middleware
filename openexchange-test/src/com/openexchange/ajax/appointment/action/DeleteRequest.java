@@ -183,21 +183,20 @@ public class DeleteRequest extends AbstractAppointmentRequest<CommonDeleteRespon
                 json.put(CalendarFields.RECURRENCE_DATE_POSITION, recurrenceDatePosition.getTime());
             }
             return json;
-        } else {
-            final JSONArray jsonArray = new JSONArray();
-            for (final int id : objectIds) {
-                final JSONObject json = new JSONObject();
-                json.put(DataFields.ID, id);
-                json.put(AJAXServlet.PARAMETER_INFOLDER, inFolder);
-                if (recurrencePosition > 0) {
-                    json.put(CalendarFields.RECURRENCE_POSITION, recurrencePosition);
-                } else if (recurrenceDatePosition != null) {
-                    json.put(CalendarFields.RECURRENCE_DATE_POSITION, recurrenceDatePosition.getTime());
-                }
-                jsonArray.put(json);
-            }
-            return jsonArray;
         }
+        final JSONArray jsonArray = new JSONArray();
+        for (final int id : objectIds) {
+            final JSONObject json = new JSONObject();
+            json.put(DataFields.ID, id);
+            json.put(AJAXServlet.PARAMETER_INFOLDER, inFolder);
+            if (recurrencePosition > 0) {
+                json.put(CalendarFields.RECURRENCE_POSITION, recurrencePosition);
+            } else if (recurrenceDatePosition != null) {
+                json.put(CalendarFields.RECURRENCE_DATE_POSITION, recurrenceDatePosition.getTime());
+            }
+            jsonArray.put(json);
+        }
+        return jsonArray;
     }
 
     /**

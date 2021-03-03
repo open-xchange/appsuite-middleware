@@ -92,6 +92,7 @@ public class Bug18094Test_VCardRoundtrip extends AbstractManagedContactTest {
         cotm.newAction(contact);
     }
 
+    @SuppressWarnings("deprecation")
     @Test
     public void testFullVCardRoundtrip() throws Exception {
         VCardExportRequest exportRequest = new VCardExportRequest(folderID, false);

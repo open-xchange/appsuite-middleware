@@ -112,6 +112,7 @@ import com.openexchange.test.tryagain.TryAgain;
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  * @since v7.8.0
  */
+@SuppressWarnings("deprecation")
 @RunWith(ParallelParameterized.class)
 public class ReadFoldersTest extends AbstractOAuthTest {
 

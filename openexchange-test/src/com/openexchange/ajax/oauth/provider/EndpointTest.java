@@ -190,7 +190,7 @@ public abstract class EndpointTest {
     public void after() throws Exception {
         try {
             if (client != null && client.getConnectionManager() != null) {
-                client.close();;
+                client.close();
             }
             RemoteClientManagement clientManagement = (RemoteClientManagement) Naming.lookup("rmi://" + AJAXConfig.getProperty(Property.RMI_HOST) + ":1099/" + RemoteClientManagement.RMI_NAME);
             clientManagement.unregisterClient(oauthClient.getId(), AbstractOAuthTest.getMasterAdminCredentials());

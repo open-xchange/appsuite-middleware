@@ -71,6 +71,7 @@ import com.openexchange.oauth.provider.resourceserver.scope.Scope;
  */
 public class ReadContactTest extends AbstractOAuthTest {
 
+    @SuppressWarnings("deprecation")
     public ReadContactTest() {
         super(Scope.newInstance(ContactActionFactory.OAUTH_READ_SCOPE, ContactActionFactory.OAUTH_WRITE_SCOPE));
     }

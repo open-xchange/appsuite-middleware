@@ -115,17 +115,16 @@ public class GetResponse extends AbstractAJAXResponse {
         final String imageUrl = getImageUrl();
         if (imageUrl == null) {
             return null;
-        } else {
-            final String path = "/ajax/image?uid=";
-            int index = imageUrl.indexOf(path);
+        }
+        final String path = "/ajax/image?uid=";
+        int index = imageUrl.indexOf(path);
 
-            String uid;
-            try {
-                uid = URLDecoder.decode(imageUrl.substring(index + path.length(), imageUrl.length()), "UTF-8");
-                return uid;
-            } catch (UnsupportedEncodingException e) {
-                throw OXException.general(e.getMessage());
-            }
+        String uid;
+        try {
+            uid = URLDecoder.decode(imageUrl.substring(index + path.length(), imageUrl.length()), "UTF-8");
+            return uid;
+        } catch (UnsupportedEncodingException e) {
+            throw OXException.general(e.getMessage());
         }
     }
 

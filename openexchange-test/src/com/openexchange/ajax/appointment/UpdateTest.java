@@ -50,6 +50,7 @@
 package com.openexchange.ajax.appointment;
 
 import static com.openexchange.groupware.calendar.TimeTools.D;
+import static com.openexchange.java.Autoboxing.i;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
@@ -111,8 +112,8 @@ public class UpdateTest extends AppointmentTest {
         appointmentObj.setObjectID(objectId);
 
         final int userParticipantId = testUser2.getAjaxClient().getValues().getUserId();
-        final int groupParticipantId = testContext.acquireGroup(Optional.empty()); //TODO null check
-        final int resourceParticipantId = testContext.acquireResource(); // TODO add null check
+        final int groupParticipantId = i(testContext.acquireGroup(Optional.empty())); //TODO null check
+        final int resourceParticipantId = i(testContext.acquireResource()); // TODO add null check
 
         final com.openexchange.groupware.container.Participant[] participants = new com.openexchange.groupware.container.Participant[4];
         participants[0] = new UserParticipant(userId);

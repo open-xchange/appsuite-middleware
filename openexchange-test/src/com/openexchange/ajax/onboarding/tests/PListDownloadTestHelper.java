@@ -85,10 +85,8 @@ public class PListDownloadTestHelper {
 
     /**
      * Initializes a new {@link PListDownloadTestHelper}.
-     * 
-     * @param name
      */
-    public PListDownloadTestHelper(String name) {
+    public PListDownloadTestHelper() {
         super();
     }
 

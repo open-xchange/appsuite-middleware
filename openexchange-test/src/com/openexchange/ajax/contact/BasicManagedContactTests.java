@@ -130,6 +130,7 @@ public class BasicManagedContactTests extends AbstractManagedContactTest {
         assertTrue("Should contain field #20", actual.contains(20));
     }
 
+    @SuppressWarnings("deprecation")
     @Test
     public void testGetAllContactsOrderedByCollationAscending() {
         List<String> sinograph = Arrays.asList("\u963f", "\u6ce2", "\u6b21", "\u7684", "\u9e45", "\u5bcc", "\u54e5", "\u6cb3", "\u6d01", "\u79d1", "\u4e86", "\u4e48", "\u5462", "\u54e6", "\u6279", "\u4e03", "\u5982", "\u56db", "\u8e22", "\u5c4b", "\u897f", "\u8863", "\u5b50");
@@ -147,6 +148,7 @@ public class BasicManagedContactTests extends AbstractManagedContactTest {
         }
     }
 
+    @SuppressWarnings("deprecation")
     @Test
     public void testGetAllContactsOrderedByCollationDescending() {
         List<String> sinograph = Arrays.asList("\u963f", "\u6ce2", "\u6b21", "\u7684", "\u9e45", "\u5bcc", "\u54e5", "\u6cb3", "\u6d01", "\u79d1", "\u4e86", "\u4e48", "\u5462", "\u54e6", "\u6279", "\u4e03", "\u5982", "\u56db", "\u8e22", "\u5c4b", "\u897f", "\u8863", "\u5b50");
@@ -168,6 +170,7 @@ public class BasicManagedContactTests extends AbstractManagedContactTest {
      * The "wonder field" is 607, which implies sorting by last name, company name, email1, email2 and display name.
      * Currently not testing e-mail since it is not supported yet.
      */
+    @SuppressWarnings("deprecation")
     @Test
     public void testGetAllContactsOrderedByCollationOrderedByWonderField() {
         List<String> sinograph = Arrays.asList("\u963f", "\u6ce2", "\u6b21", "\u7684", "\u9e45", "\u5bcc", "\u54e5", "\u6cb3", "\u6d01"); //,"\u79d1","\u4e86","\u4e48","\u5462","\u54e6","\u6279","\u4e03","\u5982","\u56db","\u8e22","\u5c4b","\u897f","\u8863","\u5b50");

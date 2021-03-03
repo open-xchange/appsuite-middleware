@@ -72,6 +72,7 @@ public class JSONApiTest extends AbstractOAuthTest {
     /**
      * Initializes a new {@link JSONApiTest}.
      */
+    @SuppressWarnings("deprecation")
     public JSONApiTest() {
         super(Scope.newInstance(ContactActionFactory.OAUTH_READ_SCOPE)); // scope for first grant
     }
@@ -81,7 +82,7 @@ public class JSONApiTest extends AbstractOAuthTest {
         return TestClassConfig.builder().createAjaxClient().createApiClient().build();
     }
 
-    @SuppressWarnings("unused")
+    @SuppressWarnings({ "unused", "deprecation" })
     @Test
     public void testAllAndRevoke() throws Exception {
         new OAuthClient(testUser, clientApp.getId(), clientApp.getSecret(), clientApp.getRedirectURIs().get(0), Scope.newInstance(AppointmentActionFactory.OAUTH_READ_SCOPE, AppointmentActionFactory.OAUTH_WRITE_SCOPE));

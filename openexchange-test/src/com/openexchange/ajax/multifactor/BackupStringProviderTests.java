@@ -52,9 +52,9 @@ package com.openexchange.ajax.multifactor;
 import static com.openexchange.java.Autoboxing.I;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsString;
+import static org.hamcrest.Matchers.emptyOrNullString;
 import static org.hamcrest.Matchers.greaterThan;
 import static org.hamcrest.Matchers.is;
-import static org.hamcrest.Matchers.isEmptyOrNullString;
 import static org.hamcrest.Matchers.not;
 import java.util.HashMap;
 import java.util.Map;
@@ -129,7 +129,7 @@ public class BackupStringProviderTests extends AbstractMultifactorProviderTest {
 
     @Override
     protected void validateStartRegistrationResponse(MultifactorStartRegistrationResponseData startRegistrationData) throws Exception {
-        assertThat(startRegistrationData.getChallenge().getSharedSecret(), not(isEmptyOrNullString()));
+        assertThat(startRegistrationData.getChallenge().getSharedSecret(), not(is(emptyOrNullString())));
     }
 
     @Override

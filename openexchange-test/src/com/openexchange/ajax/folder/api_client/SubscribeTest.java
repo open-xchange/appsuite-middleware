@@ -111,7 +111,7 @@ public class SubscribeTest extends AbstractConfigAwareAPIClientSession {
     public void setUp() throws Exception {
         super.setUp();
         foldersApi = new FoldersApi(getApiClient());
-        defaultFolder = getDefaultFolder(getSessionId(), foldersApi);
+        defaultFolder = getDefaultFolder(foldersApi);
         toDelete = new HashSet<>();
     }
 
@@ -123,8 +123,8 @@ public class SubscribeTest extends AbstractConfigAwareAPIClientSession {
      * @return The default calendar folder of the user
      * @throws Exception if the default calendar folder cannot be found
      */
-    protected String getDefaultFolder(String session, FoldersApi foldersApi) throws Exception {
-        ArrayList<ArrayList<?>> privateList = getPrivateFolderList(foldersApi, session, module, "1,308", TREE);
+    protected String getDefaultFolder(FoldersApi foldersApi) throws Exception {
+        ArrayList<ArrayList<?>> privateList = getPrivateFolderList(foldersApi, module, "1,308", TREE);
         if (privateList.size() == 1) {
             return (String) privateList.get(0).get(0);
         }
@@ -146,7 +146,7 @@ public class SubscribeTest extends AbstractConfigAwareAPIClientSession {
      * @throws Exception if the api call fails
      */
     @SuppressWarnings({ "unchecked" })
-    protected ArrayList<ArrayList<?>> getPrivateFolderList(FoldersApi foldersApi, String session, String module, String columns, String tree) throws Exception {
+    protected ArrayList<ArrayList<?>> getPrivateFolderList(FoldersApi foldersApi, String module, String columns, String tree) throws Exception {
         FoldersVisibilityResponse visibleFolders = foldersApi.getVisibleFolders(module, columns, tree, null, Boolean.TRUE);
         if (visibleFolders.getError() != null) {
             throw new OXException(new Exception(visibleFolders.getErrorDesc()));

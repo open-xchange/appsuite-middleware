@@ -144,16 +144,15 @@ public class DeleteRequest extends AbstractTaskRequest<CommonDeleteResponse> {
             json.put(AJAXServlet.PARAMETER_ID, taskId);
             json.put(AJAXServlet.PARAMETER_INFOLDER, folderId);
             return json;
-        } else {
-            JSONArray jsonArray = new JSONArray();
-            for (final int id : taskIds) {
-                final JSONObject json = new JSONObject();
-                json.put(AJAXServlet.PARAMETER_ID, id);
-                json.put(AJAXServlet.PARAMETER_INFOLDER, folderId);
-                jsonArray.put(json);
-            }
-            return jsonArray;
         }
+        JSONArray jsonArray = new JSONArray();
+        for (final int id : taskIds) {
+            final JSONObject json = new JSONObject();
+            json.put(AJAXServlet.PARAMETER_ID, id);
+            json.put(AJAXServlet.PARAMETER_INFOLDER, folderId);
+            jsonArray.put(json);
+        }
+        return jsonArray;
     }
 
     /**

@@ -1,6 +1,7 @@
 
 package com.openexchange.ajax.appointment;
 
+import static com.openexchange.java.Autoboxing.i;
 import static org.junit.Assert.assertTrue;
 import java.util.Calendar;
 import java.util.Date;
@@ -128,7 +129,7 @@ public class FreeBusyTest extends AppointmentTest {
         appointmentObj.setParentFolderID(appointmentFolderId);
         appointmentObj.setIgnoreConflicts(true);
 
-        final int resourceParticipantId = testContext.acquireResource(); // TODO add null check
+        final int resourceParticipantId = i(testContext.acquireResource()); // TODO add null check
 
         final com.openexchange.groupware.container.Participant[] participants = new com.openexchange.groupware.container.Participant[2];
         participants[0] = new UserParticipant(userId);

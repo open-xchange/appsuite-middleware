@@ -421,9 +421,7 @@ public class U2FClient {
 
                 return new AuthenticationData(base64ClientData, base64ClientHandle, base64ResponseData);
             }
-            else {
-                throw new U2FClientException("Unable to get key for client handle");
-            }
+            throw new U2FClientException("Unable to get key for client handle");
 
         } catch (JSONException | IOException e) {
             throw new U2FClientException(e.getMessage(), e);

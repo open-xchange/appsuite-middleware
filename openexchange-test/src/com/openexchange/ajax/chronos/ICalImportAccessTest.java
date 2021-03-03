@@ -49,6 +49,7 @@
 
 package com.openexchange.ajax.chronos;
 
+import static com.openexchange.java.Autoboxing.I;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import java.rmi.Naming;
@@ -81,7 +82,7 @@ public class ICalImportAccessTest extends AbstractImportExportTest {
         this.credentials = new Credentials(admin.getUser(), admin.getPassword());
         this.iface = (OXUserInterface) Naming.lookup("rmi://" + AJAXConfig.getProperty(Property.RMI_HOST) + ":1099/" + OXUserInterface.RMI_NAME);
         this.ctx = new Context();
-        this.ctx.setId(testUser.getContextId());
+        this.ctx.setId(I(testUser.getContextId()));
         setModuleAccess(false);
     }
 

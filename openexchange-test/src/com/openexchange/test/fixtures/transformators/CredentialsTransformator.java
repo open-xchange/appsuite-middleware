@@ -76,9 +76,8 @@ public class CredentialsTransformator implements Transformator {
         final String[] splitted = value.split(":");
         if (splitted.length < 2) {
             throw OXException.general("Unable to transform '" + value + "' into simple credentials");
-        } else {
-            return getCredentials(splitted[0], splitted[1]);
         }
+        return getCredentials(splitted[0], splitted[1]);
     }
 
     private final SimpleCredentials getCredentials(final String fixtureName, final String fixtureEntry) throws OXException {

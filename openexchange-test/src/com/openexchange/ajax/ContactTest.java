@@ -118,7 +118,7 @@ public class ContactTest extends AbstractAJAXSession {
         return cotm.newAction(contactObj).getObjectID();
     }
 
-    protected void compareObject(final Contact contactObj1, final Contact contactObj2) throws Exception {
+    protected void compareObject(final Contact contactObj1, final Contact contactObj2) {
         assertEquals("id is not equals", contactObj1.getObjectID(), contactObj2.getObjectID());
         assertEquals("folder id is not equals", contactObj1.getParentFolderID(), contactObj2.getParentFolderID());
         assertTrue("private flag is not equals", contactObj1.getPrivateFlag() == contactObj2.getPrivateFlag());

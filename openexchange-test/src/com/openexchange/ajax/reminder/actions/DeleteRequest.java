@@ -38,16 +38,15 @@ public class DeleteRequest extends AbstractReminderRequest<CommonDeleteResponse>
             json.put(CalendarFields.RECURRENCE_POSITION, reminder.getRecurrencePosition());
             json.put(ReminderFields.ID, reminder.getObjectId());
             return json;
-        } else {
-            JSONArray jsonArray = new JSONArray();
-            for (ReminderObject reminder : reminders) {
-                JSONObject json = new JSONObject();
-                json.put(CalendarFields.RECURRENCE_POSITION, reminder.getRecurrencePosition());
-                json.put(ReminderFields.ID, reminder.getObjectId());
-                jsonArray.put(json);
-            }
-            return jsonArray;
         }
+        JSONArray jsonArray = new JSONArray();
+        for (ReminderObject reminder : reminders) {
+            JSONObject json = new JSONObject();
+            json.put(CalendarFields.RECURRENCE_POSITION, reminder.getRecurrencePosition());
+            json.put(ReminderFields.ID, reminder.getObjectId());
+            jsonArray.put(json);
+        }
+        return jsonArray;
     }
 
     @Override
@@ -60,10 +59,9 @@ public class DeleteRequest extends AbstractReminderRequest<CommonDeleteResponse>
         if (reminders == null) {
             return new Parameter[] { new Parameter(AJAXServlet.PARAMETER_ACTION, AJAXServlet.ACTION_DELETE), new Parameter(AJAXServlet.PARAMETER_TIMESTAMP, String.valueOf(reminder.getLastModified().getTime()))
             };
-        } else {
-            return new Parameter[] { new Parameter(AJAXServlet.PARAMETER_ACTION, AJAXServlet.ACTION_DELETE), new Parameter(AJAXServlet.PARAMETER_TIMESTAMP, String.valueOf(reminders[0].getLastModified().getTime()))
-            };
         }
+        return new Parameter[] { new Parameter(AJAXServlet.PARAMETER_ACTION, AJAXServlet.ACTION_DELETE), new Parameter(AJAXServlet.PARAMETER_TIMESTAMP, String.valueOf(reminders[0].getLastModified().getTime()))
+        };
     }
 
     @Override

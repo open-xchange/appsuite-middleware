@@ -72,12 +72,10 @@ public class InfoItem extends DocumentMetadataImpl {
         if (this.containsVersions()) {
             if (super.getVersion() < this.versions.length) {
                 return this.versions[super.getVersion()];
-            } else {
-                return this.versions[0];
             }
-        } else {
-            return null;
+            return this.versions[0];
         }
+        return null;
     }
 
     /**

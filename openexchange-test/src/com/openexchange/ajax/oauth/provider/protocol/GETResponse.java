@@ -78,25 +78,8 @@ public final class GETResponse extends AbstractResponse {
             }
         }
 
-        String portPart = "";
-        if (!isDefaultPort()) {
-            portPart = ":" + Integer.toString(request.port);
-        }
         postRequest.setHeader(HttpHeaders.REFERER, request.scheme + "://" + request.hostname + EndpointTest.AUTHORIZATION_ENDPOINT);
         return postRequest;
     }
-
-    private boolean isDefaultPort() {
-        if (request.port <= 0) {
-            return true;
-        }
-
-        if (request.scheme.equalsIgnoreCase("https")) {
-            return request.port == 443;
-        }
-
-        return request.port == 80;
-    }
-
 
 }

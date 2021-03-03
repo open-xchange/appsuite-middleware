@@ -125,7 +125,7 @@ public class UpdatesTest extends AppointmentTest {
     }
 
     @Test
-    public void testModifiedRecurrenceAppointment() throws Exception {
+    public void testModifiedRecurrenceAppointment() {
         final Date start = new Date(System.currentTimeMillis() - (7 * dayInMillis));
         final Date end = new Date(System.currentTimeMillis() + (7 * dayInMillis));
 

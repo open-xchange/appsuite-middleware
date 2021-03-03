@@ -49,12 +49,10 @@
 
 package com.openexchange.ajax.task;
 
-import static com.openexchange.ajax.task.TaskTools.getTask;
 import static com.openexchange.java.Autoboxing.I;
 import static com.openexchange.java.Autoboxing.L;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 import java.io.IOException;
@@ -326,13 +324,9 @@ public class TasksTest extends Abstrac2UserAJAXSession {
 
         final int taskId = ttm.insertTaskOnServer(task).getObjectID();
 
-        final Response response = getTask(getClient(), folderId, taskId);
-        assertNull(response.getErrorMessage(), response.getErrorMessage());
-        Object data = response.getData();
-        assertTrue(data instanceof Task);
-        final Task reload = (Task) data;
+        final Task reload = ttm.getTaskFromServer(folderId, taskId);
         assertEquals("Missing reminder.", remind, reload.getAlarm());
-        deleteTask(folderId, taskId, response.getTimestamp());
+        ttm.deleteTaskOnServer(reload);
     }
 
     /**

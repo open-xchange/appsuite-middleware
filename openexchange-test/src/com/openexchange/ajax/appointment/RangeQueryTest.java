@@ -59,10 +59,8 @@ import java.util.GregorianCalendar;
 import java.util.List;
 import java.util.TimeZone;
 import org.json.JSONArray;
-import org.junit.Before;
 import org.junit.Test;
 import com.openexchange.ajax.AJAXServlet;
-import com.openexchange.ajax.config.actions.GetRequest;
 import com.openexchange.ajax.config.actions.SetRequest;
 import com.openexchange.ajax.config.actions.Tree;
 import com.openexchange.ajax.framework.AbstractAJAXSession;
@@ -78,15 +76,6 @@ import com.openexchange.test.CTMUtils;
  * @since v7.10.0
  */
 public class RangeQueryTest extends AbstractAJAXSession {
-
-    private String originalTimeZone;
-
-    @Override
-    @Before
-    public void setUp() throws Exception {
-        super.setUp();
-        originalTimeZone = getClient().execute(new GetRequest(Tree.TimeZone)).getString();
-    }
 
     @Test
     public void testPacificHonolulu() throws Exception {

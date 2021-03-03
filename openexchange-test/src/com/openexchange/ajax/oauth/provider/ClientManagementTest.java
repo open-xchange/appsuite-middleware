@@ -110,6 +110,7 @@ public class ClientManagementTest {
         credentials = AbstractOAuthTest.getMasterAdminCredentials();
     }
 
+    @SuppressWarnings("deprecation")
     @Test
     public void testUpdatePermutations() throws Exception {
         ClientDataDto clientData = prepareClient(ClientManagementTest.class.getSimpleName() + "_" + System.currentTimeMillis());

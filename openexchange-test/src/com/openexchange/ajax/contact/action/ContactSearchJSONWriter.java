@@ -65,6 +65,7 @@ public class ContactSearchJSONWriter {
      * @return a JSON representation of the task search object.
      * @throws JSONException if writing json gives errors.
      */
+    @SuppressWarnings("deprecation")
     public static JSONObject write(final ContactSearchObject search) throws JSONException {
         final JSONObject json = new JSONObject();
         int[] folders = search.getFolders();

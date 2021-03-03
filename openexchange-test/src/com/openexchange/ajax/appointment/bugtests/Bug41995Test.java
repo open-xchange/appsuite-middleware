@@ -55,8 +55,6 @@ import java.util.Date;
 import java.util.TimeZone;
 import org.junit.Before;
 import org.junit.Test;
-import com.openexchange.ajax.config.actions.GetRequest;
-import com.openexchange.ajax.config.actions.GetResponse;
 import com.openexchange.ajax.config.actions.SetRequest;
 import com.openexchange.ajax.config.actions.Tree;
 import com.openexchange.ajax.framework.AbstractAJAXSession;
@@ -76,8 +74,6 @@ public class Bug41995Test extends AbstractAJAXSession {
 
     private CalendarTestManager ctm2;
     private Appointment appointment;
-    private String origtz1;
-    private String origtz2;
 
     @Override
     @Before
@@ -86,13 +82,6 @@ public class Bug41995Test extends AbstractAJAXSession {
         catm.setFailOnError(true);
         ctm2 = new CalendarTestManager(testUser2.getAjaxClient());
         ctm2.setFailOnError(true);
-
-        GetRequest getRequest = new GetRequest(Tree.TimeZone);
-        GetResponse getResponse = getClient().execute(getRequest);
-        origtz1 = getResponse.getString();
-        getRequest = new GetRequest(Tree.TimeZone);
-        getResponse = getClient().execute(getRequest);
-        origtz2 = getResponse.getString();
 
         SetRequest setRequest = new SetRequest(Tree.TimeZone, "America/New_York");
         getClient().execute(setRequest);

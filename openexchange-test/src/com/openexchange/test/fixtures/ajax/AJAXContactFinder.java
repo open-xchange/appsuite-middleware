@@ -74,6 +74,7 @@ public class AJAXContactFinder implements ContactFinder {
         this.client = client;
     }
 
+    @SuppressWarnings("deprecation")
     private void loadGlobalAddressBook() {
         AllRequest all = new AllRequest(FolderObject.SYSTEM_LDAP_FOLDER_ID, Contact.ALL_COLUMNS);
 
