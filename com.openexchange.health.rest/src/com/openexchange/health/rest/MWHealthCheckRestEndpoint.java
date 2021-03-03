@@ -49,7 +49,6 @@
 
 package com.openexchange.health.rest;
 
-import java.lang.reflect.Method;
 import java.nio.charset.Charset;
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -70,19 +69,13 @@ import org.json.ImmutableJSONObject;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
-import com.openexchange.config.lean.LeanConfigurationService;
 import com.openexchange.exception.OXException;
-import com.openexchange.health.MWHealthCheckProperty;
 import com.openexchange.health.MWHealthCheckResponse;
 import com.openexchange.health.MWHealthCheckResult;
 import com.openexchange.health.MWHealthCheckService;
 import com.openexchange.health.MWHealthState;
-import com.openexchange.java.Strings;
-import com.openexchange.java.util.Pair;
-import com.openexchange.rest.services.EndpointAuthenticator;
 import com.openexchange.rest.services.annotation.Role;
 import com.openexchange.rest.services.annotation.RoleAllowed;
-import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.version.VersionService;
 
@@ -94,7 +87,7 @@ import com.openexchange.version.VersionService;
  */
 @Path("/health")
 @RoleAllowed(Role.INDIVIDUAL_BASIC_AUTHENTICATED)
-public class MWHealthCheckRestEndpoint implements EndpointAuthenticator {
+public class MWHealthCheckRestEndpoint extends MWHealthAbstractEndpoint {
 
     private static final JSONObject SIMPLE_UP_RESPONSE;
     static {
@@ -112,11 +105,8 @@ public class MWHealthCheckRestEndpoint implements EndpointAuthenticator {
         SIMPLE_DOWN_RESPONSE = ImmutableJSONObject.immutableFor(simpleUpResponse);
     }
 
-    private final ServiceLookup services;
-
     public MWHealthCheckRestEndpoint(ServiceLookup services) {
-        super();
-        this.services = services;
+        super(services);
     }
 
     @GET
@@ -186,43 +176,6 @@ public class MWHealthCheckRestEndpoint implements EndpointAuthenticator {
         serverInfo.put("locale", Locale.getDefault());
         serverInfo.put("charset", Charset.defaultCharset().name());
         return serverInfo;
-    }
-
-    @Override
-    public String getRealmName() {
-        return "OX HEALTH";
-    }
-
-    @Override
-    public boolean permitAll(Method invokedMethod) {
-        Pair<String, String> credentials;
-        try {
-            credentials = getCredentials();
-            return (null == credentials || (Strings.isEmpty(credentials.getFirst()) && Strings.isEmpty(credentials.getSecond())));
-        } catch (OXException e) {
-            return false;
-        }
-    }
-
-    @Override
-    public boolean authenticate(String login, String password, Method invokedMethod) {
-        Pair<String, String> credentials;
-        try {
-            credentials = getCredentials();
-            return (null != credentials && credentials.getFirst().equals(login) && credentials.getSecond().equals(password));
-        } catch (OXException e) {
-            return false;
-        }
-    }
-
-    private Pair<String, String> getCredentials() throws OXException {
-        LeanConfigurationService configurationService = services.getService(LeanConfigurationService.class);
-        if (null == configurationService) {
-            throw ServiceExceptionCode.absentService(LeanConfigurationService.class);
-        }
-        String username = configurationService.getProperty(MWHealthCheckProperty.username);
-        String password = configurationService.getProperty(MWHealthCheckProperty.password);
-        return new Pair<String, String>(username, password);
     }
 
 }

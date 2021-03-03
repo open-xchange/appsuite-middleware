@@ -51,7 +51,7 @@ package com.openexchange.health.impl.osgi;
 
 import org.eclipse.microprofile.health.HealthCheck;
 import org.eclipse.microprofile.health.HealthCheckResponse;
-import org.eclipse.microprofile.health.HealthCheckResponse.State;
+import org.eclipse.microprofile.health.HealthCheckResponse.Status;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
 import org.osgi.util.tracker.ServiceTrackerCustomizer;
@@ -90,7 +90,7 @@ public class HealthCheckTracker implements ServiceTrackerCustomizer<HealthCheck,
             @Override
             public MWHealthCheckResponse call() {
                 HealthCheckResponse response = check.call();
-                return new MWHealthCheckResponseImpl(getName(), response.getData().isPresent() ? response.getData().get() : null, State.UP.equals(response.getState()));
+                return new MWHealthCheckResponseImpl(getName(), response.getData().isPresent() ? response.getData().get() : null, Status.UP.equals(response.getStatus()));
             }
         };
         if (healthCheckService.addCheck(wrappingCheck)) {

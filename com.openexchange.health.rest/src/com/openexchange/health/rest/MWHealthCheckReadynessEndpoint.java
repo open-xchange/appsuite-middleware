@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH group of companies.
+ *    trademarks of the OX Software GmbH. group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -47,32 +47,66 @@
  *
  */
 
-package com.openexchange.health.rest.osgi;
+package com.openexchange.health.rest;
 
-import com.openexchange.config.lean.LeanConfigurationService;
+import javax.ws.rs.Consumes;
+import javax.ws.rs.GET;
+import javax.ws.rs.Path;
+import javax.ws.rs.Produces;
+import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
+import javax.ws.rs.core.Response.Status;
+import com.openexchange.health.MWHealthCheckResult;
 import com.openexchange.health.MWHealthCheckService;
-import com.openexchange.health.rest.MWHealthCheckReadynessEndpoint;
-import com.openexchange.health.rest.MWHealthCheckRestEndpoint;
-import com.openexchange.osgi.HousekeepingActivator;
-import com.openexchange.version.VersionService;
+import com.openexchange.health.MWHealthState;
+import com.openexchange.rest.services.annotation.Role;
+import com.openexchange.rest.services.annotation.RoleAllowed;
+import com.openexchange.server.ServiceLookup;
+
 
 /**
- * {@link MWHealthCheckRestActivator}
+ * {@link MWHealthCheckReadynessEndpoint}
  *
  * @author <a href="mailto:jan.bauerdick@open-xchange.com">Jan Bauerdick</a>
- * @since v7.10.1
+ * @since v8.0.0
  */
-public class MWHealthCheckRestActivator extends HousekeepingActivator {
+@Path("/ready")
+@RoleAllowed(Role.INDIVIDUAL_BASIC_AUTHENTICATED)
+public class MWHealthCheckReadynessEndpoint extends MWHealthAbstractEndpoint {
 
-    @Override
-    protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { MWHealthCheckService.class, LeanConfigurationService.class, VersionService.class };
+    /**
+     * Initializes a new {@link MWHealthCheckReadynessEndpoint}.
+     *
+     * @param services The {@link ServiceLookup}
+     */
+    public MWHealthCheckReadynessEndpoint(ServiceLookup services) {
+        super(services);
     }
 
-    @Override
-    protected void startBundle() throws Exception {
-        registerService(MWHealthCheckRestEndpoint.class, new MWHealthCheckRestEndpoint(this));
-        registerService(MWHealthCheckReadynessEndpoint.class, new MWHealthCheckReadynessEndpoint(this));
+    @GET
+    @Consumes(MediaType.TEXT_PLAIN)
+    @Produces(MediaType.TEXT_PLAIN)
+    public Response ready() {
+        MWHealthCheckService service = services.getService(MWHealthCheckService.class);
+        MWHealthCheckResult result = null;
+        if (null == service) {
+            MWHealthCheckService.LOG.error("Health Status: DOWN (MWHealthCheckService is unavailable)");
+            return Response.status(Status.INTERNAL_SERVER_ERROR).build();
+        }
+
+        try {
+            result = service.check();
+        } catch (RuntimeException e) {
+            MWHealthCheckService.LOG.error("Health Status: DOWN ({})", e.getMessage());
+            return Response.status(Status.INTERNAL_SERVER_ERROR).build();
+        }
+        MWHealthState status = result.getStatus();
+        if (MWHealthState.DOWN.equals(status)) {
+            MWHealthCheckService.LOG.debug("Health Status: DOWN, call /health for more information");
+            return Response.status(Status.SERVICE_UNAVAILABLE).build();
+        }
+        MWHealthCheckService.LOG.debug("Health Status: UP");
+        return Response.status(Status.OK).build();
     }
 
 }

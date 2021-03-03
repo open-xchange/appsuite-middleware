@@ -296,3 +296,15 @@ properties:
       file: grizzly.properties
       packageName: open-xchange-grizzly
       tags: ["Grizzly"]
+    - key: com.openexchange.connector.livenessPort
+      description: |
+        The port for the liveness end-point.
+        
+      defaultValue: 8015
+      version: 8.0.0
+      reloadable: false
+      configcascadeAware: false
+      related: []
+      file: grizzly.properties
+      packageName: open-xchange-grizzly
+      tags: ["Grizzly"]

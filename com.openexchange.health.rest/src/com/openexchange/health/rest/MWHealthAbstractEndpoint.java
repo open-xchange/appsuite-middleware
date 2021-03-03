@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH group of companies.
+ *    trademarks of the OX Software GmbH. group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -47,32 +47,68 @@
  *
  */
 
-package com.openexchange.health.rest.osgi;
+package com.openexchange.health.rest;
 
+import java.lang.reflect.Method;
 import com.openexchange.config.lean.LeanConfigurationService;
-import com.openexchange.health.MWHealthCheckService;
-import com.openexchange.health.rest.MWHealthCheckReadynessEndpoint;
-import com.openexchange.health.rest.MWHealthCheckRestEndpoint;
-import com.openexchange.osgi.HousekeepingActivator;
-import com.openexchange.version.VersionService;
+import com.openexchange.exception.OXException;
+import com.openexchange.health.MWHealthCheckProperty;
+import com.openexchange.java.Strings;
+import com.openexchange.java.util.Pair;
+import com.openexchange.rest.services.EndpointAuthenticator;
+import com.openexchange.server.ServiceLookup;
 
 /**
- * {@link MWHealthCheckRestActivator}
+ * {@link MWHealthAbstractEndpoint}
  *
  * @author <a href="mailto:jan.bauerdick@open-xchange.com">Jan Bauerdick</a>
- * @since v7.10.1
+ * @since v8.0.0
  */
-public class MWHealthCheckRestActivator extends HousekeepingActivator {
+public abstract class MWHealthAbstractEndpoint implements EndpointAuthenticator {
 
-    @Override
-    protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { MWHealthCheckService.class, LeanConfigurationService.class, VersionService.class };
+    protected final ServiceLookup services;
+
+    /**
+     * Initializes a new {@link MWHealthAbstractEndpoint}.
+     *
+     * @param services The {@link ServiceLookup}
+     */
+    protected MWHealthAbstractEndpoint(ServiceLookup services) {
+        this.services = services;
     }
 
     @Override
-    protected void startBundle() throws Exception {
-        registerService(MWHealthCheckRestEndpoint.class, new MWHealthCheckRestEndpoint(this));
-        registerService(MWHealthCheckReadynessEndpoint.class, new MWHealthCheckReadynessEndpoint(this));
+    public String getRealmName() {
+        return "OX HEALTH";
+    }
+
+    @Override
+    public boolean permitAll(Method invokedMethod) {
+        Pair<String, String> credentials;
+        try {
+            credentials = getCredentials();
+            return (null == credentials || (Strings.isEmpty(credentials.getFirst()) && Strings.isEmpty(credentials.getSecond())));
+        } catch (@SuppressWarnings("unused") OXException e) {
+            return false;
+        }
+    }
+
+    @Override
+    public boolean authenticate(String login, String password, Method invokedMethod) {
+        Pair<String, String> credentials;
+        try {
+            credentials = getCredentials();
+            return (null != credentials && credentials.getFirst().equals(login) && credentials.getSecond().equals(password));
+        } catch (@SuppressWarnings("unused") OXException e) {
+            return false;
+        }
+    }
+
+    private Pair<String, String> getCredentials() throws OXException {
+        LeanConfigurationService configurationService = services.getServiceSafe(LeanConfigurationService.class);
+        String username = configurationService.getProperty(MWHealthCheckProperty.username);
+        String password = configurationService.getProperty(MWHealthCheckProperty.password);
+        return new Pair<String, String>(username, password);
     }
 
 }

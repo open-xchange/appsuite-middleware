@@ -85,6 +85,7 @@ import org.glassfish.grizzly.http.GZipContentEncoding;
 import org.glassfish.grizzly.http.LZMAContentEncoding;
 import org.glassfish.grizzly.http.server.filecache.FileCache;
 import org.glassfish.grizzly.http.server.jmxbase.JmxEventListener;
+import org.glassfish.grizzly.http.util.HttpStatus;
 import org.glassfish.grizzly.impl.FutureImpl;
 import org.glassfish.grizzly.memory.MemoryProbe;
 import org.glassfish.grizzly.monitoring.MonitoringConfig;
@@ -724,7 +725,24 @@ public class OXHttpServer extends HttpServer {
             config.setSessionTimeoutSeconds(grizzlyConfig.getCookieMaxInactivityInterval());
 
             final HttpServerFilter httpServerFilter = new OXHttpServerFilter(grizzlyConfig, config, delayedExecutor);
-            httpServerFilter.setHttpHandler(httpHandlerChain);
+            if ("liveness-listener".equals(listener.getName())) {
+                HttpHandler livenessHtppHandler = new HttpHandler() {
+
+                    @Override
+                    public void service(Request request, Response response) throws Exception {
+                        response.setContentType("text/plain");
+                        response.setContentLength(2);
+                        response.getWriter().write("OK");
+                        response.setStatus(HttpStatus.OK_200);
+                    }
+                };
+                HttpHandlerRegistration handlerRegistration = HttpHandlerRegistration.fromString("/live");
+                HttpHandlerChain httpHandlerChain = new HttpHandlerChain(this);
+                httpHandlerChain.addHandler(livenessHtppHandler, new HttpHandlerRegistration[] { handlerRegistration });
+                httpServerFilter.setHttpHandler(httpHandlerChain);
+            } else {
+                httpServerFilter.setHttpHandler(httpHandlerChain);
+            }
 
             httpServerFilter.getMonitoringConfig().addProbes(
                     serverConfig.getMonitoringConfig().getWebServerConfig().getProbes());

@@ -84,6 +84,7 @@ public class GrizzlyConfig {
         private String httpHost = "0.0.0.0";
         private int httpPort = 8009;
         private int httpsPort = 8010;
+        private int livenessPort = 8015;
         private boolean isJMXEnabled = false;
         private GrizzlyAccessLogConfig accessLogConfig = GrizzlyAccessLogConfig.NOT_ENABLED_CONFIG;
         private boolean isWebsocketsEnabled = false;
@@ -185,6 +186,7 @@ public class GrizzlyConfig {
             }
             this.httpPort = configService.getIntProperty("com.openexchange.connector.networkListenerPort", 8009);
             this.httpsPort = configService.getIntProperty("com.openexchange.connector.networkSslListenerPort", 8010);
+            this.livenessPort = configService.getIntProperty("com.openexchange.connector.livenessPort", 8015);
             this.maxRequestParameters = configService.getIntProperty("com.openexchange.connector.maxRequestParameters", 1000);
             this.backendRoute = configService.getProperty("com.openexchange.server.backendRoute", "OX0");
             this.echoHeader = configService.getProperty("com.openexchange.servlet.echoHeaderName","X-Echo-Header");
@@ -274,6 +276,11 @@ public class GrizzlyConfig {
 
         public Builder setHttpsPort(int httpsPort) {
             this.httpsPort = httpsPort;
+            return this;
+        }
+
+        public Builder setLivenessPort(int livenessPort) {
+            this.livenessPort = livenessPort;
             return this;
         }
 
@@ -458,7 +465,7 @@ public class GrizzlyConfig {
         }
 
         public GrizzlyConfig build() {
-            return new GrizzlyConfig(httpHost, httpPort, httpsPort, isJMXEnabled, accessLogConfig, isWebsocketsEnabled, isCometEnabled, maxRequestParameters, backendRoute, isAbsoluteRedirect, shutdownFast, awaitShutDownSeconds, maxHttpHeaderSize, isSslEnabled, keystorePath, keystorePassword, sessionExpiryCheckInterval, sessionUnjoinedThreshold, removeNonAuthenticatedSessions, maxNumberOfConcurrentRequests, checkTrackingIdInRequestParameters, cookieMaxAge, cookieMaxInactivityInterval, isForceHttps, isCookieHttpOnly, contentSecurityPolicy, defaultEncoding, isConsiderXForwards, knownProxies, forHeader, protocolHeader, httpsProtoValue, httpProtoPort, httpsProtoPort, echoHeader, robotsMetaTag, maxBodySize, maxNumberOfHttpSessions, enabledCiphers, wsTimeoutMillis, supportHierachicalLookupOnNotFound);
+            return new GrizzlyConfig(httpHost, httpPort, httpsPort, livenessPort, isJMXEnabled, accessLogConfig, isWebsocketsEnabled, isCometEnabled, maxRequestParameters, backendRoute, isAbsoluteRedirect, shutdownFast, awaitShutDownSeconds, maxHttpHeaderSize, isSslEnabled, keystorePath, keystorePassword, sessionExpiryCheckInterval, sessionUnjoinedThreshold, removeNonAuthenticatedSessions, maxNumberOfConcurrentRequests, checkTrackingIdInRequestParameters, cookieMaxAge, cookieMaxInactivityInterval, isForceHttps, isCookieHttpOnly, contentSecurityPolicy, defaultEncoding, isConsiderXForwards, knownProxies, forHeader, protocolHeader, httpsProtoValue, httpProtoPort, httpsProtoPort, echoHeader, robotsMetaTag, maxBodySize, maxNumberOfHttpSessions, enabledCiphers, wsTimeoutMillis, supportHierachicalLookupOnNotFound);
         }
     }
 
@@ -466,14 +473,17 @@ public class GrizzlyConfig {
 
     // Grizzly properties
 
-    /** The host for the http network listener. Default value: 0.0.0.0, bind to every nic of your host. */
+    /** The host for the HTTP network listener. Default value: 0.0.0.0, bind to every nic of your host. */
     private final String httpHost;
 
-    /** The default port for the http network listener. */
+    /** The default port for the HTTP network listener. */
     private final int httpPort;
 
-    /** The default port for the https network listener. */
+    /** The default port for the HTTPS network listener. */
     private final int httpsPort;
+
+    /** The default port for the liveness end-point. */
+    private final int livenessPort;
 
     /** Enable Grizzly monitoring via JMX? */
     private final boolean isJMXEnabled;
@@ -484,13 +494,13 @@ public class GrizzlyConfig {
     /** Enable Bi-directional, full-duplex communications channels over a single TCP connection. */
     private final boolean isWebsocketsEnabled;
 
-    /** Enable Technologies for pseudo realtime communication with the server */
+    /** Enable Technologies for pseudo real-time communication with the server */
     private final boolean isCometEnabled;
 
     /** The max. number of allowed request parameters */
     private final int maxRequestParameters;
 
-    /** Unique backend route for every single backend behind the load balancer */
+    /** Unique back-end route for every single back-end behind the load balancer */
     private final String backendRoute;
 
     /** Do we want to send absolute or relative redirects */
@@ -508,7 +518,7 @@ public class GrizzlyConfig {
     /** Enable SSL */
     private final boolean isSslEnabled;
 
-    /** Path to keystore with X.509 certificates */
+    /** Path to key-store with X.509 certificates */
     private final String keystorePath;
 
     /** Keystore password */
@@ -522,16 +532,16 @@ public class GrizzlyConfig {
     /** Interval between two client requests in seconds until the JSession is declared invalid */
     private final int cookieMaxInactivityInterval;
 
-    /** Marks cookies as secure although the request is insecure e.g. when the backend is behind a ssl terminating proxy */
+    /** Marks cookies as secure although the request is insecure e.g. when the back-end is behind a SSL terminating proxy */
     private final boolean isForceHttps;
 
-    /** Make the cookie accessible only via http methods. This prevents Javascript access to the cookie / cross site scripting */
+    /** Make the cookie accessible only via HTTP methods. This prevents JavaScript access to the cookie / cross site scripting */
     private final boolean isCookieHttpOnly;
 
     /** The the value for the <code>Content-Security-Policy</code> header<br>Please refer to <a href="http://www.html5rocks.com/en/tutorials/security/content-security-policy/">An Introduction to Content Security Policy</a>*/
     private final String contentSecurityPolicy;
 
-    /** Default encoding for incoming Http Requests, this value must be equal to the web server's default encoding */
+    /** Default encoding for incoming HTTP requests, this value must be equal to the web server's default encoding */
     private final String defaultEncoding;
 
     /** Do we want to consider X-Forward-* Headers */
@@ -549,16 +559,16 @@ public class GrizzlyConfig {
     /** The name of the protocolHeader used to decide if we are dealing with a in-/secure Request */
     private final String protocolHeader;
 
-    /** The value indicating secure http communication */
+    /** The value indicating secure HTTP communication */
     private final String httpsProtoValue;
 
-    /** The port used for http communication */
+    /** The port used for HTTP communication */
     private final int httpProtoPort;
 
-    /** The port used for https communication */
+    /** The port used for HTTPS communication */
     private final int httpsProtoPort;
 
-    /** The name of the echo header whose value is echoed for each request providing that header, see mod_id for apache */
+    /** The name of the echo header whose value is echoed for each request providing that header, see mod_id for Apache */
     private final String echoHeader;
 
     /** The value of the <code>X-Robots-Tag</code> response header to set. Default is none. */
@@ -587,17 +597,18 @@ public class GrizzlyConfig {
     /** Checks if the special "trackingId" parameter is supposed to be looked-up or always newly created */
     private final boolean checkTrackingIdInRequestParameters;
 
-    /** Checks if hierarchical look-up of "parent" servlets should be supported. */
+    /** Checks if hierarchical look-up of "parent" Servlets should be supported. */
     private final boolean supportHierachicalLookupOnNotFound;
 
     /** Whether to remove non-authenticated HTTP sessions (no Open-Xchange session associated with it) */
     private final boolean removeNonAuthenticatedSessions;
 
-    GrizzlyConfig(String httpHost, int httpPort, int httpsPort, boolean isJMXEnabled, GrizzlyAccessLogConfig accessLogConfig, boolean isWebsocketsEnabled, boolean isCometEnabled, int maxRequestParameters, String backendRoute, boolean isAbsoluteRedirect, boolean shutdownFast, int awaitShutDownSeconds, int maxHttpHeaderSize, boolean isSslEnabled, String keystorePath, String keystorePassword, int sessionExpiryCheckInterval, int sessionUnjoinedThreshold, boolean removeNonAuthenticatedSessions, int maxNumberOfConcurrentRequests, boolean checkTrackingIdInRequestParameters, int cookieMaxAge, int cookieMaxInactivityInterval, boolean isForceHttps, boolean isCookieHttpOnly, String contentSecurityPolicy, String defaultEncoding, boolean isConsiderXForwards, List<IPRange> knownProxies, String forHeader, String protocolHeader, String httpsProtoValue, int httpProtoPort, int httpsProtoPort, String echoHeader, String robotsMetaTag, int maxBodySize, int maxNumberOfHttpSessions, List<String> enabledCiphers, long wsTimeoutMillis, boolean supportHierachicalLookupOnNotFound) {
+    GrizzlyConfig(String httpHost, int httpPort, int httpsPort, int livenessPort, boolean isJMXEnabled, GrizzlyAccessLogConfig accessLogConfig, boolean isWebsocketsEnabled, boolean isCometEnabled, int maxRequestParameters, String backendRoute, boolean isAbsoluteRedirect, boolean shutdownFast, int awaitShutDownSeconds, int maxHttpHeaderSize, boolean isSslEnabled, String keystorePath, String keystorePassword, int sessionExpiryCheckInterval, int sessionUnjoinedThreshold, boolean removeNonAuthenticatedSessions, int maxNumberOfConcurrentRequests, boolean checkTrackingIdInRequestParameters, int cookieMaxAge, int cookieMaxInactivityInterval, boolean isForceHttps, boolean isCookieHttpOnly, String contentSecurityPolicy, String defaultEncoding, boolean isConsiderXForwards, List<IPRange> knownProxies, String forHeader, String protocolHeader, String httpsProtoValue, int httpProtoPort, int httpsProtoPort, String echoHeader, String robotsMetaTag, int maxBodySize, int maxNumberOfHttpSessions, List<String> enabledCiphers, long wsTimeoutMillis, boolean supportHierachicalLookupOnNotFound) {
         super();
         this.httpHost = httpHost;
         this.httpPort = httpPort;
         this.httpsPort = httpsPort;
+        this.livenessPort = livenessPort;
         this.isJMXEnabled = isJMXEnabled;
         this.accessLogConfig = null == accessLogConfig ? GrizzlyAccessLogConfig.NOT_ENABLED_CONFIG : accessLogConfig;
         this.isWebsocketsEnabled = isWebsocketsEnabled;
@@ -690,30 +701,39 @@ public class GrizzlyConfig {
     }
 
     /**
-     * Gets the httpHost
+     * Gets the HTTP host
      *
-     * @return The httpHost
+     * @return The HTTP host
      */
     public String getHttpHost() {
         return httpHost;
     }
 
     /**
-     * Gets the httpPort
+     * Gets the HTTP port
      *
-     * @return The httpPort
+     * @return The HTTP port
      */
     public int getHttpPort() {
         return httpPort;
     }
 
     /**
-     * Gets the httpsPort
+     * Gets the HTTPS port.
      *
-     * @return The httpsPort
+     * @return The HTTPS port
      */
     public int getHttpsPort() {
         return httpsPort;
+    }
+
+    /**
+     * Gets the port for liveness end-point.
+     *
+     * @return The liveness port
+     */
+    public int getLivenessPort() {
+        return livenessPort;
     }
 
     /**

@@ -55,7 +55,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 import org.eclipse.microprofile.health.HealthCheckResponse;
-import org.eclipse.microprofile.health.HealthCheckResponse.State;
+import org.eclipse.microprofile.health.HealthCheckResponse.Status;
 import org.eclipse.microprofile.health.HealthCheckResponseBuilder;
 import org.eclipse.microprofile.health.spi.HealthCheckResponseProvider;
 
@@ -76,7 +76,7 @@ public class HealthCheckResponseProviderImpl implements HealthCheckResponseProvi
     private static class HealthCheckResponseBuilderImpl extends HealthCheckResponseBuilder {
 
         private String name = "unknown";
-        private State state = State.UP;
+        private Status status = Status.UP;
         private Map<String, Object> data;
 
         /**
@@ -109,27 +109,27 @@ public class HealthCheckResponseProviderImpl implements HealthCheckResponseProvi
 
         @Override
         public HealthCheckResponseBuilder up() {
-            this.state = State.UP;
+            this.status = Status.UP;
             return this;
         }
 
         @Override
         public HealthCheckResponseBuilder down() {
-            this.state = State.DOWN;
+            this.status = Status.DOWN;
             return this;
         }
 
         @Override
-        public HealthCheckResponseBuilder state(boolean up) {
+        public HealthCheckResponseBuilder status(boolean up) {
             return up ? up() : down();
         }
 
         @Override
         public HealthCheckResponse build() {
             String name = this.name;
-            State state = this.state;
+            Status status = this.status;
             Map<String, Object> data = this.data;
-            return new HealthCheckResponseImpl(state, data, name);
+            return new HealthCheckResponseImpl(status, data, name);
         }
 
         private HealthCheckResponseBuilder putData(String key, Object value) {
@@ -143,22 +143,22 @@ public class HealthCheckResponseProviderImpl implements HealthCheckResponseProvi
 
     private static class HealthCheckResponseImpl extends HealthCheckResponse {
 
-        private final State state;
+        private final Status status;
         private final Map<String, Object> data;
         private final String name;
 
         /**
          * Initializes a new {@link HealthCheckResponseImpl}.
          */
-        HealthCheckResponseImpl(State state, Map<String, Object> data, String name) {
-            this.state = state;
+        HealthCheckResponseImpl(Status status, Map<String, Object> data, String name) {
+            this.status = status;
             this.data = data;
             this.name = name;
         }
 
         @Override
-        public State getState() {
-            return state;
+        public Status getStatus() {
+            return status;
         }
 
         @Override

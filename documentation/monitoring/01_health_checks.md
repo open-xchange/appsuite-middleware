@@ -6,6 +6,7 @@ tags: Configuration, Installation, Administration, Monitoring
 
 # Introduction
 With v7.10.1 the Open-Xchange middleware offers health-checks to verify the middleware is running fine or get information which component is in trouble. This information can be retrieved via a REST interface.
+With v8.0.0 liveness and readiness checks for cloud deployments got added. They are described in additional paragraph.
 
 
 # Installation
@@ -122,3 +123,22 @@ If all health-checks are running fine (or ignored), the HTTP status will be ``20
 If any health-check is not running fine and not ignored, the HTTP status will be ``503 Service unavailable`` and the health-check data will be included in the response body.
 
 In case of severe middleware problems and the health-checks can not be executed, the HTTP status will be ``500 Internal Server Error``. In this case no data can be included in the response body.
+
+# Liveness and readiness checks
+With v8.0.0 liveness and readiness checks for cloud deployments got added. They also are included in ``core``.
+
+## Liveness check
+The ``liveness``-check is available via
+
+```
+GET hostname:8015/live
+```
+This endpoint is available as soon as possible when the JVM is starting and will always respond with HTTP status ``200 OK``. The default port for this endpoint is ``8015`` but can changed via ``com.openexchange.connector.livenessPort`` property.
+
+## Readiness check
+The ``readiness``-check is available via
+
+```
+GET hostname:8009/ready
+```
+This endpoint uses the ``com.openexchange.health`` configuration as described above for authentication, skipped tests and ignored results. If all health-checks are passes, it will respond with HTTP status``200 OK``, in case some health-checks failed it will respond with HTTP status``503 Service unavailable``. In case of severe middleware problems and the health-checks can not be executed, the HTTP status will be ``500 Internal Server Error``. The response body will always be empty, for more health-check information use the ``/health`` endpoint.

@@ -254,6 +254,27 @@ public class GrizzlyActivator extends HousekeepingActivator {
                 log.info("Enabled Comet for Grizzly server.");
             }
 
+            // Initialize liveness network listener
+            NetworkListener networkLivenessListener = null;
+            {
+                int livenessPort = grizzlyConfig.getLivenessPort();
+                if (livenessPort > 0) {
+                    networkLivenessListener = new NetworkListener("liveness-listener", grizzlyConfig.getHttpHost(), livenessPort);
+
+                    // Set the maximum body/header size as well as HTTP session manager
+                    networkLivenessListener.setMaxFormPostSize(1);
+                    networkLivenessListener.setMaxBufferedPostSize(1);
+                    networkLivenessListener.setMaxHttpHeaderSize(grizzlyConfig.getMaxHttpHeaderSize());
+
+                    // Set the transport
+                    networkLivenessListener.setTransport(buildTcpNioTransport(configurationService, threadPool));
+
+                    // Add HTTP network listener to Grizzly server
+                    grizzly.addListener(networkLivenessListener);
+                    log.info("Prepared Grizzly liveness network listener on host: {} and port: {}, but not yet started...", grizzlyConfig.getHttpHost(), Integer.valueOf(livenessPort));
+                }
+            }
+
             // Initialize HTTP network listener
             {
                 NetworkListener networkListener = new NetworkListener("http-listener", grizzlyConfig.getHttpHost(), grizzlyConfig.getHttpPort());
@@ -311,8 +332,11 @@ public class GrizzlyActivator extends HousekeepingActivator {
                 log.info("Prepared Grizzly HTTPS network listener on host: {} and port: {}, but not yet started...", grizzlyConfig.getHttpHost(), Integer.valueOf(grizzlyConfig.getHttpsPort()));
             }
 
-            // Start Grizzly server
+            // Start Grizzly server / Liveness end-point
             grizzly.start();
+            if (networkLivenessListener != null) {
+                networkLivenessListener.start();
+            }
 
             // The HttpService factory
             HttpServiceFactory httpServiceFactory;
