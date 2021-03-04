@@ -274,7 +274,7 @@ public abstract class CalDAVFolderCollection<T> extends FolderCollection<T> impl
     }
 
     private String getStandardFolderDisplayNameTemplate() {
-        String defaultTemplate = "[foldername]";
+        String defaultTemplate = "[owner]";
         ConfigView configView;
         try {
             configView = factory.requireService(ConfigViewFactory.class).getView();
@@ -286,7 +286,7 @@ public abstract class CalDAVFolderCollection<T> extends FolderCollection<T> impl
     }
 
     private String getSharedFolderDisplayNameTemplate() {
-        String defaultTemplate = "[foldername] ([owner])";
+        String defaultTemplate = "[owner]: [foldername]";
         ConfigView configView;
         try {
             configView = factory.requireService(ConfigViewFactory.class).getView();
