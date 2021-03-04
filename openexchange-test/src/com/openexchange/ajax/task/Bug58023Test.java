@@ -139,7 +139,7 @@ public class Bug58023Test extends AbstractAPIClientSession {
 
     @Test
     public void testGetAllTasksInFolder() throws Exception {
-        ApiClient apiClient2 = testContext.acquireUser().getApiClient();
+        ApiClient apiClient2 = testUser2.getApiClient();
         TasksApi tasksApi2 = new TasksApi(apiClient2);
 
         TasksResponse allTasks = tasksApi2.getAllTasks(privateTaskFolder, Strings.concat(",", Strings.convert(Task.ALL_COLUMNS)), Integer.toString(CalendarObject.START_DATE), "asc");
@@ -155,7 +155,7 @@ public class Bug58023Test extends AbstractAPIClientSession {
 
     @Test
     public void testGetSingleTasksInFolder() throws Exception {
-        TasksApi tasksApi2 = new TasksApi(testContext.acquireUser().getApiClient());
+        TasksApi tasksApi2 = new TasksApi(testUser2.getApiClient());
 
         TaskResponse task = tasksApi2.getTask("333", privateTaskFolder);
 

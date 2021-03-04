@@ -106,7 +106,7 @@ public class MailTest extends AbstractAJAXSession {
     }
 
     private String getMailOfUser2() {
-        return testContext.acquireUser().getLogin();
+        return testUser2.getLogin();
     }
 
     @Test

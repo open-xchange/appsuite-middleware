@@ -474,7 +474,7 @@ public class ITipAnalyzeChangesTest extends AbstractITipAnalyzeTest {
         /*
          * Check invite mail for new attendee
          */
-        ApiClient apiClient3 = context2.acquireUser().getApiClient();
+        ApiClient apiClient3 = testUser3.getApiClient();
         MailData iMip = receiveIMip(apiClient3, userResponseC1.getData().getEmail1(), summary, 1, SchedulingMethod.REQUEST);
         analyzeResponse = analyze(apiClient3, iMip);
         AnalysisChangeNewEvent newEvent = assertSingleChange(analyzeResponse).getNewEvent();

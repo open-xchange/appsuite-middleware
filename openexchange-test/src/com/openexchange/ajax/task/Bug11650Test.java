@@ -97,7 +97,7 @@ public class Bug11650Test extends AbstractTaskTest {
     @Test
     public void testSearchInSharedFolder() throws Throwable {
         final AJAXClient client = getClient();
-        final AJAXClient client2 = testContext.acquireUser().getAjaxClient();
+        final AJAXClient client2 = testUser2.getAjaxClient();
         final int privateTaskFID = client.getValues().getPrivateTaskFolder();
         final FolderObject folder = createFolder(client.getValues().getUserId(), client2.getValues().getUserId());
         folder.setParentFolderID(privateTaskFID);

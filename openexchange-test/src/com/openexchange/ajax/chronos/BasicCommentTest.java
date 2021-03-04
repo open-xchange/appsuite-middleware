@@ -162,7 +162,7 @@ public class BasicCommentTest extends AbstractChronosTest {
     }
 
     private void validateMailInSecondUsersInbox(String mailSubject, String comment) throws OXException, ApiException, Exception {
-        ApiClient apiClient2 = testContext.acquireUser().getApiClient();
+        ApiClient apiClient2 = testUser2.getApiClient();
         MailApi mailApi = new MailApi(apiClient2);
 
         MailResponse response = mailApi.getMail(INBOX, getMailId(mailApi, mailSubject), null, null, null, null, null, null, null, null, null, null, null, null);

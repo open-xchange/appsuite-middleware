@@ -123,7 +123,7 @@ public class Bug12393Test extends AbstractAJAXSession {
         perm.setGroupPermission(false);
         perm.setFolderAdmin(true);
         perm.setAllPermission(OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION);
-        final int userId2 = testContext.acquireUser().getUserId();
+        final int userId2 = testUser2.getUserId();
         final OCLPermission perm2 = new OCLPermission();
         perm2.setEntity(userId2);
         perm2.setGroupPermission(false);

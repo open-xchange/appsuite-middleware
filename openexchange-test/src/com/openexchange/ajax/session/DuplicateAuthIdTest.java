@@ -51,7 +51,6 @@ package com.openexchange.ajax.session;
 
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
-import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import com.openexchange.ajax.framework.AJAXClient;
@@ -111,15 +110,6 @@ public class DuplicateAuthIdTest {
         TestUser testUser2 = testContext.acquireUser();
         login2 = testUser2.getLogin();
         password2 = testUser2.getPassword();
-    }
-
-    @After
-    public void tearDown() throws Exception {
-        try {
-            client1.logout();
-        } finally {
-            TestContextPool.backContext(testContext);
-        }
     }
 
     @Test

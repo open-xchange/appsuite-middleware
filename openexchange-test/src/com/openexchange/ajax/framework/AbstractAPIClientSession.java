@@ -85,11 +85,6 @@ public abstract class AbstractAPIClientSession extends AbstractClientSession {
         return TestClassConfig.builder().createApiClient().build();
     }
 
-    @Override
-    public void setUp() throws Exception {
-        super.setUp();
-    }
-
     /**
      * Get the API client for the test user
      *

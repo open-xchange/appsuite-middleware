@@ -109,7 +109,7 @@ public class ConfirmOccurrencesTest extends AbstractAJAXSession {
         super.setUp();
 
         client1 = getClient();
-        client2 = testContext.acquireUser().getAjaxClient();
+        client2 = testUser2.getAjaxClient();
         ctm2 = new CalendarTestManager(client2);
         nextYear = Calendar.getInstance().get(Calendar.YEAR) + 1;
         folderId1 = client1.getValues().getPrivateAppointmentFolder();

@@ -112,7 +112,7 @@ public abstract class AbstractOrganizerTest extends AbstractExtendedChronosTest 
 
         // The internal attendees
         organizerAttendee = createAttendee(I(testUser.getUserId()));
-        actingAttendee = createAttendee(I(testContext.acquireUser().getUserId()));
+        actingAttendee = createAttendee(I(testUser2.getUserId()));
 
         LinkedList<Attendee> attendees = new LinkedList<>();
         attendees.add(organizerAttendee);

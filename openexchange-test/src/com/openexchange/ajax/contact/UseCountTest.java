@@ -68,6 +68,7 @@ import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.modules.Module;
 import com.openexchange.test.ContactTestManager;
+import com.openexchange.test.TestClassConfig;
 
 /**
  * {@link UseCountTest}
@@ -80,6 +81,11 @@ public class UseCountTest extends ContactTest {
     private String address;
     private int folderId;
     private AJAXClient client;
+    
+    @Override
+    public TestClassConfig getTestConfig() {
+        return TestClassConfig.builder().withUserPerContext(3).createAjaxClient().createApiClient().build();
+    }
 
     @Override
     @Before
@@ -92,7 +98,7 @@ public class UseCountTest extends ContactTest {
         folder = ftm.insertFolderOnServer(folder);
         folderId = folder.getObjectID();
         Contact c1 = ContactTestManager.generateContact(folder.getObjectID(), "UseCount");
-        c1.setEmail1(testContext.acquireUser().getLogin());
+        c1.setEmail1(testUser2.getLogin());
         c1 = cotm.newAction(c1);
         Contact c2 = ContactTestManager.generateContact(folder.getObjectID(), "UseCount");
         c2.setEmail1(testContext.acquireUser().getLogin());

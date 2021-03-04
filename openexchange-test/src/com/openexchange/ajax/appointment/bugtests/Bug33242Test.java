@@ -106,7 +106,7 @@ public class Bug33242Test extends AbstractAJAXSession {
         super.setUp();
         catm2 = new CalendarTestManager(testUser2.getAjaxClient());
 
-        groupParticipant = i(testContext.acquireGroup(Optional.of(Collections.singletonList(I(testContext.acquireUser().getUserId()))))); //TODO null check
+        groupParticipant = i(testContext.acquireGroup(Optional.of(Collections.singletonList(I(testUser2.getUserId()))))); //TODO null check
 
         prepareSeries();
         prepareSingle();

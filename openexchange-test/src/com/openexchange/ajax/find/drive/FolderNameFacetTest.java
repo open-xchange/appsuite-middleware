@@ -215,7 +215,7 @@ public class FolderNameFacetTest extends AbstractAPIClientSession {
         assertEquals(2, i(data.getSize()));
 
         // Search as another user, result in "Public Files" expected
-        FindApi findApi2 = new FindApi(testContext.acquireUser().getApiClient());
+        FindApi findApi2 = new FindApi(testUser2.getApiClient());
         response = findApi2.doQuery(Module.FILES.getName(), body, COLUMNS, null);
         checkResponseForErrors(response);
         data = response.getData();

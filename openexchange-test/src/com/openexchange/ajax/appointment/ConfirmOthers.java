@@ -97,7 +97,7 @@ public class ConfirmOthers extends AbstractAJAXSession {
         super.setUp();
 
         clientA = getClient();
-        clientB = testContext.acquireUser().getAjaxClient();
+        clientB = testUser2.getAjaxClient();
         clientC = testContext.acquireUser().getAjaxClient();
         userIdA = clientA.getValues().getUserId();
         userIdB = clientB.getValues().getUserId();

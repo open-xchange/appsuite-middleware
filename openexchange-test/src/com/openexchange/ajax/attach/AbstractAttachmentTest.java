@@ -318,7 +318,7 @@ public abstract class AbstractAttachmentTest extends AttachmentTest {
         attachment.setAttachedId(attachedId);
         attachment.setModuleId(moduleId);
 
-        atm.setClient(testContext.acquireUser().getAjaxClient());
+        atm.setClient(testUser2.getAjaxClient());
         atm.attach(attachment, testFile.getName(), FileUtils.openInputStream(testFile), null);
         assertTrue(atm.getLastResponse().hasError());
 
