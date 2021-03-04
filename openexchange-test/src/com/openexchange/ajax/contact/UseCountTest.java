@@ -68,7 +68,7 @@ import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.modules.Module;
 import com.openexchange.test.ContactTestManager;
-import com.openexchange.test.TestClassConfig;
+import com.openexchange.test.common.test.TestClassConfig;
 
 /**
  * {@link UseCountTest}

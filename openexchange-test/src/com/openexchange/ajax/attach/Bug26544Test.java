@@ -64,7 +64,7 @@ import com.openexchange.ajax.attach.actions.AttachRequest;
 import com.openexchange.ajax.contact.action.GetRequest;
 import com.openexchange.ajax.contact.action.InsertRequest;
 import com.openexchange.ajax.framework.AJAXClient;
-import com.openexchange.ajax.framework.ProvisioningSetup;
+import com.openexchange.ajax.framework.AbstractTestEnvironment;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.attach.AttachmentMetadata;
 import com.openexchange.groupware.container.Contact;
@@ -77,7 +77,7 @@ import com.openexchange.test.common.test.pool.TestContextPool;
  * 
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
-public class Bug26544Test {
+public class Bug26544Test extends AbstractTestEnvironment {
 
     private AJAXClient client;
 
@@ -89,8 +89,6 @@ public class Bug26544Test {
 
     @Before
     public void setUp() throws Exception {
-        ProvisioningSetup.init();
-
         testContext = TestContextPool.acquireContext(this.getClass().getCanonicalName());
         client = testContext.acquireUser().getAjaxClient();
         tz = client.getValues().getTimeZone();
@@ -108,11 +106,7 @@ public class Bug26544Test {
 
     @After
     public void tearDown() throws Exception {
-        try {
-            client.logout();
-        } finally {
-            TestContextPool.backContext(testContext);
-        }
+        TestContextPool.backContext(testContext);
     }
 
     @Test

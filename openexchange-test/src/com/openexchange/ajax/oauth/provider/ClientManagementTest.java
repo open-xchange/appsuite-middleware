@@ -61,12 +61,11 @@ import java.util.List;
 import org.hamcrest.Description;
 import org.hamcrest.TypeSafeMatcher;
 import org.junit.Before;
-import org.junit.BeforeClass;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
 import com.openexchange.admin.rmi.dataobjects.Credentials;
-import com.openexchange.ajax.framework.ProvisioningSetup;
+import com.openexchange.ajax.framework.AbstractTestEnvironment;
 import com.openexchange.calendar.json.AppointmentActionFactory;
 import com.openexchange.chronos.json.oauth.ChronosOAuthScope;
 import com.openexchange.contacts.json.ContactActionFactory;
@@ -89,7 +88,7 @@ import com.openexchange.test.common.configuration.AJAXConfig.Property;
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  * @since v7.8.0
  */
-public class ClientManagementTest {
+public class ClientManagementTest extends AbstractTestEnvironment {
 
     private RemoteClientManagement clientManagement;
 
@@ -97,12 +96,6 @@ public class ClientManagementTest {
 
     @Rule
     public ExpectedException thrown = ExpectedException.none();
-
-    @BeforeClass
-    public static void initTestFramework() throws Exception {
-        AJAXConfig.init();
-        ProvisioningSetup.init();
-    }
 
     @Before
     public void before() throws Exception {

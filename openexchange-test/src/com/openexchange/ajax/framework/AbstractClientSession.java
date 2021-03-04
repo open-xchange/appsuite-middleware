@@ -58,8 +58,6 @@ import org.json.JSONException;
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
-import org.junit.Rule;
-import org.junit.rules.TestName;
 import org.junit.runner.RunWith;
 import com.google.code.tempusfugit.concurrency.ConcurrentTestRunner;
 import com.google.code.tempusfugit.concurrency.annotations.Concurrent;
@@ -68,8 +66,6 @@ import com.openexchange.test.common.test.TestClassConfig;
 import com.openexchange.test.common.test.pool.TestContext;
 import com.openexchange.test.common.test.pool.TestContextPool;
 import com.openexchange.test.common.test.pool.TestUser;
-import com.openexchange.test.tryagain.TryAgain;
-import com.openexchange.test.tryagain.TryAgainTestRule;
 
 /**
  * {@link AbstractClientSession}
@@ -79,15 +75,7 @@ import com.openexchange.test.tryagain.TryAgainTestRule;
  */
 @RunWith(ConcurrentTestRunner.class)
 @Concurrent(count = 5)
-public class AbstractClientSession {
-
-    /** The test name for context acquisition */
-    @Rule
-    public final TestName name = new TestName();
-
-    /** Declare 'try again' rule as public field to allow {@link TryAgain}-annotation for tests */
-    @Rule
-    public final TryAgainTestRule tryAgainRule = new TryAgainTestRule();
+public class AbstractClientSession extends AbstractTestEnvironment {
 
     protected TestContext testContext;
     protected List<TestContext> testContextList;
@@ -97,7 +85,6 @@ public class AbstractClientSession {
 
     @Before
     public void setUp() throws Exception {
-        ProvisioningSetup.init();
         TestClassConfig testConfig = getTestConfig();
         testContextList = TestContextPool.acquireContext(this.getClass().getCanonicalName() + "." + name.getMethodName(), optContextConfig(), testConfig.getNumberOfContexts());
         testContext = testContextList.get(0);
@@ -115,7 +102,7 @@ public class AbstractClientSession {
     @After
     public void tearDown() throws Exception {
         try {
-            if(testContextList != null) {
+            if (testContextList != null) {
                 for (TestContext ctx : testContextList) {
                     ctx.cleanUp();
                 }

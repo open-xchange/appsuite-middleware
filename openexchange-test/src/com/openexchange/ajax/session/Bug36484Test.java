@@ -51,11 +51,15 @@ package com.openexchange.ajax.session;
 
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
+import org.junit.Before;
 import org.junit.Test;
+import com.openexchange.ajax.framework.AJAXClient;
+import com.openexchange.ajax.framework.AJAXSession;
 import com.openexchange.ajax.framework.AbstractAJAXSession;
 import com.openexchange.ajax.framework.Header;
 import com.openexchange.ajax.session.actions.FormLoginRequest;
 import com.openexchange.ajax.session.actions.FormLoginResponse;
+import com.openexchange.test.common.test.TestClassConfig;
 
 /**
  * Login using "formlogin" doesn't work after changing IP address of client
@@ -64,13 +68,36 @@ import com.openexchange.ajax.session.actions.FormLoginResponse;
  */
 public class Bug36484Test extends AbstractAJAXSession {
 
+    private AJAXClient client;
+
+    @Override
+    public TestClassConfig getTestConfig() {
+        // Avoid logins of other clients
+        return TestClassConfig.builder().withUserPerContext(2).build();
+    }
+
+    @Override
+    @Before
+    public void setUp() throws Exception {
+        super.setUp();
+        client = new AJAXClient(new AJAXSession(), true);
+    }
+
+    @Override
+    public void tearDown() throws Exception {
+        try {
+            client.logout();
+        } finally {
+            super.tearDown();
+        }
+    }
 
     @Test
     public void testAutoFormLoginWithChangedIP() throws Exception {
         /*
          * perform initial form login & store session cookie
          */
-        FormLoginResponse loginResponse = getClient().execute(new FormLoginRequest(testUser.getLogin(), testUser.getPassword()));
+        FormLoginResponse loginResponse = this.client.execute(new FormLoginRequest(testUser.getLogin(), testUser.getPassword()));
         String firstSessionID = loginResponse.getSessionId();
         assertNotNull("No session ID", firstSessionID);
 
@@ -79,10 +106,10 @@ public class Bug36484Test extends AbstractAJAXSession {
          */
         FormLoginRequest secondLoginRequest = new ChangedIPFormLoginRequest(testUser.getLogin(), testUser.getPassword(), "53.246.23.4");
         secondLoginRequest.setCookiesNeeded(false);
-        FormLoginResponse secondLoginResponse = getClient().execute(secondLoginRequest);
+        FormLoginResponse secondLoginResponse = this.client.execute(secondLoginRequest);
         String secondSessionID = secondLoginResponse.getSessionId();
         assertFalse("Same session ID", firstSessionID.equals(secondSessionID));
-        getClient().getSession().setId(secondSessionID);
+        this.client.getSession().setId(secondSessionID);
     }
 
     private static final class ChangedIPFormLoginRequest extends FormLoginRequest {

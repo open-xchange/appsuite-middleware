@@ -330,6 +330,7 @@ public class TestContext implements Serializable, CleanableResourceManager, Conf
         if (Strings.isNotEmpty(name)) {
             builder.append("name=").append(name).append(", ");
         }
+        builder.append("contextId=").append(contextId);
         builder.append("]");
         return builder.toString();
     }

@@ -50,10 +50,7 @@
 package com.openexchange.subscribe.mslive;
 
 import static org.junit.Assert.assertEquals;
-import org.junit.After;
-import org.junit.Before;
 import org.junit.Test;
-import com.openexchange.ajax.framework.AbstractAJAXSession;
 import com.openexchange.groupware.container.Contact;
 
 /**
@@ -61,33 +58,14 @@ import com.openexchange.groupware.container.Contact;
  *
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
-public class SubscribeMSLiveContactsTest extends AbstractAJAXSession {
-
-    protected static final String CONTACT_SOURCE_ID = "com.openexchange.subscribe.mslive.contact";
-
-    @Override
-    @Before
-    public void setUp() throws Exception {
-        super.setUp();
-        MSLiveSubscribeTestEnvironment.getInstance().init();
-    }
-
-    @Override
-    @After
-    public void tearDown() throws Exception {
-        try {
-            MSLiveSubscribeTestEnvironment.getInstance().cleanup();
-        } finally {
-            super.tearDown();
-        }
-    }
+public class SubscribeMSLiveContactsTest extends MSLiveSubscribeTestEnvironment {
 
     private int getContactTestFolderID() {
         return getTestFolderID(MSLiveSubscribeTestEnvironment.CONTACT_SOURCE_ID);
     }
 
     private int getTestFolderID(final String id) {
-        return MSLiveSubscribeTestEnvironment.getInstance().getTestFolders().get(id).intValue();
+        return getTestFolders().get(id).intValue();
     }
 
     @Test

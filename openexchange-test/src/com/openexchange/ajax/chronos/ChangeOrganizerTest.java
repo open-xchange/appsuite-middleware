@@ -91,7 +91,7 @@ public class ChangeOrganizerTest extends AbstractOrganizerTest {
 
     @Override
     String getEventName() {
-        return "AttendeePrivilegesTest";
+        return "ChangeOrganizerTest";
     }
 
     @Test

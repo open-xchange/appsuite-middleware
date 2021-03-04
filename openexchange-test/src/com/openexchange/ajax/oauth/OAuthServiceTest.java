@@ -57,10 +57,9 @@ import org.json.JSONException;
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
-import org.junit.BeforeClass;
 import org.junit.Test;
 import com.openexchange.ajax.framework.AJAXClient;
-import com.openexchange.ajax.framework.ProvisioningSetup;
+import com.openexchange.ajax.framework.AbstractTestEnvironment;
 import com.openexchange.ajax.framework.config.util.ChangePropertiesRequest;
 import com.openexchange.ajax.oauth.actions.AllOAuthServicesRequest;
 import com.openexchange.ajax.oauth.actions.GetOAuthServiceRequest;
@@ -78,18 +77,13 @@ import com.openexchange.test.common.test.pool.TestContextPool;
  *
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  */
-public class OAuthServiceTest {
+public class OAuthServiceTest extends AbstractTestEnvironment {
 
     private static final String TESTSERVICE = "com.openexchange.oauth.testservice";
 
     private TestContext testContext;
     private AJAXClient client1;
     private AJAXClient client2;
-
-    @BeforeClass
-    public static void before() throws Exception {
-        ProvisioningSetup.init();
-    }
 
     @Before
     public void setUp() throws Exception {
@@ -104,16 +98,7 @@ public class OAuthServiceTest {
 
     @After
     public void tearDown() throws Exception {
-        try {
-            if (null != client1) {
-                client1.logout();
-            }
-            if (null != client2) {
-                client2.logout();
-            }
-        } finally {
-            TestContextPool.backContext(testContext);
-        }
+        TestContextPool.backContext(testContext);
     }
 
     @Test

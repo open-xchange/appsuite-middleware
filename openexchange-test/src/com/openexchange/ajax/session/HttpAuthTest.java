@@ -61,7 +61,7 @@ import org.junit.Before;
 import org.junit.Test;
 import com.openexchange.ajax.framework.AJAXClient;
 import com.openexchange.ajax.framework.AJAXSession;
-import com.openexchange.ajax.framework.ProvisioningSetup;
+import com.openexchange.ajax.framework.AbstractTestEnvironment;
 import com.openexchange.ajax.session.actions.HttpAuthRequest;
 import com.openexchange.ajax.session.actions.HttpAuthResponse;
 import com.openexchange.exception.OXException;
@@ -76,7 +76,8 @@ import com.openexchange.test.common.test.pool.TestUser;
  *
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
-public class HttpAuthTest {
+public class HttpAuthTest extends AbstractTestEnvironment {
+
     private String protocol;
     private String hostname;
     private String login;
@@ -85,8 +86,6 @@ public class HttpAuthTest {
 
     @Before
     public void setUp() throws Exception {
-        ProvisioningSetup.init();
-
         testContext = TestContextPool.acquireContext(this.getClass().getCanonicalName());
 
         protocol = AJAXConfig.getProperty(Property.PROTOCOL);

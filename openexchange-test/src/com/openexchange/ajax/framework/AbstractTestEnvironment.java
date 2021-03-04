@@ -47,39 +47,48 @@
  *
  */
 
-package com.openexchange.test;
+package com.openexchange.ajax.framework;
 
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
-import org.junit.runner.RunWith;
-import org.junit.runners.Suite;
-import com.openexchange.ajax.framework.ProvisioningSetup;
-import com.openexchange.exception.OXException;
+import org.junit.Rule;
+import org.junit.rules.TestName;
+import com.openexchange.test.tryagain.TryAgain;
+import com.openexchange.test.tryagain.TryAgainTestRule;
 
 /**
- * Test suite for all AJAX interface tests. All suites considered within this definition will be executed sequentially.
+ * 
+ * {@link AbstractTestEnvironment} - Abstract "root" class of tests that uses a test context or rather test user
  *
- * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
+ * @author <a href="mailto:daniel.becker@open-xchange.com">Daniel Becker</a>
+ * @since v8.0.0
  */
-@RunWith(Suite.class)
-@Suite.SuiteClasses({
-    com.openexchange.test.MainInterfaceTests.class,
-    com.openexchange.test.RESTTests.class,
-    com.openexchange.test.InterfaceSmtpMockTests.class,
-})
-public final class InterfaceTests {
+public abstract class AbstractTestEnvironment {
 
+    /** The test name for context acquisition */
+    @Rule
+    public final TestName name = new TestName();
+
+    /** Declare 'try again' rule as public field to allow {@link TryAgain}-annotation for tests */
+    @Rule
+    public final TryAgainTestRule tryAgainRule = new TryAgainTestRule();
+
+    /**
+     * Setup basic test resource like a test context
+     *
+     * @throws Exception In case setup fails
+     */
     @BeforeClass
-    public static void beforeClass() {
-        try {
-            ProvisioningSetup.init();
-        } catch (OXException e) {
-            e.printStackTrace();
-        }
+    public static void beforeClass() throws Exception {
+        ProvisioningSetup.init();
     }
-    
+
+    /**
+     * Removes test related resources
+     */
     @AfterClass
     public static void afterClass() {
         ProvisioningSetup.down();
     }
+
 }

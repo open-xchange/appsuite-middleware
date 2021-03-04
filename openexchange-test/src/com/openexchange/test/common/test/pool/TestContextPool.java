@@ -91,11 +91,62 @@ public class TestContextPool {
 
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(TestContextPool.class);
 
+    private static AtomicBoolean initialized = new AtomicBoolean(false);
+
     private static List<TestContext> allTimeContexts = new ConcurrentList<>();
 
     private static Semaphore semaphore = new Semaphore(20, true);
 
-    private static final boolean DELETE_AFTER_USAGE = b(Boolean.valueOf(AJAXConfig.getProperty(AJAXConfig.Property.DELETE_CONTEXT, Boolean.toString(true))));
+    private static final boolean DELETE_AFTER_USAGE = b(Boolean.valueOf(AJAXConfig.getProperty(AJAXConfig.Property.DELETE_CONTEXT, Boolean.TRUE.toString())));
+    private static final boolean PRE_PROVISION_CONTEXTS = b(Boolean.valueOf(AJAXConfig.getProperty(AJAXConfig.Property.PRE_PROVISION_CONTEXTS, Boolean.TRUE.toString())));
+
+    /**
+     * Initializes the {@link TestContextPool}
+     *
+     * Pre-provisions 2000 context if configured
+     */
+    public static void init() {
+        if (initialized.get() == false) {
+            synchronized (initialized) {
+                if (initialized.get() == false) {
+                    if (false == PRE_PROVISION_CONTEXTS) {
+                        initialized.set(true);
+                        return;
+                    }
+
+                    ExecutorService executor = Executors.newFixedThreadPool(10);
+                    int taskSize = 20;
+                    List<Callable<Void>> tasks = new ArrayList<>(taskSize);
+                    for (int i = 0; i < taskSize; i++) {
+                        tasks.add(new CreateHundredContextTask(pool));
+                    }
+
+                    try {
+                        executor.invokeAll(tasks);
+                        executor.shutdown();
+                    } catch (InterruptedException e) {
+                        LOG.debug("Failed", e);
+                    }
+                    initialized.set(true);
+                }
+            }
+        }
+    }
+
+    /**
+     * Deletes pre-provisioned context that weren't used
+     */
+    public static void down() {
+        TestContext context = pool.poll();
+        while (null != context) {
+            try {
+                ProvisioningService.getInstance().deleteContext(context.getId());
+            } catch (RemoteException | StorageException | InvalidCredentialsException | InvalidDataException | NoSuchContextException | DatabaseUpdateException | MalformedURLException | NotBoundException e) {
+                LOG.warn("unable to delete context");
+            }
+            context = pool.poll();
+        }
+    }
 
     /**
      * Returns an exclusive {@link TestContext} which means this context is currently not used by any other test.<br>
@@ -169,45 +220,9 @@ public class TestContextPool {
         return Optional.ofNullable(pool.poll());
     }
 
-    /**
-     * Initializes the {@link TestContextPool}
-     *
-     * Pre-provisions 2000 context if configured
-     */
-    private static void init() {
-        if (Boolean.valueOf(AJAXConfig.getProperty(AJAXConfig.Property.PRE_PROVISION_CONTEXTS, Boolean.TRUE.toString())).booleanValue()) {
-
-            ExecutorService executor = Executors.newFixedThreadPool(20);
-            List<Callable<Void>> tasks = new ArrayList<>(20);
-            for (int i = 0; i < 20; i++) {
-                tasks.add(() -> {
-                    for (int x = 0; x < 100; x++) {
-                        TestContext ctx = ProvisioningService.getInstance().createContext();
-                        pool.add(ctx);
-                    }
-                    return null;
-                });
-            }
-
-            try {
-                executor.invokeAll(tasks);
-                executor.shutdown();
-            } catch (@SuppressWarnings("unused") InterruptedException e) {
-                // failed
-            }
-        }
-    }
-
-    private static AtomicBoolean initialized = new AtomicBoolean(false);
-
     private static List<TestContext> aquireContexts(int amount, Optional<Map<String, String>> optConfig) throws RemoteException, StorageException, InvalidCredentialsException, InvalidDataException, ContextExistsException, MalformedURLException, NotBoundException, AddressException {
         if (initialized.get() == false) {
-            synchronized (initialized) {
-                if (initialized.get() == false) {
-                    init();
-                    initialized.set(true);
-                }
-            }
+            init();
         }
         List<TestContext> result = new ArrayList<TestContext>(amount);
         try {
@@ -312,4 +327,32 @@ public class TestContextPool {
             return null;
         }
     }
+
+    /**
+     * 
+     * {@link CreateHundredContextTask}
+     *
+     * @author <a href="mailto:daniel.becker@open-xchange.com">Daniel Becker</a>
+     * @since v8.0.0
+     */
+    private static class CreateHundredContextTask implements Callable<Void> {
+
+        private Queue<TestContext> poolReference;
+
+        public CreateHundredContextTask(Queue<TestContext> pool) {
+            super();
+            this.poolReference = pool;
+        }
+
+        @Override
+        public Void call() throws Exception {
+            for (int x = 0; x < 100; x++) {
+                TestContext ctx = ProvisioningService.getInstance().createContext();
+                poolReference.add(ctx);
+            }
+            return null;
+        }
+
+    }
+
 }

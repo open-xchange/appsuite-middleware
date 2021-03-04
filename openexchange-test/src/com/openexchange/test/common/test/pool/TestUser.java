@@ -296,16 +296,22 @@ public class TestUser implements Serializable, CleanableResourceManager, Configu
     }
 
     @Override
-    public void cleanUp() throws ApiException {
+    public void cleanUp() {
         for (AJAXClient ajaxClient : ajaxClients) {
             try {
-                ajaxClient.logout();
+                if (null != ajaxClient.getSession()) {
+                    ajaxClient.logout();
+                }
             } catch (Exception e) {
                 LoggerHolder.LOGGER.info("Unable to logout client", e);
             }
         }
         for (ApiClient apiClient : apiClients) {
-            apiClient.logout();
+            try {
+                apiClient.logout();
+            } catch (ApiException e) {
+                LoggerHolder.LOGGER.info("Unable to logout client", e);
+            }
         }
     }
 

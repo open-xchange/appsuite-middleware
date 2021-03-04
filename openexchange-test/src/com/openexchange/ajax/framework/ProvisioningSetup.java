@@ -55,7 +55,7 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.Properties;
-import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicInteger;
 import com.openexchange.configuration.ConfigurationExceptionCodes;
 import com.openexchange.exception.OXException;
 import com.openexchange.test.common.configuration.AJAXConfig;
@@ -75,16 +75,22 @@ public class ProvisioningSetup {
 
     private static final TestConfig.Property KEY = TestConfig.Property.PROV_PROPS;
 
-    private static AtomicBoolean initialized = new AtomicBoolean();
+    private static AtomicInteger initialized = new AtomicInteger(0);
 
     private static final String MASTER_IDENTIFIER = "oxadminmaster";
     private static final String MASTER_PWD_IDENTIFIER = "oxadminmaster_password";
     private static final String REST_IDENTIFIER = "restUser";
     private static final String REST_PWD_IDENTIFIER = "restPwd";
 
+    
+    /**
+     * Initializes configuration etc.
+     *
+     * @throws OXException In case it fails
+     */
     public static void init() throws OXException {
         synchronized (ProvisioningSetup.class) {
-            if (!initialized.get()) {
+            if (initialized.get() <= 0) {
                 LOG.info("Starting initialization of contexts.");
                 AJAXConfig.init();
                 Properties contextsAndUsers = getProperties();
@@ -92,11 +98,25 @@ public class ProvisioningSetup {
                 createOXAdminMaster(contextsAndUsers);
                 createRestUser(contextsAndUsers);
 
-                initialized.compareAndSet(false, true);
+                TestContextPool.init();
+
                 LOG.info("Finished initialization for {} contexts.", I(TestContextPool.getAllTimeAvailableContexts().size()));
             } else {
                 LOG.debug("Pool already initialized! Please do not try to remember users/pools multiple times as this will cause unexpected behavior within test execution.");
             }
+            initialized.getAndIncrement();
+        }
+    }
+
+    /**
+     * Tears down all unused resources
+     * <p>
+     * Only removes resource if this is the last test class that
+     * calls the clean up
+     */
+    public static void down() {
+        if (initialized.decrementAndGet() <= 0) {
+            TestContextPool.down();
         }
     }
 
@@ -138,7 +158,7 @@ public class ProvisioningSetup {
         if (!propFile.canRead()) {
             throw ConfigurationExceptionCodes.NOT_READABLE.create(propFile.getAbsoluteFile());
         }
-            return propFile;
+        return propFile;
     }
 
     protected static String getPropertyFileName() throws OXException {
@@ -151,7 +171,7 @@ public class ProvisioningSetup {
 
     private static Properties readPropFile(File propFile) throws OXException {
         Properties props = new Properties();
-        try (FileInputStream fis = new FileInputStream(propFile)){
+        try (FileInputStream fis = new FileInputStream(propFile)) {
             props.load(fis);
         } catch (FileNotFoundException e) {
             throw ConfigurationExceptionCodes.FILE_NOT_FOUND.create(propFile.getAbsolutePath(), e);
@@ -160,4 +180,5 @@ public class ProvisioningSetup {
         }
         return props;
     }
+
 }

@@ -52,7 +52,9 @@ package com.openexchange.rest;
 import javax.ws.rs.core.HttpHeaders;
 import org.apache.commons.codec.binary.Base64;
 import org.glassfish.jersey.test.JerseyTest;
+import org.junit.AfterClass;
 import org.junit.Assert;
+import org.junit.BeforeClass;
 import org.junit.runner.RunWith;
 import org.slf4j.LoggerFactory;
 import com.google.code.tempusfugit.concurrency.ConcurrentTestRunner;
@@ -96,10 +98,18 @@ public abstract class AbstractRestTest extends JerseyTest {
         return ajaxClient2;
     }
 
+    @BeforeClass
+    public static void beforeClass() throws Exception {
+        ProvisioningSetup.init();
+    }
+
+    @AfterClass
+    public static void afterClass() {
+        ProvisioningSetup.down();
+    }
+
     @Override
     public void setUp() throws Exception {
-        ProvisioningSetup.init();
-
         testContext = TestContextPool.acquireContext(this.getClass().getCanonicalName());
         Assert.assertNotNull("Unable to retrieve a context!", testContext);
         testUser = testContext.acquireUser();
@@ -134,20 +144,10 @@ public abstract class AbstractRestTest extends JerseyTest {
     @Override
     public void tearDown() throws Exception {
         try {
-            if (ajaxClient1 != null) {
-                // Client can be null if setUp() fails
-                ajaxClient1.logout();
-                ajaxClient1 = null;
-            }
-            if (ajaxClient2 != null) {
-                // Client can be null if setUp() fails
-                ajaxClient2.logout();
-                ajaxClient2 = null;
-            }
+            TestContextPool.backContext(testContext);
         } catch (Exception e) {
             LoggerFactory.getLogger(AbstractRestTest.class).error("Unable to correctly tear down test setup.", e);
         } finally {
-            TestContextPool.backContext(testContext);
             super.tearDown();
         }
     }

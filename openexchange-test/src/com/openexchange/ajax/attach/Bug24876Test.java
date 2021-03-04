@@ -61,7 +61,7 @@ import com.openexchange.ajax.attach.actions.ListResponse;
 import com.openexchange.ajax.contact.action.GetRequest;
 import com.openexchange.ajax.contact.action.InsertRequest;
 import com.openexchange.ajax.framework.AJAXClient;
-import com.openexchange.ajax.framework.ProvisioningSetup;
+import com.openexchange.ajax.framework.AbstractTestEnvironment;
 import com.openexchange.groupware.attach.AttachmentField;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.java.util.TimeZones;
@@ -73,7 +73,7 @@ import com.openexchange.test.common.test.pool.TestContextPool;
  *
  * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
  */
-public final class Bug24876Test {
+public final class Bug24876Test extends AbstractTestEnvironment {
 
     private AJAXClient client;
     private Contact contact;
@@ -84,8 +84,6 @@ public final class Bug24876Test {
 
     @Before
     public void setUp() throws Exception {
-        ProvisioningSetup.init();
-
         testContext = TestContextPool.acquireContext(this.getClass().getCanonicalName());
         client = testContext.acquireUser().getAjaxClient();
         tz = client.getValues().getTimeZone();
@@ -101,11 +99,7 @@ public final class Bug24876Test {
 
     @After
     public void tearDown() throws Exception {
-        try {
-            client.logout();
-        } finally {
-            TestContextPool.backContext(testContext);
-        }
+        TestContextPool.backContext(testContext);
     }
 
     @Test

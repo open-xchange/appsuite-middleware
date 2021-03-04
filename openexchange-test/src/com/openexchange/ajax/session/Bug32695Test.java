@@ -55,12 +55,15 @@ import static org.junit.Assert.fail;
 import java.util.List;
 import org.apache.http.cookie.Cookie;
 import org.apache.http.impl.cookie.BasicClientCookie;
+import org.junit.Before;
 import org.junit.Test;
 import com.openexchange.ajax.LoginServlet;
 import com.openexchange.ajax.framework.AJAXClient;
+import com.openexchange.ajax.framework.AJAXSession;
 import com.openexchange.ajax.framework.AbstractAJAXSession;
 import com.openexchange.ajax.session.actions.FormLoginRequest;
 import com.openexchange.ajax.session.actions.FormLoginResponse;
+import com.openexchange.test.common.test.TestClassConfig;
 
 /**
  * Session count steadily grows with usage of form login
@@ -68,6 +71,30 @@ import com.openexchange.ajax.session.actions.FormLoginResponse;
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
 public class Bug32695Test extends AbstractAJAXSession {
+
+    private AJAXClient client;
+
+    @Override
+    public TestClassConfig getTestConfig() {
+        // Avoid logins of other clients
+        return TestClassConfig.builder().withUserPerContext(2).build();
+    }
+
+    @Override
+    @Before
+    public void setUp() throws Exception {
+        super.setUp();
+        client = new AJAXClient(new AJAXSession(), true);
+    }
+
+    @Override
+    public void tearDown() throws Exception {
+        try {
+            client.logout();
+        } finally {
+            super.tearDown();
+        }
+    }
 
     @Test
     public void testAutoFormLoginWithOtherUser() throws Exception {
@@ -78,12 +105,12 @@ public class Bug32695Test extends AbstractAJAXSession {
         /*
          * perform second form login
          */
-        FormLoginRequest secondLoginRequest = new FormLoginRequest(testUser.getLogin(), testUser.getPassword());
+        FormLoginRequest secondLoginRequest = new FormLoginRequest(testUser2.getLogin(), testUser2.getPassword());
         secondLoginRequest.setCookiesNeeded(false);
-        FormLoginResponse secondLoginResponse = getClient().execute(secondLoginRequest);
+        FormLoginResponse secondLoginResponse = this.client.execute(secondLoginRequest);
         String secondSessionID = secondLoginResponse.getSessionId();
         assertFalse("Same session ID", firstSessionID.equals(secondSessionID));
-        getClient().getSession().setId(secondSessionID);
+        this.client.getSession().setId(secondSessionID);
     }
 
     @Test
@@ -95,11 +122,11 @@ public class Bug32695Test extends AbstractAJAXSession {
         /*
          * perform second form login with wrong credentials
          */
-        FormLoginRequest secondLoginRequest = new FormLoginRequest(testUser.getLogin(), "wrongpassword");
+        FormLoginRequest secondLoginRequest = new FormLoginRequest(testUser2.getLogin(), "wrongpassword");
         secondLoginRequest.setCookiesNeeded(false);
         AssertionError expectedError = null;
         try {
-            getClient().execute(secondLoginRequest);
+            this.client.execute(secondLoginRequest);
         } catch (AssertionError e) {
             expectedError = e;
         }
@@ -116,17 +143,16 @@ public class Bug32695Test extends AbstractAJAXSession {
          * perform second form login with wrong secret cookie
          */
         findCookie(LoginServlet.SECRET_PREFIX).setValue("wrongsecret");
-        FormLoginRequest secondLoginRequest = new FormLoginRequest(testUser.getLogin(), testUser.getPassword());
+        FormLoginRequest secondLoginRequest = new FormLoginRequest(testUser2.getLogin(), testUser2.getPassword());
         secondLoginRequest.setCookiesNeeded(false);
-        FormLoginResponse secondLoginResponse = getClient().execute(secondLoginRequest);
+        FormLoginResponse secondLoginResponse = this.client.execute(secondLoginRequest);
         String secondSessionID = secondLoginResponse.getSessionId();
         assertFalse("Same session ID", firstSessionID.equals(secondSessionID));
-        getClient().getSession().setId(secondSessionID);
+        this.client.getSession().setId(secondSessionID);
     }
 
     private String firstFormLogin() throws Exception {
-        AJAXClient client = getClient();
-        FormLoginResponse loginResponse = client.execute(new FormLoginRequest(testUser.getLogin(), testUser.getPassword()));
+        FormLoginResponse loginResponse = this.client.execute(new FormLoginRequest(testUser.getLogin(), testUser.getPassword()));
         String sessionID = loginResponse.getSessionId();
         assertNotNull("No session ID", sessionID);
         client.getSession().setId(sessionID);
@@ -134,7 +160,7 @@ public class Bug32695Test extends AbstractAJAXSession {
     }
 
     private BasicClientCookie findCookie(String prefix) {
-        List<Cookie> cookies = getClient().getSession().getHttpClient().getCookieStore().getCookies();
+        List<Cookie> cookies = this.client.getSession().getHttpClient().getCookieStore().getCookies();
         for (int i = 0; i < cookies.size(); i++) {
             if (cookies.get(i).getName().startsWith(prefix)) {
                 return (BasicClientCookie) cookies.get(i);

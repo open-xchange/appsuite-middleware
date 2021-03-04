@@ -51,11 +51,12 @@ package com.openexchange.ajax.session;
 
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import com.openexchange.ajax.framework.AJAXClient;
 import com.openexchange.ajax.framework.AJAXSession;
-import com.openexchange.ajax.framework.ProvisioningSetup;
+import com.openexchange.ajax.framework.AbstractTestEnvironment;
 import com.openexchange.ajax.session.actions.LoginRequest;
 import com.openexchange.ajax.session.actions.LoginResponse;
 import com.openexchange.exception.OXException;
@@ -69,7 +70,7 @@ import com.openexchange.test.common.test.pool.TestUser;
  *
  * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
  */
-public class DuplicateAuthIdTest {
+public class DuplicateAuthIdTest extends AbstractTestEnvironment {
 
     private String sameAuthId;
 
@@ -91,7 +92,6 @@ public class DuplicateAuthIdTest {
 
     @Before
     public void setUp() throws Exception {
-        ProvisioningSetup.init();
         testContext = TestContextPool.acquireContext(this.getClass().getCanonicalName());
         TestUser testUser = testContext.acquireUser();
 
@@ -110,6 +110,11 @@ public class DuplicateAuthIdTest {
         TestUser testUser2 = testContext.acquireUser();
         login2 = testUser2.getLogin();
         password2 = testUser2.getPassword();
+    }
+
+    @After
+    public void tearDown() throws Exception {
+        TestContextPool.backContext(testContext);
     }
 
     @Test

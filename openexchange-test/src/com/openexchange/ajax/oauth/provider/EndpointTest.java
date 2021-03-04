@@ -82,12 +82,10 @@ import org.apache.http.ssl.SSLContextBuilder;
 import org.apache.http.util.EntityUtils;
 import org.junit.After;
 import org.junit.Before;
-import org.junit.BeforeClass;
 import org.junit.runner.RunWith;
 import com.google.code.tempusfugit.concurrency.ConcurrentTestRunner;
 import com.openexchange.ajax.framework.AJAXClient;
-import com.openexchange.ajax.framework.ProvisioningSetup;
-import com.openexchange.exception.OXException;
+import com.openexchange.ajax.framework.AbstractTestEnvironment;
 import com.openexchange.java.util.UUIDs;
 import com.openexchange.oauth.provider.impl.OAuthProviderConstants;
 import com.openexchange.oauth.provider.resourceserver.scope.Scope;
@@ -108,7 +106,7 @@ import com.openexchange.test.common.test.pool.TestUser;
  * @since v7.8.0
  */
 @RunWith(ConcurrentTestRunner.class)
-public abstract class EndpointTest {
+public abstract class EndpointTest extends AbstractTestEnvironment {
 
     public static final String AUTHORIZATION_ENDPOINT = "/ajax/" + OAuthProviderConstants.AUTHORIZATION_SERVLET_ALIAS;
 
@@ -124,25 +122,17 @@ public abstract class EndpointTest {
 
     protected TestUser testUser;
 
-    protected static String scheme;
+    protected final static String SCHEME =  "https";
 
-    protected static String hostname;
+    protected final static String HOSTNAME = AJAXConfig.getProperty(AJAXConfig.Property.HOSTNAME);
 
-    protected static int port;
+    protected final static int PORT = 443;
 
     protected TestContext testContext;
 
     protected AJAXClient noReplyClient;
 
     protected TestUser noReplyUser;
-
-    @BeforeClass
-    public static void beforeClass() throws OXException {
-        ProvisioningSetup.init();
-        scheme = "https";
-        hostname = AJAXConfig.getProperty(AJAXConfig.Property.HOSTNAME);
-        port = 443;
-    }
 
     @Before
     public void before() throws Exception {

@@ -102,7 +102,7 @@ public class Bug44309Test extends Abstract2UserCalDAVTest {
 
     @Override
     public TestClassConfig getTestConfig() {
-        return TestClassConfig.builder().createAjaxClient().createApiClient().withUserPerContext(3).build();
+        return TestClassConfig.builder().createAjaxClient().createApiClient().withUserPerContext(3).useEnhancedApiClients().build();
     }
 
     @Test

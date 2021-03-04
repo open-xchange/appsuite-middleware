@@ -61,24 +61,11 @@ public class MSLiveSubscribeTestEnvironment extends AbstractSubscribeTestEnviron
 
     protected static final String CONTACT_SOURCE_ID = "com.openexchange.subscribe.mslive.contact";
 
-    private static final MSLiveSubscribeTestEnvironment INSTANCE = new MSLiveSubscribeTestEnvironment();
-
     /**
      * Initializes a new {@link MSLiveSubscribeTestEnvironment}.
-     * 
-     * @param serviceId
      */
     public MSLiveSubscribeTestEnvironment() {
         super("com.openexchange.oauth.msliveconnect");
-    }
-
-    /**
-     * Get the instance of the environment
-     * 
-     * @return the instance
-     */
-    public static final MSLiveSubscribeTestEnvironment getInstance() {
-        return INSTANCE;
     }
 
     @Override
