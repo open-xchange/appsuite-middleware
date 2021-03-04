@@ -59,6 +59,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 import javax.servlet.http.HttpServletResponse;
@@ -87,6 +88,8 @@ import com.openexchange.caldav.query.Filter;
 import com.openexchange.caldav.query.FilterAnalyzer;
 import com.openexchange.caldav.reports.FilteringResource;
 import com.openexchange.chronos.provider.CalendarFolderProperty;
+import com.openexchange.config.cascade.ConfigView;
+import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.dav.DAVProperty;
 import com.openexchange.dav.DAVProtocol;
 import com.openexchange.dav.PreconditionException;
@@ -100,6 +103,7 @@ import com.openexchange.folderstorage.CalendarFolderConverter;
 import com.openexchange.folderstorage.ParameterizedFolder;
 import com.openexchange.folderstorage.UserizedFolder;
 import com.openexchange.folderstorage.type.PrivateType;
+import com.openexchange.folderstorage.type.SharedType;
 import com.openexchange.java.Streams;
 import com.openexchange.java.Strings;
 import com.openexchange.login.Interface;
@@ -252,6 +256,45 @@ public abstract class CalDAVFolderCollection<T> extends FolderCollection<T> impl
             return;
         }
         throw new PreconditionException(DAVProtocol.DAV_NS.getURI(), "cannot-modify-protected-property", getUrl(), HttpServletResponse.SC_FORBIDDEN);
+    }
+
+    @Override
+    public String getDisplayName() throws WebdavProtocolException {
+        Locale locale = factory.getUser().getLocale();
+        String name = locale != null ? folder.getLocalizedName(locale) : folder.getName();
+        String ownerName = getOwnerName();
+
+        if (PrivateType.getInstance().equals(this.folder.getType()) && folder.isDefault()) {
+            return getStandardFolderDisplayNameTemplate().replaceAll("\\[foldername\\]", name).replaceAll("\\[owner\\]", ownerName);
+        } else if (SharedType.getInstance().equals(this.folder.getType())) {
+            return getSharedFolderDisplayNameTemplate().replaceAll("\\[foldername\\]", name).replaceAll("\\[owner\\]", ownerName);
+        }
+
+        return name;
+    }
+
+    private String getStandardFolderDisplayNameTemplate() {
+        String defaultTemplate = "[foldername]";
+        ConfigView configView;
+        try {
+            configView = factory.requireService(ConfigViewFactory.class).getView();
+            return configView.opt("com.openexchange.caldav.standardFolderDisplayName", String.class, defaultTemplate);
+        } catch (OXException e) {
+            LOG.warn("Unable load config.", e);
+        }
+        return defaultTemplate;
+    }
+
+    private String getSharedFolderDisplayNameTemplate() {
+        String defaultTemplate = "[foldername] ([owner])";
+        ConfigView configView;
+        try {
+            configView = factory.requireService(ConfigViewFactory.class).getView();
+            return configView.opt("com.openexchange.caldav.sharedFolderDisplayName", String.class, defaultTemplate);
+        } catch (OXException e) {
+            LOG.warn("Unable load config.", e);
+        }
+        return defaultTemplate;
     }
 
     protected void putProperty(DAVProperty property) throws WebdavProtocolException {

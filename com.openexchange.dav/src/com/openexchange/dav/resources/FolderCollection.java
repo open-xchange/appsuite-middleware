@@ -489,7 +489,7 @@ public abstract class FolderCollection<T> extends DAVCollection {
         return updatableFolder;
     }
 
-    private String getOwnerName() {
+    protected String getOwnerName() {
         User owner = null;
         try {
             owner = getOwner();
