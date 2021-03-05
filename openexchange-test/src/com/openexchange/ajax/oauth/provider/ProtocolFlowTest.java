@@ -229,7 +229,7 @@ public class ProtocolFlowTest extends EndpointTest {
     public void testMaxNumberOfDistinctGrants() throws Exception {
         // A user must have at max. OAuthProviderService.MAX_CLIENTS_PER_USER grants for different clients
         Credentials masterAdminCredentials = AbstractOAuthTest.getMasterAdminCredentials();
-        RemoteClientManagement clientManagement = (RemoteClientManagement) Naming.lookup("rmi://" + AJAXConfig.getProperty(Property.RMI_HOST) + ":1099/" + RemoteClientManagement.RMI_NAME);
+        RemoteClientManagement clientManagement = (RemoteClientManagement) Naming.lookup("rmi://" + AJAXConfig.getProperty(Property.RMIHOST) + ":1099/" + RemoteClientManagement.RMI_NAME);
         List<ClientDto> clients = new ArrayList<>(ClientManagement.MAX_CLIENTS_PER_USER);
         for (int i = 0; i < ClientManagement.MAX_CLIENTS_PER_USER; i++) {
             clients.add(clientManagement.registerClient(ClientManagement.DEFAULT_GID, prepareClient("testMaxNumberOfDistinctGrants " + i + " " + System.currentTimeMillis()), masterAdminCredentials));

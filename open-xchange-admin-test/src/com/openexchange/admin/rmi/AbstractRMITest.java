@@ -160,7 +160,7 @@ public abstract class AbstractRMITest {
 
     /**
      * Returns the RMI host name. It first looks up the <code>rmi_test_host</code>
-     * system property and then the {@link Property#RMI_HOST} via the {@link AJAXConfig}
+     * system property and then the {@link Property#RMIHOST} via the {@link AJAXConfig}
      * 
      * @return The RMI host name.
      */
@@ -169,8 +169,8 @@ public abstract class AbstractRMITest {
 
         if (System.getProperty("rmi_test_host") != null) {
             host = System.getProperty("rmi_test_host");
-        } else if (AJAXConfig.getProperty(Property.RMI_HOST) != null) {
-            host = AJAXConfig.getProperty(Property.RMI_HOST);
+        } else if (AJAXConfig.getProperty(Property.RMIHOST) != null) {
+            host = AJAXConfig.getProperty(Property.RMIHOST);
         }
 
         return host;

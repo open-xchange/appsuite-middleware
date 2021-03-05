@@ -97,7 +97,7 @@ public class TestContextPool {
 
     private static Semaphore semaphore = new Semaphore(20, true);
 
-    private static final boolean DELETE_AFTER_USAGE = b(Boolean.valueOf(AJAXConfig.getProperty(AJAXConfig.Property.DELETE_CONTEXT, Boolean.TRUE.toString())));
+    private static final boolean DELETE_AFTER_USAGE = b(Boolean.valueOf(AJAXConfig.getProperty(AJAXConfig.Property.DELETE_CONTEXT_AFTER_USE, Boolean.TRUE.toString())));
     private static final boolean PRE_PROVISION_CONTEXTS = b(Boolean.valueOf(AJAXConfig.getProperty(AJAXConfig.Property.PRE_PROVISION_CONTEXTS, Boolean.TRUE.toString())));
 
     /**

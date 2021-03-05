@@ -142,7 +142,7 @@ public class Bug65533Test extends AbstractITipTest {
          * prepare & send message from user b to user a
          */
         String iMip;
-        File file = new File(AJAXConfig.getProperty(AJAXConfig.Property.TEST_DIR), "bug65533.eml");
+        File file = new File(AJAXConfig.getProperty(AJAXConfig.Property.TEST_MAIL_DIR), "bug65533.eml");
         try (InputStream inputStream = new FileInputStream(file)) {
             iMip = Streams.stream2string(inputStream, Charsets.UTF_8_NAME);
         }

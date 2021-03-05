@@ -101,17 +101,34 @@ public class AJAXConfig extends AbstractConfig {
     }
 
     public static String getProperty(final Property key) {
-        return singleton.getPropertyInternal(key.getPropertyName());
+        String property = tryToFindEnviromentVariable(key);
+        if (property == null) {
+            property = singleton.getPropertyInternal(key.getPropertyName());
+        }
+        return property;
     }
 
     public static String getProperty(final Property key, final String fallBack) {
         String property;
         try {
-            property = singleton.getPropertyInternal(key.getPropertyName(), fallBack);
+            property = tryToFindEnviromentVariable(key);
+            if (property == null) {
+                property = singleton.getPropertyInternal(key.getPropertyName(), fallBack);
+            }
         } catch (Exception e) {
             return fallBack;
         }
         return property;
+    }
+
+    private static String tryToFindEnviromentVariable(Property key) {
+        String envVar;
+        try {
+            envVar = System.getenv(key.getEnvVarName());
+        } catch (@SuppressWarnings("unused") Exception e) {
+            envVar = null;
+        }
+        return envVar;
     }
 
     /**
@@ -130,7 +147,7 @@ public class AJAXConfig extends AbstractConfig {
         /**
          * The host for RMI calls
          */
-        RMI_HOST("rmihost"),
+        RMIHOST("rmihost"),
         /** Executor sleeps this amount of time after every request to prevent Apache problems */
         SLEEP("sleep"),
         /**
@@ -145,7 +162,7 @@ public class AJAXConfig extends AbstractConfig {
         /**
          * Directory which contains test files
          */
-        TEST_DIR("testMailDir"),
+        TEST_MAIL_DIR("testMailDir"),
 
         MAIL_PORT("mailPort"),
 
@@ -167,7 +184,7 @@ public class AJAXConfig extends AbstractConfig {
         /**
          * Whether newly created contexts should be deleted after usage or not
          */
-        DELETE_CONTEXT("deleteContextAfterUse"),
+        DELETE_CONTEXT_AFTER_USE("deleteContextAfterUse"),
 
         /**
          * The suffix of the context name
@@ -211,6 +228,8 @@ public class AJAXConfig extends AbstractConfig {
          */
         private final String propertyName;
 
+        private static final String ENV_VAR_PREFIX = "ajax_properties__%1s";
+
         /**
          * Default constructor.
          * @param propertyName Name of the property in the ajax.properties
@@ -225,6 +244,10 @@ public class AJAXConfig extends AbstractConfig {
          */
         public String getPropertyName() {
             return propertyName;
+        }
+
+        public String getEnvVarName() {
+            return String.format(ENV_VAR_PREFIX, this.name());
         }
     }
 }

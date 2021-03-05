@@ -80,7 +80,7 @@ public class ICalImportAccessTest extends AbstractImportExportTest {
         super.setUp();
         this.user = new com.openexchange.admin.rmi.dataobjects.User(getApiClient().getUserId().intValue());
         this.credentials = new Credentials(admin.getUser(), admin.getPassword());
-        this.iface = (OXUserInterface) Naming.lookup("rmi://" + AJAXConfig.getProperty(Property.RMI_HOST) + ":1099/" + OXUserInterface.RMI_NAME);
+        this.iface = (OXUserInterface) Naming.lookup("rmi://" + AJAXConfig.getProperty(Property.RMIHOST) + ":1099/" + OXUserInterface.RMI_NAME);
         this.ctx = new Context();
         this.ctx.setId(I(testUser.getContextId()));
         setModuleAccess(false);

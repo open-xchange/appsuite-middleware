@@ -169,7 +169,7 @@ public abstract class EndpointTest extends AbstractTestEnvironment {
 
           // register client application
           ClientDataDto clientData = prepareClient("Test App " + UUID.randomUUID().toString());
-          RemoteClientManagement clientManagement = (RemoteClientManagement) Naming.lookup("rmi://" + AJAXConfig.getProperty(Property.RMI_HOST) + ":1099/" + RemoteClientManagement.RMI_NAME);
+          RemoteClientManagement clientManagement = (RemoteClientManagement) Naming.lookup("rmi://" + AJAXConfig.getProperty(Property.RMIHOST) + ":1099/" + RemoteClientManagement.RMI_NAME);
           oauthClient = clientManagement.registerClient(RemoteClientManagement.DEFAULT_GID, clientData, AbstractOAuthTest.getMasterAdminCredentials());
 
           csrfState = UUIDs.getUnformattedStringFromRandom();
@@ -182,7 +182,7 @@ public abstract class EndpointTest extends AbstractTestEnvironment {
             if (client != null && client.getConnectionManager() != null) {
                 client.close();
             }
-            RemoteClientManagement clientManagement = (RemoteClientManagement) Naming.lookup("rmi://" + AJAXConfig.getProperty(Property.RMI_HOST) + ":1099/" + RemoteClientManagement.RMI_NAME);
+            RemoteClientManagement clientManagement = (RemoteClientManagement) Naming.lookup("rmi://" + AJAXConfig.getProperty(Property.RMIHOST) + ":1099/" + RemoteClientManagement.RMI_NAME);
             clientManagement.unregisterClient(oauthClient.getId(), AbstractOAuthTest.getMasterAdminCredentials());
         } finally {
             TestContextPool.backContext(testContext);

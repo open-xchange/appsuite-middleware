@@ -390,7 +390,7 @@ abstract class AbstractTestProvisioningReporting extends AbstractTestReporting {
 
     /**
      * Returns the RMI host name. It first looks up the <code>rmi_test_host</code>
-     * system property and then the {@link Property#RMI_HOST} via the {@link AJAXConfig}
+     * system property and then the {@link Property#RMIHOST} via the {@link AJAXConfig}
      * 
      * @return The RMI host name.
      */

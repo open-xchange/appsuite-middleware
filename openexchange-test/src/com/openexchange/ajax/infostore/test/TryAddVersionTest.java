@@ -89,7 +89,7 @@ public class TryAddVersionTest extends AbstractInfostoreTest {
         File file = new DefaultFile();
         file.setFolderId(String.valueOf(getClient().getValues().getPrivateInfostoreFolder()));
         file.setFileName("tryAddVersion");
-        java.io.File f = new java.io.File(AJAXConfig.getProperty(AJAXConfig.Property.TEST_DIR) + filename);
+        java.io.File f = new java.io.File(AJAXConfig.getProperty(AJAXConfig.Property.TEST_MAIL_DIR) + filename);
         NewInfostoreRequest req = new NewInfostoreRequest(file, f);
         NewInfostoreResponse resp = getClient().execute(req);
         ids.add(resp.getID());
@@ -100,7 +100,7 @@ public class TryAddVersionTest extends AbstractInfostoreTest {
         File file = new DefaultFile();
         file.setFolderId(String.valueOf(getClient().getValues().getPrivateInfostoreFolder()));
         file.setFileName("tryAddVersion");
-        java.io.File f = new java.io.File(AJAXConfig.getProperty(AJAXConfig.Property.TEST_DIR) + filename);
+        java.io.File f = new java.io.File(AJAXConfig.getProperty(AJAXConfig.Property.TEST_MAIL_DIR) + filename);
         NewInfostoreRequest req = new NewInfostoreRequest(file, f, true);
         NewInfostoreResponse resp = getClient().execute(req);
         assertFalse(resp.hasError());
@@ -117,7 +117,7 @@ public class TryAddVersionTest extends AbstractInfostoreTest {
         File file = new DefaultFile();
         file.setFolderId(String.valueOf(getClient().getValues().getPrivateInfostoreFolder()));
         file.setFileName("tryAddVersion");
-        java.io.File f = new java.io.File(AJAXConfig.getProperty(AJAXConfig.Property.TEST_DIR) + filename);
+        java.io.File f = new java.io.File(AJAXConfig.getProperty(AJAXConfig.Property.TEST_MAIL_DIR) + filename);
         NewInfostoreRequest req = new NewInfostoreRequest(file, f, false);
         NewInfostoreResponse resp = getClient().execute(req);
         assertFalse(resp.hasError());
@@ -136,7 +136,7 @@ public class TryAddVersionTest extends AbstractInfostoreTest {
         File file = new DefaultFile();
         file.setFolderId(String.valueOf(getClient().getValues().getPrivateInfostoreFolder()));
         file.setFileName("TryAddVersion");
-        java.io.File f = new java.io.File(AJAXConfig.getProperty(AJAXConfig.Property.TEST_DIR) + filename);
+        java.io.File f = new java.io.File(AJAXConfig.getProperty(AJAXConfig.Property.TEST_MAIL_DIR) + filename);
         NewInfostoreRequest req = new NewInfostoreRequest(file, f, true);
         NewInfostoreResponse resp = getClient().execute(req);
         assertFalse(resp.hasError());

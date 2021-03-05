@@ -106,7 +106,7 @@ public class AbstractAppPasswordTest extends AbstractConfigAwareAPIClientSession
         Set<String> cap = new HashSet<String>(1);
         cap.add("app_spec_passwords");
         Credentials userCreds = new Credentials(admin.getUser(), admin.getPassword());
-        OXUserInterface usrInterface = (OXUserInterface) Naming.lookup("rmi://" + AJAXConfig.getProperty(Property.RMI_HOST) + ":1099/" + OXUserInterface.RMI_NAME);
+        OXUserInterface usrInterface = (OXUserInterface) Naming.lookup("rmi://" + AJAXConfig.getProperty(Property.RMIHOST) + ":1099/" + OXUserInterface.RMI_NAME);
         Set<String> emptySet = Collections.emptySet();
         usrInterface.changeCapabilities(new Context(I(testUser.getContextId())), user, cap, emptySet, emptySet, userCreds);
         appSpecApi = new AppPasswordApi(getApiClient());

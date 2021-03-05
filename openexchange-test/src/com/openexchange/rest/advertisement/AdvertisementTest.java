@@ -154,7 +154,7 @@ public class AdvertisementTest extends AbstractConfigAwareAjaxSession {
                 ctx.setUserAttribute("taxonomy", "types", taxonomyTypes);
                 TestUser oxAdminMaster = TestContextPool.getOxAdminMaster();
                 Credentials credentials = new Credentials(oxAdminMaster.getUser(), oxAdminMaster.getPassword());
-                OXContextInterface ctxInterface = (OXContextInterface) Naming.lookup("rmi://" + AJAXConfig.getProperty(Property.RMI_HOST) + ":1099/" + OXContextInterface.RMI_NAME);
+                OXContextInterface ctxInterface = (OXContextInterface) Naming.lookup("rmi://" + AJAXConfig.getProperty(Property.RMIHOST) + ":1099/" + OXContextInterface.RMI_NAME);
                 ctxInterface.change(ctx, credentials);
                 break;
             default:

@@ -63,7 +63,7 @@ public abstract class AttachmentTest extends AbstractAJAXSession {
     @Before
     public void setUp() throws Exception {
         super.setUp();
-        testFile = new File(AJAXConfig.getProperty(AJAXConfig.Property.TEST_DIR), "ox.html.txt");
-        testFile2 = new File(AJAXConfig.getProperty(AJAXConfig.Property.TEST_DIR), "ox.html.txt");
+        testFile = new File(AJAXConfig.getProperty(AJAXConfig.Property.TEST_MAIL_DIR), "ox.html.txt");
+        testFile2 = new File(AJAXConfig.getProperty(AJAXConfig.Property.TEST_MAIL_DIR), "ox.html.txt");
     }
 }

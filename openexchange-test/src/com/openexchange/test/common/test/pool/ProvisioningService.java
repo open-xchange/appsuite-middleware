@@ -498,8 +498,8 @@ public class ProvisioningService {
 
         if (System.getProperty("rmi_test_host") != null) {
             host = System.getProperty("rmi_test_host");
-        } else if (AJAXConfig.getProperty(AJAXConfig.Property.RMI_HOST) != null) {
-            host = AJAXConfig.getProperty(AJAXConfig.Property.RMI_HOST);
+        } else if (AJAXConfig.getProperty(AJAXConfig.Property.RMIHOST) != null) {
+            host = AJAXConfig.getProperty(AJAXConfig.Property.RMIHOST);
         }
 
         return host;

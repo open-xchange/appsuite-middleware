@@ -177,7 +177,7 @@ public class JPCSVImportTest extends AbstractConfigAwareAPIClientSession {
 
     @Test
     public void testJPImport() throws ApiException {
-        File file = new File(AJAXConfig.getProperty(AJAXConfig.Property.TEST_DIR), "jpcontact.csv");
+        File file = new File(AJAXConfig.getProperty(AJAXConfig.Property.TEST_MAIL_DIR), "jpcontact.csv");
         importApi.importCSV(folderId, file, Boolean.FALSE, null);
         ContactsResponse allContacts = contactsApi.getAllContacts(folderId, COLUMNS, null, null, null);
         Object data = checkResponse(allContacts.getError(), allContacts.getErrorDesc(), allContacts.getData());

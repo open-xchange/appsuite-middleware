@@ -81,7 +81,7 @@ public class ContactImageApiClientScaleTest extends AbstractApiClientContactTest
         FileInputStream input = null;
         try {
             final ContactData contactObj = createContactObject("testContactWithImage");
-            String testDataDir = AJAXConfig.getProperty(AJAXConfig.Property.TEST_DIR);
+            String testDataDir = AJAXConfig.getProperty(AJAXConfig.Property.TEST_MAIL_DIR);
             java.io.File file = new java.io.File(testDataDir, "oxlogo.png");
             input = new FileInputStream(file);
             final byte bigImage[] = new byte[input.available()];
@@ -111,7 +111,7 @@ public class ContactImageApiClientScaleTest extends AbstractApiClientContactTest
         try {
             final ContactData contactObj = createContactObject("testUpdateContactWithImageUpdate");
             final String objectId = createContact(contactObj);
-            String testDataDir = AJAXConfig.getProperty(AJAXConfig.Property.TEST_DIR);
+            String testDataDir = AJAXConfig.getProperty(AJAXConfig.Property.TEST_MAIL_DIR);
             java.io.File file = new java.io.File(testDataDir, "oxlogo.png");
             input = new FileInputStream(file);
             final byte bigImage[] = new byte[input.available()];

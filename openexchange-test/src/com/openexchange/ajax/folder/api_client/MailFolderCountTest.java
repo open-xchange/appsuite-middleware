@@ -89,7 +89,7 @@ public class MailFolderCountTest extends AbstractConfigAwareAPIClientSession {
     public void setUp() throws Exception {
         super.setUp();
 
-        String testMailDir = AJAXConfig.getProperty(AJAXConfig.Property.TEST_DIR);
+        String testMailDir = AJAXConfig.getProperty(AJAXConfig.Property.TEST_MAIL_DIR);
         super.setUpConfiguration();
 
         // Setup client and import mails ------------------------

@@ -100,7 +100,7 @@ public class AbstractFolderCheckLimitTest extends AbstractEnhancedApiClientSessi
     @Override
     public void setUp() throws Exception {
         super.setUp();
-        this.iface = (OXUserInterface) Naming.lookup("rmi://" + AJAXConfig.getProperty(Property.RMI_HOST) + ":1099/" + OXUserInterface.RMI_NAME);
+        this.iface = (OXUserInterface) Naming.lookup("rmi://" + AJAXConfig.getProperty(Property.RMIHOST) + ":1099/" + OXUserInterface.RMI_NAME);
         this.credentials = new Credentials(admin.getUser(), admin.getPassword());
         this.user = createUserObj();
         this.quotaTestuser = new TestUser(user.getName(), Integer.toString(testUser.getContextId()), "secret");

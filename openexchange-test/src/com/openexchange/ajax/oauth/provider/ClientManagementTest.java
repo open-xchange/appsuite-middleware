@@ -99,7 +99,7 @@ public class ClientManagementTest extends AbstractTestEnvironment {
 
     @Before
     public void before() throws Exception {
-        clientManagement = (RemoteClientManagement) Naming.lookup("rmi://" + AJAXConfig.getProperty(Property.RMI_HOST) + ":1099/" + RemoteClientManagement.RMI_NAME);
+        clientManagement = (RemoteClientManagement) Naming.lookup("rmi://" + AJAXConfig.getProperty(Property.RMIHOST) + ":1099/" + RemoteClientManagement.RMI_NAME);
         credentials = AbstractOAuthTest.getMasterAdminCredentials();
     }
 

@@ -98,7 +98,7 @@ public class ApplyMailFilterTest extends AbstractMailFilterTest {
         String folderId = createFolder();
 
         // Add two mails to this folder (one matches the sieve rule)
-        String testMailDir = AJAXConfig.getProperty(AJAXConfig.Property.TEST_DIR);
+        String testMailDir = AJAXConfig.getProperty(AJAXConfig.Property.TEST_MAIL_DIR);
         importMail("mailfilter1.eml", testMailDir, folderId); // person1 to person2
         String matchingMailId = importMail("mailfilter2.eml", testMailDir, folderId); // person1 to person3
 

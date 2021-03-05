@@ -34,7 +34,7 @@ public class UploadActionTest extends InfostoreApiClientTest {
 
     @Test
     public void testUpload() throws Exception {
-        final File file = new File(AJAXConfig.getProperty(AJAXConfig.Property.TEST_DIR), "ox.jpg");
+        final File file = new File(AJAXConfig.getProperty(AJAXConfig.Property.TEST_MAIL_DIR), "ox.jpg");
         String id = uploadInfoItem(file, MIME_IMAGE_JPG);
 
         InfoItemData item = getItem(id);
@@ -73,7 +73,7 @@ public class UploadActionTest extends InfostoreApiClientTest {
     // Bug 3928
     @Test
     public void testVersionCommentForNewDocument() throws Exception {
-        final File file = new File(AJAXConfig.getProperty(AJAXConfig.Property.TEST_DIR), "ox.jpg");
+        final File file = new File(AJAXConfig.getProperty(AJAXConfig.Property.TEST_MAIL_DIR), "ox.jpg");
         String id = uploadInfoItem(null, file, MIME_IMAGE_JPG, "my comment");
 
         InfoItemData item = getItem(id);
@@ -86,7 +86,7 @@ public class UploadActionTest extends InfostoreApiClientTest {
     @Test
     public void testUniqueFilenamesOnUpload() throws Exception {
 
-        final File file = new File(AJAXConfig.getProperty(AJAXConfig.Property.TEST_DIR), "ox.jpg");
+        final File file = new File(AJAXConfig.getProperty(AJAXConfig.Property.TEST_MAIL_DIR), "ox.jpg");
         String id = uploadInfoItem(file, MIME_IMAGE_JPG);
 
         InfoItemData item = getItem(id);
@@ -99,7 +99,7 @@ public class UploadActionTest extends InfostoreApiClientTest {
 
     @Test
     public void testChunkWiseUpload() throws Exception {
-        String testDir = AJAXConfig.getProperty(AJAXConfig.Property.TEST_DIR);
+        String testDir = AJAXConfig.getProperty(AJAXConfig.Property.TEST_MAIL_DIR);
         System.out.println("Going to use file from directory '" + testDir + "'.");
         final File file = new File(testDir, "ox.jpg");
         byte[] all = IOTools.getBytes(new FileInputStream(file));
@@ -130,7 +130,7 @@ public class UploadActionTest extends InfostoreApiClientTest {
     @Test
     public void testBasicUpdate() throws Exception {
 
-        final File file = new File(AJAXConfig.getProperty(AJAXConfig.Property.TEST_DIR), "ox.jpg");
+        final File file = new File(AJAXConfig.getProperty(AJAXConfig.Property.TEST_MAIL_DIR), "ox.jpg");
         String id = uploadInfoItem(file, MIME_IMAGE_JPG);
 
         InfoItemData item = getItem(id);

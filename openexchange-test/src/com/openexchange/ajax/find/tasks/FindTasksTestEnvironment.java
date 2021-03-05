@@ -429,7 +429,7 @@ public class FindTasksTestEnvironment extends AbstractFindTest {
      * @throws IOException
      */
     private final String readFile(String fileName) throws IOException {
-        try (BufferedReader br = new BufferedReader(new FileReader(AJAXConfig.getProperty(AJAXConfig.Property.TEST_DIR) + fileName))) {
+        try (BufferedReader br = new BufferedReader(new FileReader(AJAXConfig.getProperty(AJAXConfig.Property.TEST_MAIL_DIR) + fileName))) {
             StringBuilder sb = new StringBuilder();
             String line = br.readLine();
 

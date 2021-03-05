@@ -121,7 +121,7 @@ public abstract class AbstractMailComposeTest extends AbstractAPIClientSession {
 
         mailApi = new MailApi(getApiClient());
         foldersApi = new FoldersApi(getApiClient());
-        testMailDir = AJAXConfig.getProperty(AJAXConfig.Property.TEST_DIR);
+        testMailDir = AJAXConfig.getProperty(AJAXConfig.Property.TEST_MAIL_DIR);
 
         attachment = new File(TestInit.getTestProperty("ajaxPropertiesFile"));
         attachment2 = new File(TestInit.getTestProperty("provisioningFile"));

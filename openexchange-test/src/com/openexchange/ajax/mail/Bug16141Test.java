@@ -95,7 +95,7 @@ public class Bug16141Test extends AbstractAJAXSession {
         values = getClient().getValues();
         folder = values.getInboxFolder();
         address = getClient().getValues().getSendAddress();
-        testMailDir = AJAXConfig.getProperty(AJAXConfig.Property.TEST_DIR);
+        testMailDir = AJAXConfig.getProperty(AJAXConfig.Property.TEST_MAIL_DIR);
     }
 
     @Test
