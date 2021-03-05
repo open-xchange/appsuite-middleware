@@ -84,7 +84,9 @@ public class NumberOfVersionsLoader extends DbMetadataLoader<Integer> {
 
     @Override
     protected DocumentMetadata set(DocumentMetadata document, Integer metadata) {
-        document.setNumberOfVersions(metadata.intValue());
+        if(metadata != null) {
+            document.setNumberOfVersions(metadata.intValue());
+        }
         return document;
     }
 
