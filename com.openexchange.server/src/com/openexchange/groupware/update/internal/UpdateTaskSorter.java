@@ -108,7 +108,16 @@ public class UpdateTaskSorter {
                 OXException e = UpdateExceptionCodes.UNMET_DEPENDENCY.create(task.getClass().getName(), sb.toString());
                 org.slf4j.LoggerFactory.getLogger(UpdateTaskSorter.class).warn(e.getMessage());
             }
-            throw UpdateExceptionCodes.UNRESOLVABLE_DEPENDENCIES.create(Strings.join(executed.getSuccessfullyExecutedTasks(), ","), Strings.join(retval, ","), Strings.join(toExecute, ","));
+
+            List<String> enqueuedNames = new ArrayList<>(retval.size());
+            for (UpdateTaskV2 enqueuedOne : retval) {
+                enqueuedNames.add(enqueuedOne.getClass().getName());
+            }
+            List<String> toExecuteNames = new ArrayList<>(toExecute.size());
+            for (UpdateTaskV2 toExecuteOne : toExecute) {
+                toExecuteNames.add(toExecuteOne.getClass().getName());
+            }
+            throw UpdateExceptionCodes.UNRESOLVABLE_DEPENDENCIES.create(Strings.join(executed.getSuccessfullyExecutedTasks(), ","), Strings.join(enqueuedNames, ","), Strings.join(toExecuteNames, ","));
         }
         return retval;
     }
