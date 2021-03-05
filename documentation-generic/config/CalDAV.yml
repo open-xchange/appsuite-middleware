@@ -87,27 +87,27 @@ properties:
       file: caldav.properties
       packageName: open-xchange-dav
       tags: ["CalDAV", "Folder", "Host"]
-    - com.openexchange.caldav.standardFolderDisplayName
+    - key: com.openexchange.caldav.standardFolderDisplayName
       description: |
         CalDAV display name for the standard folder. Placeholder [foldername]
         and [owner] are possible. [foldername] is the localized String of default
         folders.
-       defaultValue: [owner]
-       version:
-       reloadable: true
-       configcascadeAware: false
-       file: caldav.properties
-       package: open-xchange-dav
-       tags: ["CalDAV", "Folder"]
-    - com.openexchange.caldav.sharedFolderDisplayName
+      defaultValue: [owner]
+      version:
+      reloadable: true
+      configcascadeAware: false
+      file: caldav.properties
+      packageName: open-xchange-dav
+      tags: ["CalDAV", "Folder"]
+    - key: com.openexchange.caldav.sharedFolderDisplayName
       description: |
         CalDAV display name for shared folders. Placeholder [foldername]
         and [owner] are possible. [foldername] is the localized String of default
         folders, or the folder name as-is for non-default folders.
-       defaultValue: [owner]: [foldername]
-       version:
-       reloadable: true
-       configcascadeAware: false
-       file: caldav.properties
-       package: open-xchange-dav
-       tags: ["CalDAV", "Folder"]
+      defaultValue: "[owner]: [foldername]"
+      version:
+      reloadable: true
+      configcascadeAware: false
+      file: caldav.properties
+      packageName: open-xchange-dav
+      tags: ["CalDAV", "Folder"]
