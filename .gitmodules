@@ -2,3 +2,9 @@
 	path = build
 	url = git@gitlab.open-xchange.com:engineering/build.git
 	branch = master
+[submodule "env"]
+	path = env
+	url = git@gitlab.open-xchange.com:sre/toolkit_env.git
+[submodule "plugins/sre"]
+	path = plugins/sre
+	url = git@gitlab.open-xchange.com:sre/sre_plugin.git
