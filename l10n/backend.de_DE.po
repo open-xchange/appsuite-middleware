@@ -19,7 +19,7 @@ msgstr ""
 "Project-Id-Version: errors.de_DE\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: \n"
-"PO-Revision-Date: 2021-03-05 11:10+0100\n"
+"PO-Revision-Date: 2021-03-05 14:51+0100\n"
 "Last-Translator: Harald Petry <harald.petry@open-xchange.com>\n"
 "Language-Team: German <kde-i18n-de@kde.org>\n"
 "Language: de_DE\n"
@@ -3002,6 +3002,12 @@ msgstr ""
 "Push über Long polling ist für Benutzer \"%1$s\" im Kontext \"%1$s\" "
 "deaktiviert."
 
+#: com.openexchange.drive/src/com/openexchange/drive/DriveExceptionMessages.java:100
+msgid "The directory is no longer accessible. Please select another directory."
+msgstr ""
+"Auf das Verzeichnis kann nicht mehr zugegriffen werden. Bitte wählen Sie ein "
+"anderes Verzeichnis."
+
 #: com.openexchange.external.account/src/com/openexchange/external/account/ExternalAccountExceptionMessages.java:62
 msgid "No external account provider found for module '%1$s'."
 msgstr "Für das Modul '%1$s' wurde kein externer Kontoanbieter gefunden."
@@ -3229,14 +3235,14 @@ msgstr "Der Ordner \"%1$s\" kann nicht nach \"%2$s\" verschoben werden."
 msgid "The file \"%1$s\" cannot be moved to \"%2$s\"."
 msgstr "Die Datei \"%1$s\" kann nicht nach \"%2$s\" verschoben werden."
 
-#. The notes of the file \"%1$s\" in folder \"%2$s\" are lost when moving it into the account \"%3$s\".
+#. The description of the file \"%1$s\" in folder \"%2$s\" are lost when moving it into the account \"%3$s\".
 #: com.openexchange.file.storage/src/com/openexchange/file/storage/FileStorageExceptionMessages.java:101
 msgid ""
-"The notes of the file \"%1$s\" in folder \"%2$s\" are lost when moving it "
-"into the account \"%3$s\"."
+"The description of the file \"%1$s\" in folder \"%2$s\" are lost when moving "
+"it into the account \"%3$s\"."
 msgstr ""
-"Die Notizen zur Datei \"%1$s\" im Ordner \"%2$s\" gehen verloren, wenn die "
-"Datei in das Konto \"%3$s\" verschoben wird."
+"Die Beschreibung der Datei \"%1$s\" im Ordner \"%2$s\" geht beim Verschieben "
+"in das Konto \"%3$s\" verloren."
 
 #. All previous versions of the file \"%1$s\" in folder \"%2$s\" are lost when moving it into the account \"%3$s\".
 #: com.openexchange.file.storage/src/com/openexchange/file/storage/FileStorageExceptionMessages.java:104
@@ -3356,12 +3362,13 @@ msgstr ""
 "Für das Konto \"%1$s\" werden keine individuellen Benutzerberechtigungen "
 "unterstützt."
 
-#. Saving notes for file \"%1$s\" is not supported in account \"%2$s\".
+#. Saving description for file \"%1$s\" is not supported in account \"%2$s\".
 #: com.openexchange.file.storage/src/com/openexchange/file/storage/FileStorageExceptionMessages.java:157
-msgid "Saving notes for file \"%1$s\" is not supported in account \"%2$s\"."
+msgid ""
+"Saving description for file \"%1$s\" is not supported in account \"%2$s\"."
 msgstr ""
-"Das Speichern von Notizen zur Datei \"%1$s\" wird für das Konto \"%2$s\" "
-"nicht unterstützt."
+"Das Speichern der Beschreibung für die Datei \"%1$s\" wird für das Konto "
+"\"%2$s\" nicht unterstützt."
 
 #. Assigning categories to file \"%1$s\" is not supported in account \"%2$s\".
 #: com.openexchange.file.storage/src/com/openexchange/file/storage/FileStorageExceptionMessages.java:160
@@ -4632,22 +4639,20 @@ msgstr ""
 "fehlgeschlagen."
 
 #. *
-#. * Invalid password length. The password must have a minimum length of %1$d characters.
+#. * Invalid password length. The password must be of minimum length %1$d.
 #.
 #: com.openexchange.global/src/com/openexchange/user/UserExceptionMessage.java:133
 msgid ""
-"Invalid password length. The password must have a minimum length of %1$d "
-"characters."
+"Invalid password length. The password must have a minimum length of %1$d."
 msgstr ""
 "Ungültige Passwortlänge. Das Passwort muss mindestens %1$d Zeichen lang sein."
 
 #. *
-#. * Invalid password length. The password must have a maximum length of %1$d characters.
+#. * Invalid password length. The password must be of maximum length %1$d.
 #.
 #: com.openexchange.global/src/com/openexchange/user/UserExceptionMessage.java:138
 msgid ""
-"Invalid password length. The password must have a maximum length of %1$d "
-"characters."
+"Invalid password length. The password must have a maximum length of %1$d."
 msgstr ""
 "Ungültige Passwortlänge. Das Passwort darf höchstens %1$d Zeichen lang sein."
 
@@ -6125,20 +6130,21 @@ msgstr ""
 "Es gibt keinen Passwortmechanismus für die ID ' %s '. Das Passwort kann "
 "nicht verarbeitet werden."
 
-#. *
-#. * New password too short.
-#.
-#: com.openexchange.passwordchange.script/src/com/openexchange/passwordchange/script/impl/PasswordExceptionMessage.java:64
+#. Failed to change password for any reason. E.g. the script used to change a user's password advertised an error (return code)
+#: com.openexchange.passwordchange.script/src/com/openexchange/passwordchange/script/impl/PasswordExceptionMessage.java:62
+msgid "Failed to change password for any reason."
+msgstr "Passwort konnte nicht geändert werden."
+
+#. New password too short.
+#: com.openexchange.passwordchange.script/src/com/openexchange/passwordchange/script/impl/PasswordExceptionMessage.java:65
 msgid ""
 "The entered password is too short. Please try again using a longer password."
 msgstr ""
 "Das eingegebene Passwort ist zu kurz. Bitte versuchen Sie es mit einem "
 "längeren Passwort."
 
-#. *
-#. * New password too weak.
-#.
-#: com.openexchange.passwordchange.script/src/com/openexchange/passwordchange/script/impl/PasswordExceptionMessage.java:69
+#. New password too weak.
+#: com.openexchange.passwordchange.script/src/com/openexchange/passwordchange/script/impl/PasswordExceptionMessage.java:68
 msgid ""
 "The entered password is too weak. Please try again using a more complex "
 "password."
@@ -15335,6 +15341,32 @@ msgstr "UTC"
 #: TimeZones.java:534
 msgid "Zulu"
 msgstr "Zulu"
+
+#~ msgid ""
+#~ "The notes of the file \"%1$s\" in folder \"%2$s\" are lost when moving it "
+#~ "into the account \"%3$s\"."
+#~ msgstr ""
+#~ "Die Notizen zur Datei \"%1$s\" im Ordner \"%2$s\" gehen verloren, wenn "
+#~ "die Datei in das Konto \"%3$s\" verschoben wird."
+
+#~ msgid "Saving notes for file \"%1$s\" is not supported in account \"%2$s\"."
+#~ msgstr ""
+#~ "Das Speichern von Notizen zur Datei \"%1$s\" wird für das Konto \"%2$s\" "
+#~ "nicht unterstützt."
+
+#~ msgid ""
+#~ "Invalid password length. The password must have a minimum length of %1$d "
+#~ "characters."
+#~ msgstr ""
+#~ "Ungültige Passwortlänge. Das Passwort muss mindestens %1$d Zeichen lang "
+#~ "sein."
+
+#~ msgid ""
+#~ "Invalid password length. The password must have a maximum length of %1$d "
+#~ "characters."
+#~ msgstr ""
+#~ "Ungültige Passwortlänge. Das Passwort darf höchstens %1$d Zeichen lang "
+#~ "sein."
 
 #~ msgid "The uwa widget with the id %1$s could not be found"
 #~ msgstr "Das UWA-Widget mit der ID %1$s konnte nicht gefunden werden"
