@@ -19,7 +19,7 @@ msgstr ""
 "Project-Id-Version: errors.de_DE\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: \n"
-"PO-Revision-Date: 2021-01-26 15:32+0100\n"
+"PO-Revision-Date: 2021-03-05 14:58+0100\n"
 "Last-Translator: \n"
 "Language-Team: German <kde-i18n-de@kde.org>\n"
 "Language: de_DE\n"
@@ -3116,6 +3116,12 @@ msgstr ""
 "Push über Long polling ist für Benutzer \"%1$s\" im Kontext \"%1$s\" "
 "deaktiviert."
 
+#: com.openexchange.drive/src/com/openexchange/drive/DriveExceptionMessages.java:100
+msgid "The directory is no longer accessible. Please select another directory."
+msgstr ""
+"Auf das Verzeichnis kann nicht mehr zugegriffen werden. Bitte wählen Sie ein "
+"anderes Verzeichnis."
+
 #: com.openexchange.external.account/src/com/openexchange/external/account/ExternalAccountExceptionMessages.java:62
 msgid "No external account provider found for module '%1$s'."
 msgstr "Für das Modul '%1$s' wurde kein externer Kontoanbieter gefunden."
@@ -3365,14 +3371,14 @@ msgstr "Der Ordner \"%1$s\" kann nicht nach \"%2$s\" verschoben werden."
 msgid "The file \"%1$s\" cannot be moved to \"%2$s\"."
 msgstr "Die Datei \"%1$s\" kann nicht nach \"%2$s\" verschoben werden."
 
-#. The notes of the file \"%1$s\" in folder \"%2$s\" are lost when moving it into the account \"%3$s\".
+#. The description of the file \"%1$s\" in folder \"%2$s\" are lost when moving it into the account \"%3$s\".
 #: com.openexchange.file.storage/src/com/openexchange/file/storage/FileStorageExceptionMessages.java:101
 msgid ""
-"The notes of the file \"%1$s\" in folder \"%2$s\" are lost when moving it "
-"into the account \"%3$s\"."
+"The description of the file \"%1$s\" in folder \"%2$s\" are lost when moving "
+"it into the account \"%3$s\"."
 msgstr ""
-"Die Notizen zur Datei \"%1$s\" im Ordner \"%2$s\" gehen verloren, wenn die "
-"Datei in das Konto \"%3$s\" verschoben wird."
+"Die Beschreibung der Datei \"%1$s\" im Ordner \"%2$s\" geht beim Verschieben "
+"in das Konto \"%3$s\" verloren."
 
 #. All previous versions of the file \"%1$s\" in folder \"%2$s\" are lost when moving it into the account \"%3$s\".
 #: com.openexchange.file.storage/src/com/openexchange/file/storage/FileStorageExceptionMessages.java:104
@@ -3492,12 +3498,13 @@ msgstr ""
 "Für das Konto \"%1$s\" werden keine individuellen Benutzerberechtigungen "
 "unterstützt."
 
-#. Saving notes for file \"%1$s\" is not supported in account \"%2$s\".
+#. Saving description for file \"%1$s\" is not supported in account \"%2$s\".
 #: com.openexchange.file.storage/src/com/openexchange/file/storage/FileStorageExceptionMessages.java:157
-msgid "Saving notes for file \"%1$s\" is not supported in account \"%2$s\"."
+msgid ""
+"Saving description for file \"%1$s\" is not supported in account \"%2$s\"."
 msgstr ""
-"Das Speichern von Notizen zur Datei \"%1$s\" wird für das Konto \"%2$s\" "
-"nicht unterstützt."
+"Das Speichern der Beschreibung für die Datei \"%1$s\" wird für das Konto "
+"\"%2$s\" nicht unterstützt."
 
 #. Assigning categories to file \"%1$s\" is not supported in account \"%2$s\".
 #: com.openexchange.file.storage/src/com/openexchange/file/storage/FileStorageExceptionMessages.java:160
@@ -15743,6 +15750,18 @@ msgstr "UTC"
 #: TimeZones.java:533
 msgid "Zulu"
 msgstr "Zulu"
+
+#~ msgid ""
+#~ "The notes of the file \"%1$s\" in folder \"%2$s\" are lost when moving it "
+#~ "into the account \"%3$s\"."
+#~ msgstr ""
+#~ "Die Notizen zur Datei \"%1$s\" im Ordner \"%2$s\" gehen verloren, wenn "
+#~ "die Datei in das Konto \"%3$s\" verschoben wird."
+
+#~ msgid "Saving notes for file \"%1$s\" is not supported in account \"%2$s\"."
+#~ msgstr ""
+#~ "Das Speichern von Notizen zur Datei \"%1$s\" wird für das Konto \"%2$s\" "
+#~ "nicht unterstützt."
 
 #~ msgid ""
 #~ "%1$s has shared the %2$s \"%3$s\" with you. Please enter the share "
