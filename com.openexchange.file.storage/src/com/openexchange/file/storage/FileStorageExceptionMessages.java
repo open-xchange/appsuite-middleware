@@ -97,8 +97,8 @@ public final class FileStorageExceptionMessages implements LocalizableStrings {
     // The file \"%1$s\" cannot be moved to \"%2$s\".
     public static final String FILE_MOVE_NOT_SUPPORTED_MSG = "The file \"%1$s\" cannot be moved to \"%2$s\".";
 
-    // The notes of the file \"%1$s\" in folder \"%2$s\" are lost when moving it into the account \"%3$s\".
-    public static final String LOSS_OF_NOTES_MSG = "The notes of the file \"%1$s\" in folder \"%2$s\" are lost when moving it into the account \"%3$s\".";
+    // The description of the file \"%1$s\" in folder \"%2$s\" are lost when moving it into the account \"%3$s\".
+    public static final String LOSS_OF_NOTES_MSG = "The description of the file \"%1$s\" in folder \"%2$s\" are lost when moving it into the account \"%3$s\".";
 
     // All previous versions of the file \"%1$s\" in folder \"%2$s\" are lost when moving it into the account \"%3$s\".
     public static final String LOSS_OF_VERSIONS_MSG = "All previous versions of the file \"%1$s\" in folder \"%2$s\" are lost when moving it into the account \"%3$s\".";
@@ -153,8 +153,8 @@ public final class FileStorageExceptionMessages implements LocalizableStrings {
     // Individual permissions are not supported in account \"%1$s\".
     public static final String NO_PERMISSION_SUPPORT_MSG = "Individual permissions are not supported in account \"%1$s\".";
 
-    // Saving notes for file \"%1$s\" is not supported in account \"%2$s\".
-    public static final String NO_NOTES_SUPPORT_MSG = "Saving notes for file \"%1$s\" is not supported in account \"%2$s\".";
+    // Saving description for file \"%1$s\" is not supported in account \"%2$s\".
+    public static final String NO_NOTES_SUPPORT_MSG = "Saving description for file \"%1$s\" is not supported in account \"%2$s\".";
 
     // Assigning categories to file \"%1$s\" is not supported in account \"%2$s\".
     public static final String NO_CATEGORIES_SUPPORT_MSG = "Assigning categories to file \"%1$s\" is not supported in account \"%2$s\".";
