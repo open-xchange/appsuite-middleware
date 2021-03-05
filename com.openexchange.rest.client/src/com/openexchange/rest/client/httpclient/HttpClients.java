@@ -282,7 +282,7 @@ public final class HttpClients {
                     HttpClients.close(response, true);
                 }
             } finally {
-                super.close();
+                in.close();
             }
         }
 
