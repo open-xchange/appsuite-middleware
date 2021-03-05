@@ -1948,7 +1948,7 @@ public class SMTPTransport extends Transport {
 	}
 
 	// try the addresses one at a time
-	Set<String> alreadyOccurredExceptions = new HashSet<>();
+	java.util.Set<String> alreadyOccurredExceptions = new java.util.HashSet<>();
 	for (int i = 0; i < addresses.length; i++) {
 
 	    sfex = null;
