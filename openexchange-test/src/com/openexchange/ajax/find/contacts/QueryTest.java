@@ -56,6 +56,7 @@ import static com.openexchange.find.contacts.ContactsFacetType.EMAIL;
 import static com.openexchange.find.contacts.ContactsFacetType.NAME;
 import static com.openexchange.find.contacts.ContactsFacetType.PHONE;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
@@ -111,6 +112,7 @@ public class QueryTest extends ContactsFindTest {
         facets.add(createActiveFieldFacet(CONTACT_TYPE, "contact_type", "contact"));
         facets.add(createFolderTypeFacet(FolderType.PRIVATE));
         contact = cotm.newAction(contact);
+        assertFalse(cotm.getLastResponse().getErrorMessage(), cotm.getLastResponse().hasError());
         assertFoundDocumentInSearch(facets, contact.getEmail1());
     }
 

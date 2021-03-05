@@ -144,7 +144,7 @@ public class MWB933Test extends ShareTest {
         /*
          * check access to share (via guest client)
          */
-        String shareURL = discoverShareURL(guest);
+        String shareURL = discoverShareURL(testUser.getApiClient(), guest);
         GuestClient guestClient = resolveShare(shareURL, guestPermission.getRecipient());
         guestClient.checkShareModuleAvailable();
         guestClient.checkShareAccessible(guestPermission);

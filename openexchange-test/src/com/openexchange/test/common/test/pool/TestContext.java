@@ -173,7 +173,7 @@ public class TestContext implements Serializable, CleanableResourceManager, Conf
     }
 
     /**
-     * 
+     *
      * Gets the next unused user name from the user name pool.
      *
      * @return The user name. Returns null, if the user name pool can not be read of if there are more users than names in the pool.
@@ -195,6 +195,8 @@ public class TestContext implements Serializable, CleanableResourceManager, Conf
         return null;
     }
 
+    private final Random rand = new Random(System.currentTimeMillis());
+
     /**
      * Gets a user from this context. Can be a user that has already
      * been acquired by {@link #acquireUser()}
@@ -207,10 +209,12 @@ public class TestContext implements Serializable, CleanableResourceManager, Conf
             return acquireUser();
         }
         if (1 == userPool.size()) {
-            return userPool.element();
+            TestUser result = userPool.poll();
+            if (result != null) {
+                return result;
+            }
         }
 
-        Random rand = new Random(System.currentTimeMillis());
         int next = rand.nextInt(userPool.size());
         return userPool.remove(next);
     }

@@ -215,7 +215,7 @@ public class AutoCompleteShowDepartmentsTest extends AbstractConfigAwareAPIClien
      */
     private boolean isRandomUser(String itemName) {
         for (TestUser user : randomUsers) {
-            if (itemName.toLowerCase().contains(user.getUser())) {
+            if (itemName.toLowerCase().contains(user.getUser().toLowerCase())) {
                 return true;
             }
         }

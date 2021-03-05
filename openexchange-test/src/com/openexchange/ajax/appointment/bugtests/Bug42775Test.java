@@ -90,9 +90,9 @@ public class Bug42775Test extends AbstractAJAXSession {
         SetRequest setRequest = new SetRequest(Tree.TimeZone, "Europe/Berlin");
         getClient().execute(setRequest);
         catm.setTimezone(TimeZone.getTimeZone("Europe/Berlin"));
-        setRequest = new SetRequest(Tree.TimeZone, "US/Pacific-New");
+        setRequest = new SetRequest(Tree.TimeZone, "PST");
         testUser2.getAjaxClient().execute(setRequest);
-        catm2.setTimezone(TimeZone.getTimeZone("US/Pacific-New"));
+        catm2.setTimezone(TimeZone.getTimeZone("PST"));
 
         appointment = new Appointment();
         appointment.setTitle("Bug 42775 Test");

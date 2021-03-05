@@ -159,7 +159,7 @@ public class Bug23181Test extends Abstract2UserCalDAVTest {
             }
         }
         for (ConfirmableParticipant participant : appointmentA.getConfirmations()) {
-            if (manager2.getClient().getValues().getDefaultAddress().equals(participant.getEmailAddress())) {
+            if (manager2.getClient().getValues().getDefaultAddress().toLowerCase().equals(participant.getEmailAddress())) {
                 participantB = participant;
             }
         }
@@ -180,7 +180,7 @@ public class Bug23181Test extends Abstract2UserCalDAVTest {
             }
         }
         for (ConfirmableParticipant participant : appointmentB.getConfirmations()) {
-            if (getClient().getValues().getDefaultAddress().equals(participant.getEmailAddress())) {
+            if (getClient().getValues().getDefaultAddress().toLowerCase().equals(participant.getEmailAddress())) {
                 participantA = participant;
             }
         }
