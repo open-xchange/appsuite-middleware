@@ -79,6 +79,8 @@ public class DropboxHttpClientConfiguration extends DefaultHttpClientConfigProvi
     public HttpBasicConfig configureHttpBasicConfig(HttpBasicConfig config) {
         return config
             .setConnectTimeout((int) TimeUnit.SECONDS.toMillis(20))     // See com.dropbox.core.http.HttpRequestor.DEFAULT_CONNECT_TIMEOUT_MILLIS
-            .setSocketReadTimeout((int) TimeUnit.MINUTES.toMillis(2));  // See com.dropbox.core.http.HttpRequestor.DEFAULT_READ_TIMEOUT_MILLIS
+            .setSocketReadTimeout((int) TimeUnit.MINUTES.toMillis(2))   // See com.dropbox.core.http.HttpRequestor.DEFAULT_READ_TIMEOUT_MILLIS
+            .setMaxTotalConnections(100)
+            .setMaxConnectionsPerRoute(100);
     }
 }
