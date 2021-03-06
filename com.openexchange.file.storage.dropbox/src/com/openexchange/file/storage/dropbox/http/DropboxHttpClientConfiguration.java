@@ -50,6 +50,7 @@
 package com.openexchange.file.storage.dropbox.http;
 
 import java.util.Optional;
+import java.util.concurrent.TimeUnit;
 import com.openexchange.rest.client.httpclient.DefaultHttpClientConfigProvider;
 import com.openexchange.rest.client.httpclient.HttpBasicConfig;
 import com.openexchange.version.VersionService;
@@ -62,9 +63,7 @@ import com.openexchange.version.VersionService;
  */
 public class DropboxHttpClientConfiguration extends DefaultHttpClientConfigProvider {
 
-    /**
-     * The DropboxHttpClientConfiguration.java.
-     */
+    /** The identifier of the HTTP client used for Dropbox communication. */
     public static final String HTTP_CLIENT_DROPBOX = "dropbox";
 
     /**
@@ -78,6 +77,8 @@ public class DropboxHttpClientConfiguration extends DefaultHttpClientConfigProvi
 
     @Override
     public HttpBasicConfig configureHttpBasicConfig(HttpBasicConfig config) {
-        return config.setConnectTimeout(20000).setSocketReadTimeout(120000);
+        return config
+            .setConnectTimeout((int) TimeUnit.SECONDS.toMillis(20))     // See com.dropbox.core.http.HttpRequestor.DEFAULT_CONNECT_TIMEOUT_MILLIS
+            .setSocketReadTimeout((int) TimeUnit.MINUTES.toMillis(2));  // See com.dropbox.core.http.HttpRequestor.DEFAULT_READ_TIMEOUT_MILLIS
     }
 }
