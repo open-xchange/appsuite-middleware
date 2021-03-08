@@ -1,3 +1,9 @@
+open-xchange-drive (7.10.3-34) stable; urgency=medium
+
+  * Build for patch 2021-03-15 (5971)
+
+ -- Tobias Friedrich <tobias.friedrich@open-xchange.com>  Mon, 08 Mar 2021 11:47:34 +0000
+
 open-xchange-drive (7.10.3-33) stable; urgency=medium
 
   * Build for patch 2021-02-25 (5959)

@@ -15,7 +15,7 @@ BuildRequires: java-1.8.0-openjdk-devel
 BuildRequires:  open-xchange-core
 BuildRequires:  open-xchange-admin
 Version:        @OXVERSION@
-%define        ox_release 33
+%define        ox_release 34
 Release:        %{ox_release}_<CI_CNT>.<B_CNT>
 Group:          Applications/Productivity
 License:        GPL-2.0
@@ -66,6 +66,8 @@ ox_update_permissions "/opt/open-xchange/etc/upsell.properties" root:open-xchang
 %doc com.openexchange.upsell.multiple/ChangeLog
 
 %changelog
+* Mon Mar 08 2021 Carsten Hoeger <choeger@open-xchange.com>
+Build for patch 2021-03-15 (5971)
 * Mon Feb 22 2021 Carsten Hoeger <choeger@open-xchange.com>
 Build for patch 2021-02-25 (5959)
 * Mon Feb 01 2021 Carsten Hoeger <choeger@open-xchange.com>
