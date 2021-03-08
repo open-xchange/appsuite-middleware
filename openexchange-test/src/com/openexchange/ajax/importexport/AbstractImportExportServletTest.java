@@ -184,7 +184,7 @@ public abstract class AbstractImportExportServletTest extends AbstractAJAXSessio
         folderObj.setModule(folderObjectModuleID);
         folderObj.setType(FolderObject.PRIVATE);
 
-        final OCLPermission[] permission = new OCLPermission[] { FolderTestManager.createPermission(getClient().getValues().getPrivateAppointmentFolder(), false, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION),};
+        final OCLPermission[] permission = new OCLPermission[] { FolderTestManager.createPermission(ftm.getClient().getValues().getPrivateAppointmentFolder(), false, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION)};
         folderObj.setPermissionsAsArray(permission);
 
         return ftm.insertFolderOnServer(folderObj).getObjectID();

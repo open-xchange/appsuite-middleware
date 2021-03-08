@@ -2,6 +2,7 @@
 package com.openexchange.ajax.appointment.bugtests;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import java.util.Date;
 import java.util.List;
 import org.junit.Test;
@@ -25,6 +26,7 @@ public class Bug19500Test_NewAppointmentRequestWeirdBehaviour extends ManagedApp
         series.setTitle("Bug 19500 Series");
         series.setStartDate(start);
         catm.insert(series);
+        assertFalse(catm.getLastException().getMessage(), catm.hasLastException());
 
         List<Appointment> list1 = catm.newappointments(start, end, 5, Appointment.ALL_COLUMNS);
         List<Appointment> list2 = catm.newappointments(start, end, 5, Appointment.ALL_COLUMNS);

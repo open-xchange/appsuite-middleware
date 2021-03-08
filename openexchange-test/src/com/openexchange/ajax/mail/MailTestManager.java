@@ -108,7 +108,7 @@ import com.openexchange.test.TestManager;
  */
 public class MailTestManager implements TestManager {
 
-    private static final String DEFAULT_UPLOAD_MIME_TYPE = "text/plain; charset=us-ascii";
+    private static final String DEFAULT_UPLOAD_MIME_TYPE = "text/plain";
 
     private final List<MailCleaner> cleaningSteps;
 

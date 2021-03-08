@@ -29,7 +29,11 @@ public class Bug19543Test_DeletingContactsInDistributionList extends AbstractMan
     @Test
     public void testWithExternalContacts() throws Exception {
         int type = DistributionListEntryObject.INDEPENDENT;
-        DistributionListEntryObject[] members = new DistributionListEntryObject[] { new DistributionListEntryObject("Displayname 1", "user1@oxample.invalid", type), new DistributionListEntryObject("Displayname 2", "user2@oxample.invalid", type), new DistributionListEntryObject("Displayname 3", "user3@oxample.invalid", type), new DistributionListEntryObject("Displayname 4", "user4@oxample.invalid", type)
+        DistributionListEntryObject[] members = new DistributionListEntryObject[] { 
+            new DistributionListEntryObject("Displayname 1", "user1@oxample.invalid", type), 
+            new DistributionListEntryObject("Displayname 2", "user2@oxample.invalid", type), 
+            new DistributionListEntryObject("Displayname 3", "user3@oxample.invalid", type), 
+            new DistributionListEntryObject("Displayname 4", "user4@oxample.invalid", type)
         };
         runTests(members);
     }

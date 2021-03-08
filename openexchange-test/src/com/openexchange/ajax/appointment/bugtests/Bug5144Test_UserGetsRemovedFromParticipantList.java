@@ -94,7 +94,7 @@ public class Bug5144Test_UserGetsRemovedFromParticipantList extends ManagedAppoi
 
         Participant[] participants = actual.getParticipants();
 
-        assertEquals(1, participants.length);
+        assertEquals(2, participants.length);
         assertEquals(uid1, participants[0].getIdentifier());
     }
 

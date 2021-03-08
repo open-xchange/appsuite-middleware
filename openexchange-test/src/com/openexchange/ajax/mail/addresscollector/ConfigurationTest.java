@@ -35,7 +35,7 @@ public class ConfigurationTest extends AbstractAJAXSession {
 
         getRequest = new GetRequest(Tree.ContactCollectEnabled);
         getResponse = getClient().execute(getRequest);
-        assertFalse(getResponse.getBoolean());
+        assertFalse(getResponse.getErrorMessage(), getResponse.getBoolean());
     }
 
     @Test

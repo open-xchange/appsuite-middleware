@@ -14,25 +14,26 @@ import java.io.IOException;
 import java.io.OutputStreamWriter;
 import java.io.StringReader;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
 import java.util.Date;
-import java.util.List;
 import java.util.Locale;
+import java.util.UUID;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.junit.Test;
 import org.xml.sax.SAXException;
-import com.openexchange.ajax.framework.AJAXRequest.Parameter;
 import com.openexchange.ajax.framework.AbstractAJAXResponse;
-import com.openexchange.ajax.framework.AbstractAJAXSession;
+import com.openexchange.ajax.framework.AbstractClientSession;
+import com.openexchange.ajax.mail.MailTestManager;
 import com.openexchange.ajax.mail.TestMail;
 import com.openexchange.groupware.search.Order;
 import com.openexchange.mail.MailListField;
 import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.test.common.test.TestClassConfig;
 
-public class MailTest extends AbstractAJAXSession {
+public class MailTest extends AbstractClientSession {
+
+    private static final String INBOX = "default0/INBOX";
 
     private static final StringBuilder FILE_CONTENT_BUILDER;
 
@@ -81,6 +82,17 @@ public class MailTest extends AbstractAJAXSession {
         return TestClassConfig.builder().withUserPerContext(2).createAjaxClient().build();
     }
 
+    protected MailTestManager mtm;
+    protected MailTestManager mtm2;
+
+    @Override
+    public void setUp() throws Exception {
+        super.setUp();
+
+        mtm = new MailTestManager(getClient());
+        mtm2 = new MailTestManager(testUser2.getAjaxClient());
+    }
+
     @Test
     public void testFail() {
         try {
@@ -113,7 +125,7 @@ public class MailTest extends AbstractAJAXSession {
     public void testSendSimpleMail() throws IOException, Exception {
         final JSONObject mailObj = new JSONObject();
         mailObj.put("from", getMailOfUser2());
-        mailObj.put("to", testUser.getLogin());
+        setToAddress(mailObj);
         mailObj.put("subject", "JUnit Test Mail: " + SDF.format(new Date()));
         final JSONArray attachments = new JSONArray();
         /*
@@ -126,16 +138,16 @@ public class MailTest extends AbstractAJAXSession {
 
         mailObj.put("attachments", attachments);
 
-        TestMail send = mtm.send(new TestMail(mailObj));
+        TestMail send = mtm2.send(new TestMail(mailObj));
+        assertFalse(mtm2.getLastResponse().getErrorMessage(), mtm2.getLastResponse().hasError());
         assertNotNull(send);
-        assertFalse(mtm.getLastResponse().hasError());
     }
 
     @Test
     public void testSendMailWithMultipleAttachment() throws IOException, JSONException, Exception {
         final JSONObject mailObj = new JSONObject();
         mailObj.put("from", getMailOfUser2());
-        mailObj.put("to", testUser.getLogin());
+        setToAddress(mailObj);
         mailObj.put("subject", "JUnit Test Mail with an attachment: " + SDF.format(new Date()));
         final JSONArray attachments = new JSONArray();
         /*
@@ -147,16 +159,16 @@ public class MailTest extends AbstractAJAXSession {
         attachments.put(attach);
         mailObj.put("attachments", attachments);
 
-        TestMail send = mtm.send(new TestMail(mailObj), new FileInputStream(createTempFile()));
+        TestMail send = mtm2.send(new TestMail(mailObj), new FileInputStream(createTempFile()));
+        assertFalse(mtm2.getLastResponse().getErrorMessage(), mtm2.getLastResponse().hasError());
         assertNotNull(send);
-        assertFalse(mtm.getLastResponse().hasError());
     }
 
     @Test
     public void testForwardMail() throws IOException, JSONException, Exception {
         final JSONObject mailObj = new JSONObject();
         mailObj.put("from", getMailOfUser2());
-        mailObj.put("to", testUser.getLogin());
+        setToAddress(mailObj);
         mailObj.put("subject", "JUnit Test Mail with an attachment: " + SDF.format(new Date()));
         final JSONArray attachments = new JSONArray();
         /*
@@ -171,19 +183,24 @@ public class MailTest extends AbstractAJAXSession {
          * Upload files
          */
         TestMail forwardMe = new TestMail(mailObj);
-        mtm.forwardAndSendBefore(forwardMe);
+        assertNotNull(forwardMe);
+        mtm2.forwardAndSendBefore(forwardMe);
+        assertFalse(mtm2.getLastResponse().getErrorMessage(), mtm2.getLastResponse().hasError());
         /*
          * Get forward mail for display
          */
-        TestMail forwarded = mtm.get(forwardMe.getFolderAndId());
-        assertTrue(forwarded != null);
+        int[] columns = new int[] { MailListField.ID.getField() };
+
+        MailMessage[] mails = mtm.listMails(INBOX, columns, MailListField.ID.getField(), Order.DESCENDING, false, "general");
+        assertNotNull(mails);
+        assertTrue(mails.length > 0);
     }
 
     @Test
     public void testSendForwardMailWithAttachments() throws IOException, JSONException, Exception {
         final JSONObject mailObj = new JSONObject();
         mailObj.put("from", getMailOfUser2());
-        mailObj.put("to", testUser.getLogin());
+        setToAddress(mailObj);
         mailObj.put("subject", "JUnit ForwardMe Mail with an attachment: " + SDF.format(new Date()));
         final JSONArray attachments = new JSONArray();
         /*
@@ -197,88 +214,72 @@ public class MailTest extends AbstractAJAXSession {
         /*
          * Upload files
          */
-        TestMail send = mtm.send(new TestMail(mailObj), new FileInputStream(createTempFile()));
+        TestMail send = mtm2.send(new TestMail(mailObj), new FileInputStream(createTempFile()));
+        assertFalse(mtm2.getLastResponse().getErrorMessage(), mtm2.getLastResponse().hasError());
+        assertNotNull(send);
         /*
          * Get forward mail for display
          */
         send.setSubject("Fwd: JUnit ForwardMe Mail with an attachment: " + SDF.format(new Date()));
 
-        TestMail forwarded = mtm.forwardButDoNotSend(send);
+        TestMail forwarded = mtm2.forwardButDoNotSend(send);
+        assertFalse(mtm2.getLastResponse().hasError());
         assertNotNull(forwarded);
-        assertFalse(mtm.getLastResponse().hasError());
     }
 
     @Test
     public void testGetMails() throws IOException, SAXException, JSONException, Exception {
         AbstractAJAXResponse jResp = null;
-        final JSONObject mailObj = new JSONObject();
+        JSONObject mailObj = new JSONObject();
         mailObj.put("from", getMailOfUser2());
-        mailObj.put("to", testUser.getLogin());
-        mailObj.put("subject", "JUnit testGetMails Test Mail: " + SDF.format(new Date()));
-        final JSONArray attachments = new JSONArray();
+        setToAddress(mailObj);
+        String subject = "JUnit testGetMails Test Mail: " + UUID.randomUUID().toString();
+        mailObj.put("subject", subject);
+        JSONArray attachments = new JSONArray();
         /*
          * Mail text
          */
-        final JSONObject attach = new JSONObject();
+        JSONObject attach = new JSONObject();
         attach.put("content", MAILTEXT);
         attach.put("content_type", "text/plain");
         attachments.put(attach);
 
         mailObj.put("attachments", attachments);
+        
 
         /*
          * Send mail 10 times
          */
         TestMail mail = new TestMail(mailObj);
-        mtm.send(mail);
+        mtm2.send(mail);
 
-        jResp = mtm.getLastResponse();
-        assertFalse(jResp.hasError());
+        jResp = mtm2.getLastResponse();
+        assertFalse(jResp.getErrorMessage(), jResp.hasError());
         for (int i = 2; i <= 10; i++) {
-            mtm.send(mail);
-            jResp = mtm.getLastResponse();
-            assertFalse(jResp.hasError());
+            mtm2.send(mail);
+            jResp = mtm2.getLastResponse();
+            assertFalse(jResp.getErrorMessage(), jResp.hasError());
         }
 
         /*
          * Request mails
          */
-        int[] columns = new int[] { MailListField.ID.getField() };
+        int[] columns = new int[] { MailListField.ID.getField(), MailListField.SUBJECT.getField() };
 
-        MailMessage[] mails = mtm.listMails("INBOX", columns, MailListField.ID.getField(), Order.DESCENDING, false, "general");
-
+        MailMessage[] mails = mtm.listMails(INBOX, columns, MailListField.ID.getField(), Order.DESCENDING, false, "general");
         assertTrue(mails != null);
-        assertTrue(mails.length == 10);
+        int i = 0;
+        for (MailMessage mailMessage : mails) {
+            if (subject.equalsIgnoreCase(mailMessage.getSubject())) {
+                i++;
+            }
+        }
+        assertTrue("Should have found 10 mails but were " + mails.length, 10 == i);
     }
 
-    @Test
-    public void testGetMsgSrc() throws IOException, SAXException, JSONException, Exception {
-        AbstractAJAXResponse jResp = null;
-        final JSONObject mailObj = new JSONObject();
-        mailObj.put("from", getMailOfUser2());
-        mailObj.put("to", testUser.getLogin());
-        mailObj.put("subject", "JUnit Source Test Mail: " + SDF.format(new Date()));
-        final JSONArray attachments = new JSONArray();
-        /*
-         * Mail text
-         */
-        final JSONObject attach = new JSONObject();
-        attach.put("content", MAILTEXT);
-        attach.put("content_type", "text/plain");
-        attachments.put(attach);
-
-        mailObj.put("attachments", attachments);
-
-        mtm.send(new TestMail(mailObj));
-        jResp = mtm.getLastResponse();
-        assertFalse(jResp.hasError());
-
-        List<Parameter> additional = new ArrayList<>();
-        additional.add(new Parameter(Mail.PARAMETER_SHOW_SRC, "true"));
-        int[] columns = new int[] { MailListField.ID.getField() };
-        MailMessage[] mails = mtm.listMails("INBOX", columns, MailListField.ID.getField(), Order.DESCENDING, false, additional);
-        assertFalse(mtm.getLastResponse().hasError());
-        assertTrue(mails != null);
-        assertNotNull(mails[0].getSource());
+    private void setToAddress(JSONObject mailObj) throws JSONException {
+        JSONArray to = new JSONArray();
+        to.add(0, testUser.getLogin());
+        mailObj.put("to", to);
     }
 }

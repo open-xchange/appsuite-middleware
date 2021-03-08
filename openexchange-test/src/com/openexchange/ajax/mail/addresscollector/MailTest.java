@@ -9,7 +9,6 @@ import java.util.UUID;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
-import org.junit.Before;
 import org.junit.Test;
 import com.openexchange.ajax.config.actions.SetRequest;
 import com.openexchange.ajax.config.actions.Tree;
@@ -17,7 +16,6 @@ import com.openexchange.ajax.folder.Create;
 import com.openexchange.ajax.folder.actions.DeleteRequest;
 import com.openexchange.ajax.folder.actions.EnumAPI;
 import com.openexchange.ajax.folder.actions.InsertRequest;
-import com.openexchange.ajax.framework.AJAXClient;
 import com.openexchange.ajax.framework.CommonInsertResponse;
 import com.openexchange.ajax.framework.Executor;
 import com.openexchange.ajax.mail.AbstractMailTest;
@@ -35,17 +33,8 @@ import com.openexchange.mail.MailJSONField;
  */
 public class MailTest extends AbstractMailTest {
 
-    private AJAXClient client;
-
     public MailTest() {
         super();
-    }
-
-    @Override
-    @Before
-    public void setUp() throws Exception {
-        super.setUp();
-        this.client = getClient();
     }
 
     @Test
@@ -102,7 +91,7 @@ public class MailTest extends AbstractMailTest {
         mail.put(MailJSONField.ATTACHMENTS.getKey(), attachments);
 
         //Send mail
-        Executor.execute(client, new SendRequest(mail.toString(), null));
+        Executor.execute(getClient(), new SendRequest(mail.toString(), null));
     }
 
     private void checkContacts(final int folderId) throws Exception {
@@ -114,7 +103,7 @@ public class MailTest extends AbstractMailTest {
     private FolderObject createContactFolder() throws OXException, IOException, JSONException {
         final FolderObject folder = Create.createPrivateFolder("ContactCollectionFolder " + UUID.randomUUID().toString(), FolderObject.CONTACT, getClient().getValues().getUserId());
         folder.setParentFolderID(getClient().getValues().getPrivateContactFolder());
-        final CommonInsertResponse response = Executor.execute(client, new InsertRequest(EnumAPI.OX_OLD, folder));
+        final CommonInsertResponse response = Executor.execute(getClient(), new InsertRequest(EnumAPI.OX_OLD, folder));
         folder.setObjectID(response.getId());
         folder.setLastModified(response.getTimestamp());
 
@@ -124,8 +113,8 @@ public class MailTest extends AbstractMailTest {
     }
 
     private void deleteContactFolder(final FolderObject folder) throws OXException, IOException, JSONException {
-        Executor.execute(client, new SetRequest(Tree.ContactCollectEnabled, B(false)));
-        Executor.execute(client, new DeleteRequest(EnumAPI.OX_OLD, folder.getObjectID(), folder.getLastModified()));
+        Executor.execute(getClient(), new SetRequest(Tree.ContactCollectEnabled, B(false)));
+        Executor.execute(getClient(), new DeleteRequest(EnumAPI.OX_OLD, folder.getObjectID(), folder.getLastModified()));
     }
 
 }

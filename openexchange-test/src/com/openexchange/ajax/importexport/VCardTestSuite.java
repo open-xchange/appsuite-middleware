@@ -51,13 +51,11 @@ package com.openexchange.ajax.importexport;
 
 import org.junit.runner.RunWith;
 import org.junit.runners.Suite;
-import com.openexchange.ajax.conversion.VCardMailPartAttachTest;
 import com.openexchange.test.concurrent.ParallelSuite;
 
 @RunWith(ParallelSuite.class)
 @Suite.SuiteClasses({
     Bug18094Test_VCardRoundtrip.class,
-    VCardMailPartAttachTest.class,
     Bug27151Test_RoundtripOfYomiFields.class,
     Bug25701Test.class,
     Bug15400Test.class,

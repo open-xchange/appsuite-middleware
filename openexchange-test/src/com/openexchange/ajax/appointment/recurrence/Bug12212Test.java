@@ -56,7 +56,6 @@ import java.util.TimeZone;
 import org.json.JSONException;
 import org.junit.Test;
 import com.openexchange.ajax.appointment.action.AllRequest;
-import com.openexchange.ajax.appointment.action.DeleteRequest;
 import com.openexchange.ajax.appointment.action.GetRequest;
 import com.openexchange.ajax.appointment.action.GetResponse;
 import com.openexchange.ajax.appointment.action.InsertRequest;
@@ -121,70 +120,66 @@ public class Bug12212Test extends AbstractAJAXSession {
             appointmentSeries.setObjectID(response.getId());
             appointmentSeries.setLastModified(response.getTimestamp());
         }
-        try {
-            //get one occurrence
-            final int recurrence_position = 3;
-            final Appointment occurrence;
-            {
-                final GetRequest request = new GetRequest(folderId, appointmentSeries.getObjectID(), recurrence_position);
-                final GetResponse response = client.execute(request);
-                occurrence = response.getAppointment(tz);
-            }
+        //get one occurrence
+        final int recurrence_position = 3;
+        final Appointment occurrence;
+        {
+            final GetRequest request = new GetRequest(folderId, appointmentSeries.getObjectID(), recurrence_position);
+            final GetResponse response = client.execute(request);
+            occurrence = response.getAppointment(tz);
+        }
 
-            //make an exception out of the occurrence
-            Appointment exception = new Appointment();
-            exception.setObjectID(occurrence.getObjectID());
-            exception.setParentFolderID(folderId);
-            exception.setLastModified(occurrence.getLastModified());
-            exception.setRecurrencePosition(occurrence.getRecurrencePosition());
-            exception.setTitle(occurrence.getTitle() + "-changed");
+        //make an exception out of the occurrence
+        Appointment exception = new Appointment();
+        exception.setObjectID(occurrence.getObjectID());
+        exception.setParentFolderID(folderId);
+        exception.setLastModified(occurrence.getLastModified());
+        exception.setRecurrencePosition(occurrence.getRecurrencePosition());
+        exception.setTitle(occurrence.getTitle() + "-changed");
+        exception.setIgnoreConflicts(true);
+        exception.setStartDate(occurrence.getStartDate());
+        exception.setEndDate(occurrence.getEndDate());
+        //move the exception one hour
+        shiftAppointmentDateOneHour(exception, tz);
+        //send exception
+        int exceptionId;
+        {
+            final UpdateRequest request = new UpdateRequest(exception, tz);
+            final UpdateResponse response = client.execute(request);
+            exceptionId = response.getId();
+            appointmentSeries.setLastModified(response.getTimestamp());
+        }
+        {//get exception
+            final GetRequest request = new GetRequest(folderId, exceptionId);
+            final GetResponse response = client.execute(request);
+            exception = response.getAppointment(tz);
+        }
+        //move it again
+        shiftAppointmentDateOneHour(exception, tz);
+
+        {//send exception again
             exception.setIgnoreConflicts(true);
-            exception.setStartDate(occurrence.getStartDate());
-            exception.setEndDate(occurrence.getEndDate());
-            //move the exception one hour
-            shiftAppointmentDateOneHour(exception, tz);
-            //send exception
-            int exceptionId;
-            {
-                final UpdateRequest request = new UpdateRequest(exception, tz);
-                final UpdateResponse response = client.execute(request);
-                exceptionId = response.getId();
-                appointmentSeries.setLastModified(response.getTimestamp());
-            }
-            {//get exception
-                final GetRequest request = new GetRequest(folderId, exceptionId);
-                final GetResponse response = client.execute(request);
-                exception = response.getAppointment(tz);
-            }
-            //move it again
-            shiftAppointmentDateOneHour(exception, tz);
-
-            {//send exception again
-                exception.setIgnoreConflicts(true);
-                final UpdateRequest request = new UpdateRequest(exception, tz);
-                final UpdateResponse response = client.execute(request);
-                exceptionId = response.getId();
-                appointmentSeries.setLastModified(response.getTimestamp());
-            }
-
-            {//assert no duplicate exists
-                final AllRequest request = new AllRequest(folderId, new int[] { Appointment.TITLE, Appointment.START_DATE, Appointment.END_DATE }, exception.getStartDate(), exception.getEndDate(), tz, false);
-                final CommonAllResponse response = client.execute(request);
-                final Object[][] allAppointmentsWithinTimeframe = response.getArray();
-                int countOfPotentialDuplicates = 0;
-                for (final Object[] arr : allAppointmentsWithinTimeframe) {
-                    if (null != arr[0] && ((String) arr[0]).startsWith(bugname)) {
-                        countOfPotentialDuplicates++;
-                    }
+            final UpdateRequest request = new UpdateRequest(exception, tz);
+            final UpdateResponse response = client.execute(request);
+            exceptionId = response.getId();
+            appointmentSeries.setLastModified(response.getTimestamp());
+        }
+        {//get exception
+            final GetRequest request = new GetRequest(folderId, exceptionId);
+            final GetResponse response = client.execute(request);
+            exception = response.getAppointment(tz);
+        }
+        {//assert no duplicate exists
+            final AllRequest request = new AllRequest(folderId, new int[] { Appointment.TITLE, Appointment.START_DATE, Appointment.END_DATE }, exception.getStartDate(), exception.getEndDate(), tz, false);
+            final CommonAllResponse response = client.execute(request);
+            final Object[][] allAppointmentsWithinTimeframe = response.getArray();
+            int countOfPotentialDuplicates = 0;
+            for (final Object[] arr : allAppointmentsWithinTimeframe) {
+                if (null != arr[0] && ((String) arr[0]).startsWith(bugname)) {
+                    countOfPotentialDuplicates++;
                 }
-                assertEquals("Should be only one occurrence of this appointment", Integer.valueOf(1), Integer.valueOf(countOfPotentialDuplicates));
             }
-        } finally {
-            //clean up
-            final GetRequest request = new GetRequest(folderId, appointmentSeries.getObjectID(), true);
-            appointmentSeries.setLastModified(client.execute(request).getTimestamp());
-            final DeleteRequest deleteRequest = new DeleteRequest(appointmentSeries);
-            client.execute(deleteRequest);
+            assertEquals("Should be only one occurrence of this appointment", Integer.valueOf(1), Integer.valueOf(countOfPotentialDuplicates));
         }
     }
 
