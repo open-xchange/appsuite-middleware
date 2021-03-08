@@ -236,12 +236,12 @@ public class OXReseller extends OXCommonImpl implements OXResellerInterface {
                 throw new OXResellerException(Code.RESELLER_ADMIN_NOT_EXIST, admin.getName());
             }
 
+            ResellerAdmin dbAdmin = oxresell.getData(new ResellerAdmin[] { admin })[0];
             Credentials masterCredentials = cache.getMasterCredentials();
             if (null != masterCredentials && masterCredentials.getLogin().equals(credentials.getLogin())) {
                 basicauth.doAuthentication(credentials);
             } else {
-                ResellerAdmin dbadm = oxresell.getData(new ResellerAdmin[] { admin })[0];
-                if (!dbadm.getName().equalsIgnoreCase(credentials.getLogin())) {
+                if (!dbAdmin.getName().equalsIgnoreCase(credentials.getLogin())) {
                     InvalidCredentialsException invalidCredentialsException = new InvalidCredentialsException("Authentication failed");
                     log(LogLevel.ERROR, LOGGER, credentials, invalidCredentialsException, "changeSelf can only be applied to own data");
                     throw invalidCredentialsException;
@@ -251,7 +251,7 @@ public class OXReseller extends OXCommonImpl implements OXResellerInterface {
                     throw new OXResellerException(Code.SUBAMIN_NOT_ALLOWED_TO_CHANGE_PARENTID);
                 }
             }
-            checkResellerChangeSelfData(admin);
+            checkResellerChangeSelfData(admin, dbAdmin);
             oxresell.change(admin);
         } catch (Throwable e) {
             enhanceAndLogException(e, credentials);
@@ -651,9 +651,12 @@ public class OXReseller extends OXCommonImpl implements OXResellerInterface {
      * @param admin The admin that issued the self-change
      * @throws InvalidDataException If invalid data is set
      */
-    private void checkResellerChangeSelfData(ResellerAdmin admin) throws InvalidDataException {
+    private void checkResellerChangeSelfData(ResellerAdmin admin, ResellerAdmin dbAdmin) throws InvalidDataException {
         // @formatter:off
-        if (admin.isNameset() || admin.isDisplaynameset() || admin.isParentIdset() || admin.isParentNameset() || admin.isPasswordMechset() 
+        if (admin.isNameset() && false == admin.getName().equals(dbAdmin.getName())) {
+            throw new InvalidDataException("Invalid data sent by client!");
+        }
+        if ( admin.isDisplaynameset() || admin.isParentIdset() || admin.isParentNameset() || admin.isPasswordMechset() 
             || admin.isPasswordset() || admin.isRestrictionsset() || admin.isSaltSet()) {
             throw new InvalidDataException("Invalid data sent by client!");
         }
