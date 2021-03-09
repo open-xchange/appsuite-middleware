@@ -90,6 +90,7 @@ import com.openexchange.timer.TimerService;
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  * @since v7.10.1
  */
+@SuppressWarnings("synthetic-access")
 public class UpdateTaskServiceImpl implements UpdateTaskService {
 
     private static final Logger LOG = LoggerFactory.getLogger(UpdateTaskServiceImpl.class);
@@ -424,7 +425,7 @@ public class UpdateTaskServiceImpl implements UpdateTaskService {
         /**
          * Initialises a new {@link UpdateTaskServiceImpl.TaskMetadataBuilder}.
          */
-        TaskMetadataBuilder() {
+        private TaskMetadataBuilder() {
             super();
         }
 
@@ -434,7 +435,7 @@ public class UpdateTaskServiceImpl implements UpdateTaskService {
          * @param taskName The task name to set
          * @return <code>this</code> instance for chained calls
          */
-        final TaskMetadataBuilder withTaskName(String taskName) {
+        private final TaskMetadataBuilder withTaskName(String taskName) {
             this.taskName = taskName;
             return this;
         }
@@ -445,7 +446,7 @@ public class UpdateTaskServiceImpl implements UpdateTaskService {
          * @param taskState The task state to set
          * @return <code>this</code> instance for chained calls
          */
-        final TaskMetadataBuilder withTaskState(TaskState taskState) {
+        private final TaskMetadataBuilder withTaskState(TaskState taskState) {
             this.taskState = taskState.name();
             return this;
         }
@@ -456,7 +457,7 @@ public class UpdateTaskServiceImpl implements UpdateTaskService {
          * @param reason The reason to set
          * @return <code>this</code> instance for chained calls
          */
-        final TaskMetadataBuilder withReason(String reason) {
+        private final TaskMetadataBuilder withReason(String reason) {
             this.reason = reason;
             return this;
         }
@@ -467,7 +468,7 @@ public class UpdateTaskServiceImpl implements UpdateTaskService {
          * @param className The task class name to set
          * @return <code>this</code> instance for chained calls
          */
-        final TaskMetadataBuilder withClassName(String className) {
+        private final TaskMetadataBuilder withClassName(String className) {
             this.className = className;
             return this;
         }
@@ -478,7 +479,7 @@ public class UpdateTaskServiceImpl implements UpdateTaskService {
          * @param schema The schema name to set
          * @return <code>this</code> instance for chained calls
          */
-        final TaskMetadataBuilder withSchema(String schema) {
+        private final TaskMetadataBuilder withSchema(String schema) {
             this.schema = schema;
             return this;
         }
@@ -489,7 +490,7 @@ public class UpdateTaskServiceImpl implements UpdateTaskService {
          * @param successful whether the task was executed successfully
          * @return <code>this</code> instance for chained calls
          */
-        final TaskMetadataBuilder withSuccess(Boolean successful) {
+        private final TaskMetadataBuilder withSuccess(Boolean successful) {
             this.isSuccessful = successful;
             return this;
         }
@@ -500,7 +501,7 @@ public class UpdateTaskServiceImpl implements UpdateTaskService {
          * @param lastModified the last modified date of the task
          * @return <code>this</code> instance for chained calls
          */
-        final TaskMetadataBuilder withLastModified(Date lastModified) {
+        private final TaskMetadataBuilder withLastModified(Date lastModified) {
             this.lastModified = lastModified;
             return this;
         }
@@ -511,7 +512,7 @@ public class UpdateTaskServiceImpl implements UpdateTaskService {
          * @param uuid The task uuid to set
          * @return <code>this</code> instance for chained calls
          */
-        final TaskMetadataBuilder withUUID(String uuid) {
+        private final TaskMetadataBuilder withUUID(String uuid) {
             this.uuid = uuid;
             return this;
         }
@@ -521,7 +522,7 @@ public class UpdateTaskServiceImpl implements UpdateTaskService {
          *
          * @return an unmodifiable {@link Map} with the {@link TaskMetadata}
          */
-        Map<String, Object> build() {
+        private Map<String, Object> build() {
             Map<String, Object> taskMap = new HashMap<>(8);
             if (Strings.isNotEmpty(taskName)) {
                 taskMap.put(TaskMetadata.taskName.name(), taskName);

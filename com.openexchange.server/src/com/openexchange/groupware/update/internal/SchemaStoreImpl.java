@@ -368,7 +368,7 @@ public class SchemaStoreImpl extends SchemaStore {
     /**
      * @param con connection to the master in transaction mode.
      */
-    private static SchemaUpdateState loadSchemaStatus(int poolId, String schemaName, Connection con) throws OXException, SQLException {
+    private static SchemaUpdateState loadSchemaStatus(int poolId, String schemaName, Connection con) throws OXException {
         final SchemaUpdateStateImpl retval = new SchemaUpdateStateImpl();
         retval.setBlockingUpdatesRunning(false);
         retval.setBackgroundUpdatesRunning(false);
@@ -439,7 +439,6 @@ public class SchemaStoreImpl extends SchemaStore {
     @Override
     public void addExecutedTask(Connection con, String taskName, boolean success, int poolId, String schema) throws OXException {
         doAddExecutedTasks(con, Collections.singletonList(taskName), success, poolId, schema);
-        invalidateCache(poolId, schema);
     }
 
     @Override
@@ -449,11 +448,11 @@ public class SchemaStoreImpl extends SchemaStore {
         }
 
         doAddExecutedTasks(con, taskNames, success, poolId, schema);
-        invalidateCache(poolId, schema);
     }
 
-    private static void doAddExecutedTasks(Connection con, Collection<String> taskNames, boolean success, int poolId, String schema) throws OXException {
+    private void doAddExecutedTasks(Connection con, Collection<String> taskNames, boolean success, int poolId, String schema) throws OXException {
         doAddExecutedTasks(con, taskNames, success);
+        invalidateCache(poolId, schema);
     }
 
     private static void doAddExecutedTasks(Connection con, Collection<String> taskNames, boolean success) throws OXException {
