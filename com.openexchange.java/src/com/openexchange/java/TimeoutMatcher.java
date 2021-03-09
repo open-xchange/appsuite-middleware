@@ -204,7 +204,7 @@ public class TimeoutMatcher {
             future = executor.submit(task);
         } catch (RejectedExecutionException e) {
             // Run with calling thread
-            FutureTask<R> ft = new FutureTask<>(task);
+            FutureTask<R> ft = new FutureTask<R>(task);
             ft.run();
             future = ft;
         }
@@ -332,22 +332,6 @@ public class TimeoutMatcher {
      * previous match operation.
      *
      * @param name The name of a named-capturing group in this matcher's pattern
-     * @return The index of the first character captured by the group,
-     *         or {@code -1} if the match was successful but the group
-     *         itself did not match anything
-     * @throws IllegalStateExceptionIf no match has yet been attempted, or if the previous match operation failed
-     * @throws IllegalArgumentException If there is no capturing group in the pattern with the given name
-     */
-    public int start(String name) {
-        return matcher.start(name);
-    }
-
-    /**
-     * Gets the start index of the subsequence captured by the given
-     * <a href="Pattern.html#groupname">named-capturing group</a> during the
-     * previous match operation.
-     *
-     * @param name The name of a named-capturing group in this matcher's pattern
      * @return The index of the first character captured by the group, or {@code -1} if the match was successful but the group itself
      *         did not match anything
      * @throws IllegalStateException If no match has yet been attempted, or if the previous match operation failed
@@ -374,21 +358,6 @@ public class TimeoutMatcher {
      */
     public int end(int group) {
         return matcher.end(group);
-    }
-
-    /**
-     * Gets the offset after the last character of the subsequence
-     * captured by the given <a href="Pattern.html#groupname">named-capturing
-     * group</a> during the previous match operation.
-     *
-     * @param name The name of a named-capturing group in this matcher's pattern
-     * @return The offset after the last character captured by the group, or {@code -1} if the match was successful but the group itself
-     *         did not match anything
-     * @throws IllegalStateException If no match has yet been attempted, or if the previous match operation failed
-     * @throws IllegalArgumentException If there is no capturing group in the pattern with the given name
-     */
-    public int end(String name) {
-        return matcher.end(name);
     }
 
     /**
@@ -545,7 +514,7 @@ public class TimeoutMatcher {
      * @return <tt>true</tt> if, and only if, a subsequence of the input sequence starting at the given index matches this matcher's
      *         pattern
      */
-    public boolean find(int start) {
+    public boolean find(final int start) {
         if (timeout <= 0) {
             return matcher.find(start);
         }
