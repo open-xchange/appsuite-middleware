@@ -50,7 +50,6 @@
 package com.openexchange.oidc.impl;
 
 import static com.openexchange.java.Autoboxing.I;
-import java.io.IOException;
 import java.net.URI;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -125,7 +124,7 @@ public class OIDCTokenRefresher implements TokenRefresher {
                 return httpClientService.getHttpClient(OIDCHttpClientConfig.getClientIdOidc());
             }));
             return validateResponse(response, debugInfoForRefreshToken);
-        } catch (com.nimbusds.oauth2.sdk.ParseException | IOException e) {
+        } catch (Exception e) {
             LOG.info("Unable to refresh access token for user {} in context {}. Session '{}' will be invalidated.",
                 I(session.getUserId()), I(session.getContextId()), session.getSessionID());
             TokenRefreshResponse.Error error = new TokenRefreshResponse.Error(ErrorType.TEMPORARY, "refresh_failed", e.getMessage());
