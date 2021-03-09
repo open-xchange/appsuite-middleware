@@ -3439,7 +3439,6 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade, I
         final User user = session.getUser();
         final Map<Integer, List<Lock>> locks = loadLocksInFolderAndExpireOldLocks(folderId, session);
 
-        InfostoreIterator newIter = null;
         InfostoreIterator modIter = null;
         InfostoreIterator delIter = null;
         boolean shouldTriggerMediaDataExtraction = shouldTriggerMediaDataExtraction();
@@ -3472,8 +3471,6 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade, I
             if (addObjectPermission) {
                 customizer = new ObjectPermissionCustomizer(objectPermissionLoader, context, customizer);
             }
-            newIter = InfostoreIterator.newSharedDocumentsForUser(context, user, columns, sort, order, updateSince, this);
-            newIter.setCustomizer(customizer);
             modIter = InfostoreIterator.modifiedSharedDocumentsForUser(context, user, columns, sort, order, updateSince, this);
             modIter.setCustomizer(customizer);
             if (!ignoreDeleted) {
@@ -3502,16 +3499,12 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade, I
             }
 
             if (onlyOwn) {
-                newIter = InfostoreIterator.newDocumentsByCreator(folderId, user.getId(), cols, sort, order, updateSince, this, context);
-                newIter.setCustomizer(customizer);
                 modIter = InfostoreIterator.modifiedDocumentsByCreator(folderId, user.getId(), cols, sort, order, updateSince, this, context);
                 modIter.setCustomizer(customizer);
                 if (!ignoreDeleted) {
                     delIter = InfostoreIterator.deletedDocumentsByCreator(folderId, user.getId(), sort, order, updateSince, this, context);
                 }
             } else {
-                newIter = InfostoreIterator.newDocuments(folderId, cols, sort, order, updateSince, this, context);
-                newIter.setCustomizer(customizer);
                 modIter = InfostoreIterator.modifiedDocuments(folderId, cols, sort, order, updateSince, this, context);
                 modIter.setCustomizer(customizer);
                 if (!ignoreDeleted) {
@@ -3534,6 +3527,7 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade, I
         }
 
         SearchIterator<DocumentMetadata> it = ignoreDeleted ? SearchIteratorAdapter.emptyIterator() : delIter;
+        SearchIterator<DocumentMetadata> newIter = SearchIteratorAdapter.emptyIterator(); // New documents are covered by the query of modified files, therefore no special new search iterator is needed (see MWB-981)
         Delta<DocumentMetadata> delta = new FileDelta(newIter, modIter, it, System.currentTimeMillis());
         if (addLocked) {
             delta = lockedUntilLoader.add(delta, context, locks);

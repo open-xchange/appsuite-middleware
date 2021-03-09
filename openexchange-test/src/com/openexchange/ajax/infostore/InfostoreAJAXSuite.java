@@ -52,6 +52,7 @@ import com.openexchange.test.concurrent.ParallelSuite;
     TryAddVersionTest.class,
     Bug54232Test.class,
     Bug67377Test.class,
+    MWB981Test.class,
 })
 public class InfostoreAJAXSuite  {
     // empty

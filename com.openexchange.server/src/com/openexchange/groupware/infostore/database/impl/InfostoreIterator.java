@@ -126,11 +126,6 @@ public class InfostoreIterator implements SearchIterator<DocumentMetadata> {
         return new InfostoreIterator(query, provider, ctx, metadata, new InfostoreQueryCatalog.VersionWins());
     }
 
-    public static InfostoreIterator newDocuments(final long folderId, final Metadata[] metadata, final Metadata sort, final int order, final long since, final DBProvider provider, final Context ctx) {
-        final String query = QUERIES.getNewDocumentsQuery(folderId,since, metadata, sort, order, new InfostoreQueryCatalog.DocumentWins(), ctx.getContextId());
-        return new InfostoreIterator(query, provider, ctx, metadata, new InfostoreQueryCatalog.DocumentWins());
-    }
-
     public static InfostoreIterator modifiedDocuments(final long folderId, final Metadata[] metadata, final Metadata sort, final int order, final long since, final DBProvider provider, final Context ctx) {
         final String query = QUERIES.getModifiedDocumentsQuery(folderId,since, metadata, sort, order, new InfostoreQueryCatalog.DocumentWins(), ctx.getContextId());
         return new InfostoreIterator(query, provider, ctx, metadata, new InfostoreQueryCatalog.DocumentWins());
@@ -139,11 +134,6 @@ public class InfostoreIterator implements SearchIterator<DocumentMetadata> {
     public static InfostoreIterator deletedDocuments(final long folderId, final Metadata sort, final int order, final long since, final DBProvider provider, final Context ctx) {
         final String query = QUERIES.getDeletedDocumentsQuery(folderId,since, sort, order, new InfostoreQueryCatalog.DocumentWins(), ctx.getContextId());
         return new InfostoreIterator(query, provider, ctx, new Metadata[]{Metadata.ID_LITERAL, Metadata.FOLDER_ID_LITERAL}, new InfostoreQueryCatalog.DocumentWins());
-    }
-
-    public static InfostoreIterator newDocumentsByCreator(final long folderId,final int userId, final Metadata[] metadata, final Metadata sort, final int order, final long since, final DBProvider provider, final Context ctx) {
-        final String query = QUERIES.getNewDocumentsQuery(folderId,userId, since, metadata, sort, order, new InfostoreQueryCatalog.DocumentWins(), ctx.getContextId());
-        return new InfostoreIterator(query, provider, ctx, metadata, new InfostoreQueryCatalog.DocumentWins());
     }
 
     public static InfostoreIterator modifiedDocumentsByCreator(final long folderId,final int userId, final Metadata[] metadata, final Metadata sort, final int order, final long since, final DBProvider provider, final Context ctx) {
@@ -178,11 +168,6 @@ public class InfostoreIterator implements SearchIterator<DocumentMetadata> {
 
     public static InfostoreIterator sharedDocumentsByUser(Context ctx, User user, Metadata[] metadata, Metadata sort, int order, int start, int end, DBProvider provider) {
         String query = QUERIES.getSharedDocumentsByUserQuery(ctx.getContextId(), user.getId(), metadata, sort, order, start, end, new InfostoreQueryCatalog.DocumentWins());
-        return new InfostoreIterator(query, provider, ctx, metadata, new InfostoreQueryCatalog.DocumentWins());
-    }
-
-    public static InfostoreIterator newSharedDocumentsForUser(final Context ctx, final User user, final Metadata[] metadata, final Metadata sort, final int order, final long since, final DBProvider provider) {
-        final String query = QUERIES.getNewSharedDocumentsSince(ctx.getContextId(), user.getId(), user.getGroups(), since, metadata, sort, order, new InfostoreQueryCatalog.DocumentWins());
         return new InfostoreIterator(query, provider, ctx, metadata, new InfostoreQueryCatalog.DocumentWins());
     }
 

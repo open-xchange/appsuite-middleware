@@ -68,6 +68,12 @@ public class FileDelta implements Delta<DocumentMetadata> {
         this.sequenceNumber = sequenceNumber;
     }
 
+    /**
+     * Gets a search iterator with information about new added document metadata.
+     * Possibly this value is not known and the iterator is empty.
+     * 
+     * @return SearchIterator<DocumentMetadata> The document metadata search iterator.
+     */
     @Override
     public SearchIterator<DocumentMetadata> getNew() {
         return newOnes;

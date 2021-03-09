@@ -697,15 +697,6 @@ public class InfostoreQueryCatalog {
         return builder.toString();
     }
 
-    public String getNewDocumentsQuery(final long folderId, final long since, final Metadata[] metadata, final Metadata sort, final int order, final FieldChooser wins, final int contextId) {
-        final StringBuilder builder = new StringBuilder(STR_SELECT).append(fields(metadata, wins)).append(SQL_CHUNK04).append(contextId).append(
-            SQL_CHUNK03).append(contextId).append(SQL_CHUNK01).append(folderId).append(" AND infostore.creating_date >= ").append(since);
-        if (sort != null) {
-            builder.append(STR_ORDER_BY).append(fieldName(sort, wins, true)).append(' ').append(order(order));
-        }
-        return builder.toString();
-    }
-
     public String getModifiedDocumentsQuery(final long folderId, final long since, final Metadata[] metadata, final Metadata sort, final int order, final FieldChooser wins, final int contextId) {
         final StringBuilder builder = new StringBuilder(STR_SELECT).append(fields(metadata, wins)).append(SQL_CHUNK04).append(contextId).append(
             SQL_CHUNK03).append(contextId).append(SQL_CHUNK01).append(folderId).append(SQL_CHUNK05).append(since);
@@ -725,15 +716,6 @@ public class InfostoreQueryCatalog {
         return builder.toString();
     }
 
-    public String getNewDocumentsQuery(final long folderId, final int userId, final long since, final Metadata[] metadata, final Metadata sort, final int order, final FieldChooser wins, final int contextId) {
-        final StringBuilder builder = new StringBuilder(STR_SELECT).append(fields(metadata, wins)).append(SQL_CHUNK04).append(contextId).append(
-            SQL_CHUNK03).append(contextId).append(SQL_CHUNK01).append(folderId).append(" AND infostore.creating_date >= ").append(since).append(
-                SQL_CHUNK02).append(userId);
-        if (sort != null) {
-            builder.append(STR_ORDER_BY).append(fieldName(sort, wins, true)).append(' ').append(order(order));
-        }
-        return builder.toString();
-    }
 
     public String getModifiedDocumentsQuery(final long folderId, final int userId, final long since, final Metadata[] metadata, final Metadata sort, final int order, final FieldChooser wins, final int contextId) {
         final StringBuilder builder = new StringBuilder(STR_SELECT).append(fields(metadata, wins)).append(SQL_CHUNK04).append(contextId).append(
@@ -862,20 +844,6 @@ public class InfostoreQueryCatalog {
         appendEntityConstraint(builder, "p", userId, groups);
         if (versionsOnly) {
             builder.append(" AND i.version > 0");
-        }
-        return builder.toString();
-    }
-
-    public String getNewSharedDocumentsSince(final int contextId, final int userId, final int[] groups, final long since, final Metadata[] metadata, final Metadata sort, final int order, final FieldChooser wins) {
-        final StringBuilder builder = new StringBuilder(STR_SELECT).append(fields(metadata, wins));
-        builder.append(" FROM object_permission JOIN infostore ON object_permission.cid = ").append(contextId).append(" AND object_permission.module = 8 AND object_permission.cid = infostore.cid AND object_permission.folder_id = infostore.folder_id AND object_permission.object_id = infostore.id");
-        builder.append(" JOIN infostore_document ON infostore.cid = infostore_document.cid AND infostore.version = infostore_document.version_number AND infostore.id = infostore_document.infostore_id");
-        builder.append(" WHERE");
-        appendEntityConstraint(builder, "object_permission", userId, groups);
-
-        builder.append(" AND object_permission.last_modified > ").append(since);
-        if (sort != null) {
-            builder.append(STR_ORDER_BY).append(fieldName(sort, wins, true)).append(' ').append(order(order));
         }
         return builder.toString();
     }
