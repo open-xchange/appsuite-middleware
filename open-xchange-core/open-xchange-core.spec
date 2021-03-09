@@ -11,7 +11,7 @@ BuildRequires: open-xchange-hazelcast
 BuildRequires: java-1.8.0-openjdk-devel
 BuildRequires: pandoc >= 2.0.0
 Version:       @OXVERSION@
-%define        ox_release 6
+%define        ox_release 7
 Release:       %{ox_release}_<CI_CNT>.<B_CNT>
 Group:         Applications/Productivity
 License:       GPL-2.0
@@ -939,6 +939,8 @@ exit 0
 %doc com.openexchange.authentication.application.impl/doc/examples
 
 %changelog
+* Tue Mar 09 2021 Marcus Klein <marcus.klein@open-xchange.com>
+Build for patch 2021-03-15 (5973)
 * Mon Feb 22 2021 Marcus Klein <marcus.klein@open-xchange.com>
 Build for patch 2021-02-22 (5961)
 * Fri Feb 05 2021 Marcus Klein <marcus.klein@open-xchange.com>

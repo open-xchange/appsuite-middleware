@@ -6,7 +6,7 @@ BuildRequires: ant
 BuildRequires: open-xchange-core
 BuildRequires: java-1.8.0-openjdk-devel
 Version:       @OXVERSION@
-%define        ox_release 6
+%define        ox_release 7
 Release:       %{ox_release}_<CI_CNT>.<B_CNT>
 Group:         Applications/Productivity
 License:       GPL-2.0
@@ -63,6 +63,8 @@ fi
 %config(noreplace) /opt/open-xchange/etc/*
 
 %changelog
+* Tue Mar 09 2021 Markus Wagner <markus.wagner@open-xchange.com>
+Build for patch 2021-03-15 (5973)
 * Mon Feb 22 2021 Markus Wagner <markus.wagner@open-xchange.com>
 Build for patch 2021-02-22 (5961)
 * Fri Feb 05 2021 Markus Wagner <markus.wagner@open-xchange.com>
