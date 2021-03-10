@@ -51,18 +51,18 @@ package com.openexchange.exception;
 
 
 /**
- * {@link Code} - Basic interface for an Open-Xchange error code.
+ * {@link Prefix} - Provides a prefix identifying related error codes; e.g. all error codes for a certain module.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since v8.0.0
  */
-public interface Code extends Prefix {
+public interface Prefix {
 
     /**
-     * Gets the {@link OXException}'s code number.
+     * Gets the prefix which is part of the compound error code: &lt;prefix&gt; + "-" + &lt;code&gt;
      *
-     * @return The code number
+     * @return The prefix
      */
-    int getNumber();
+    String getPrefix();
 
 }
