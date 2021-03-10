@@ -233,4 +233,146 @@ public final class OXExceptions {
 
     // -----------------------------------------------------------------------------------------------------------------------------------
 
+    /**
+     * Creates the code for given arguments.
+     *
+     * @param code The error code number
+     * @param prefix The error code prefix
+     * @return The code
+     */
+    public static Code codeFor(int code, String prefix) {
+        return new CodeImpl(prefix, code);
+    }
+
+    private static class CodeImpl implements Code {
+
+        private final String prefix;
+        private final int number;
+        private int hash;
+
+        CodeImpl(String prefix, int number) {
+            super();
+            this.prefix = prefix;
+            this.number = number;
+            hash = 0;
+        }
+
+        @Override
+        public String getPrefix() {
+            return prefix;
+        }
+
+        @Override
+        public int getNumber() {
+            return number;
+        }
+
+        @Override
+        public int hashCode() {
+            int result = hash;
+            if (result == 0) {
+                int prime = 31;
+                result = 1;
+                result = prime * result + number;
+                result = prime * result + ((prefix == null) ? 0 : prefix.hashCode());
+                this.hash = result;
+            }
+            return result;
+        }
+
+        @Override
+        public boolean equals(Object obj) {
+            if (this == obj) {
+                return true;
+            }
+            if (!(obj instanceof Code)) {
+                return false;
+            }
+            Code other = (Code) obj;
+            if (number != other.getNumber()) {
+                return false;
+            }
+            if (prefix == null) {
+                if (other.getPrefix() != null) {
+                    return false;
+                }
+            } else if (!prefix.equals(other.getPrefix())) {
+                return false;
+            }
+            return true;
+        }
+
+        @Override
+        public String toString() {
+            return new StringBuilder(getPrefix()).append('-').append(String.format("%04d", Integer.valueOf(number))).toString();
+        }
+    }
+
+
+
+    // -----------------------------------------------------------------------------------------------------------------------------------
+
+    /**
+     * Creates the prefix for given argument.
+     *
+     * @param prefix The error code prefix
+     * @return The prefix
+     */
+    public static Prefix prefixFor(String prefix) {
+        return new PrefixImpl(prefix);
+    }
+
+    private static class PrefixImpl implements Prefix {
+
+        private final String prefix;
+        private int hash;
+
+        PrefixImpl(String prefix) {
+            super();
+            this.prefix = prefix;
+            hash = 0;
+        }
+
+        @Override
+        public String getPrefix() {
+            return prefix;
+        }
+
+        @Override
+        public int hashCode() {
+            int result = hash;
+            if (result == 0) {
+                int prime = 31;
+                result = 1;
+                result = prime * result + ((prefix == null) ? 0 : prefix.hashCode());
+                this.hash = result;
+            }
+            return result;
+        }
+
+        @Override
+        public boolean equals(Object obj) {
+            if (this == obj) {
+                return true;
+            }
+            if (!(obj instanceof Prefix)) {
+                return false;
+            }
+            Prefix other = (Prefix) obj;
+            if (prefix == null) {
+                if (other.getPrefix() != null) {
+                    return false;
+                }
+            } else if (!prefix.equals(other.getPrefix())) {
+                return false;
+            }
+            return true;
+        }
+
+        @Override
+        public String toString() {
+            return prefix;
+        }
+    }
+
 }
