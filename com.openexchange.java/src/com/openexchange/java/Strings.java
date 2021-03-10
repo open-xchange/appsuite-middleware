@@ -130,10 +130,7 @@ public class Strings {
      * @return <code>true</code> if given string contains specified sequence; otherwise <code>false</code>
      */
     public static boolean containsAny(String s, String sequence) {
-        if (null == s) {
-            return false;
-        }
-        return null != sequence && s.indexOf(sequence, 0) >= 0 ? true : false;
+        return null != s && null != sequence && s.indexOf(sequence, 0) >= 0 ? true : false;
     }
 
     /**

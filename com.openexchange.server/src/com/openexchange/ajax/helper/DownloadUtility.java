@@ -257,6 +257,8 @@ public final class DownloadUtility {
                 // Treat all SVG content as harmful
                 harmful = true;
                 sContentDisposition = "attachment";
+            } else if (Strings.containsAny(toLowerCase(contentType.getSubType()), "xcf") || fileNameImpliesXcf(fileName)) {
+                sContentDisposition = "attachment";
             } else if (Strings.startsWithAny(toLowerCase(contentType.getSubType()), "xsl") || fileNameImpliesExcel(fileName)) {
                 sContentDisposition = "attachment";
             } else if (Strings.containsAny(toLowerCase(contentType.getSubType()), "xml") || fileNameImpliesXml(fileName)) {
@@ -563,6 +565,10 @@ public final class DownloadUtility {
 
     private static boolean fileNameImpliesSvg(final String fileName) {
         return null != fileName && checkFileNameFor(fileName, testContains("svg"), "svg");
+    }
+
+    private static boolean fileNameImpliesXcf(final String fileName) {
+        return null != fileName && checkFileNameFor(fileName, testContains("xcf"), "xcf");
     }
 
     private static boolean fileNameImpliesExcel(final String fileName) {
