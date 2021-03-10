@@ -9,14 +9,6 @@
         - oauth: []  
     parameters:
       - in: query
-        name: parent
-        description: >-
-          Object ID of a folder, which is the parent folder of the requested
-          folders.
-        required: true
-        schema:
-          type: string
-      - in: query
         name: timestamp
         description: Timestamp of the last update of the requested folders.
         required: true
