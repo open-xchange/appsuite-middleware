@@ -98,10 +98,10 @@ import com.openexchange.config.Reloadable;
 import com.openexchange.config.Reloadables;
 import com.openexchange.conversion.ConversionService;
 import com.openexchange.conversion.Data;
-import com.openexchange.conversion.DataExceptionCodes;
 import com.openexchange.conversion.DataProperties;
 import com.openexchange.exception.OXException;
 import com.openexchange.exception.OXExceptionCodeSet;
+import com.openexchange.exception.OXExceptions;
 import com.openexchange.filemanagement.ManagedFile;
 import com.openexchange.filemanagement.ManagedFileManagement;
 import com.openexchange.groupware.contexts.Context;
@@ -1980,12 +1980,12 @@ public class MimeMessageFiller {
     private static final OXExceptionCodeSet IGNORABLE_CODES = new OXExceptionCodeSet(
         MimeMailExceptionCode.IMAGE_ATTACHMENTS_UNSUPPORTED,
         MailExceptionCode.IMAGE_ATTACHMENT_NOT_FOUND,
-        DataExceptionCodes.ERROR,
         MailExceptionCode.MAIL_NOT_FOUND,
         MailExceptionCode.ATTACHMENT_NOT_FOUND,
         SnippetExceptionCodes.SNIPPET_NOT_FOUND,
         SnippetExceptionCodes.ATTACHMENT_NOT_FOUND,
-        MailAccountExceptionCodes.NOT_FOUND);
+        MailAccountExceptionCodes.NOT_FOUND,
+        OXExceptions.prefixFor("CNV"));
 
     private static boolean isIgnorableException(OXException e) {
         return IGNORABLE_CODES.contains(e) || isFolderNotFound(e);
