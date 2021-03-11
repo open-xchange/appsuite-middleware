@@ -202,11 +202,11 @@ public class ReplyITipAnalyzer extends AbstractITipAnalyzer {
                 // @formatter:off
                 analysis.addAnnotation(new ITipAnnotation(
                     new Sentence(Messages.MALICIOUS_SENDER_WARNING)
-                    .add(null == fromAddress ? null : fromAddress.getAddress())
                     .add(Strings.isEmpty(replyingAttendee.getEMail()) ? 
                         replyingAttendee.getUri() : 
-                            replyingAttendee.getEMail()
-                        ).getMessage(locale),
+                        replyingAttendee.getEMail())
+                    .add(null == fromAddress ? null : fromAddress.getAddress())
+                    .getMessage(locale),
                     locale));
                 // @formatter:on
             }
