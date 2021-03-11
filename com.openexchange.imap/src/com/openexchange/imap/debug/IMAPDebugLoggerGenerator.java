@@ -133,10 +133,14 @@ public class IMAPDebugLoggerGenerator {
             ConfigView view = configViewFactory.getView(userId, contextId);
 
             String filePath = ConfigViews.getDefinedStringPropertyFrom("com.openexchange.imap.debugLog.file.path", "/var/log/open-xchange", view).trim();
-            if (!filePath.endsWith("/")) {
-                filePath = new StringBuilder(filePath).append('/').toString();
+            {
+                StringBuilder filePathBuilder = new StringBuilder(filePath);
+                if (!filePath.endsWith("/")) {
+                    // Ensure ending slash character
+                    filePathBuilder.append('/');
+                }
+                filePath = filePathBuilder.append("imaptrace_").append(contextId).append('_').append(userId).append('_').append(server).toString();
             }
-            filePath = new StringBuilder(filePath).append("imaptrace_").append(contextId).append('_').append(userId).append('_').append(server).toString();
             {
                 File f = new File(filePath);
                 if (f.exists()) {
