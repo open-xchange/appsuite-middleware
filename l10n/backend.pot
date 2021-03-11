@@ -1108,11 +1108,11 @@ msgstr ""
 msgid "The meeting access information was removed."
 msgstr ""
 
-#. * The sender %1$s is not allowed to perform changes on behave of %2$s. Best ignore it.
+#. * The reply for %1$s was received from a different sender (%2$s). Best ignore it.
 #: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:378
 msgid ""
-"The sender %1$s is not allowed to perform changes on behave of %2$s. Best "
-"ignore it."
+"The reply for %1$s was received from a different sender (%2$s). Best ignore "
+"it."
 msgstr ""
 
 #. *
