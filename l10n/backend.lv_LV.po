@@ -14,7 +14,7 @@ msgstr ""
 "Project-Id-Version: errors.lv_LV.po\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: \n"
-"PO-Revision-Date: 2020-07-09 13:03+0300\n"
+"PO-Revision-Date: 2021-03-12 11:43+0100\n"
 "Last-Translator: Aivars Oliņš <aivars@adsl.lv>\n"
 "Language-Team: Latvian <LL@li.org>\n"
 "Language: lv\n"
@@ -22,7 +22,7 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=3; plural=n%10==1 && n%100!=11 ? 0 : n != 0 ? 1 : 2;\n"
-"X-Generator: Poedit 2.3.1\n"
+"X-Generator: Poedit 2.4.2\n"
 "Plural-Forms: nplurals=3; plural=n%10==1 && n%100!=11 ? 0 : n != 0 ? 1 : 2;\n"
 
 #. The verb "accepted", like "User A has accepted an appointment."
@@ -2912,6 +2912,10 @@ msgstr ""
 "\"Push via long polling\" funkcionalitāte lietotājam \"%1$s\" kontekstā "
 "\"%1$s\" ir atspējota"
 
+#: com.openexchange.drive/src/com/openexchange/drive/DriveExceptionMessages.java:100
+msgid "The directory is no longer accessible. Please select another directory."
+msgstr ""
+
 #: com.openexchange.external.account/src/com/openexchange/external/account/ExternalAccountExceptionMessages.java:62
 msgid "No external account provider found for module '%1$s'."
 msgstr "Modulim '%1$s' nav atrasts ārējais konta nodrošinātājs."
@@ -3326,6 +3330,15 @@ msgstr "Fails ar šādu vārdu jau eksistē."
 #: com.openexchange.server/src/com/openexchange/folderstorage/FolderExceptionMessages.java:107
 msgid "Restore from trash is not supported"
 msgstr "Atjaunošana no atkritnes netiek atbalstīta"
+
+#. The account name is too long. Please limit the account name to a maximum of %1$s characters.
+#: com.openexchange.file.storage/src/com/openexchange/file/storage/FileStorageExceptionMessages.java:193
+msgid ""
+"The account name is too long. Please limit the account name to a maximum of "
+"%1$s characters."
+msgstr ""
+"Konta nosaukums ir pārāk garš. Lūdzu, ierobežojiet konta nosaukumu, "
+"nepārsniedzot %1$s simbolus."
 
 #. Access denied.
 #: com.openexchange.filestore.s3/src/com/openexchange/filestore/s3/internal/S3ExceptionMessages.java:65
@@ -4479,19 +4492,21 @@ msgid "Updating attributes failed in context %1$d for user %2$d."
 msgstr "Kļūda pie atribūtu jaunināšanas kontekstā %1$d lietotājam %2$d."
 
 #. *
-#. * Invalid password length. The password must be of minimum length %1$d.
+#. * Invalid password length. The password must have a minimum length of %1$d characters.
 #.
 #: com.openexchange.global/src/com/openexchange/user/UserExceptionMessage.java:133
 msgid ""
-"Invalid password length. The password must have a minimum length of %1$d."
+"Invalid password length. The password must have a minimum length of %1$d "
+"characters."
 msgstr "Nepareizs paroles garums. Minimālais paroles garums ir %1$d simboli."
 
 #. *
-#. * Invalid password length. The password must be of maximum length %1$d.
+#. * Invalid password length. The password must have a maximum length of %1$d characters.
 #.
 #: com.openexchange.global/src/com/openexchange/user/UserExceptionMessage.java:138
 msgid ""
-"Invalid password length. The password must have a maximum length of %1$d."
+"Invalid password length. The password must have a maximum length of %1$d "
+"characters."
 msgstr "Nepareizs paroles garums. Maksimālais paroles garums ir %1$d simboli."
 
 #. *
@@ -5912,18 +5927,19 @@ msgstr ""
 "Identifikatoram '%s' paroles mehānisms nav pieejams. Parole nevar tikt "
 "apstrādāta."
 
-#. *
-#. * New password too short.
-#.
-#: com.openexchange.passwordchange.script/src/com/openexchange/passwordchange/script/impl/PasswordExceptionMessage.java:64
+#. Failed to change password for any reason. E.g. the script used to change a user's password advertised an error (return code)
+#: com.openexchange.passwordchange.script/src/com/openexchange/passwordchange/script/impl/PasswordExceptionMessage.java:62
+msgid "Failed to change password for any reason."
+msgstr "Kļūda pie paroles nomaiņas."
+
+#. New password too short.
+#: com.openexchange.passwordchange.script/src/com/openexchange/passwordchange/script/impl/PasswordExceptionMessage.java:65
 msgid ""
 "The entered password is too short. Please try again using a longer password."
 msgstr "Ievadītā parole ir pārāk īsa. Lūdzu mēģiniet vēlreiz ar garāku paroli."
 
-#. *
-#. * New password too weak.
-#.
-#: com.openexchange.passwordchange.script/src/com/openexchange/passwordchange/script/impl/PasswordExceptionMessage.java:69
+#. New password too weak.
+#: com.openexchange.passwordchange.script/src/com/openexchange/passwordchange/script/impl/PasswordExceptionMessage.java:68
 msgid ""
 "The entered password is too weak. Please try again using a more complex "
 "password."
@@ -12193,14 +12209,19 @@ msgstr "Identificēti nederīgi vai bīstami attēla dati"
 msgid "The signature image exceeds the maximum allowed size of '%1$s'."
 msgstr "Paraksta attēls pārsniedz maksimāli pieļaujamo '%1$s' izmēru."
 
-#. Thrown if a user tries to create a snippet/signature containing more than max. number of allowed images
+#. The signature size exceeds the maximum allowed size of '%1$s'.
 #: com.openexchange.snippet/src/com/openexchange/snippet/SnippetStrings.java:77
+msgid "The signature size exceeds the maximum allowed size of '%1$s'."
+msgstr "Paraksta izmērs pārsniedz maksimāli pieļaujamo '%1$s' izmēru."
+
+#. Thrown if a user tries to create a snippet/signature containing more than max. number of allowed images
+#: com.openexchange.snippet/src/com/openexchange/snippet/SnippetStrings.java:80
 msgid ""
 "The maximum allowed number of '%1$s' images in the signature is reached."
 msgstr "Sasniegts maksimāli pieļaujamais '%1$s' attēlu skaits parakstā."
 
 #. Thrown if a user must not modify a snippet/signature. Neither shared nor owned by that user.
-#: com.openexchange.snippet/src/com/openexchange/snippet/SnippetStrings.java:80
+#: com.openexchange.snippet/src/com/openexchange/snippet/SnippetStrings.java:83
 msgid "You are not allowed to modify the signature"
 msgstr "Jums nav tiesību mainīt parakstu"
 
@@ -12287,6 +12308,40 @@ msgstr ""
 #: com.openexchange.subscribe/src/com/openexchange/subscribe/SubscriptionErrorStrings.java:92
 msgid "You already have such a subscription."
 msgstr "Jums jau ir šāds abonements."
+
+#: com.openexchange.switchboard/src/com/openexchange/switchboard/exception/ZoomExceptionMessages.java:62
+msgid ""
+"Zoom meetings cannot be used in all-day appointments. Please use a fixed "
+"start- and end-time and try again."
+msgstr ""
+"Zoom mītiņš nevar tikt izmantots visas dienas garuma mītiņiem. Lūdzu "
+"norādiet fiksētus sākuma un beigu laikus."
+
+#: com.openexchange.switchboard/src/com/openexchange/switchboard/exception/ZoomExceptionMessages.java:64
+msgid ""
+"Zoom meetings cannot be used in appointments with floating start- or end-"
+"times. Please use a fixed start- and end-time and try again."
+msgstr ""
+"Zoom mītiņš nevar tikt izmantots mītiņiem ar mainīgiem sākuma vai beigu "
+"laikiem. Lūdzu norādiet fiksētus sākuma un beigu laikus."
+
+#: com.openexchange.switchboard/src/com/openexchange/switchboard/exception/ZoomExceptionMessages.java:66
+msgid ""
+"Zoom meetings cannot be used in recurring appointment series spanning over "
+"more than one year. Please shorten the recurrence rule and try again."
+msgstr ""
+"Zoom mītiņi nevar tikt izmantoti mītiņu sērijās, kuras ir garākas par vienu "
+"gadu. Lūdzu koriģējiet atkārtošanās noteikumus un mēģiniet vēlreiz."
+
+#: com.openexchange.switchboard/src/com/openexchange/switchboard/exception/ZoomExceptionMessages.java:68
+msgid ""
+"The same Zoom meeting can't be re-used when switching from recurring to "
+"single appointments and vice versa. Please generate a new Zoom meeting and "
+"try again."
+msgstr ""
+"Viens un tas pats Zoom mītiņš nevar tikt izmantots, izmainot to no "
+"vienreizēja uz atkārtotu mītiņu sēriju, vai otrādi. Lūdzu izveidojiet jaunu "
+"Zoom mītiņu un mēģiniet vēlreiz."
 
 #. Application 'xyz' requires following permissions:
 #. - Read all your tasks.
@@ -14728,6 +14783,16 @@ msgstr "UTC"
 #: TimeZones.java:534
 msgid "Zulu"
 msgstr "Zulu"
+
+#~ msgid ""
+#~ "Invalid password length. The password must have a minimum length of %1$d."
+#~ msgstr ""
+#~ "Nepareizs paroles garums. Minimālais paroles garums ir %1$d simboli."
+
+#~ msgid ""
+#~ "Invalid password length. The password must have a maximum length of %1$d."
+#~ msgstr ""
+#~ "Nepareizs paroles garums. Maksimālais paroles garums ir %1$d simboli."
 
 #~ msgid "The group %1$s has been invited to the appointment"
 #~ msgstr "Grupa %1$s ir ieaicināta uz mītiņu"

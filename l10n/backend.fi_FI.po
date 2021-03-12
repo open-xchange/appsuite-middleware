@@ -8,7 +8,7 @@ msgstr ""
 "Project-Id-Version: backend\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: \n"
-"PO-Revision-Date: 2020-07-14 15:48+0300\n"
+"PO-Revision-Date: 2021-03-12 11:40+0100\n"
 "Last-Translator: \n"
 "Language-Team: \n"
 "Language: fi_FI\n"
@@ -16,7 +16,7 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
-"X-Generator: Poedit 2.3.1\n"
+"X-Generator: Poedit 2.4.2\n"
 
 #. The verb "accepted", like "User A has accepted an appointment."
 #: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/ContextSensitiveMessages.java:84
@@ -2897,6 +2897,10 @@ msgstr ""
 "Push pitkän pollauksen kautta on kytketty pois päältä käyttäjälle \"%1$s\" "
 "yhteydessä \"%1$s\""
 
+#: com.openexchange.drive/src/com/openexchange/drive/DriveExceptionMessages.java:100
+msgid "The directory is no longer accessible. Please select another directory."
+msgstr ""
+
 #: com.openexchange.external.account/src/com/openexchange/external/account/ExternalAccountExceptionMessages.java:62
 msgid "No external account provider found for module '%1$s'."
 msgstr "Ulkoista tilintarjoajaa ei löydy moduulille '%1$s'."
@@ -3314,6 +3318,13 @@ msgstr "Samanniminen tiedosto on jo olemassa."
 #: com.openexchange.server/src/com/openexchange/folderstorage/FolderExceptionMessages.java:107
 msgid "Restore from trash is not supported"
 msgstr "Roskakorista palauttamista ei tueta"
+
+#. The account name is too long. Please limit the account name to a maximum of %1$s characters.
+#: com.openexchange.file.storage/src/com/openexchange/file/storage/FileStorageExceptionMessages.java:193
+msgid ""
+"The account name is too long. Please limit the account name to a maximum of "
+"%1$s characters."
+msgstr "Tilin nimi on liian pitkä. Tilin nimen enimmäispituus on %1$s merkkiä."
 
 #. Access denied.
 #: com.openexchange.filestore.s3/src/com/openexchange/filestore/s3/internal/S3ExceptionMessages.java:65
@@ -4471,21 +4482,22 @@ msgid "Updating attributes failed in context %1$d for user %2$d."
 msgstr "Attribuuttien päivitys epäonnistui kontekstin %1$d käyttäjälle %2$d."
 
 #. *
-#. * Invalid password length. The password must be of minimum length %1$d.
+#. * Invalid password length. The password must have a minimum length of %1$d characters.
 #.
 #: com.openexchange.global/src/com/openexchange/user/UserExceptionMessage.java:133
 msgid ""
-"Invalid password length. The password must have a minimum length of %1$d."
-msgstr ""
-"Epäkelpo salasanan pituus. Salasanassa tulee olla vähintään %1$d merkkiä."
+"Invalid password length. The password must have a minimum length of %1$d "
+"characters."
+msgstr "Salasanan pituus ei kelpaa. Salasanan vähimmäispituus on %1$d merkkiä."
 
 #. *
-#. * Invalid password length. The password must be of maximum length %1$d.
+#. * Invalid password length. The password must have a maximum length of %1$d characters.
 #.
 #: com.openexchange.global/src/com/openexchange/user/UserExceptionMessage.java:138
 msgid ""
-"Invalid password length. The password must have a maximum length of %1$d."
-msgstr "Epäkelpo salasanan pituus. Salasanassa saa olla enintään %1$d merkkiä."
+"Invalid password length. The password must have a maximum length of %1$d "
+"characters."
+msgstr "Salasanan pituus ei kelpaa. Salasanan enimmäispituus on %1$d merkkiä."
 
 #. *
 #. * The parameter %s for this user is missing.
@@ -5891,19 +5903,20 @@ msgstr ""
 "Tunnisteelle \"%s\" ei ole käytettävissä salasanamekanismia. Salasanaa ei "
 "voi käsitellä."
 
-#. *
-#. * New password too short.
-#.
-#: com.openexchange.passwordchange.script/src/com/openexchange/passwordchange/script/impl/PasswordExceptionMessage.java:64
+#. Failed to change password for any reason. E.g. the script used to change a user's password advertised an error (return code)
+#: com.openexchange.passwordchange.script/src/com/openexchange/passwordchange/script/impl/PasswordExceptionMessage.java:62
+msgid "Failed to change password for any reason."
+msgstr "Salasanan vaihto epäonnistui jostain syystä."
+
+#. New password too short.
+#: com.openexchange.passwordchange.script/src/com/openexchange/passwordchange/script/impl/PasswordExceptionMessage.java:65
 msgid ""
 "The entered password is too short. Please try again using a longer password."
 msgstr ""
 "Syötetty salasana on liian lyhyt. Yritä uudelleen pidemmällä salasanalla."
 
-#. *
-#. * New password too weak.
-#.
-#: com.openexchange.passwordchange.script/src/com/openexchange/passwordchange/script/impl/PasswordExceptionMessage.java:69
+#. New password too weak.
+#: com.openexchange.passwordchange.script/src/com/openexchange/passwordchange/script/impl/PasswordExceptionMessage.java:68
 msgid ""
 "The entered password is too weak. Please try again using a more complex "
 "password."
@@ -12187,14 +12200,19 @@ msgstr "Kelpaamatonta tai haitallista kuvadataa havaittu"
 msgid "The signature image exceeds the maximum allowed size of '%1$s'."
 msgstr "Allekirjoituskuvan koko ylittää sallitun enimmäiskoon '%1$s'."
 
-#. Thrown if a user tries to create a snippet/signature containing more than max. number of allowed images
+#. The signature size exceeds the maximum allowed size of '%1$s'.
 #: com.openexchange.snippet/src/com/openexchange/snippet/SnippetStrings.java:77
+msgid "The signature size exceeds the maximum allowed size of '%1$s'."
+msgstr "Allekirjoituskuvan koko ylittää sallitun enimmäiskoon '%1$s'."
+
+#. Thrown if a user tries to create a snippet/signature containing more than max. number of allowed images
+#: com.openexchange.snippet/src/com/openexchange/snippet/SnippetStrings.java:80
 msgid ""
 "The maximum allowed number of '%1$s' images in the signature is reached."
 msgstr "Allekirjoituskuvien enimmäismäärä '%1$s' on saavutettu."
 
 #. Thrown if a user must not modify a snippet/signature. Neither shared nor owned by that user.
-#: com.openexchange.snippet/src/com/openexchange/snippet/SnippetStrings.java:80
+#: com.openexchange.snippet/src/com/openexchange/snippet/SnippetStrings.java:83
 msgid "You are not allowed to modify the signature"
 msgstr "Et saa muokata allekirjoitusta"
 
@@ -12284,6 +12302,40 @@ msgstr ""
 #: com.openexchange.subscribe/src/com/openexchange/subscribe/SubscriptionErrorStrings.java:92
 msgid "You already have such a subscription."
 msgstr "Sinulla on jo tämä tilaus."
+
+#: com.openexchange.switchboard/src/com/openexchange/switchboard/exception/ZoomExceptionMessages.java:62
+msgid ""
+"Zoom meetings cannot be used in all-day appointments. Please use a fixed "
+"start- and end-time and try again."
+msgstr ""
+"Zoom-kokouksia ei voi käyttää koko päivän kestäviin tapaamisiin. Käytä "
+"aloitus- ja lopetusaikaa ja yritä uudelleen."
+
+#: com.openexchange.switchboard/src/com/openexchange/switchboard/exception/ZoomExceptionMessages.java:64
+msgid ""
+"Zoom meetings cannot be used in appointments with floating start- or end-"
+"times. Please use a fixed start- and end-time and try again."
+msgstr ""
+"Zoom-kokouksia ei voi käyttää tapaamisiin, joiden aloitus- ja lopetusaika on "
+"liukuva. Käytä kiinteää aloitus- ja lopetusaikaa ja yritä uudelleen."
+
+#: com.openexchange.switchboard/src/com/openexchange/switchboard/exception/ZoomExceptionMessages.java:66
+msgid ""
+"Zoom meetings cannot be used in recurring appointment series spanning over "
+"more than one year. Please shorten the recurrence rule and try again."
+msgstr ""
+"Zoom-kokouksia ei voi käyttää toistuviin tapaamissarjoihin, joiden kesto "
+"ylittää vuoden. Lyhennä sarjan pituutta ja yritä uudelleen."
+
+#: com.openexchange.switchboard/src/com/openexchange/switchboard/exception/ZoomExceptionMessages.java:68
+msgid ""
+"The same Zoom meeting can't be re-used when switching from recurring to "
+"single appointments and vice versa. Please generate a new Zoom meeting and "
+"try again."
+msgstr ""
+"Samaa Zoom-kokousta ei voi käyttää uudelleen siirryttäessä toistuvista "
+"tapaamisista yksittäisiin tapaamisiin eikä toisin pain. Luo uusi Zoom-kokous "
+"ja yritä uudelleen."
 
 #. Application 'xyz' requires following permissions:
 #. - Read all your tasks.
@@ -14723,6 +14775,16 @@ msgstr "UTC"
 #: TimeZones.java:534
 msgid "Zulu"
 msgstr "Zulu"
+
+#~ msgid ""
+#~ "Invalid password length. The password must have a minimum length of %1$d."
+#~ msgstr ""
+#~ "Epäkelpo salasanan pituus. Salasanassa tulee olla vähintään %1$d merkkiä."
+
+#~ msgid ""
+#~ "Invalid password length. The password must have a maximum length of %1$d."
+#~ msgstr ""
+#~ "Epäkelpo salasanan pituus. Salasanassa saa olla enintään %1$d merkkiä."
 
 #~ msgid "The group %1$s has been invited to the appointment"
 #~ msgstr "Ryhmä %1$s on kutsuttu tapaamiseen"

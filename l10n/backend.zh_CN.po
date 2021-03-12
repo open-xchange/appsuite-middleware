@@ -11,7 +11,7 @@ msgstr ""
 "Project-Id-Version: errors.zh_CN.po\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: \n"
-"PO-Revision-Date: 2020-07-10 20:57+1000\n"
+"PO-Revision-Date: 2021-03-12 11:46+0100\n"
 "Last-Translator: \n"
 "Language-Team: Simplified Chinese <LL@li.org>\n"
 "Language: zh_CN\n"
@@ -19,7 +19,7 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
-"X-Generator: Poedit 2.3.1\n"
+"X-Generator: Poedit 2.4.2\n"
 
 #. The verb "accepted", like "User A has accepted an appointment."
 #: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/ContextSensitiveMessages.java:84
@@ -2754,6 +2754,10 @@ msgstr "一个名为 \"%1$s\" 的目录已存在于 \"%2$s\"。"
 msgid "Push via long polling is disabled for user \"%1$s\" in context \"%1$s\""
 msgstr "对用户 \"%1$s\"（于上下文 \"%1$s\" 中），通过长轮询的推送被禁用。"
 
+#: com.openexchange.drive/src/com/openexchange/drive/DriveExceptionMessages.java:100
+msgid "The directory is no longer accessible. Please select another directory."
+msgstr ""
+
 #: com.openexchange.external.account/src/com/openexchange/external/account/ExternalAccountExceptionMessages.java:62
 msgid "No external account provider found for module '%1$s'."
 msgstr "找不到模块'%1$s'的外部户口提供者。"
@@ -3149,6 +3153,13 @@ msgstr "同名的文件已经存在。"
 #: com.openexchange.server/src/com/openexchange/folderstorage/FolderExceptionMessages.java:107
 msgid "Restore from trash is not supported"
 msgstr "不支持从垃圾桶中恢复"
+
+#. The account name is too long. Please limit the account name to a maximum of %1$s characters.
+#: com.openexchange.file.storage/src/com/openexchange/file/storage/FileStorageExceptionMessages.java:193
+msgid ""
+"The account name is too long. Please limit the account name to a maximum of "
+"%1$s characters."
+msgstr "户口名称太长。请将限制户口名称到最多%1$s字符。"
 
 #. Access denied.
 #: com.openexchange.filestore.s3/src/com/openexchange/filestore/s3/internal/S3ExceptionMessages.java:65
@@ -4259,20 +4270,22 @@ msgid "Updating attributes failed in context %1$d for user %2$d."
 msgstr "为上下文 %1$d 中的用户 %2$d 更新属性失败。"
 
 #. *
-#. * Invalid password length. The password must be of minimum length %1$d.
+#. * Invalid password length. The password must have a minimum length of %1$d characters.
 #.
 #: com.openexchange.global/src/com/openexchange/user/UserExceptionMessage.java:133
 msgid ""
-"Invalid password length. The password must have a minimum length of %1$d."
-msgstr "无效的密码长度。密码必须有最短长度 %1$d。"
+"Invalid password length. The password must have a minimum length of %1$d "
+"characters."
+msgstr "密码长度无效。密码的最小长度必须为%1$d字符。"
 
 #. *
-#. * Invalid password length. The password must be of maximum length %1$d.
+#. * Invalid password length. The password must have a maximum length of %1$d characters.
 #.
 #: com.openexchange.global/src/com/openexchange/user/UserExceptionMessage.java:138
 msgid ""
-"Invalid password length. The password must have a maximum length of %1$d."
-msgstr "无效的密码长度。密码必须有最长长度 %1$d。"
+"Invalid password length. The password must have a maximum length of %1$d "
+"characters."
+msgstr "密码长度无效。密码的最大长度必须为%1$d字符。"
 
 #. *
 #. * The parameter %s for this user is missing.
@@ -5602,18 +5615,19 @@ msgid ""
 "No password mechanism available for identifier '%s'. Cannot handle password."
 msgstr "没有可用于标识符 '%s' 的密码机制。无法处理密码。"
 
-#. *
-#. * New password too short.
-#.
-#: com.openexchange.passwordchange.script/src/com/openexchange/passwordchange/script/impl/PasswordExceptionMessage.java:64
+#. Failed to change password for any reason. E.g. the script used to change a user's password advertised an error (return code)
+#: com.openexchange.passwordchange.script/src/com/openexchange/passwordchange/script/impl/PasswordExceptionMessage.java:62
+msgid "Failed to change password for any reason."
+msgstr "因为任何原因而无法更改密码。"
+
+#. New password too short.
+#: com.openexchange.passwordchange.script/src/com/openexchange/passwordchange/script/impl/PasswordExceptionMessage.java:65
 msgid ""
 "The entered password is too short. Please try again using a longer password."
 msgstr "输入的密码过短，请使用一个长一点的密码再试。"
 
-#. *
-#. * New password too weak.
-#.
-#: com.openexchange.passwordchange.script/src/com/openexchange/passwordchange/script/impl/PasswordExceptionMessage.java:69
+#. New password too weak.
+#: com.openexchange.passwordchange.script/src/com/openexchange/passwordchange/script/impl/PasswordExceptionMessage.java:68
 msgid ""
 "The entered password is too weak. Please try again using a more complex "
 "password."
@@ -11488,14 +11502,19 @@ msgstr "侦测到无效或有害的图像数据"
 msgid "The signature image exceeds the maximum allowed size of '%1$s'."
 msgstr "签名影像超出最大允许名称 '%1$s'。"
 
-#. Thrown if a user tries to create a snippet/signature containing more than max. number of allowed images
+#. The signature size exceeds the maximum allowed size of '%1$s'.
 #: com.openexchange.snippet/src/com/openexchange/snippet/SnippetStrings.java:77
+msgid "The signature size exceeds the maximum allowed size of '%1$s'."
+msgstr "签名大小超过允许的最大体积'%1$s'。"
+
+#. Thrown if a user tries to create a snippet/signature containing more than max. number of allowed images
+#: com.openexchange.snippet/src/com/openexchange/snippet/SnippetStrings.java:80
 msgid ""
 "The maximum allowed number of '%1$s' images in the signature is reached."
 msgstr "达到签名里一个图像的允许最大数量 '%1$s'。"
 
 #. Thrown if a user must not modify a snippet/signature. Neither shared nor owned by that user.
-#: com.openexchange.snippet/src/com/openexchange/snippet/SnippetStrings.java:80
+#: com.openexchange.snippet/src/com/openexchange/snippet/SnippetStrings.java:83
 msgid "You are not allowed to modify the signature"
 msgstr "不允许你修改签名"
 
@@ -11579,6 +11598,36 @@ msgstr ""
 #: com.openexchange.subscribe/src/com/openexchange/subscribe/SubscriptionErrorStrings.java:92
 msgid "You already have such a subscription."
 msgstr "您已经有此订阅。"
+
+#: com.openexchange.switchboard/src/com/openexchange/switchboard/exception/ZoomExceptionMessages.java:62
+msgid ""
+"Zoom meetings cannot be used in all-day appointments. Please use a fixed "
+"start- and end-time and try again."
+msgstr "Zoom会议不能用于全天约会。请使用固定的开始和结束时间，然后重试。"
+
+#: com.openexchange.switchboard/src/com/openexchange/switchboard/exception/ZoomExceptionMessages.java:64
+msgid ""
+"Zoom meetings cannot be used in appointments with floating start- or end-"
+"times. Please use a fixed start- and end-time and try again."
+msgstr ""
+"Zoom会议不能用于具有浮动开始时间或结束时间的约会。请使用固定的开始和结束时"
+"间，然后重试。"
+
+#: com.openexchange.switchboard/src/com/openexchange/switchboard/exception/ZoomExceptionMessages.java:66
+msgid ""
+"Zoom meetings cannot be used in recurring appointment series spanning over "
+"more than one year. Please shorten the recurrence rule and try again."
+msgstr ""
+"Zoom会议不能用于横跨超过一年的循环约会系列中。请缩短重复规则，然后重试。"
+
+#: com.openexchange.switchboard/src/com/openexchange/switchboard/exception/ZoomExceptionMessages.java:68
+msgid ""
+"The same Zoom meeting can't be re-used when switching from recurring to "
+"single appointments and vice versa. Please generate a new Zoom meeting and "
+"try again."
+msgstr ""
+"从循环约会切换到单个约会时，不能重新使用同一个Zoom会议，反之亦然。请生成新的"
+"Zoom会议，然后重试。"
 
 #. Application 'xyz' requires following permissions:
 #. - Read all your tasks.
@@ -14013,6 +14062,14 @@ msgstr "UTC"
 #: TimeZones.java:534
 msgid "Zulu"
 msgstr "祖鲁"
+
+#~ msgid ""
+#~ "Invalid password length. The password must have a minimum length of %1$d."
+#~ msgstr "无效的密码长度。密码必须有最短长度 %1$d。"
+
+#~ msgid ""
+#~ "Invalid password length. The password must have a maximum length of %1$d."
+#~ msgstr "无效的密码长度。密码必须有最长长度 %1$d。"
 
 #~ msgid "The group %1$s has been invited to the appointment"
 #~ msgstr "组 %1$s 已被邀请到约会"

@@ -7,7 +7,7 @@ msgstr ""
 "Project-Id-Version: backend\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: \n"
-"PO-Revision-Date: 2020-07-13 12:14+0200\n"
+"PO-Revision-Date: 2021-03-12 11:43+0100\n"
 "Last-Translator: Tim <tim@workshop-chapina.com>\n"
 "Language-Team: Dutch <kde-i18n-nl@kde.org>\n"
 "Language: nl_NL\n"
@@ -15,7 +15,7 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
-"X-Generator: Lokalize 20.04.2\n"
+"X-Generator: Poedit 2.4.2\n"
 
 #. The verb "accepted", like "User A has accepted an appointment."
 #: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/ContextSensitiveMessages.java:84
@@ -102,9 +102,8 @@ msgid ""
 "Unable to update application passwords during password change. You may need "
 "to remove then recreate the application passwords."
 msgstr ""
-"Kan applicatiewachtwoorden niet bijwerken tijdens wachtwoordwijziging."
-" Mogelijk moet u "
-"de applicatiewachtwoorden verwijderen en opnieuw maken."
+"Kan applicatiewachtwoorden niet bijwerken tijdens wachtwoordwijziging. "
+"Mogelijk moet u de applicatiewachtwoorden verwijderen en opnieuw maken."
 
 #: com.openexchange.authentication.application/src/com/openexchange/authentication/application/exceptions/AppPasswordExceptionMessages.java:69
 #: com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:92
@@ -2952,6 +2951,10 @@ msgstr ""
 "Push notificaties via long polling is uitgeschakeld voor gebruiker \"%1$s\" "
 "in context \"%1$s\""
 
+#: com.openexchange.drive/src/com/openexchange/drive/DriveExceptionMessages.java:100
+msgid "The directory is no longer accessible. Please select another directory."
+msgstr ""
+
 #: com.openexchange.external.account/src/com/openexchange/external/account/ExternalAccountExceptionMessages.java:62
 msgid "No external account provider found for module '%1$s'."
 msgstr "Geen externe accountprovider gevonden voor module '%1$s'."
@@ -3097,14 +3100,15 @@ msgstr "De verbindingscontrole is mislukt."
 #: com.openexchange.file.storage.webdav/src/com/openexchange/file/storage/webdav/exception/WebdavExceptionMessages.java:75
 msgid "Cannot connect to URI: %1$s. Please change and try again."
 msgstr ""
-"Kan geen verbinding maken met URI: %1$s. Pas deze alstublieft aan en probeer"
-" het opnieuw."
+"Kan geen verbinding maken met URI: %1$s. Pas deze alstublieft aan en probeer "
+"het opnieuw."
 
 #. The given URL is invalid. Please change it and try again.
 #: com.openexchange.file.storage.webdav/src/com/openexchange/file/storage/webdav/exception/WebdavExceptionMessages.java:78
 msgid "The given URL is invalid. Please change it and try again."
 msgstr ""
-"De opgegeven URL is ongeldig. Pas deze alstublieft aan en probeer het opnieuw."
+"De opgegeven URL is ongeldig. Pas deze alstublieft aan en probeer het "
+"opnieuw."
 
 #. The folder you requested does not exist.
 #: com.openexchange.file.storage/src/com/openexchange/file/storage/FileStorageExceptionMessages.java:65
@@ -3379,6 +3383,15 @@ msgstr "Er bestaat al een bestand met deze naam."
 #: com.openexchange.server/src/com/openexchange/folderstorage/FolderExceptionMessages.java:107
 msgid "Restore from trash is not supported"
 msgstr "Herstellen vanuit de prullenbak wordt niet ondersteund"
+
+#. The account name is too long. Please limit the account name to a maximum of %1$s characters.
+#: com.openexchange.file.storage/src/com/openexchange/file/storage/FileStorageExceptionMessages.java:193
+msgid ""
+"The account name is too long. Please limit the account name to a maximum of "
+"%1$s characters."
+msgstr ""
+"De naam van het account is te lang. Maak de naam van het account niet langer "
+"dan %1$s tekens."
 
 #. Access denied.
 #: com.openexchange.filestore.s3/src/com/openexchange/filestore/s3/internal/S3ExceptionMessages.java:65
@@ -4548,22 +4561,26 @@ msgstr ""
 "%2$d."
 
 #. *
-#. * Invalid password length. The password must be of minimum length %1$d.
+#. * Invalid password length. The password must have a minimum length of %1$d characters.
 #.
 #: com.openexchange.global/src/com/openexchange/user/UserExceptionMessage.java:133
 msgid ""
-"Invalid password length. The password must have a minimum length of %1$d."
+"Invalid password length. The password must have a minimum length of %1$d "
+"characters."
 msgstr ""
-"Ongeldige wachtwoordlengte. De minimale lengte van het wachtwoord is %1$d."
+"Ongeldige wachtwoordlengte. De minimale lengte van het wachtwoord is %1$d "
+"tekens."
 
 #. *
-#. * Invalid password length. The password must be of maximum length %1$d.
+#. * Invalid password length. The password must have a maximum length of %1$d characters.
 #.
 #: com.openexchange.global/src/com/openexchange/user/UserExceptionMessage.java:138
 msgid ""
-"Invalid password length. The password must have a maximum length of %1$d."
+"Invalid password length. The password must have a maximum length of %1$d "
+"characters."
 msgstr ""
-"Ongeldige wachtwoordlengte. De maximale lengte van het wachtwoord is %1$d."
+"Ongeldige wachtwoordlengte. De maximale lengte van het wachtwoord is %1$d "
+"tekens."
 
 #. *
 #. * The parameter %s for this user is missing.
@@ -6019,20 +6036,21 @@ msgstr ""
 "Er is geen wachtwoordmechanisme beschikbaar voor id '%s'. Kan geen "
 "wachtwoord verwerken."
 
-#. *
-#. * New password too short.
-#.
-#: com.openexchange.passwordchange.script/src/com/openexchange/passwordchange/script/impl/PasswordExceptionMessage.java:64
+#. Failed to change password for any reason. E.g. the script used to change a user's password advertised an error (return code)
+#: com.openexchange.passwordchange.script/src/com/openexchange/passwordchange/script/impl/PasswordExceptionMessage.java:62
+msgid "Failed to change password for any reason."
+msgstr "Wachtwoord wijzigen mislukt om een willekeurige reden."
+
+#. New password too short.
+#: com.openexchange.passwordchange.script/src/com/openexchange/passwordchange/script/impl/PasswordExceptionMessage.java:65
 msgid ""
 "The entered password is too short. Please try again using a longer password."
 msgstr ""
 "Het opgegeven wachtwoord is te kort. Probeer alstublieft een langer "
 "wachtwoord."
 
-#. *
-#. * New password too weak.
-#.
-#: com.openexchange.passwordchange.script/src/com/openexchange/passwordchange/script/impl/PasswordExceptionMessage.java:69
+#. New password too weak.
+#: com.openexchange.passwordchange.script/src/com/openexchange/passwordchange/script/impl/PasswordExceptionMessage.java:68
 msgid ""
 "The entered password is too weak. Please try again using a more complex "
 "password."
@@ -9309,8 +9327,8 @@ msgid ""
 "The file contains too many permissions. Please reduce the number of "
 "permissions or use group permissions instead."
 msgstr ""
-"Het bestand bevat teveel rechten. Reduceer het aantal "
-"rechten of gebruik groepsrechten."
+"Het bestand bevat teveel rechten. Reduceer het aantal rechten of gebruik "
+"groepsrechten."
 
 #. A document's version comment
 #: com.openexchange.server/src/com/openexchange/groupware/infostore/InfostoreStrings.java:79
@@ -11391,8 +11409,8 @@ msgid ""
 "The folder contains too many permissions. Please reduce the number of "
 "permissions or use group permissions instead."
 msgstr ""
-"De map bevat teveel rechten. Reduceer het aantal "
-"rechten of gebruik groepsrechten."
+"De map bevat teveel rechten. Reduceer het aantal rechten of gebruik "
+"groepsrechten."
 
 #: com.openexchange.server/src/com/openexchange/tools/servlet/AjaxExceptionMessages.java:62
 msgid "The requested operation is not permitted via a non-secure connection."
@@ -12497,8 +12515,13 @@ msgid "The signature image exceeds the maximum allowed size of '%1$s'."
 msgstr ""
 "De handtekeningsafbeelding is groter dan de maximale grootte van '%1$s'."
 
-#. Thrown if a user tries to create a snippet/signature containing more than max. number of allowed images
+#. The signature size exceeds the maximum allowed size of '%1$s'.
 #: com.openexchange.snippet/src/com/openexchange/snippet/SnippetStrings.java:77
+msgid "The signature size exceeds the maximum allowed size of '%1$s'."
+msgstr "De handtekeningsgrootte is meer dan de maximale grootte van '%1$s'."
+
+#. Thrown if a user tries to create a snippet/signature containing more than max. number of allowed images
+#: com.openexchange.snippet/src/com/openexchange/snippet/SnippetStrings.java:80
 msgid ""
 "The maximum allowed number of '%1$s' images in the signature is reached."
 msgstr ""
@@ -12506,7 +12529,7 @@ msgstr ""
 "ondertekeningsafbeeldingen is bereikt."
 
 #. Thrown if a user must not modify a snippet/signature. Neither shared nor owned by that user.
-#: com.openexchange.snippet/src/com/openexchange/snippet/SnippetStrings.java:80
+#: com.openexchange.snippet/src/com/openexchange/snippet/SnippetStrings.java:83
 msgid "You are not allowed to modify the signature"
 msgstr "U heeft geen toestemming om de handtekening te bewerken"
 
@@ -12595,6 +12618,41 @@ msgstr ""
 #: com.openexchange.subscribe/src/com/openexchange/subscribe/SubscriptionErrorStrings.java:92
 msgid "You already have such a subscription."
 msgstr "U heeft al een dergelijk abonnement."
+
+#: com.openexchange.switchboard/src/com/openexchange/switchboard/exception/ZoomExceptionMessages.java:62
+msgid ""
+"Zoom meetings cannot be used in all-day appointments. Please use a fixed "
+"start- and end-time and try again."
+msgstr ""
+"Zoom afspraken kunnen niet gebruikt worden voor dag-afspraken. Gebruik een "
+"vaste start- en eindtijd en probeer opnieuw."
+
+#: com.openexchange.switchboard/src/com/openexchange/switchboard/exception/ZoomExceptionMessages.java:64
+msgid ""
+"Zoom meetings cannot be used in appointments with floating start- or end-"
+"times. Please use a fixed start- and end-time and try again."
+msgstr ""
+"Zoom afspraken kunnen niet gebruikt worden voor afspraken met flexibele "
+"start- en eindtijden. Gebruik een vaste start- en eindtijd en probeer "
+"opnieuw."
+
+#: com.openexchange.switchboard/src/com/openexchange/switchboard/exception/ZoomExceptionMessages.java:66
+msgid ""
+"Zoom meetings cannot be used in recurring appointment series spanning over "
+"more than one year. Please shorten the recurrence rule and try again."
+msgstr ""
+"Zoom afspraken kunnen niet gebruikt worden voor herhalende afspraken in een "
+"serie over meer dan een jaar. Verkort de tijd en probeer opnieuw"
+
+#: com.openexchange.switchboard/src/com/openexchange/switchboard/exception/ZoomExceptionMessages.java:68
+msgid ""
+"The same Zoom meeting can't be re-used when switching from recurring to "
+"single appointments and vice versa. Please generate a new Zoom meeting and "
+"try again."
+msgstr ""
+"Dezelfde Zoom afspraak kan niet opnieuw gebruikt worden als u wisselt van "
+"herhalende naar enkele afspraken en terug. Maak alstublieft een nieuwe Zoom "
+"afspraak en probeer opnieuw."
 
 #. Application 'xyz' requires following permissions:
 #. - Read all your tasks.
@@ -15044,6 +15102,16 @@ msgstr "UTC"
 #: TimeZones.java:534
 msgid "Zulu"
 msgstr "Zoeloe"
+
+#~ msgid ""
+#~ "Invalid password length. The password must have a minimum length of %1$d."
+#~ msgstr ""
+#~ "Ongeldige wachtwoordlengte. De minimale lengte van het wachtwoord is %1$d."
+
+#~ msgid ""
+#~ "Invalid password length. The password must have a maximum length of %1$d."
+#~ msgstr ""
+#~ "Ongeldige wachtwoordlengte. De maximale lengte van het wachtwoord is %1$d."
 
 #~ msgid "The group %1$s has been invited to the appointment"
 #~ msgstr "De groep %1$s is uitgenodigd voor de afspraak."

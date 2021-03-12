@@ -6,14 +6,14 @@ msgstr ""
 "Project-Id-Version: backend\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: \n"
-"PO-Revision-Date: 2020-07-13 18:56+0200\n"
+"PO-Revision-Date: 2021-03-12 11:45+0100\n"
 "Last-Translator: Arve Eriksson <sv@workshop-chapina.com>\n"
 "Language-Team: Swedish <sv@workshop-chapina.com>\n"
 "Language: sv_SE\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"X-Generator: Poedit 2.3\n"
+"X-Generator: Poedit 2.4.2\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 
 #. The verb "accepted", like "User A has accepted an appointment."
@@ -2877,6 +2877,10 @@ msgstr ""
 "Push via lång polling har avaktiverats för användaren \"%1$s\" i kontexten "
 "\"%1$s\""
 
+#: com.openexchange.drive/src/com/openexchange/drive/DriveExceptionMessages.java:100
+msgid "The directory is no longer accessible. Please select another directory."
+msgstr ""
+
 #: com.openexchange.external.account/src/com/openexchange/external/account/ExternalAccountExceptionMessages.java:62
 msgid "No external account provider found for module '%1$s'."
 msgstr "Ingen extern kontoleverantör hittades för modulen '%1$s'."
@@ -3296,6 +3300,14 @@ msgstr "En fil med det namnet finns redan."
 #: com.openexchange.server/src/com/openexchange/folderstorage/FolderExceptionMessages.java:107
 msgid "Restore from trash is not supported"
 msgstr "Återställning från papperskorg stöds inte"
+
+#. The account name is too long. Please limit the account name to a maximum of %1$s characters.
+#: com.openexchange.file.storage/src/com/openexchange/file/storage/FileStorageExceptionMessages.java:193
+msgid ""
+"The account name is too long. Please limit the account name to a maximum of "
+"%1$s characters."
+msgstr ""
+"Kontots namn är för långt. Begränsa kontonamnet till maximalt %1$s tecken."
 
 #. Access denied.
 #: com.openexchange.filestore.s3/src/com/openexchange/filestore/s3/internal/S3ExceptionMessages.java:65
@@ -4441,20 +4453,24 @@ msgid "Updating attributes failed in context %1$d for user %2$d."
 msgstr "Kunde inte uppdatera attribut i kontext %1$d för användare %2$d."
 
 #. *
-#. * Invalid password length. The password must be of minimum length %1$d.
+#. * Invalid password length. The password must have a minimum length of %1$d characters.
 #.
 #: com.openexchange.global/src/com/openexchange/user/UserExceptionMessage.java:133
 msgid ""
-"Invalid password length. The password must have a minimum length of %1$d."
-msgstr "Ogiltig lösenordslängd. Lösenordet måste vara längre än %1$d."
+"Invalid password length. The password must have a minimum length of %1$d "
+"characters."
+msgstr ""
+"Ogiltig lösenordslängd. Lösenordet måste vara som minst %1$d tecken långt."
 
 #. *
-#. * Invalid password length. The password must be of maximum length %1$d.
+#. * Invalid password length. The password must have a maximum length of %1$d characters.
 #.
 #: com.openexchange.global/src/com/openexchange/user/UserExceptionMessage.java:138
 msgid ""
-"Invalid password length. The password must have a maximum length of %1$d."
-msgstr "Ogiltig lösenordslängd. Lösenordet får bara vara upp till %1$d."
+"Invalid password length. The password must have a maximum length of %1$d "
+"characters."
+msgstr ""
+"Ogiltig lösenordslängd. Lösenordet måste vara som mest %1$d tecken långt."
 
 #. *
 #. * The parameter %s for this user is missing.
@@ -5866,18 +5882,19 @@ msgstr ""
 "Ingen lösenordsmekanism tillgänglig för identifieraren '%s'. Kan inte "
 "hantera lösenord."
 
-#. *
-#. * New password too short.
-#.
-#: com.openexchange.passwordchange.script/src/com/openexchange/passwordchange/script/impl/PasswordExceptionMessage.java:64
+#. Failed to change password for any reason. E.g. the script used to change a user's password advertised an error (return code)
+#: com.openexchange.passwordchange.script/src/com/openexchange/passwordchange/script/impl/PasswordExceptionMessage.java:62
+msgid "Failed to change password for any reason."
+msgstr "Kunde inte ändra lösenord av någon anledning."
+
+#. New password too short.
+#: com.openexchange.passwordchange.script/src/com/openexchange/passwordchange/script/impl/PasswordExceptionMessage.java:65
 msgid ""
 "The entered password is too short. Please try again using a longer password."
 msgstr "Det givna lösenordet är för kort. Försök igen med ett längre lösenord."
 
-#. *
-#. * New password too weak.
-#.
-#: com.openexchange.passwordchange.script/src/com/openexchange/passwordchange/script/impl/PasswordExceptionMessage.java:69
+#. New password too weak.
+#: com.openexchange.passwordchange.script/src/com/openexchange/passwordchange/script/impl/PasswordExceptionMessage.java:68
 msgid ""
 "The entered password is too weak. Please try again using a more complex "
 "password."
@@ -12168,14 +12185,20 @@ msgstr "Ogiltig eller skadlig bilddata upptäcktes"
 msgid "The signature image exceeds the maximum allowed size of '%1$s'."
 msgstr "Signaturbilden överskrider den maximala tillåtna storleken på '%1$s'."
 
-#. Thrown if a user tries to create a snippet/signature containing more than max. number of allowed images
+#. The signature size exceeds the maximum allowed size of '%1$s'.
 #: com.openexchange.snippet/src/com/openexchange/snippet/SnippetStrings.java:77
+msgid "The signature size exceeds the maximum allowed size of '%1$s'."
+msgstr ""
+"Signaturens storlek överskrider den maximala tillåtna gränsen på '%1$s'."
+
+#. Thrown if a user tries to create a snippet/signature containing more than max. number of allowed images
+#: com.openexchange.snippet/src/com/openexchange/snippet/SnippetStrings.java:80
 msgid ""
 "The maximum allowed number of '%1$s' images in the signature is reached."
 msgstr "Det maximala tillåtna antalet '%1$s' signaturbilder har nåtts."
 
 #. Thrown if a user must not modify a snippet/signature. Neither shared nor owned by that user.
-#: com.openexchange.snippet/src/com/openexchange/snippet/SnippetStrings.java:80
+#: com.openexchange.snippet/src/com/openexchange/snippet/SnippetStrings.java:83
 msgid "You are not allowed to modify the signature"
 msgstr "Du har inte tillstånd att ändra signaturen"
 
@@ -12264,6 +12287,39 @@ msgstr ""
 #: com.openexchange.subscribe/src/com/openexchange/subscribe/SubscriptionErrorStrings.java:92
 msgid "You already have such a subscription."
 msgstr "Du har redan en prenumeration här."
+
+#: com.openexchange.switchboard/src/com/openexchange/switchboard/exception/ZoomExceptionMessages.java:62
+msgid ""
+"Zoom meetings cannot be used in all-day appointments. Please use a fixed "
+"start- and end-time and try again."
+msgstr ""
+"Zoom-möten kan inte användas för heldagsmöten. Använd bestämda start- och "
+"sluttider och försök igen."
+
+#: com.openexchange.switchboard/src/com/openexchange/switchboard/exception/ZoomExceptionMessages.java:64
+msgid ""
+"Zoom meetings cannot be used in appointments with floating start- or end-"
+"times. Please use a fixed start- and end-time and try again."
+msgstr ""
+"Zoom-möten kan inte användas i möten med flexibla start- och sluttider. "
+"Använd bestämda start- och sluttider och försök igen."
+
+#: com.openexchange.switchboard/src/com/openexchange/switchboard/exception/ZoomExceptionMessages.java:66
+msgid ""
+"Zoom meetings cannot be used in recurring appointment series spanning over "
+"more than one year. Please shorten the recurrence rule and try again."
+msgstr ""
+"Zoom-möten kan inte användas i upprepade mötesserier som förekommer i över "
+"ett år. Välj en kortare upprepningsregel och försök igen."
+
+#: com.openexchange.switchboard/src/com/openexchange/switchboard/exception/ZoomExceptionMessages.java:68
+msgid ""
+"The same Zoom meeting can't be re-used when switching from recurring to "
+"single appointments and vice versa. Please generate a new Zoom meeting and "
+"try again."
+msgstr ""
+"Samma Zoom-möte kan inte återanvändas vid byte från upprepade till enstaka "
+"möten och det omvända. Skapa ett nytt Zoom-möte och försök igen."
 
 #. Application 'xyz' requires following permissions:
 #. - Read all your tasks.
@@ -14711,6 +14767,14 @@ msgstr "UTC"
 #: TimeZones.java:534
 msgid "Zulu"
 msgstr "Zulu"
+
+#~ msgid ""
+#~ "Invalid password length. The password must have a minimum length of %1$d."
+#~ msgstr "Ogiltig lösenordslängd. Lösenordet måste vara längre än %1$d."
+
+#~ msgid ""
+#~ "Invalid password length. The password must have a maximum length of %1$d."
+#~ msgstr "Ogiltig lösenordslängd. Lösenordet får bara vara upp till %1$d."
 
 #~ msgid "The group %1$s has been invited to the appointment"
 #~ msgstr "Gruppen %1$s har bjudits in till mötet"
