@@ -4237,19 +4237,21 @@ msgid "Updating attributes failed in context %1$d for user %2$d."
 msgstr ""
 
 #. *
-#. * Invalid password length. The password must be of minimum length %1$d.
+#. * Invalid password length. The password must have a minimum length of %1$d characters.
 #.
 #: com.openexchange.global/src/com/openexchange/user/UserExceptionMessage.java:133
 msgid ""
-"Invalid password length. The password must have a minimum length of %1$d."
+"Invalid password length. The password must have a minimum length of %1$d "
+"characters."
 msgstr ""
 
 #. *
-#. * Invalid password length. The password must be of maximum length %1$d.
+#. * Invalid password length. The password must have a maximum length of %1$d characters.
 #.
 #: com.openexchange.global/src/com/openexchange/user/UserExceptionMessage.java:138
 msgid ""
-"Invalid password length. The password must have a maximum length of %1$d."
+"Invalid password length. The password must have a maximum length of %1$d "
+"characters."
 msgstr ""
 
 #. *
