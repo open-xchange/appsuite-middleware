@@ -843,11 +843,36 @@ public class Strings {
      * @param replacement The string replacement
      * @return The replaced string
      */
-    public static String replaceWhitespacesWith(final String s, final String replacement) {
+    public static String replaceWhitespacesWith(String s, String replacement) {
         if (null == s) {
             return null;
         }
-        return P_SPLIT_WHITESPACE.matcher(s).replaceAll(null == replacement ? "" : quoteReplacement(replacement));
+
+        int length = s.length();
+        String repl = replacement == null ? "" : replacement;
+        boolean prevWs = false;
+        StringBuilder sb = null;
+        for (int i = 0; i < length; i++) {
+            char ch = s.charAt(i);
+            if (isWhitespace(ch)) {
+                if (sb == null) {
+                    sb = new StringBuilder(length);
+                    if (i > 0) {
+                        sb.append(s, 0, i);
+                    }
+                }
+                if (!prevWs) {
+                    sb.append(repl);
+                    prevWs = true;
+                }
+            } else {
+                if (sb != null) {
+                    sb.append(ch);
+                    prevWs = false;
+                }
+            }
+        }
+        return sb == null ? s : sb.toString();
     }
 
     /**
