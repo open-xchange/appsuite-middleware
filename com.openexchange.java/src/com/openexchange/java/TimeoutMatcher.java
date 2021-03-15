@@ -410,27 +410,6 @@ public class TimeoutMatcher {
     }
 
     /**
-     * Gets the input subsequence captured by the given
-     * <a href="Pattern.html#groupname">named-capturing group</a> during the previous
-     * match operation.
-     * <p>
-     * If the match was successful but the group specified failed to match
-     * any part of the input sequence, then <tt>null</tt> is returned. Note
-     * that some groups, for example <tt>(a*)</tt>, match the empty string.
-     * This method will return the empty string when such a group successfully
-     * matches the empty string in the input. </p>
-     *
-     * @param name The name of a named-capturing group in this matcher's pattern
-     * @return The (possibly empty) subsequence captured by the named group during the previous match, or <tt>null</tt> if the group
-     *         failed to match part of the input
-     * @throws IllegalStateException If no match has yet been attempted, or if the previous match operation failed
-     * @throws IllegalArgumentException If there is no capturing group in the pattern with the given name
-     */
-    public String group(String name) {
-        return matcher.group(name);
-    }
-
-    /**
      * Gets the number of capturing groups in this matcher's pattern.
      * <p>
      * Group zero denotes the entire pattern by convention. It is not
