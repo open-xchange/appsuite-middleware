@@ -51,6 +51,7 @@ package com.openexchange.chronos.storage.rdb;
 
 import static com.openexchange.chronos.common.CalendarUtils.add;
 import static com.openexchange.chronos.common.CalendarUtils.compare;
+import static com.openexchange.chronos.common.CalendarUtils.isAllDay;
 import static com.openexchange.chronos.common.CalendarUtils.isFloating;
 import static com.openexchange.chronos.common.CalendarUtils.isSeriesException;
 import static com.openexchange.chronos.common.CalendarUtils.isSeriesMaster;
@@ -69,6 +70,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import org.dmfs.rfc5545.DateTime;
+import org.dmfs.rfc5545.Duration;
 import com.google.common.collect.Lists;
 import com.openexchange.chronos.Attendee;
 import com.openexchange.chronos.Event;
@@ -878,12 +880,25 @@ public class RdbEventStorage extends RdbStorage implements EventStorage {
      * @return The start time of the effective range of an event
      */
     private long getRangeUntil(Event event) {
-        DateTime rangeUntil = null != event.getEndDate() ? event.getEndDate() : event.getStartDate();
+        DateTime rangeUntil = event.getEndDate();
         if (null == rangeUntil) {
-            /*
-             * (legacy) tombstone event without persisted start-/end-date
-             */
-            return Long.MAX_VALUE;
+            if (null == event.getStartDate()) {
+                /*
+                 * (legacy) tombstone event without persisted start-/end-date
+                 */
+                return Long.MAX_VALUE;
+            }
+            if (isAllDay(event)) {
+                /*
+                 * assume a duration of one day for all-day events w/o defined end-date
+                 */
+                rangeUntil = event.getStartDate().addDuration(new Duration(1, 1, 0));
+            } else {
+                /*
+                 * assume 'instant' event that ends on its start-date, otherwise
+                 */
+                rangeUntil = event.getStartDate();
+            }
         }
         if (isSeriesMaster(event)) {
             /*
