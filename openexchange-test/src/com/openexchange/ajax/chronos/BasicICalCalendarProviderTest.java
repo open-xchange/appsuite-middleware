@@ -118,7 +118,7 @@ public class BasicICalCalendarProviderTest extends AbstractExternalProviderChron
         return this.folderManager.createFolder(body);
     }
 
-    long dateToMillis(String date) {
+    protected long dateToMillis(String date) {
         DateTimeFormatter formatter = DateTimeFormat.forPattern("yyyyMMdd'T'HHmmssZ");
         return formatter.parseDateTime(date).getMillis();
     }
@@ -1161,7 +1161,7 @@ public class BasicICalCalendarProviderTest extends AbstractExternalProviderChron
         return ids;
     }
 
-    private String createDefaultAccount(String externalUri) throws ApiException {
+    protected String createDefaultAccount(String externalUri) throws ApiException {
         FolderCalendarConfig config = new FolderCalendarConfig();
         NewFolderBodyFolder folder = createFolder(externalUri, config);
         addPermissions(folder);

@@ -89,6 +89,7 @@ import com.openexchange.test.concurrent.ParallelSuite;
     MWB2Test.class,
     MWB104Test.class,
     MWB864Test.class,
+    MWB999Test.class,
     // @formatter:on
 
 })
