@@ -691,7 +691,7 @@ public final class FilterJerichoHandler implements JerichoHandler {
                                     // return;
                                 }
                             } else {
-                                if (replaceUrls && uriAttributes.contains(attr)) {
+                                if (replaceUrls && (uriAttributes.contains(attr) || isHrefTag(tagName))) {
                                     attrBuilder.append(' ').append(attr).append("=\"").append(CharacterReference.encode(checkPossibleURL(val))).append('"');
                                 } else {
                                     attrBuilder.append(' ').append(attr).append("=\"").append(CharacterReference.encode(val)).append('"');
@@ -719,7 +719,7 @@ public final class FilterJerichoHandler implements JerichoHandler {
                                                 // return;
                                             }
                                         } else {
-                                            if (replaceUrls && uriAttributes.contains(attr)) {
+                                            if (replaceUrls && (uriAttributes.contains(attr) || isHrefTag(tagName))) {
                                                 attrBuilder.append(' ').append(attr).append("=\"").append(CharacterReference.encode(checkPossibleURL(val))).append('"');
                                             } else {
                                                 attrBuilder.append(' ').append(attr).append("=\"").append(CharacterReference.encode(val)).append('"');
@@ -955,15 +955,19 @@ public final class FilterJerichoHandler implements JerichoHandler {
     }
 
     private String checkPossibleURL(final String val) {
-        final Matcher m = PATTERN_URL_SOLE.matcher(val);
+        String ret = Strings.replaceWhitespacesWith(val, null);
+        if (Strings.isEmpty(ret)) {
+            return ret;
+        }
+        final Matcher m = PATTERN_URL_SOLE.matcher(ret);
         if (!m.matches()) {
-            return val;
+            return ret;
         }
         urlBuilder.setLength(0);
-        urlBuilder.append(val.substring(0, m.start()));
+        urlBuilder.append(ret.substring(0, m.start()));
         //replaceURL(urlDecode(m.group()), urlBuilder);
         replaceURL(m.group(), urlBuilder);
-        urlBuilder.append(val.substring(m.end()));
+        urlBuilder.append(ret.substring(m.end()));
         return urlBuilder.toString();
     }
 

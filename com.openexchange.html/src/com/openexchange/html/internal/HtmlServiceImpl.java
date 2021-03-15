@@ -1376,11 +1376,11 @@ public final class HtmlServiceImpl implements HtmlService {
         return htmlFormat(plainText, true);
     }
 
-    private static final String REGEX_URL_SOLE = "\\b(?:https?://|ftp://|mailto:|news\\.|www\\.)[-\\p{L}\\p{Sc}0-9+&@#/%?=~_()|!:,.;\\[\\]]*[-\\p{L}\\p{Sc}0-9+&@#/%=~_()|]";
+    private static final String REGEX_URL_SOLE = "\\b(?:https?://|ftp://|mailto:|news\\.|www\\.|tel:)[-\\p{L}\\p{Sc}0-9+&@#/%?=~_()|!:,.;\\[\\]]*[-\\p{L}\\p{Sc}0-9+&@#/%=~_()|]";
 
     /**
      * The regular expression to match URLs inside text:<br>
-     * <code>\b(?:https?://|ftp://|mailto:|news\\.|www\.)[-\p{L}\p{Sc}0-9+&@#/%?=~_()|!:,.;]*[-\p{L}\p{Sc}0-9+&@#/%=~_()|]</code>
+     * <code>\b(?:https?://|ftp://|mailto:|news\\.|www\.|tel:)[-\p{L}\p{Sc}0-9+&@#/%?=~_()|!:,.;]*[-\p{L}\p{Sc}0-9+&@#/%=~_()|]</code>
      * <p>
      * Parentheses, if present, are allowed in the URL -- The leading one is <b>not</b> absorbed.
      */

@@ -364,7 +364,7 @@ public final class HtmlServices {
         // Check for possible URI
         URI uri;
         try {
-            uri = new URI(possibleUrl.trim());
+            uri = new URI(Strings.replaceWhitespacesWith(possibleUrl, null)); 
         } catch (URISyntaxException x) {
             // At least check for common attack vectors
             return isNonJavaScriptURL(possibleUrl, tagName);

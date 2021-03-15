@@ -976,18 +976,19 @@ public final class CleaningJsoupHandler implements JsoupHandler {
      * @return The checked attribute value
      */
     public static String checkPossibleURL(String val, StringBuilder urlBuilder) {
-        if (Strings.isEmpty(val)) {
-            return val;
+        String ret = Strings.replaceWhitespacesWith(val, null);
+        if (Strings.isEmpty(ret)) {
+            return ret;
         }
-        final Matcher m = PATTERN_URL_SOLE.matcher(val);
+        final Matcher m = PATTERN_URL_SOLE.matcher(ret);
         if (!m.matches()) {
-            return val;
+            return ret;
         }
         urlBuilder.setLength(0);
-        urlBuilder.append(val.substring(0, m.start()));
+        urlBuilder.append(ret.substring(0, m.start()));
         //replaceURL(urlDecode(m.group()), urlBuilder);
         replaceURL(m.group(), urlBuilder);
-        urlBuilder.append(val.substring(m.end()));
+        urlBuilder.append(ret.substring(m.end()));
         return urlBuilder.toString();
     }
 

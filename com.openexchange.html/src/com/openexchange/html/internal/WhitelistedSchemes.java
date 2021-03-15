@@ -74,7 +74,7 @@ public class WhitelistedSchemes {
      * @param configService The configuration service to use
      */
     public static void initInstance(ConfigurationService configService) {
-        String schemesString = configService.getProperty("com.openexchange.html.sanitizer.allowedUrlSchemes", "http, https, ftp, ftps, mailto");
+        String schemesString = configService.getProperty("com.openexchange.html.sanitizer.allowedUrlSchemes", "http, https, ftp, ftps, mailto, tel");
         String[] schemas = Strings.splitByComma(schemesString);
         for (int i = 0; i < schemas.length; i++) {
             schemas[i] = Strings.asciiLowerCase(schemas[i]);

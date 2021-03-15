@@ -85,6 +85,7 @@ import com.openexchange.html.bugtests.Bug31826Test;
 import com.openexchange.html.bugtests.Bug35291Test;
 import com.openexchange.html.bugtests.Bug35546Test;
 import com.openexchange.html.bugtests.Bug40189Test;
+import com.openexchange.html.bugtests.MWB990Test;
 import com.openexchange.html.internal.Bug27708Test;
 import com.openexchange.html.internal.HtmlServiceImplTest;
 import com.openexchange.html.internal.css.Bug30114Test;
@@ -200,6 +201,7 @@ import com.openexchange.html.vulntests.Bug57095VulTest;
     Bug56420Test.class,
     Bug56582VulTest.class,
     Bug57095VulTest.class,
+    MWB990Test.class,
     com.openexchange.html.vulntests.ImgVulTest.class,
     CSSMatcherTest.class,
     ConformHtmlTest.class,
