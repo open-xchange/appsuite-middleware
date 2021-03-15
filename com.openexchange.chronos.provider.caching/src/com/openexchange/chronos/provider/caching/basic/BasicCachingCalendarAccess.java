@@ -89,6 +89,7 @@ import com.openexchange.chronos.ResourceId;
 import com.openexchange.chronos.common.AlarmPreparator;
 import com.openexchange.chronos.common.CalendarUtils;
 import com.openexchange.chronos.common.Check;
+import com.openexchange.chronos.common.Consistency;
 import com.openexchange.chronos.common.CreateResultImpl;
 import com.openexchange.chronos.common.DataHandlers;
 import com.openexchange.chronos.common.DefaultCalendarEvent;
@@ -96,7 +97,6 @@ import com.openexchange.chronos.common.DefaultCalendarParameters;
 import com.openexchange.chronos.common.DefaultCalendarResult;
 import com.openexchange.chronos.common.DeleteResultImpl;
 import com.openexchange.chronos.common.DeltaEvent;
-import com.openexchange.chronos.common.RecurrenceUtils;
 import com.openexchange.chronos.common.UpdateResultImpl;
 import com.openexchange.chronos.common.mapping.AttendeeMapper;
 import com.openexchange.chronos.common.mapping.ConferenceMapper;
@@ -1049,6 +1049,7 @@ public abstract class BasicCachingCalendarAccess implements BasicCalendarAccess,
      * Prepares the list of events from the external calendar source for further processing. This includes:
      * <ul>
      * <li>remove events that cannot be stored due to missing mandatory fields or syntactically wrong data</li>
+     * <li>auto-correcting bogus event properties as needed to ensure the consistency of the data</li>
      * <li>map events by their UID property (events without UID are mapped to <code>null</code>)</li>
      * <li>event lists are sorted so that the series master event will be the first element</li>
      * <li>the change exception field of series master events will be set based on the actual overridden instances</li>
@@ -1076,12 +1077,15 @@ public abstract class BasicCachingCalendarAccess implements BasicCalendarAccess,
              * Adjust faulty reccurrence rule
              */
             try {
-                RecurrenceUtils.adjustRecurrenceRule(event);
+                Consistency.adjustRecurrenceRule(event);
             } catch (OXException e) {
                 LOG.debug("Removed event with uid {} from list to add because of the following corrupt data: {}", event.getUid(), e.getMessage());
                 continue;
             }
-
+            /*
+             * adjust bogus all-day dates
+             */
+            Consistency.adjustAllDayDates(event);
             /*
              * Adjust timezones
              */
