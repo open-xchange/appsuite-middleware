@@ -104,7 +104,7 @@ public class SproxydFileStorage implements DestroyAwareFileStorage {
 
     @Override
     public void onDestroyed() {
-        client.shutdown();
+        // Only if last one that uses the pool
     }
 
     @Override
