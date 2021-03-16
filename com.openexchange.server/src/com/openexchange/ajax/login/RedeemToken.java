@@ -115,7 +115,7 @@ public class RedeemToken implements LoginRequestHandler {
             return;
         }
         Tools.disableCaching(resp);
-        resp.setContentType(AJAXServlet.CONTENTTYPE_JAVASCRIPT);
+        AJAXServlet.setDefaultContentType(resp);
         TokenLoginService service = ServerServiceRegistry.getInstance().getService(TokenLoginService.class);
         // Parse more request information
         String client = LoginTools.parseClient(req, true, "");

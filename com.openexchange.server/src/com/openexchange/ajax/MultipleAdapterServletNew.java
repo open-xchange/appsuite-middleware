@@ -145,7 +145,7 @@ public abstract class MultipleAdapterServletNew extends PermissionServlet {
      */
     protected final void handle(final HttpServletRequest req, final HttpServletResponse resp, final boolean preferStream) throws IOException, ServletException {
         resp.setStatus(HttpServletResponse.SC_OK);
-        resp.setContentType(AJAXServlet.CONTENTTYPE_JAVASCRIPT);
+        resp.setContentType(AJAXServlet.CONTENTTYPE_JSON);
         Tools.disableCaching(resp);
 
         final String action = req.getParameter(PARAMETER_ACTION);

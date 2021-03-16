@@ -118,7 +118,7 @@ public class SyncServlet extends PermissionServlet {
 
     @Override
     protected void doPut(final HttpServletRequest req, final HttpServletResponse resp) throws IOException {
-        resp.setContentType(CONTENTTYPE_JAVASCRIPT);
+        setDefaultContentType(resp);
         Tools.disableCaching(resp);
         try {
             actionPut(req, resp);

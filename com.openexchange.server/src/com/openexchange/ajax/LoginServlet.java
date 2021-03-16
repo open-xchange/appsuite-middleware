@@ -360,7 +360,7 @@ public class LoginServlet extends AJAXServlet {
             public void handleRequest(HttpServletRequest req, HttpServletResponse resp, LoginRequestContext requestContext) throws IOException {
                 // The magic spell to disable caching
                 Tools.disableCaching(resp);
-                resp.setContentType(CONTENTTYPE_JAVASCRIPT);
+                setDefaultContentType(resp);
                 final String sessionId = req.getParameter(PARAMETER_SESSION);
                 if (sessionId == null) {
                     resp.sendError(HttpServletResponse.SC_BAD_REQUEST);
@@ -428,7 +428,7 @@ public class LoginServlet extends AJAXServlet {
                 final LoginConfiguration conf = confReference.get();
                 // The magic spell to disable caching
                 Tools.disableCaching(resp);
-                resp.setContentType(CONTENTTYPE_JAVASCRIPT);
+                setDefaultContentType(resp);
                 String randomToken = null;
                 if (conf.isRandomTokenEnabled()) {
                     randomToken = req.getParameter(LoginFields.RANDOM_PARAM);
@@ -602,7 +602,7 @@ public class LoginServlet extends AJAXServlet {
                     response.setException(e);
                 }
                 Tools.disableCaching(resp);
-                resp.setContentType(CONTENTTYPE_JAVASCRIPT);
+                setDefaultContentType(resp);
                 resp.setStatus(HttpServletResponse.SC_OK);
                 try {
                     ResponseWriter.write(response, resp.getWriter(), localeFrom(session));
@@ -624,7 +624,7 @@ public class LoginServlet extends AJAXServlet {
                 final LoginConfiguration conf = confReference.get();
                 // The magic spell to disable caching
                 Tools.disableCaching(resp);
-                resp.setContentType(CONTENTTYPE_JAVASCRIPT);
+                setDefaultContentType(resp);
                 String randomToken = null;
                 if (conf.isRandomTokenEnabled()) {
                     randomToken = req.getParameter(LoginFields.RANDOM_PARAM);
@@ -948,7 +948,7 @@ public class LoginServlet extends AJAXServlet {
 
     protected void doRefreshSecret(final HttpServletRequest req, final HttpServletResponse resp) throws OXException, JSONException, IOException {
         Tools.disableCaching(resp);
-        resp.setContentType(CONTENTTYPE_JAVASCRIPT);
+        setDefaultContentType(resp);
         doCookieReWrite(req, resp, CookieType.SECRET);
     }
 

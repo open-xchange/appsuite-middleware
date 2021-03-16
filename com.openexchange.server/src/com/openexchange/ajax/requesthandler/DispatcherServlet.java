@@ -679,7 +679,7 @@ public class DispatcherServlet extends SessionServlet {
 
     /**
      * Do "error" handling in case the response status is != 200. Like writing Retry-After header for a successful 202 response or removing
-     * the default Content-Type: text/javascript we assume in {@link AJAXServlet#service()}.
+     * the default Content-Type: application/json we assume in {@link AJAXServlet#service()}.
      *
      * @param result The current {@link AJAXRequestResult}
      * @param httpServletResponse The current {@link HttpServletResponse}

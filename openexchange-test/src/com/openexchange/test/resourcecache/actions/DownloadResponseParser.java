@@ -77,7 +77,7 @@ public class DownloadResponseParser extends AbstractAJAXParser<DownloadResponse>
     public String checkResponse(HttpResponse resp, HttpRequest request) throws ParseException, IOException {
         assertEquals("Response code is not okay.", HttpStatus.SC_OK, resp.getStatusLine().getStatusCode());
         HttpEntity entity = resp.getEntity();
-        if (entity.getContentType().getValue().startsWith("text/javascript")) {
+        if (entity.getContentType().getValue().startsWith("application/json")) {
             EntityUtils.consume(entity);
             return null;
         }

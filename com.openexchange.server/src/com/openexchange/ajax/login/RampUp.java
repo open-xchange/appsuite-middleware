@@ -55,6 +55,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import org.json.JSONException;
 import org.json.JSONObject;
+import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.LoginServlet;
 import com.openexchange.ajax.container.Response;
 import com.openexchange.ajax.writer.ResponseWriter;
@@ -81,7 +82,7 @@ public class RampUp extends AbstractLoginRequestHandler implements LoginRequestH
     @Override
     public void handleRequest(HttpServletRequest req, HttpServletResponse resp, LoginRequestContext requestContext) throws IOException {
 
-        resp.setContentType(LoginServlet.CONTENTTYPE_JAVASCRIPT);
+        AJAXServlet.setDefaultContentType(resp);
         final Response response = new Response();
         Session session = null;
         try {
@@ -119,7 +120,7 @@ public class RampUp extends AbstractLoginRequestHandler implements LoginRequestH
         // The magic spell to disable caching
         Tools.disableCaching(resp);
         resp.setStatus(HttpServletResponse.SC_OK);
-        resp.setContentType(LoginServlet.CONTENTTYPE_JAVASCRIPT);
+        AJAXServlet.setDefaultContentType(resp);
         try {
             if (response.hasError()) {
                 requestContext.getMetricProvider().recordException(response.getException());

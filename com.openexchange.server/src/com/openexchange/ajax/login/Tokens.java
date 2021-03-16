@@ -49,7 +49,6 @@
 
 package com.openexchange.ajax.login;
 
-import static com.openexchange.ajax.AJAXServlet.CONTENTTYPE_JAVASCRIPT;
 import static com.openexchange.ajax.fields.LoginFields.CLIENT_PARAM;
 import static com.openexchange.ajax.fields.LoginFields.CLIENT_TOKEN;
 import static com.openexchange.ajax.fields.LoginFields.SERVER_TOKEN;
@@ -59,6 +58,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import org.json.JSONException;
 import org.json.JSONObject;
+import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.LoginServlet;
 import com.openexchange.ajax.SessionUtility;
 import com.openexchange.ajax.container.Response;
@@ -169,7 +169,7 @@ public final class Tokens implements LoginRequestHandler {
 
         Tools.disableCaching(resp);
         resp.setStatus(HttpServletResponse.SC_OK);
-        resp.setContentType(CONTENTTYPE_JAVASCRIPT);
+        AJAXServlet.setDefaultContentType(resp);
         LoginServlet.writeSecretCookie(req, resp, session, hash, req.isSecure(), req.getServerName(), conf);
         LoginServlet.writeSessionCookie(resp, session, hash, req.isSecure(), req.getServerName());
         try {

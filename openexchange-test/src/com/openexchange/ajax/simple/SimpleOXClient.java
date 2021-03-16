@@ -146,7 +146,7 @@ public class SimpleOXClient {
                 entityMethod = new PutMethod(url);
             }
             try {
-                entityMethod.setRequestEntity(new StringRequestEntity(body, "text/javascript", "UTF-8"));
+                entityMethod.setRequestEntity(new StringRequestEntity(body, "application/json", "UTF-8"));
             } catch (UnsupportedEncodingException e) {
                 // Doesn't happen
                 e.printStackTrace();

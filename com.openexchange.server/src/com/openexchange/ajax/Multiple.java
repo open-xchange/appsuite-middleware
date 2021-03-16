@@ -199,7 +199,7 @@ public class Multiple extends SessionServlet {
         try {
             JSONArray respArr = perform(dataArray, req, session);
             resp.setStatus(HttpServletResponse.SC_OK);
-            resp.setContentType(CONTENTTYPE_JAVASCRIPT);
+            setDefaultContentType(resp);
             final Writer writer = resp.getWriter();
             writeTo(null == respArr ? new JSONArray(0) : respArr, writer);
             writer.flush();

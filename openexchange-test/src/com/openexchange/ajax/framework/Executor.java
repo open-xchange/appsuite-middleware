@@ -177,7 +177,7 @@ public class Executor extends Assert {
                 Object body = request.getBody();
                 if (null != body) {
                     final ByteArrayEntity entity = new ByteArrayEntity(createBodyBytes(body));
-                    entity.setContentType("text/javascript; charset=UTF-8");
+                    entity.setContentType(AJAXServlet.CONTENTTYPE_JSON);
                     httpPut.setEntity(entity);
                 }
                 httpRequest = httpPut;
@@ -312,7 +312,7 @@ public class Executor extends Assert {
                 addURLParameter(get, session, request);
                 break;
             case PUT:
-                final PutMethodWebRequest put = new PutMethodWebRequest(addURLParameter(urlString, session, request), new ByteArrayInputStream(request.getBody().toString().getBytes("US-ASCII")), "text/javascript; charset=us-ascii");
+                final PutMethodWebRequest put = new PutMethodWebRequest(addURLParameter(urlString, session, request), new ByteArrayInputStream(request.getBody().toString().getBytes("US-ASCII")), "application/json; charset=us-ascii");
                 req = put;
                 break;
             default:

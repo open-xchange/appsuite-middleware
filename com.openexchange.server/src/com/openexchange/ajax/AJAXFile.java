@@ -114,7 +114,7 @@ public final class AJAXFile extends PermissionServlet {
 
     @Override
     protected void doGet(final HttpServletRequest req, final HttpServletResponse resp) throws ServletException, IOException {
-        resp.setContentType(CONTENTTYPE_JAVASCRIPT);
+        resp.setContentType(CONTENTTYPE_JSON);
         /*
          * The magic spell to disable caching
          */
@@ -252,7 +252,7 @@ public final class AJAXFile extends PermissionServlet {
         } catch (OXException e) {
             LOG.error("", e);
             resp.setStatus(HttpServletResponse.SC_OK);
-            resp.setContentType(CONTENTTYPE_JAVASCRIPT);
+            resp.setContentType(CONTENTTYPE_JSON);
             Tools.disableCaching(resp);
             final Response response = new Response();
             response.setException(e);

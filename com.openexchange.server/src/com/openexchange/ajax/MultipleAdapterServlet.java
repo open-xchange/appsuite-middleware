@@ -104,7 +104,7 @@ public abstract class MultipleAdapterServlet extends PermissionServlet {
 
     protected void handle(final HttpServletRequest req, final HttpServletResponse resp) throws IOException {
         resp.setStatus(HttpServletResponse.SC_OK);
-        resp.setContentType(AJAXServlet.CONTENTTYPE_JAVASCRIPT);
+        resp.setContentType(AJAXServlet.CONTENTTYPE_JSON);
         Tools.disableCaching(resp);
 
         if (handleOverride(req, resp)) {

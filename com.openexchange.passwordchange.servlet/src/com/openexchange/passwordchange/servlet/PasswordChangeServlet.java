@@ -110,7 +110,7 @@ public final class PasswordChangeServlet extends SessionServlet {
             return;
         }
 
-        resp.setContentType(CONTENTTYPE_JAVASCRIPT);
+        resp.setContentType(CONTENTTYPE_JSON);
         /*
          * The magic spell to disable caching
          */
@@ -132,7 +132,7 @@ public final class PasswordChangeServlet extends SessionServlet {
             return;
         }
 
-        resp.setContentType(CONTENTTYPE_JAVASCRIPT);
+        resp.setContentType(CONTENTTYPE_JSON);
         /*
          * The magic spell to disable caching
          */
@@ -183,7 +183,7 @@ public final class PasswordChangeServlet extends SessionServlet {
     }
 
     private void actionGet(final HttpServletRequest req, final HttpServletResponse resp) throws OXException {
-        resp.setContentType(CONTENTTYPE_JAVASCRIPT);
+        resp.setContentType(CONTENTTYPE_JSON);
         final String actionStr = checkStringParam(req, PARAMETER_ACTION);
         throw PasswordChangeServletExceptionCode.UNSUPPORTED_ACTION.create(actionStr, "GET");
     }

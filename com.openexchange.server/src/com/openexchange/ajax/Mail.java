@@ -314,7 +314,7 @@ public class Mail extends PermissionServlet {
 
     @Override
     protected void doGet(final HttpServletRequest req, final HttpServletResponse resp) throws IOException {
-        resp.setContentType(CONTENTTYPE_JAVASCRIPT);
+        setDefaultContentType(resp);
         /*
          * The magic spell to disable caching
          */
@@ -329,7 +329,7 @@ public class Mail extends PermissionServlet {
 
     @Override
     protected void doPut(final HttpServletRequest req, final HttpServletResponse resp) throws IOException {
-        resp.setContentType(CONTENTTYPE_JAVASCRIPT);
+        setDefaultContentType(resp);
         /*
          * The magic spell to disable caching
          */

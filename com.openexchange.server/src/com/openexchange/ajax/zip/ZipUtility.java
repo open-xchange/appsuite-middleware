@@ -49,7 +49,7 @@
 
 package com.openexchange.ajax.zip;
 
-import static com.openexchange.ajax.AJAXServlet.CONTENTTYPE_JAVASCRIPT;
+import static com.openexchange.ajax.AJAXServlet.CONTENTTYPE_JSON;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.util.HashMap;
@@ -124,7 +124,7 @@ public class ZipUtility {
     private static AJAXRequestResult rethrowOrsignalIOError(Exception e, AJAXRequestData requestData) throws OXException {
         if (!requestData.isResponseCommitted()) {
             // Exception can be safely thrown to be orderly managed in dispatcher framework since HTTP response is not yet committed
-            requestData.setResponseHeader("Content-Type", CONTENTTYPE_JAVASCRIPT);
+            requestData.setResponseHeader("Content-Type", CONTENTTYPE_JSON);
             requestData.setResponseHeader("Content-Disposition", "inline");
             throw e instanceof OXException ? (OXException) e : OXException.general("Unexpected error while writing ZIP archive", e);
         }

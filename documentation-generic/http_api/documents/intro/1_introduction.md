@@ -8,7 +8,7 @@ The client accesses the server through HTTP GET, POST and PUT requests. HTTP coo
 specified by [RFC 6265](http://tools.ietf.org/html/rfc6265). The HTTP API is accessible at URIs starting with `/ajax`. Each server module has a unique name and its own sub-namespace with 
 that name below `/ajax`, e. g. all access to the module "tasks" is via URIs starting with `/ajax/tasks`.
 
-Text encoding is always UTF-8. Data is sent from the server to the client as text/javascript and interpreted by the client to obtain an ECMAScript object. 
+Text encoding is always UTF-8. Data is sent from the server to the client as `application/json` and interpreted by the client to obtain an ECMAScript object. 
 The HTTP API uses only a small subset of the ECMAScript syntax. This subset is roughly described by the following BNF:
 
 ```

@@ -59,6 +59,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import org.json.JSONException;
 import org.json.JSONObject;
+import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.ajax.requesthandler.ResponseRenderer;
@@ -131,7 +132,7 @@ public class JobInfoResponseRenderer implements ResponseRenderer {
     private static boolean writeResponse(JobInfo jobInfo, PrintWriter writer, HttpServletRequest req, HttpServletResponse resp, ServerSession session) throws IOException {
         try {
             resp.setStatus(HttpServletResponse.SC_ACCEPTED);
-            resp.setContentType("text/javascript");
+            AJAXServlet.setDefaultContentType(resp);
 
             JSONObject jData = new JSONObject(2);
             jData.put("job", UUIDs.getUnformattedString(jobInfo.getId()));

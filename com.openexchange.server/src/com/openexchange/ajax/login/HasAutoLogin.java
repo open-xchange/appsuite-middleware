@@ -57,6 +57,7 @@ import org.apache.http.HttpStatus;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.slf4j.Logger;
+import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.LoginServlet;
 import com.openexchange.tools.servlet.http.Tools;
 
@@ -94,7 +95,7 @@ public final class HasAutoLogin implements LoginRequestHandler {
     public void handleRequest(HttpServletRequest req, HttpServletResponse resp, LoginRequestContext requestContext) throws IOException {
         Tools.disableCaching(resp);
         resp.setStatus(HttpServletResponse.SC_OK);
-        resp.setContentType(LoginServlet.CONTENTTYPE_JAVASCRIPT);
+        AJAXServlet.setDefaultContentType(resp);
         try {
             final JSONObject json = new JSONObject(2);
             json.put(ACTION_AUTOLOGIN, true); // Keeping this for compatibility...

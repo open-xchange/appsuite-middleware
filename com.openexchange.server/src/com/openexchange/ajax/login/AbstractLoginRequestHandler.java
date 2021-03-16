@@ -66,6 +66,7 @@ import org.apache.http.HttpStatus;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.LoginServlet;
 import com.openexchange.ajax.Multiple;
 import com.openexchange.ajax.SessionUtility;
@@ -208,7 +209,7 @@ public abstract class AbstractLoginRequestHandler implements LoginRequestHandler
      */
     protected boolean loginOperation(HttpServletRequest req, HttpServletResponse resp, LoginClosure login, LoginCookiesSetter cookiesSetter, LoginConfiguration conf, LoginRequestContext requestContext) throws IOException, OXException {
         Tools.disableCaching(resp);
-        resp.setContentType(LoginServlet.CONTENTTYPE_JAVASCRIPT);
+        AJAXServlet.setDefaultContentType(resp);
 
         // Perform the login
         final Response response = new Response();

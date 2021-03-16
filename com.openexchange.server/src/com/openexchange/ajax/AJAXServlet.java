@@ -429,8 +429,16 @@ public abstract class AJAXServlet extends HttpServlet implements UploadRegistry 
     /**
      * The content type if the response body contains javascript data. Set it with
      * <code>resp.setContentType(AJAXServlet.CONTENTTYPE_JAVASCRIPT)</code> .
+     *
+     * @deprecated Use {@link #CONTENTTYPE_JSON} instead
      */
+    @Deprecated
     public static final String CONTENTTYPE_JAVASCRIPT = "text/javascript; charset=UTF-8";
+
+    /**
+     * The default json content type
+     */
+    public static final String CONTENTTYPE_JSON = "application/json; charset=UTF-8";
 
     /**
      * The content type if the reponse body contains the html page include the response for uploads.
@@ -564,7 +572,7 @@ public abstract class AJAXServlet extends HttpServlet implements UploadRegistry 
 
             // Set 200 OK status code and JSON content by default
             resp.setStatus(HttpServletResponse.SC_OK);
-            resp.setContentType(CONTENTTYPE_JAVASCRIPT);
+            resp.setContentType(CONTENTTYPE_JSON);
 
             // Optionally enable rate limit on request instance
             HttpServletRequest requestToPass = checkRateLimit ? enableRateLimitCheckFor(req) : req;
@@ -949,7 +957,7 @@ public abstract class AJAXServlet extends HttpServlet implements UploadRegistry 
     @Deprecated
     protected static void sendErrorAsJS(HttpServletResponse resp, String errorMessage) throws IOException, ServletException {
         resp.setStatus(HttpServletResponse.SC_OK);
-        resp.setContentType(CONTENTTYPE_JAVASCRIPT);
+        setDefaultContentType(resp);
         try {
             PrintWriter w = resp.getWriter();
             JSONWriter jw = new JSONWriter(w);
@@ -1171,7 +1179,7 @@ public abstract class AJAXServlet extends HttpServlet implements UploadRegistry 
      * @throws IOException If an I/O error occurs
      */
     protected void writeResponse(Response response, HttpServletResponse servletResponse, Session optSession) throws IOException {
-        servletResponse.setContentType(CONTENTTYPE_JAVASCRIPT);
+        setDefaultContentType(servletResponse);
         try {
             ResponseWriter.write(response, servletResponse.getWriter(), localeFrom(optSession));
         } catch (JSONException e) {
@@ -1269,6 +1277,10 @@ public abstract class AJAXServlet extends HttpServlet implements UploadRegistry 
             module = -1;
         }
         return module;
+    }
+
+    public static void setDefaultContentType(HttpServletResponse resp) {
+        resp.setContentType(CONTENTTYPE_JSON);
     }
 
 }

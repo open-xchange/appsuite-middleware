@@ -62,6 +62,7 @@ import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 import org.json.JSONException;
 import org.json.JSONObject;
+import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.LoginServlet;
 import com.openexchange.ajax.SessionUtility;
 import com.openexchange.ajax.container.Response;
@@ -116,7 +117,7 @@ public class AutoLogin extends AbstractLoginRequestHandler {
     @Override
     public void handleRequest(final HttpServletRequest req, final HttpServletResponse resp, LoginRequestContext requestContext) throws IOException {
         Tools.disableCaching(resp);
-        resp.setContentType(LoginServlet.CONTENTTYPE_JAVASCRIPT);
+        AJAXServlet.setDefaultContentType(resp);
         Response response = new Response();
         Session session = null;
         try {
@@ -274,7 +275,7 @@ public class AutoLogin extends AbstractLoginRequestHandler {
         // The magic spell to disable caching
         Tools.disableCaching(resp);
         resp.setStatus(HttpServletResponse.SC_OK);
-        resp.setContentType(LoginServlet.CONTENTTYPE_JAVASCRIPT);
+        AJAXServlet.setDefaultContentType(resp);
         try {
             if (response.hasError()) {
                 ResponseWriter.write(response, resp.getWriter(), LoginServlet.localeFrom(session));

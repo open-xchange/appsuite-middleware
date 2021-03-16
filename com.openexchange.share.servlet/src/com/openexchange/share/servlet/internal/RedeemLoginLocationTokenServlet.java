@@ -58,6 +58,7 @@ import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 import org.json.JSONException;
 import org.json.JSONObject;
+import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.exception.OXException;
 import com.openexchange.i18n.Translator;
 import com.openexchange.i18n.TranslatorFactory;
@@ -105,7 +106,7 @@ public class RedeemLoginLocationTokenServlet extends AbstractShareServlet {
 
             request.getSession(true);
             response.setStatus(HttpServletResponse.SC_OK);
-            response.setContentType("text/javascript; charset=UTF-8");
+            AJAXServlet.setDefaultContentType(response);
 
             String token = request.getParameter("token");
             if (Strings.isEmpty(token)) {

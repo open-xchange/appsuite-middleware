@@ -181,7 +181,7 @@ public class Attachment extends PermissionServlet {
 
             document(
                 session,
-                req, 
+                req,
                 res,
                 isIE(req),
                 folderId,
@@ -198,7 +198,7 @@ public class Attachment extends PermissionServlet {
             if (!attRequest.action(action, new ServletRequestAdapter(req, res))) {
                 unknownAction("GET", action, res, false);
             }
-            res.setContentType(AJAXServlet.CONTENTTYPE_JAVASCRIPT);
+            res.setContentType(AJAXServlet.CONTENTTYPE_JSON);
             try {
                 ((JSONObject) writer.getObject()).write(res.getWriter());
             } catch (JSONException e) {
@@ -246,7 +246,7 @@ public class Attachment extends PermissionServlet {
         if (!attRequest.action(action, new ServletRequestAdapter(req, res))) {
             unknownAction("PUT", action, res, false);
         }
-        res.setContentType(AJAXServlet.CONTENTTYPE_JAVASCRIPT);
+        res.setContentType(AJAXServlet.CONTENTTYPE_JSON);
         try {
             ((JSONObject) writer.getObject()).write(res.getWriter());
         } catch (JSONException e) {

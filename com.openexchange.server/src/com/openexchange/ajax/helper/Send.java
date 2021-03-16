@@ -101,7 +101,7 @@ public final class Send {
     public static void sendResponse(final Response response, final HttpServletResponse resp) throws IOException {
         Tools.disableCaching(resp);
         resp.setStatus(HttpServletResponse.SC_OK);
-        resp.setContentType(AJAXServlet.CONTENTTYPE_JAVASCRIPT);
+        AJAXServlet.setDefaultContentType(resp);
         try {
             ResponseWriter.write(response, resp.getWriter());
         } catch (JSONException e) {

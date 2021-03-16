@@ -202,7 +202,7 @@ public class Folder extends SessionServlet implements OXExceptionConstants {
 
     @Override
     protected void doGet(final HttpServletRequest req, final HttpServletResponse resp) throws IOException {
-        resp.setContentType(CONTENTTYPE_JAVASCRIPT);
+        setDefaultContentType(resp);
         Tools.disableCaching(resp);
         try {
             actionGet(req, resp);
@@ -214,7 +214,7 @@ public class Folder extends SessionServlet implements OXExceptionConstants {
 
     @Override
     protected void doPut(final HttpServletRequest req, final HttpServletResponse resp) throws IOException {
-        resp.setContentType(CONTENTTYPE_JAVASCRIPT);
+        setDefaultContentType(resp);
         Tools.disableCaching(resp);
         try {
             actionPut(req, resp);
@@ -2333,7 +2333,7 @@ public class Folder extends SessionServlet implements OXExceptionConstants {
         }
         return intArray;
     }
-    
+
     public static com.openexchange.folderstorage.Folder turnIntoStorageFolder(FolderObject folderObject) {
         return new DatabaseFolder(folderObject);
     }
@@ -2348,7 +2348,7 @@ public class Folder extends SessionServlet implements OXExceptionConstants {
         }
         return folders;
     }
-    
+
     /**
      * Writes an account's root folder into a JSON array.
      */

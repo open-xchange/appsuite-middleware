@@ -45,7 +45,7 @@ This line contains the parameters sent in the POST request. "name" is set to "us
 
 ```
 HTTP/1.1 200 OK
-Content-Type: text/javascript; charset=UTF-8
+Content-Type: application/json; charset=UTF-8
 Set-Cookie: open-xchange-secret-IaxgQLSrL7j1zE1Yceasg=1c0c09bc54564dcabf0c8b9a21d8fc59; Expires=Wed, 20-Nov-2019 15:40:56 GMT; Path=/; Secure; HttpOnly
 Set-Cookie: open-xchange-public-session-OF7B6xxx3jbjvxmcsELGdA=17bc398e29724e308c3f9bd25ae64ac8; Expires=Wed, 20-Nov-2019 15:40:56 GMT; Path=/; Secure; HttpOnly
 Set-Cookie: open-xchange-session-IaxgQLSrL7j1zE1Yceasg=4eea89150dab48f683a34e6cbe7e7aca; Expires=Wed, 20-Nov-2019 15:40:56 GMT; Path=/; Secure; HttpOnly
@@ -102,7 +102,7 @@ User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:70.0) Gecko/20100101 Fi
 Cookie: ... JSESSIONID=1397204484404800359.OX1; open-xchange-secret-IaxgQLSrL7j1zE1Yceasg=1c0c09bc54564dcabf0c8b9a21d8fc59; open-xchange-public-session-OF7B6xxx3jbjvxmcsELGdA=17bc398e29724e308c3f9bd25ae64ac8; open-xchange-session-IaxgQLSrL7j1zE1Yceasg=4eea89150dab48f683a34e6cbe7e7aca
 
 HTTP/1.1 200 OK
-Content-Type: text/javascript; charset=UTF-8
+Content-Type:application/json; charset=UTF-8
 Pragma: no-cache
 Cache-Control: post-check=0, pre-check=0
 Keep-Alive: timeout=5, max=99
@@ -156,7 +156,7 @@ Content-Type: application/x-www-form-urlencoded
 Cookie: ... JSESSIONID=1397204484404800359.OX1; open-xchange-secret-IaxgQLSrL7j1zE1Yceasg=0417958f2729482b988051b96cf59fea; open-xchange-public-session-OF7B6xxx3jbjvxmcsELGdA=320e21856b3940569582d5013e0f7726; open-xchange-session-IaxgQLSrL7j1zE1Yceasg=1603f458d1c94869a69df2654d981a45
 
 HTTP/1.1 200 OK
-Content-Type: text/javascript; charset=UTF-8
+Content-Type: application/json; charset=UTF-8
 Pragma: no-cache
 Cache-Control: post-check=0, pre-check=0
 Set-Cookie: open-xchange-session-IaxgQLSrL7j1zE1Yceasg=invalid; Expires=Thu, 01-Jan-1970 00:00:10 GMT; Path=/; HttpOnly

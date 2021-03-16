@@ -168,7 +168,7 @@ public class GroupwareTests {
             object.put("body", "test");
             final byte[] bytes = object.toString().getBytes("UTF-8");
             ByteArrayInputStream bais = new ByteArrayInputStream(bytes);
-            final WebRequest reqmailfilter = new PutMethodWebRequest(PROTOCOL + getHostname() + SpamSettingsServletRegisterer.SERVLET_PATH + "?action=send&session=" + login.getSessionid(), bais, "text/javascript; charset=UTF-8");
+            final WebRequest reqmailfilter = new PutMethodWebRequest(PROTOCOL + getHostname() + SpamSettingsServletRegisterer.SERVLET_PATH + "?action=send&session=" + login.getSessionid(), bais, "application/json; charset=UTF-8");
             final WebResponse mailfilterresp = login.getWebConversation().getResponse(reqmailfilter);
             body = mailfilterresp.getText();
             final JSONObject json;

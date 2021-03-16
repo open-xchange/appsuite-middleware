@@ -137,7 +137,7 @@ public abstract class SessionServlet extends AJAXServlet {
         String sessionId = null;
         try {
             resp.setStatus(HttpServletResponse.SC_OK);
-            resp.setContentType(CONTENTTYPE_JAVASCRIPT);
+            setDefaultContentType(resp);
 
             // Get session result
             SessionResult<ServerSession> result = initializeSession(req, resp);
@@ -365,7 +365,7 @@ public abstract class SessionServlet extends AJAXServlet {
 
             // API response
             if (null != writer) {
-                resp.setContentType(CONTENTTYPE_JAVASCRIPT);
+                setDefaultContentType(resp);
                 resp.setHeader("Content-Disposition", "inline");
                 APIResponseRenderer.writeResponse(new Response().setException(e), Dispatchers.getActionFrom(req), writer, req, resp);
             } else {

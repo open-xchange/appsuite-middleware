@@ -273,7 +273,7 @@ public class APIResponseRenderer implements ResponseRenderer {
                 }
 
                 // Write: <call> + "(" + <json> + ")"
-                resp.setContentType("text/javascript");
+                AJAXServlet.setDefaultContentType(resp);
                 writer.write(callback);
                 writer.write('(');
                 ResponseWriter.write(response, writer, localeFrom(req));

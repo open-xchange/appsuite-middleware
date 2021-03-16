@@ -58,6 +58,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 import org.json.JSONException;
+import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.SessionUtility;
 import com.openexchange.ajax.container.Response;
 import com.openexchange.ajax.writer.ResponseWriter;
@@ -95,12 +96,6 @@ public abstract class AbstractMailFilterServlet extends HttpServlet {
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(AbstractMailFilterServlet.class);
 
     private static final String PARAMETER_SESSION = com.openexchange.ajax.AJAXServlet.PARAMETER_SESSION;
-
-    /**
-     * The content type if the response body contains javascript data. Set it
-     * with <code>resp.setContentType(AJAXServlet.CONTENTTYPE_JAVASCRIPT)</code>.
-     */
-    public static final String CONTENTTYPE_JAVASCRIPT = "text/javascript; charset=UTF-8";
 
     private CookieHashSource hashSource;
 
@@ -218,7 +213,7 @@ public abstract class AbstractMailFilterServlet extends HttpServlet {
          */
         Tools.disableCaching(resp);
         resp.setStatus(HttpServletResponse.SC_OK);
-        resp.setContentType(CONTENTTYPE_JAVASCRIPT);
+        AJAXServlet.setDefaultContentType(resp);
         try {
             ResponseWriter.write(response, resp.getWriter(), localeFrom(session));
         } catch (JSONException e) {
@@ -289,7 +284,7 @@ public abstract class AbstractMailFilterServlet extends HttpServlet {
          */
         Tools.disableCaching(resp);
         resp.setStatus(HttpServletResponse.SC_OK);
-        resp.setContentType(CONTENTTYPE_JAVASCRIPT);
+        AJAXServlet.setDefaultContentType(resp);
         try {
             ResponseWriter.write(response, resp.getWriter(), localeFrom(session));
         } catch (JSONException e) {

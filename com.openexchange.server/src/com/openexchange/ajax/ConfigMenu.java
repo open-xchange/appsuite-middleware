@@ -113,7 +113,7 @@ public class ConfigMenu extends SessionServlet {
             response.setException(oje);
         }
         resp.setStatus(HttpServletResponse.SC_OK);
-        resp.setContentType(CONTENTTYPE_JAVASCRIPT);
+        setDefaultContentType(resp);
         try {
             ResponseWriter.write(response, resp.getWriter(), localeFrom(sessionObj));
         } catch (JSONException e) {
@@ -209,7 +209,7 @@ public class ConfigMenu extends SessionServlet {
         }
         try {
             resp.setStatus(HttpServletResponse.SC_OK);
-            resp.setContentType(AJAXServlet.CONTENTTYPE_JAVASCRIPT);
+            resp.setContentType(AJAXServlet.CONTENTTYPE_JSON);
             if (response.hasError()) {
                 ResponseWriter.write(response, resp.getWriter(), localeFrom(session));
             }
