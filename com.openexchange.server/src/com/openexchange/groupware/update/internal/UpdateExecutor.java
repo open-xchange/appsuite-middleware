@@ -35,6 +35,7 @@ import java.util.concurrent.TimeUnit;
 import org.osgi.service.event.Event;
 import org.osgi.service.event.EventAdmin;
 import com.google.common.collect.ImmutableSet;
+import com.openexchange.config.ConfigurationService;
 import com.openexchange.database.DatabaseService;
 import com.openexchange.database.Databases;
 import com.openexchange.databaseold.Database;
@@ -48,8 +49,10 @@ import com.openexchange.groupware.update.SchemaUpdateState;
 import com.openexchange.groupware.update.SeparatedTasks;
 import com.openexchange.groupware.update.TaskInfo;
 import com.openexchange.groupware.update.UpdateExceptionCodes;
+import com.openexchange.groupware.update.UpdateProperty;
 import com.openexchange.groupware.update.UpdateTaskV2;
 import com.openexchange.groupware.update.UpdaterEventConstants;
+import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.timer.ScheduledTimerTask;
 import com.openexchange.timer.TimerService;
@@ -62,9 +65,8 @@ import com.openexchange.tools.exceptions.ExceptionUtils;
  */
 public final class UpdateExecutor {
 
+    /** The logger constant */
     static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(UpdateExecutor.class);
-
-    private static final SchemaStore store = SchemaStore.getInstance();
 
     private volatile SchemaUpdateState state;
     private final int optContextId;
@@ -75,13 +77,13 @@ public final class UpdateExecutor {
     /**
      * Initializes a new {@link UpdateExecutor}.
      *
-     * @param state The schema information
+     * @param initialState The initial schema information
      * @param optContextId The optional context identifier; otherwise <code>0</code> (zero)
      * @param tasks The optional tasks to perform; otherwise <code>null</code> (all tasks will be executed)
      */
-    public UpdateExecutor(SchemaUpdateState state, int optContextId, List<UpdateTaskV2> tasks) {
+    public UpdateExecutor(SchemaUpdateState initialState, int optContextId, List<UpdateTaskV2> tasks) {
         super();
-        this.state = state;
+        this.state = initialState;
         this.optContextId = optContextId;
         this.tasks = tasks;
         this.poolId = state.getPoolId();
@@ -91,11 +93,11 @@ public final class UpdateExecutor {
     /**
      * Initializes a new {@link UpdateExecutor}.
      *
-     * @param state The schema information
+     * @param initialState The initial schema information
      * @param tasks The optional tasks to perform; otherwise <code>null</code> (all tasks will be executed)
      */
-    public UpdateExecutor(SchemaUpdateState state, List<UpdateTaskV2> tasks) {
-        this(state, 0, tasks);
+    public UpdateExecutor(SchemaUpdateState initialState, List<UpdateTaskV2> tasks) {
+        this(initialState, 0, tasks);
     }
 
     /**
@@ -136,6 +138,14 @@ public final class UpdateExecutor {
     }
 
     private void runUpdates(final boolean blocking, final Queue<TaskInfo> failures, boolean throwExceptionOnFailure, SeparatedTasks separatedTasks) throws OXException {
+        // Get required service
+        TimerService timerService = ServerServiceRegistry.getInstance().getService(TimerService.class);
+        if (timerService == null) {
+            throw ServiceExceptionCode.absentService(TimerService.class);
+        }
+        ScheduledTimerTask timerTask = null;
+
+        // Try to acquire lock
         SchemaUpdateState state = this.state;
         LOG.info("Starting {} updates on schema {}", (blocking ? "blocking" : "background"), state.getSchema());
         try {
@@ -151,9 +161,8 @@ public final class UpdateExecutor {
             }
             throw e;
         }
+
         // Lock successfully obtained, thus remember to unlock
-        TimerService timerService = ServerServiceRegistry.getInstance().getService(TimerService.class);
-        ScheduledTimerTask timerTask = null;
         try {
             // Contexts on that scheme can continue
             if (blocking) {
@@ -161,7 +170,7 @@ public final class UpdateExecutor {
             }
             final List<UpdateTaskV2> scheduled = new ArrayList<UpdateTaskV2>();
             if (null == separatedTasks) {
-                state = store.getSchema(poolId, schema);
+                state = SchemaStore.getInstance().getSchema(poolId, schema);
                 this.state = state;
                 // Get filtered & sorted list of update tasks
                 scheduled.addAll(UpdateTaskCollection.getInstance().getFilteredAndSortedUpdateTasks(state, blocking));
@@ -170,58 +179,56 @@ public final class UpdateExecutor {
             }
 
             // Start timer task for periodic refresh
-            if (null != timerService) {
+            {
                 final SchemaUpdateState _state = state;
-                Runnable task = new Runnable() {
-
-                    @Override
-                    public void run() {
-                        try {
-                            boolean refreshed = tryRefreshSchemaLock(blocking, _state);
-                            if (refreshed) {
-                                LOG.info("Refreshed lock for schema {}", _state.getSchema());
-                            }
-                        } catch (Exception e) {
-                            LOG.warn("Failed to refresh lock for schema {}", _state.getSchema(), e);
+                Runnable task = () -> {
+                    try {
+                        if (tryRefreshSchemaLock(blocking, _state)) {
+                            LOG.info("Refreshed lock for schema {}", _state.getSchema());
                         }
+                    } catch (Exception e) {
+                        LOG.warn("Failed to refresh lock for schema {}", _state.getSchema(), e);
                     }
                 };
-                timerTask = timerService.scheduleWithFixedDelay(task, 5L, 5L, TimeUnit.MINUTES);
+                long refreshIntervalMillis = getRefreshIntervalMillis();
+                timerTask = timerService.scheduleWithFixedDelay(task, refreshIntervalMillis, refreshIntervalMillis, TimeUnit.MILLISECONDS);
             }
 
             // Perform updates
-            int poolId = this.poolId;
-            AbstractConnectionProvider connectionProvider = optContextId > 0 ? new ContextConnectionProvider(optContextId) : new PoolAndSchemaConnectionProvider(poolId, schema);
+            AbstractConnectionProvider connectionProvider = optContextId > 0 ? new ContextConnectionProvider(optContextId) : new PoolAndSchemaConnectionProvider(this.poolId, schema);
             try {
-                long startNanos;
-                long durMillis;
-                for (final UpdateTaskV2 task : scheduled) {
+                for (UpdateTaskV2 task : scheduled) {
+                    // Check task's dependencies
                     checkDependencies(task, state);
-                    final String taskName = task.getClass().getName();
-                    boolean success = false;
-                    startNanos = System.nanoTime();
+
+                    // Execute task
+                    String taskName = task.getClass().getName();
+                    Exception failure = null;
+                    long startNanos = System.nanoTime();
                     try {
                         LOG.info("Starting update task {} on schema {}.", taskName, state.getSchema());
                         ProgressState logger = new ProgressStatusImpl(taskName, state.getSchema());
                         PerformParameters params = new PerformParametersImpl(state, connectionProvider, optContextId, logger);
                         task.perform(params);
-                        success = true;
-                    } catch (OXException e) {
-                        LOG.error("", e);
+                    } catch (Exception e) {
+                        failure = e;
                     }
-                    durMillis = TimeUnit.MILLISECONDS.convert(System.nanoTime() - startNanos, TimeUnit.NANOSECONDS);
+                    long durMillis = TimeUnit.MILLISECONDS.convert(System.nanoTime() - startNanos, TimeUnit.NANOSECONDS);
+
+                    // Log & add task execution result
+                    boolean success = failure == null;
                     if (success) {
                         LOG.info("Update task {} on schema {} done ({}).", taskName, state.getSchema(), exactly(durMillis, true));
                     } else {
                         if (throwExceptionOnFailure) {
-                            throw SchemaExceptionCodes.TASK_FAILED.create(taskName, state.getSchema());
+                            throw SchemaExceptionCodes.TASK_FAILED.create(failure, taskName, state.getSchema());
                         }
                         if (null != failures) {
                             failures.offer(new TaskInfo(taskName, state.getSchema()));
                         }
-                        LOG.error("Update task {} on schema {} failed ({}).", taskName, state.getSchema(), exactly(durMillis, true));
+                        LOG.error("Update task {} on schema {} failed ({}).", taskName, state.getSchema(), exactly(durMillis, true), failure);
                     }
-                    addExecutedTask(taskName, success, poolId, state.getSchema(), connectionProvider.getConnection());
+                    addExecutedTask(taskName, success, this.poolId, state.getSchema(), connectionProvider.getConnection());
                     state.addExecutedTask(taskName, success);
                 }
             } finally {
@@ -234,13 +241,15 @@ public final class UpdateExecutor {
                 if (null != service) {
                     Map<String, Object> eventProperties = new HashMap<String, Object>(6);
                     eventProperties.put(UpdaterEventConstants.PROPERTY_SCHEMA, state.getSchema());
-                    eventProperties.put(UpdaterEventConstants.PROPERTY_POOL_ID, Integer.valueOf(poolId));
+                    eventProperties.put(UpdaterEventConstants.PROPERTY_POOL_ID, Integer.valueOf(this.poolId));
                     eventProperties.put(CommonEvent.PUBLISH_MARKER, Boolean.TRUE);
                     service.postEvent(new Event(UpdaterEventConstants.TOPIC, eventProperties));
                 }
             }
 
             LOG.info("Finished {} updates on schema {}", (blocking ? "blocking" : "background"), state.getSchema());
+        } catch (OXException e) {
+            throw e;
         } catch (Throwable t) {
             ExceptionUtils.handleThrowable(t);
             throw UpdateExceptionCodes.UPDATE_FAILED.create(t, state.getSchema(), t.getMessage());
@@ -248,9 +257,7 @@ public final class UpdateExecutor {
             // Stop timer task
             if (null != timerTask) {
                 timerTask.cancel();
-                if (null != timerService) {
-                    timerService.purge();
-                }
+                timerService.purge();
             }
 
             // Unlock schema and invalidate context cache
@@ -275,20 +282,30 @@ public final class UpdateExecutor {
     }
 
     private final void lockSchema(boolean blocking, SchemaUpdateState state) throws OXException {
-        store.lockSchema(state, !blocking);
+        SchemaStore.getInstance().lockSchema(state, !blocking);
         LocalUpdateTaskMonitor.getInstance().addState(state.getSchema());
     }
 
     private final void unlockSchema(boolean blocking, SchemaUpdateState state) throws OXException {
         try {
-            store.unlockSchema(state, !blocking);
+            SchemaStore.getInstance().unlockSchema(state, !blocking);
         } finally {
             LocalUpdateTaskMonitor.getInstance().removeState(state.getSchema());
         }
     }
 
     final boolean tryRefreshSchemaLock(boolean blocking, SchemaUpdateState state) throws OXException {
-        return store.tryRefreshSchemaLock(state, !blocking);
+        return SchemaStore.getInstance().tryRefreshSchemaLock(state, !blocking);
+    }
+
+    private long getRefreshIntervalMillis() {
+        long defaultRefreshIntervalMillis = UpdateProperty.REFRESH_INTERVAL_MILLIS.getDefaultValue(Long.class).longValue();
+        ConfigurationService configService = ServerServiceRegistry.getInstance().getService(ConfigurationService.class);
+        if (configService == null) {
+            return defaultRefreshIntervalMillis;
+        }
+        long refreshIntervalMillis = configService.getIntProperty(UpdateProperty.REFRESH_INTERVAL_MILLIS.getFQPropertyName(), (int) defaultRefreshIntervalMillis);
+        return refreshIntervalMillis <= 0 ? defaultRefreshIntervalMillis : refreshIntervalMillis;
     }
 
     private final void addExecutedTask(String taskName, boolean success, int poolId, String schema, Connection con) throws OXException {
@@ -297,7 +314,7 @@ public final class UpdateExecutor {
             con.setAutoCommit(false);
             rollback = 1;
 
-            store.addExecutedTask(con, taskName, success, poolId, schema);
+            SchemaStore.getInstance().addExecutedTask(con, taskName, success, poolId, schema);
 
             con.commit();
             rollback = 2;

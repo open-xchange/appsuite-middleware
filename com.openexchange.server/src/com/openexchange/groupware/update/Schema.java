@@ -32,23 +32,28 @@ import java.io.Serializable;
 public interface Schema extends Serializable {
 
     /**
+     * Checks if the schema is currently updated by blocking update tasks.
+     *
      * @return <code>true</code> if the schema will currently be updated.
      */
     boolean isLocked();
 
     /**
-     * @return name of the server that is currently updating the schema or
-     * <code>null</code>.
+     * Gets the name of the server that is currently updating the schema.
+     *
+     * @return The name of the server that is currently updating the schema or <code>null</code>.
      */
     String getServer();
 
     /**
+     * Gets the name of the database schema.
+     *
      * @return schema name
      */
     String getSchema();
 
     /**
-     * Gets the identifier of the schema-associated database pool
+     * Gets the identifier of the schema-associated database pool.
      *
      * @return The pool identifier
      */

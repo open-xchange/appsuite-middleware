@@ -35,7 +35,10 @@ import com.openexchange.groupware.update.internal.ProgressStatusImpl;
  */
 public abstract class UpdateTaskAdapter implements UpdateTaskV2 {
 
-    public UpdateTaskAdapter() {
+    /**
+     * Initializes a new {@link UpdateTaskAdapter}.
+     */
+    protected UpdateTaskAdapter() {
         super();
     }
 

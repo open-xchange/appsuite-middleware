@@ -21,18 +21,12 @@
 
 package com.openexchange.passwordchange.history.impl.groupware;
 
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.SQLException;
 import com.openexchange.database.AbstractCreateTableImpl;
-import com.openexchange.database.Databases;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.update.Attributes;
 import com.openexchange.groupware.update.PerformParameters;
 import com.openexchange.groupware.update.TaskAttributes;
-import com.openexchange.groupware.update.UpdateExceptionCodes;
 import com.openexchange.groupware.update.UpdateTaskV2;
-import com.openexchange.tools.update.Tools;
 
 /**
  * {@link PasswordChangeHistoryCreateTableTask} - Creates the table "user_password_history"
@@ -64,29 +58,6 @@ public class PasswordChangeHistoryCreateTableTask extends AbstractCreateTableImp
      */
     public PasswordChangeHistoryCreateTableTask() {
         super();
-    }
-
-    /**
-     * Creates the table
-     *
-     * @param tablename The table name
-     * @param sqlCreate The command to create the table
-     * @param writeCon The connection to use
-     * @throws OXException In case of {@link SQLException}
-     */
-    private void createTable(String tablename, String sqlCreate, Connection writeCon) throws OXException {
-        PreparedStatement stmt = null;
-        try {
-            if (Tools.tableExists(writeCon, tablename)) {
-                return;
-            }
-            stmt = writeCon.prepareStatement(sqlCreate);
-            stmt.executeUpdate();
-        } catch (SQLException e) {
-            throw UpdateExceptionCodes.SQL_PROBLEM.create(e, e.getMessage());
-        } finally {
-            Databases.closeSQLStuff(stmt);
-        }
     }
 
     @Override

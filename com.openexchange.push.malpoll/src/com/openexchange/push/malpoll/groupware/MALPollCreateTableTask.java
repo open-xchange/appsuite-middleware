@@ -21,9 +21,7 @@
 
 package com.openexchange.push.malpoll.groupware;
 
-import static com.openexchange.database.Databases.closeSQLStuff;
 import java.sql.Connection;
-import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import com.openexchange.database.AbstractCreateTableImpl;
 import com.openexchange.database.Databases;
@@ -33,7 +31,6 @@ import com.openexchange.groupware.update.PerformParameters;
 import com.openexchange.groupware.update.TaskAttributes;
 import com.openexchange.groupware.update.UpdateExceptionCodes;
 import com.openexchange.groupware.update.UpdateTaskV2;
-import com.openexchange.tools.update.Tools;
 
 /**
  * {@link MALPollCreateTableTask} - Inserts necessary tables to support MAL Poll bundle features.
@@ -118,18 +115,4 @@ public final class MALPollCreateTableTask extends AbstractCreateTableImpl implem
         LOG.info("UpdateTask 'MALPollCreateTableTask' successfully performed!");
     }
 
-    private void createTable(final String tablename, final String sqlCreate, final Connection con) throws OXException {
-        PreparedStatement stmt = null;
-        try {
-            if (Tools.tableExists(con, tablename)) {
-                return;
-            }
-            stmt = con.prepareStatement(sqlCreate);
-            stmt.executeUpdate();
-        } catch (SQLException e) {
-            throw UpdateExceptionCodes.SQL_PROBLEM.create(e, e.getMessage());
-        } finally {
-            closeSQLStuff(stmt);
-        }
-    }
 }

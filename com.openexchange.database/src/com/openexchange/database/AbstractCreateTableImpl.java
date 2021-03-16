@@ -23,6 +23,7 @@ package com.openexchange.database;
 
 import java.sql.Connection;
 import java.sql.DatabaseMetaData;
+import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
@@ -38,8 +39,10 @@ import com.openexchange.java.Strings;
  */
 public abstract class AbstractCreateTableImpl implements CreateTableService {
 
-    private static final org.slf4j.Logger LOG =
-        org.slf4j.LoggerFactory.getLogger(AbstractCreateTableImpl.class);
+    /** Simple class to delay initialization until needed */
+    private static class LoggerHolder {
+        static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(AbstractCreateTableImpl.class);
+    }
 
     /**
      * Initializes a new {@link AbstractCreateTableImpl}.
@@ -50,67 +53,84 @@ public abstract class AbstractCreateTableImpl implements CreateTableService {
 
     @Override
     public final void perform(final Connection con) throws OXException {
-        Statement stmt = null;
         try {
-            stmt = con.createStatement();
-            for (final String create : getCreateStatements()) {
-                final String tableName = extractTableName(create);
+            for (String create : getCreateStatements()) {
+                String tableName = extractTableName(create);
                 if (null != tableName) {
-                    if (tableExists(con, tableName)) {
-                        LOG.debug("A table with name \"{}\" already exists. Aborting table creation.", tableName);
-                    } else {
-                        try {
-                            stmt.execute(create);
-                        } catch (SQLException e) {
-                            final String sep = Strings.getLineSeparator();
-                            throw DBPoolingExceptionCodes.SQL_ERROR.create(e, new StringBuilder(256).append(e.getMessage()).append(sep).append("Affected statement:").append(sep).append(create).toString());
-                        }
-                    }
+                    createTable(tableName, create, con);
                 }
-                final String procedureName = extractProcedureName(create);
+
+                String procedureName = extractProcedureName(create);
                 if (null != procedureName) {
                     if (procedureExists(con, procedureName)) {
-                        LOG.debug("A procedure with name \"{}\" already exists. Aborting procedure creation.", procedureName);
+                        LoggerHolder.LOG.debug("A procedure with name \"{}\" already exists. Aborting procedure creation.", procedureName);
                     } else {
+                        Statement stmt = con.createStatement();
                         try {
                             stmt.execute(create);
                         } catch (SQLException e) {
                             final String sep = Strings.getLineSeparator();
                             throw DBPoolingExceptionCodes.SQL_ERROR.create(e, new StringBuilder(256).append(e.getMessage()).append(sep).append("Affected statement:").append(sep).append(create).toString());
+                        } finally {
+                            Databases.closeSQLStuff(stmt);
                         }
                     }
                 }
             }
         } catch (SQLException e) {
-            // e.printStackTrace();
+            throw DBPoolingExceptionCodes.SQL_ERROR.create(e, e.getMessage());
+        }
+    }
+
+    /**
+     * Gets the <code>CREATE TABLE...</code> statements for the {@link #tablesToCreate() tables}.
+     *
+     * @return The <code>CREATE TABLE...</code> statements
+     */
+    protected abstract String[] getCreateStatements();
+
+    /**
+     * The constant to signal no dependencies to other tables.
+     */
+    protected static final String[] NO_TABLES = new String[0];
+
+    // -------------------------------------------------------------------------------------------------------------------------------------
+
+    /**
+     * Creates the table according to given <code>"CREATE TABLE..."</code> statement.
+     *
+     * @param tableName The name of the table
+     * @param sqlCreate The <code>"CREATE TABLE..."</code> statement
+     * @param con The connection to use
+     * @throws OXException If creating the table fails
+     */
+    protected static void createTable(String tableName, String sqlCreate, Connection con) throws OXException {
+        PreparedStatement stmt = null;
+        try {
+            if (tableExists(con, tableName)) {
+                LoggerHolder.LOG.debug("A table with name \"{}\" already exists. Aborting table creation.", tableName);
+            } else {
+                stmt = con.prepareStatement(sqlCreate);
+                stmt.executeUpdate();
+            }
+        } catch (SQLException e) {
             throw DBPoolingExceptionCodes.SQL_ERROR.create(e, e.getMessage());
         } finally {
             Databases.closeSQLStuff(stmt);
         }
     }
 
-    private static final Pattern PATTERN_CREATE_TABLE = Pattern.compile("CREATE +TABLE +`?(\\w+)`? *\\(");
-    private static final Pattern PATTERN_CREATE_PROCEDURE = Pattern.compile("CREATE +PROCEDURE +`?(\\w+)`?");
-
-    private static String extractTableName(final String create) {
-        final Matcher m = PATTERN_CREATE_TABLE.matcher(create);
-        if (m.find()) {
-            return m.group(1);
-        }
-        return null;
-    }
-
-    private static String extractProcedureName(final String create) {
-        final Matcher m = PATTERN_CREATE_PROCEDURE.matcher(create);
-        if (m.find()) {
-            return m.group(1);
-        }
-        return null;
-    }
-
     private static final String TABLE = "TABLE";
 
-    private static final boolean tableExists(final Connection con, final String table) throws SQLException {
+    /**
+     * Checks for existence of denoted table.
+     *
+     * @param con The connection to use
+     * @param table The table to check
+     * @return <code>true</code> if such a table exists; otherwise <code>false</code>
+     * @throws SQLException If an SQL error occurs
+     */
+    protected static boolean tableExists(Connection con, String table) throws SQLException {
         final DatabaseMetaData metaData = con.getMetaData();
         ResultSet rs = null;
         boolean retval = false;
@@ -123,7 +143,15 @@ public abstract class AbstractCreateTableImpl implements CreateTableService {
         return retval;
     }
 
-    private static final boolean procedureExists(final Connection con, final String procedure) throws SQLException {
+    /**
+     * Checks for existence of denoted procedure.
+     *
+     * @param con The connection to use
+     * @param procedure The procedure to check
+     * @return <code>true</code> if such a procedure exists; otherwise <code>false</code>
+     * @throws SQLException If an SQL error occurs
+     */
+    protected static boolean procedureExists(Connection con, String procedure) throws SQLException {
         final DatabaseMetaData metaData = con.getMetaData();
         ResultSet rs = null;
         boolean retval = false;
@@ -136,16 +164,18 @@ public abstract class AbstractCreateTableImpl implements CreateTableService {
         return retval;
     }
 
-    /**
-     * Gets the <code>CREATE TABLE</code> statements for the {@link #tablesToCreate() tables}.
-     *
-     * @return The <code>CREATE TABLE</code> statements
-     */
-    protected abstract String[] getCreateStatements();
+    private static final Pattern PATTERN_CREATE_TABLE = Pattern.compile("CREATE +TABLE +`?(\\w+)`? *\\(");
 
-    /**
-     * The constant to signal no dependencies to other tables.
-     */
-    protected static final String[] NO_TABLES = new String[0];
+    private static String extractTableName(String create) {
+        Matcher m = PATTERN_CREATE_TABLE.matcher(create);
+        return m.find() ? m.group(1) : null;
+    }
+
+    private static final Pattern PATTERN_CREATE_PROCEDURE = Pattern.compile("CREATE +PROCEDURE +`?(\\w+)`?");
+
+    private static String extractProcedureName(String create) {
+        Matcher m = PATTERN_CREATE_PROCEDURE.matcher(create);
+        return m.find() ? m.group(1) : null;
+    }
 
 }

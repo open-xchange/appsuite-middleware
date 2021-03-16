@@ -22,13 +22,9 @@
 package com.openexchange.snippet.rdb.groupware;
 
 import java.sql.Connection;
-import java.sql.DatabaseMetaData;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
 import java.sql.SQLException;
 import com.openexchange.database.AbstractCreateTableImpl;
 import com.openexchange.database.Databases;
-import com.openexchange.exception.OXException;
 import com.openexchange.groupware.update.Attributes;
 import com.openexchange.groupware.update.PerformParameters;
 import com.openexchange.groupware.update.TaskAttributes;
@@ -67,8 +63,8 @@ public final class RdbSnippetCreateTableTask extends AbstractCreateTableImpl imp
 
     @Override
     public void perform(final PerformParameters params) throws com.openexchange.exception.OXException {
-        Connection writeCon = params.getConnection();
         int rollback = 0;
+        Connection writeCon = params.getConnection();
         try {
             writeCon.setAutoCommit(false);
             rollback = 1;
@@ -92,32 +88,6 @@ public final class RdbSnippetCreateTableTask extends AbstractCreateTableImpl imp
         }
         final org.slf4j.Logger logger = org.slf4j.LoggerFactory.getLogger(RdbSnippetCreateTableTask.class);
         logger.info("UpdateTask ''{}'' successfully performed!", RdbSnippetCreateTableTask.class.getSimpleName());
-    }
-
-    private void createTable(final String tablename, final String sqlCreate, final Connection writeCon) throws OXException {
-        PreparedStatement stmt = null;
-        try {
-            if (tableExists(writeCon, tablename)) {
-                return;
-            }
-            stmt = writeCon.prepareStatement(sqlCreate);
-            stmt.executeUpdate();
-        } catch (SQLException e) {
-            throw UpdateExceptionCodes.SQL_PROBLEM.create(e, e.getMessage());
-        } finally {
-            Databases.closeSQLStuff(stmt);
-        }
-    }
-
-    private boolean tableExists(final Connection con, final String table) throws SQLException {
-        final DatabaseMetaData metaData = con.getMetaData();
-        ResultSet rs = null;
-        try {
-            rs = metaData.getTables(null, null, table, new String[] { "TABLE" });
-            return (rs.next() && rs.getString("TABLE_NAME").equals(table));
-        } finally {
-            Databases.closeSQLStuff(rs);
-        }
     }
 
     @Override

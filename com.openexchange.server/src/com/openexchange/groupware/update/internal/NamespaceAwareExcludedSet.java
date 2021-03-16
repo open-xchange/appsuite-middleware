@@ -25,7 +25,6 @@ import java.util.Collections;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicReference;
 import com.google.common.collect.ImmutableSet;
-import com.openexchange.config.lean.DefaultProperty;
 import com.openexchange.config.lean.LeanConfigurationService;
 import com.openexchange.config.lean.Property;
 import com.openexchange.java.Strings;
@@ -40,7 +39,7 @@ import com.openexchange.java.Strings;
 public class NamespaceAwareExcludedSet implements UpdateTaskSet<String> {
 
     /** The property providing the namespaces of the updates tasks that are supposed to be excluded */
-    static final Property PROPERTY = DefaultProperty.valueOf("com.openexchange.groupware.update.excludedUpdateTasks", "");
+    static final Property PROPERTY = com.openexchange.groupware.update.UpdateProperty.EXCLUDED_UPDATE_TASKS;
 
     private static final NamespaceAwareExcludedSet SINGLETON = new NamespaceAwareExcludedSet();
 

@@ -32,7 +32,6 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -43,7 +42,6 @@ import java.util.Map;
 import java.util.Set;
 import java.util.TimeZone;
 import java.util.TreeSet;
-import java.util.concurrent.TimeUnit;
 import java.util.regex.Pattern;
 import java.util.regex.PatternSyntaxException;
 import javax.mail.internet.idn.IDNA;
@@ -1892,7 +1890,6 @@ public class OXToolMySQLStorage extends OXToolSQLStorage implements OXMySQLDefau
             }
 
             // Determine outdated threshold
-            long outdatedThreshold = System.currentTimeMillis() - TimeUnit.DAYS.toMillis(1); // 24h ago
             List<Database> outdatedUpdating = null;
 
             // Unblock outdated schemas
@@ -1901,8 +1898,7 @@ public class OXToolMySQLStorage extends OXToolSQLStorage implements OXMySQLDefau
                 UpdateStatus status = updater.getStatus(database.getScheme(), poolId);
                 if (status.blockingUpdatesRunning()) {
                     // Currently updating
-                    Date runningSince = status.blockingUpdatesRunningSince();
-                    if (null != runningSince && runningSince.getTime() < outdatedThreshold) {
+                    if (status.blockingUpdatesTimedOut()) {
                         int contextId = getAnyContextFromSchema(poolId, database.getScheme());
                         try {
                             updater.unblock(database.getScheme(), poolId, contextId);
@@ -1985,16 +1981,13 @@ public class OXToolMySQLStorage extends OXToolSQLStorage implements OXMySQLDefau
         List<Database> currentlyUpdating = null;
         List<Database> outdatedUpdating = null;
 
-        long outdatedThreshold = System.currentTimeMillis() - TimeUnit.DAYS.toMillis(1); // 24h ago
-
         try {
             Updater updater = Updater.getInstance();
             for (Database database : databases) {
                 UpdateStatus status = updater.getStatus(database.getScheme(), database.getId().intValue());
                 if (status.blockingUpdatesRunning()) {
                     // Currently updating
-                    Date runningSince = status.blockingUpdatesRunningSince();
-                    if (null != runningSince && runningSince.getTime() < outdatedThreshold) {
+                    if (status.blockingUpdatesTimedOut()) {
                         if (outdatedUpdating == null) {
                             outdatedUpdating = new LinkedList<>();
                         }

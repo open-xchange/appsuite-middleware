@@ -94,4 +94,22 @@ public abstract class Updater {
      * @return The list of schemas
      */
     public abstract Collection<String> getLocallyScheduledTasks();
+
+    /**
+     * Invalidates the caches for given context identifier.
+     *
+     * @param contextId The context identifier
+     * @throws OXException If cache invalidation fails
+     */
+    public abstract void invalidateCacheFor(int contextId) throws OXException;
+
+    /**
+     * Invalidates the caches for given schema.
+     *
+     * @param schemaName The schema name
+     * @param poolId The pool identifier
+     * @throws OXException If cache invalidation fails
+     */
+    public abstract void invalidateCacheFor(String schemaName, int poolId) throws OXException;
+
 }

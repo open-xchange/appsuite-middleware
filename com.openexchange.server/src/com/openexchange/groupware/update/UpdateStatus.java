@@ -50,4 +50,24 @@ public interface UpdateStatus {
      */
     boolean isExecutedSuccessfully(String taskName);
 
+    /**
+     * Checks if blocking updates are considered as timed-out.
+     *
+     * @return <code>true</code> if timed-out; otherwise <code>false</code>
+     */
+    boolean blockingUpdatesTimedOut();
+
+    /**
+     * Gets the identifier of the database pool associated with thus status' schema.
+     *
+     * @return The database pool identifier
+     */
+    int getPoolId();
+
+    /**
+     * Gets the name of the schema.
+     *
+     * @return The schema name
+     */
+    String getSchemaName();
 }
