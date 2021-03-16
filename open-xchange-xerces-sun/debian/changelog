@@ -1,3 +1,9 @@
+open-xchange-xerces-sun (7.6.3-58) stable; urgency=medium
+
+  * Build for patch 2021-03-26 (5974)
+
+ -- Marcus Klein <marcus.klein@open-xchange.com>  Tue, 16 Mar 2021 08:16:20 +0000
+
 open-xchange-xerces-sun (7.6.3-57) stable; urgency=medium
 
   * Build for patch 2021-01-15 (5932)
