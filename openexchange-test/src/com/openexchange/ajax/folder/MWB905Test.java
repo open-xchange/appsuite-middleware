@@ -57,7 +57,6 @@ import org.junit.Test;
 import com.openexchange.ajax.folder.manager.FolderApi;
 import com.openexchange.ajax.folder.manager.FolderManager;
 import com.openexchange.ajax.framework.AbstractClientSession;
-import com.openexchange.test.common.configuration.AJAXConfig;
 import com.openexchange.test.common.test.pool.TestUser;
 import com.openexchange.testing.httpclient.invoker.ApiClient;
 import com.openexchange.testing.httpclient.invoker.ApiException;
@@ -123,31 +122,9 @@ public class MWB905Test extends AbstractClientSession {
         Assert.assertTrue("There should be exactly one \"Collected Addresses\" folder.", count == 1);
     }
 
-    /*
-     * ============================== HELPERS ==============================
-     * Copied from com.openexchange.ajax.framework.AbstractAPIClientSession
-     * Use here to avoid premature logins
-     */
-
     private ApiClient generateApiClient(TestUser user) throws ApiException {
-        Assert.assertTrue("No test user give", null != testUser);
-        ApiClient newClient = new ApiClient();
-        setBasePath(newClient);
-        newClient.setUserAgent("HTTP API Testing Agent");
-        newClient.login(user.getLogin(), user.getPassword());
-        return newClient;
-    }
-
-    protected void setBasePath(ApiClient newClient) {
-        String hostname = AJAXConfig.getProperty(AJAXConfig.Property.HOSTNAME);
-        if (hostname == null) {
-            hostname = "localhost";
-        }
-        String protocol = AJAXConfig.getProperty(AJAXConfig.Property.PROTOCOL);
-        if (protocol == null) {
-            protocol = "http";
-        }
-        newClient.setBasePath(protocol + "://" + hostname + "/ajax");
+        Assert.assertTrue("No test user give", null != user);
+        return user.generateApiClient();
     }
 
 }
