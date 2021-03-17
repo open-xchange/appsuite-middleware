@@ -1,3 +1,9 @@
+open-xchange-cluster-upgrade-from-7103-7104 (7.10.5-7) stable; urgency=medium
+
+  * Build for patch 2021-03-15 (5973)
+
+ -- Thorben Betten <thorben.betten@open-xchange.com>  Tue, 09 Mar 2021 16:40:52 +0000
+
 open-xchange-cluster-upgrade-from-7103-7104 (7.10.5-6) stable; urgency=medium
 
   * Build for patch 2021-02-22 (5961)

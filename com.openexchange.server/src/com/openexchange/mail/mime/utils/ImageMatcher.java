@@ -49,11 +49,15 @@
 
 package com.openexchange.mail.mime.utils;
 
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import com.openexchange.dispatcher.DispatcherPrefixService;
 import com.openexchange.image.ImageActionFactory;
+import com.openexchange.java.TimeoutMatcher;
+import com.openexchange.server.services.ServerServiceRegistry;
+import com.openexchange.threadpool.ThreadPoolService;
 
 /**
  * {@link ImageMatcher} - Looks up occurrences of
@@ -73,7 +77,7 @@ public final class ImageMatcher {
      * @return The appropriate matcher
      */
     public static ImageMatcher matcher(CharSequence content) {
-        return new ImageMatcher(content);
+        return content == null ? null : new ImageMatcher(content);
     }
 
     private static final int GROUP_FILE_ID = 5;
@@ -117,18 +121,33 @@ public final class ImageMatcher {
 
     // -------------------------------------------------------------------------------------------------------------------------------------
 
-    private final Matcher matcher;
+    private final TimeoutMatcher matcher;
+    private CharSequence content;
+    private FindState findState;
 
     /**
      * Initializes a new {@link ImageMatcher}.
      */
     private ImageMatcher(CharSequence content) {
         super();
+        this.content = content;
         final Pattern pattern = PATTERN_REF_IMG.get();
         if (null == pattern) {
             throw new IllegalStateException(ImageMatcher.class.getSimpleName() + " not initialized, yet.");
         }
-        matcher = pattern.matcher(content);
+        findState = FindState.NOT_CHECKED;
+
+        ThreadPoolService threadPool = ServerServiceRegistry.getInstance().getService(ThreadPoolService.class);
+        if (threadPool == null) {
+            matcher = TimeoutMatcher.newPassThroughInstance(pattern, content);
+        } else {
+            matcher = TimeoutMatcher.builder()
+                                    .withPattern(pattern)
+                                    .withInput(content)
+                                    .withTimeout(10, TimeUnit.SECONDS)
+                                    .withExecutor(threadPool.getExecutor())
+                                    .build();
+        }
     }
 
     /**
@@ -193,6 +212,28 @@ public final class ImageMatcher {
      * @return <tt>true</tt> if, and only if, a subsequence of the input sequence matches this matcher's pattern
      */
     public boolean find() {
+        // Fast plausibility check
+        switch (findState) {
+            case NOT_CHECKED:
+                String str = content.toString();
+                if (str.indexOf('/' + ImageActionFactory.ALIAS_APPENDIX) < 0 && str.indexOf("/file") < 0) {
+                    // Essential substring not included. Cannot find a match.
+                    findState = FindState.CANNOT_FIND;
+                    content = null; // Content no more needed
+                    return false;
+                }
+                // Essential substrings contained. Check for matches.
+                findState = FindState.CHECK_FIND;
+                content = null; // Content no more needed
+                break;
+            case CANNOT_FIND:
+                // Essential substring not included. Cannot find a match.
+                return false;
+            default:
+                break;
+        }
+
+        // Invoke matcher
         return matcher.find();
     }
 
@@ -251,6 +292,17 @@ public final class ImageMatcher {
      */
     public StringBuffer appendTail(StringBuffer sb) {
         return matcher.appendTail(sb);
+    }
+
+    // -------------------------------------------------------------------------------------------------------------------------------------
+
+    private static enum FindState {
+        /** Not yet checked */
+        NOT_CHECKED,
+        /** Essential substring not included. Cannot find a match. */
+        CANNOT_FIND,
+        /** Essential substrings contained. Check for matches. */
+        CHECK_FIND;
     }
 
 }

@@ -3073,11 +3073,11 @@ msgstr ""
 msgid "The file \"%1$s\" cannot be moved to \"%2$s\"."
 msgstr ""
 
-#. The notes of the file \"%1$s\" in folder \"%2$s\" are lost when moving it into the account \"%3$s\".
+#. The description of the file \"%1$s\" in folder \"%2$s\" are lost when moving it into the account \"%3$s\".
 #: com.openexchange.file.storage/src/com/openexchange/file/storage/FileStorageExceptionMessages.java:101
 msgid ""
-"The notes of the file \"%1$s\" in folder \"%2$s\" are lost when moving it "
-"into the account \"%3$s\"."
+"The description of the file \"%1$s\" in folder \"%2$s\" are lost when moving "
+"it into the account \"%3$s\"."
 msgstr ""
 
 #. All previous versions of the file \"%1$s\" in folder \"%2$s\" are lost when moving it into the account \"%3$s\".
@@ -3181,9 +3181,10 @@ msgstr ""
 msgid "Individual permissions are not supported in account \"%1$s\"."
 msgstr ""
 
-#. Saving notes for file \"%1$s\" is not supported in account \"%2$s\".
+#. Saving description for file \"%1$s\" is not supported in account \"%2$s\".
 #: com.openexchange.file.storage/src/com/openexchange/file/storage/FileStorageExceptionMessages.java:157
-msgid "Saving notes for file \"%1$s\" is not supported in account \"%2$s\"."
+msgid ""
+"Saving description for file \"%1$s\" is not supported in account \"%2$s\"."
 msgstr ""
 
 #. Assigning categories to file \"%1$s\" is not supported in account \"%2$s\".

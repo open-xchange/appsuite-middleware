@@ -79,6 +79,7 @@ import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestDataTools;
 import com.openexchange.annotation.Nullable;
 import com.openexchange.exception.OXException;
+import com.openexchange.exception.OXExceptionCodeSet;
 import com.openexchange.groupware.upload.StreamedUploadFile;
 import com.openexchange.groupware.upload.StreamedUploadFileIterator;
 import com.openexchange.java.Streams;
@@ -342,6 +343,8 @@ public class MailStorageCompositionSpaceService implements CompositionSpaceServi
         return new ImmutableCompositionSpaceInfo(id, draftPath, lastModified);
     }
 
+    private static final OXExceptionCodeSet CODES_COPY_TO_SENT_FOLDER_FAILED = new OXExceptionCodeSet(MailExceptionCode.COPY_TO_SENT_FOLDER_FAILED_QUOTA, MailExceptionCode.COPY_TO_SENT_FOLDER_FAILED);
+
     @Override
     public MailPath transportCompositionSpace(UUID compositionSpaceId, Optional<StreamedUploadFileIterator> optionalUploadedAttachments, UserSettingMail mailSettings, AJAXRequestData request, List<OXException> warnings, boolean deleteAfterTransport, final ClientToken clientToken) throws OXException {
         LookUpResult lookUpResult = requireCompositionSpaceToDraftAssociation(compositionSpaceId);
@@ -424,7 +427,17 @@ public class MailStorageCompositionSpaceService implements CompositionSpaceServi
 
             mailInterface = MailServletInterface.getInstance(serverSession);
 
-            MailPath sentMailPath = doTransport(request, accountId, mailInterface, composedMails, sentMessage, transportEqualToSent, usm);
+            MailPath sentMailPath = null;
+            OXException sendFailed = null;
+            try {
+                sentMailPath = doTransport(request, accountId, mailInterface, composedMails, sentMessage, transportEqualToSent, usm);
+            } catch (OXException oxe) {
+                if (!CODES_COPY_TO_SENT_FOLDER_FAILED.contains(oxe)) {
+                    // Re-throw...
+                    throw oxe;
+                }
+                sendFailed = oxe;
+            }
 
             // Commit results as actual transport was executed
             try {
@@ -496,6 +509,10 @@ public class MailStorageCompositionSpaceService implements CompositionSpaceServi
                         LOG.warn("Failed to rename shared attachments folder {} from compositon space {}.", sharedFolderRef.getFolderId(), getUnformattedString(compositionSpaceId), e);
                     }
                 }
+            }
+
+            if (sendFailed != null) {
+                throw sendFailed;
             }
 
             return sentMailPath;

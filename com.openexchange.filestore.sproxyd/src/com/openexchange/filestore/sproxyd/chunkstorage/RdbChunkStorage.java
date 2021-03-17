@@ -53,8 +53,8 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.Collections;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -131,7 +131,7 @@ public class RdbChunkStorage implements ChunkStorage {
             if (!rs.next()) {
                 return Collections.emptyList();
             }
-            List<UUID> documentIds = new LinkedList<UUID>();
+            List<UUID> documentIds = new ArrayList<UUID>();
             do {
                 documentIds.add(UUIDs.toUUID(rs.getBytes(1)));
             } while (rs.next());
@@ -147,7 +147,11 @@ public class RdbChunkStorage implements ChunkStorage {
     public List<Chunk> getChunks(UUID documentId) throws OXException {
         Connection con = databaseAccess.acquireReadOnly();
         try {
-            return getChunks(documentId, userId, contextId, true, con);
+            Optional<List<Chunk>> optionalChunks = getChunks(documentId, userId, contextId, con);
+            if (optionalChunks.isPresent()) {
+                return optionalChunks.get();
+            }
+            throw SproxydExceptionCode.NO_SUCH_DOCUMENT.create(UUIDs.getUnformattedString(documentId));
         } finally {
             databaseAccess.releaseReadOnly(con);
         }
@@ -157,13 +161,13 @@ public class RdbChunkStorage implements ChunkStorage {
     public Optional<List<Chunk>> optChunks(UUID documentId) throws OXException {
         Connection con = databaseAccess.acquireReadOnly();
         try {
-            return Optional.ofNullable(getChunks(documentId, userId, contextId, false, con));
+            return getChunks(documentId, userId, contextId, con);
         } finally {
             databaseAccess.releaseReadOnly(con);
         }
     }
 
-    private static List<Chunk> getChunks(UUID documentId, int userId, int contextId, boolean errorOnAbsence, Connection con) throws OXException {
+    private static Optional<List<Chunk>> getChunks(UUID documentId, int userId, int contextId, Connection con) throws OXException {
         PreparedStatement stmt = null;
         ResultSet rs = null;
         try {
@@ -173,18 +177,15 @@ public class RdbChunkStorage implements ChunkStorage {
             stmt.setBytes(3, UUIDs.toByteArray(documentId));
             rs = stmt.executeQuery();
             if (!rs.next()) {
-                if (errorOnAbsence) {
-                    throw SproxydExceptionCode.NO_SUCH_DOCUMENT.create(UUIDs.getUnformattedString(documentId));
-                }
-                return null;
+                return Optional.empty();
             }
 
-            List<Chunk> chunks = new LinkedList<Chunk>();
+            List<Chunk> chunks = new ArrayList<Chunk>();
             do {
                 chunks.add(new Chunk(documentId, UUIDs.toUUID(rs.getBytes(1)), rs.getLong(2), rs.getLong(3)));
             } while (rs.next());
             Collections.sort(chunks);
-            return chunks;
+            return Optional.of(chunks);
         } catch (SQLException e) {
             throw SproxydExceptionCode.SQL_ERROR.create(e, e.getMessage());
         } finally {

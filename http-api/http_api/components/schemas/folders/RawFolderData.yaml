@@ -2,11 +2,11 @@ id:
   type: string
   description: Object ID
 created_by:
-  type: string
+  type: integer
   description: User ID of the user who created this object.
   readOnly: true
 modified_by:
-  type: string
+  type: integer
   description: User ID of the user who last modified this object.
   readOnly: true
 creation_date:
