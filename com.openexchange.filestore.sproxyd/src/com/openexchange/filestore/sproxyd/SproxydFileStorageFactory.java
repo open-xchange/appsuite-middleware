@@ -56,9 +56,16 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutionException;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import org.apache.http.client.utils.URIBuilder;
+import com.google.common.cache.Cache;
+import com.google.common.cache.CacheBuilder;
+import com.google.common.cache.RemovalListener;
+import com.google.common.cache.RemovalNotification;
+import com.google.common.util.concurrent.UncheckedExecutionException;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.config.Interests;
 import com.openexchange.config.Reloadables;
@@ -90,17 +97,19 @@ public class SproxydFileStorageFactory implements FileStorageProvider, Interests
 
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(SproxydFileStorageFactory.class);
 
-    /**
-     * The URI scheme identifying sproxyd file storages.
-     */
+    /** The URI scheme identifying sproxyd file storages. */
     private static final String SPROXYD_SCHEME = "sproxyd";
 
-    /**
-     * The file storage's ranking compared to other sharing the same URL scheme.
-     */
+    /** The file storage's ranking compared to other sharing the same URL scheme. */
     private static final int RANKING = 547;
 
+    // -------------------------------------------------------------------------------------------------------------------------------------
+
+    /** The service look-up */
     private final ServiceLookup services;
+
+    /** The cache holding initialized end-point pools */
+    private final Cache<String, EndpointPool> endpointPoolCache;
 
     /**
      * Initializes a new {@link SproxydFileStorageFactory}.
@@ -110,6 +119,16 @@ public class SproxydFileStorageFactory implements FileStorageProvider, Interests
     public SproxydFileStorageFactory(ServiceLookup services) {
         super();
         this.services = services;
+        endpointPoolCache = CacheBuilder.newBuilder()
+            .weakValues()
+            .removalListener(new RemovalListener<String, EndpointPool>() {
+
+                @Override
+                public void onRemoval(RemovalNotification<String, EndpointPool> notification) {
+                    notification.getValue().close();
+                }
+            })
+            .build();
     }
 
     @Override
@@ -262,13 +281,36 @@ public class SproxydFileStorageFactory implements FileStorageProvider, Interests
     }
 
     /**
+     * Gets the HTTP client and endpoint pool for a configured denoted sproxyd filestore.
+     *
+     * @param filestoreID The filestore ID
+     * @return The endpoint pool
+     * @throws OXException If endpoint pool cannot be initialized
+     */
+    private EndpointPool initSproxydConfig(String filestoreID) throws OXException {
+        EndpointPool endpointPool = endpointPoolCache.getIfPresent(filestoreID);
+        if (endpointPool == null) {
+            try {
+                endpointPool = endpointPoolCache.get(filestoreID, new EndpointPoolLoaderCallable(filestoreID, this));
+            } catch (ExecutionException | UncheckedExecutionException e) {
+                Throwable cause = e.getCause();
+                if (cause instanceof OXException) {
+                    throw (OXException) cause;
+                }
+                throw OXException.general("Failed initializing S3 client.", cause);
+            }
+        }
+        return endpointPool;
+    }
+
+    /**
      * Initializes a new HTTP client and endpoint pool for a configured sproxyd filestore.
      *
      * @param filestoreID The filestore ID
-     * @return The configured items
-     * @throws OXException
+     * @return The new endpoint pool
+     * @throws OXException If endpoint pool cannot be initialized
      */
-    private EndpointPool initSproxydConfig(String filestoreID) throws OXException {
+    EndpointPool doInitSproxydConfig(String filestoreID) throws OXException {
         ConfigurationService configService = services.getService(ConfigurationService.class);
         PropertyNameBuilder nameBuilder = new PropertyNameBuilder("com.openexchange.filestore.sproxyd.");
         // End-point configuration
@@ -332,6 +374,25 @@ public class SproxydFileStorageFactory implements FileStorageProvider, Interests
             throw new IllegalArgumentException("No 'authority' part specified in filestore URI");
         }
         return authority;
+    }
+
+    // -------------------------------------------------------------------------------------------------------------------------------------
+
+    private static class EndpointPoolLoaderCallable implements Callable<EndpointPool> {
+
+        private final String filestoreID;
+        private final SproxydFileStorageFactory factory;
+
+        EndpointPoolLoaderCallable(String filestoreID, SproxydFileStorageFactory factory) {
+            super();
+            this.filestoreID = filestoreID;
+            this.factory = factory;
+        }
+
+        @Override
+        public EndpointPool call() throws Exception {
+            return factory.doInitSproxydConfig(filestoreID);
+        }
     }
 
 }

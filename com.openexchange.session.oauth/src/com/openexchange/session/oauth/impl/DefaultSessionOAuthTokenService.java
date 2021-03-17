@@ -81,8 +81,7 @@ public class DefaultSessionOAuthTokenService implements SessionOAuthTokenService
 
     @Override
     public RefreshResult checkOrRefreshTokens(Session session, TokenRefresher refresher, TokenRefreshConfig refreshConfig) throws InterruptedException, OXException {
-        OAuthTokenUpdaterImpl updater = new OAuthTokenUpdaterImpl(session, refresher, refreshConfig, tokenGetterSetter, services);
-        return updater.checkOrRefreshTokens();
+        return new OAuthTokenUpdaterImpl(session, refresher, refreshConfig, tokenGetterSetter, services).checkOrRefreshTokens();
     }
 
     @Override

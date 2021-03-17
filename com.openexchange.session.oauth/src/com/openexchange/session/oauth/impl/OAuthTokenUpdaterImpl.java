@@ -87,6 +87,15 @@ public class OAuthTokenUpdaterImpl {
     private final ServiceLookup services;
     private final OAuthTokensGetterSetter tokenGetterSetter;
 
+    /**
+     * Initializes a new {@link OAuthTokenUpdaterImpl}.
+     *
+     * @param session The session for which to check OAuth tokens
+     * @param refresher The refresher to use
+     * @param refreshConfig The refresh configuration
+     * @param tokenGetterSetter The getter/setter for tokens
+     * @param services The tracked OSGi services
+     */
     public OAuthTokenUpdaterImpl(Session session, TokenRefresher refresher, TokenRefreshConfig refreshConfig, OAuthTokensGetterSetter tokenGetterSetter, ServiceLookup services) {
         super();
         this.session = session;
@@ -97,6 +106,13 @@ public class OAuthTokenUpdaterImpl {
 
     }
 
+    /**
+     * Checks (and respectively refreshes) tokens associated with this updater's session.
+     *
+     * @return The refresh result
+     * @throws InterruptedException If operation gets interrupted
+     * @throws OXException If an error occurs while trying to refresh access token
+     */
     public RefreshResult checkOrRefreshTokens() throws InterruptedException, OXException {
         long lockTimeoutMillis = refreshConfig.getLockTimeoutMillis();
         long start = System.currentTimeMillis();
@@ -104,24 +120,28 @@ public class OAuthTokenUpdaterImpl {
         try {
             Optional<OAuthTokens> optTokens = tokenGetterSetter.getFromSessionAtomic(session, lockTimeoutMillis, TimeUnit.MILLISECONDS);
             if (!optTokens.isPresent()) {
+                LOG.debug("Could not get OAuth tokens from session '{}'", session.getSessionID());
                 return RefreshResult.fail(FailReason.PERMANENT_ERROR, "Could not get tokens from session");
             }
 
             tokens = optTokens.get();
         } catch (TimeoutException e) {
-            return RefreshResult.fail(FailReason.LOCK_TIMEOUT, "Lock timeout for expired session oauth token exceeded", e);
+            return RefreshResult.fail(FailReason.LOCK_TIMEOUT, "Lock timeout for expired session OAuth token exceeded", e);
         }
 
         if (tokens.accessExpiresWithin(refreshConfig.getRefreshThresholdMillis(), TimeUnit.MILLISECONDS)) {
+            LOG.debug("Need to refresh OAuth tokens from session '{}'", session.getSessionID());
             long lockMillisLeft = lockTimeoutMillis - (System.currentTimeMillis() - start);
             if (lockMillisLeft <= 0) {
-                return RefreshResult.fail(FailReason.LOCK_TIMEOUT, "Lock timeout for expired session oauth token exceeded");
+                LOG.debug("Could not refresh OAuth tokens from session '{}' since lock timeout is exceeded", session.getSessionID());
+                return RefreshResult.fail(FailReason.LOCK_TIMEOUT, "Lock timeout for expired session OAuth token exceeded");
             }
 
-            LOG.debug("Refreshing oauth tokens...");
+            LOG.debug("Trying to refresh OAuth tokens from session '{}'...", session.getSessionID());
             return refreshTokens(tokens, lockMillisLeft, TimeUnit.MILLISECONDS);
         }
 
+        LOG.debug("No need to refresh OAuth tokens from session '{}' since not expired", session.getSessionID());
         return RefreshResult.success(SuccessReason.NON_EXPIRED);
     }
 
@@ -130,20 +150,24 @@ public class OAuthTokenUpdaterImpl {
             return tokenGetterSetter.doThrowableAtomic(session, lockTimeout, lockUnit, () -> {
                 Optional<OAuthTokens> optTokens = tokenGetterSetter.getFromSession(session);
                 if (!optTokens.isPresent()) {
+                    LOG.debug("Could not get OAuth tokens from session '{}'", session.getSessionID());
                     return RefreshResult.fail(FailReason.PERMANENT_ERROR, "Could not get tokens from session");
                 }
 
                 OAuthTokens tokens = optTokens.get();
                 if (!oldTokens.getAccessToken().equals(tokens.getAccessToken())) {
-                    LOG.debug("Tokens were already refreshed by another thread");
+                    LOG.debug("OAuth tokens from session '{}' were already refreshed by another thread", session.getSessionID());
                     return RefreshResult.success(SuccessReason.CONCURRENT_REFRESH);
                 }
 
+                LOG.debug("Refreshing OAuth tokens from session '{}'...", session.getSessionID());
                 TokenRefreshResponse response = refresher.execute(tokens);
                 if (response.isSuccess()) {
+                    LOG.debug("Succeeded refreshing OAuth tokens from session '{}'...", session.getSessionID());
                     return handleSuccess(response.getTokens());
                 }
 
+                LOG.debug("Failed refreshing OAuth tokens from session '{}'...", session.getSessionID());
                 return handleError(oldTokens, response.getError());
             });
         } catch (TimeoutException e) {
@@ -159,7 +183,7 @@ public class OAuthTokenUpdaterImpl {
             // In case the expiration time becomes lower than the configured refresh threshold,
             // it doesn't make sense to use the new token pair at all. Any subsequent request
             // would immediately try to refresh it again.
-            LOG.info("Discarding refreshed tokens for session '{}'. Expiration is lower than configured refresh threshold: {}sec / {}sec",
+            LOG.info("Discarding refreshed OAuth tokens for session '{}'. Expiration is lower than configured refresh threshold: {}sec / {}sec",
                 session.getSessionID(),
                 TimeUnit.MILLISECONDS.toSeconds(tokens.getExpiresInMillis()),
                 refreshConfig.getRefreshThresholdUnit().toSeconds(refreshConfig.getRefreshThreshold()));
@@ -167,15 +191,15 @@ public class OAuthTokenUpdaterImpl {
         }
 
         tokenGetterSetter.setInSession(session, tokens);
-        SessiondService sessiondService = services.getService(SessiondService.class);
+        SessiondService sessiondService = services.getOptionalService(SessiondService.class);
         if (sessiondService == null) {
-            LOG.warn("Storing tokens in stored session failed. SessiondService unavailable.");
+            LOG.warn("Storing OAuth tokens in stored session '{}' failed. SessionD service unavailable.", session.getSessionID());
         } else {
             try {
-                LOG.info("Storing updated tokens in stored session '{}'", session.getSessionID());
+                LOG.info("Storing updated OAuth tokens in stored session '{}'", session.getSessionID());
                 sessiondService.storeSession(session.getSessionID(), false);
-            } catch (OXException e) {
-                LOG.warn("Storing tokens in stored session failed", e);
+            } catch (Exception e) {
+                LOG.warn("Storing OAuth tokens in stored session '{}' failed", session.getSessionID(), e);
             }
         }
 
@@ -185,7 +209,7 @@ public class OAuthTokenUpdaterImpl {
     private RefreshResult handleError(OAuthTokens oldTokens, Error error) {
         switch (error.getType()) {
             case INVALID_REFRESH_TOKEN:
-                LOG.info("Token refresh failed for due to invalid refresh token for session '{}'", session.getSessionID());
+                LOG.info("OAuth token refresh failed due to invalid refresh token for session '{}'", session.getSessionID());
                 return handleInvalidRefreshToken(oldTokens);
             case TEMPORARY:
                 if (error.hasException()) {

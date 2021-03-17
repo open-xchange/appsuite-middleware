@@ -1,3 +1,9 @@
+open-xchange-admin-soap (7.10.4-20) stable; urgency=medium
+
+  * Build for patch 2021-03-15 (5972)
+
+ -- Marcus Klein <marcus.klein@open-xchange.com>  Wed, 10 Mar 2021 11:31:03 +0000
+
 open-xchange-admin-soap (7.10.4-19) stable; urgency=medium
 
   * Build for patch 2021-02-25 (5960)

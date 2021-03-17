@@ -86,6 +86,13 @@ public class TokenRefresherImpl extends OAuthRequestIssuer implements TokenRefre
     private final Session session;
     private final ServiceLookup services;
 
+    /**
+     * Initializes a new {@link TokenRefresherImpl}.
+     *
+     * @param session The session for which tokens are supposed to be refreshed
+     * @param config The applicable configuration
+     * @param services The tracked OSGi services
+     */
     public TokenRefresherImpl(Session session, OAuthAuthenticationConfig config, ServiceLookup services) {
         super(config);
         this.session = session;
@@ -95,17 +102,21 @@ public class TokenRefresherImpl extends OAuthRequestIssuer implements TokenRefre
     @Override
     public TokenRefreshResponse execute(OAuthTokens currentTokens) throws OXException {
         if (!currentTokens.hasRefreshToken()) {
+            LOG.debug("Cannot refresh OAuth tokens from session '{}' since no refresh token available", session.getSessionID());
             return TokenRefreshResponse.MISSING_REFRESH_TOKEN;
         }
 
         //@formatter:off
+        Object debugInfoForRefreshToken = OAuthTokens.getDebugInfoForRefreshToken(currentTokens);
+        LOG.debug("Trying to refresh OAuth tokens from session '{}' using refresh token '{}'", session.getSessionID(), debugInfoForRefreshToken);
+
         RefreshToken refreshToken = new RefreshToken(currentTokens.getRefreshToken());
         AuthorizationGrant authorizationGrant = new RefreshTokenGrant(refreshToken);
         TokenRequest request = new TokenRequest(config.getTokenEndpoint(),
                                                 getClientAuthentication(),
                                                 authorizationGrant);
         //@formatter:on
-        LOG.debug("Sending refresh token request for session '{}'", session.getSessionID());
+        LOG.debug("Sending refresh token request for session '{}' using refresh token '{}'", session.getSessionID(), debugInfoForRefreshToken);
 
         try {
             TokenResponse response = TokenResponse.parse(HTTPSender.send(request.toHTTPRequest(), () -> {
@@ -115,7 +126,7 @@ public class TokenRefresherImpl extends OAuthRequestIssuer implements TokenRefre
                 }
                 return httpClientService.getHttpClient(OAuthAuthenticationHttpClientConfig.getClientIdOAuthAuthentication());
             }));
-            return validateResponse(response);
+            return validateResponse(response, debugInfoForRefreshToken);
         } catch (com.nimbusds.oauth2.sdk.ParseException | IOException e) {
             LOG.info("Unable to refresh access token for user {} in context {}. Session will be invalidated.", I(session.getUserId()), I(session.getContextId()));
             LOG.trace("Refresh failed because of {}", e.getMessage(), e);
@@ -124,7 +135,7 @@ public class TokenRefresherImpl extends OAuthRequestIssuer implements TokenRefre
         }
     }
 
-    private TokenRefreshResponse validateResponse(TokenResponse response) {
+    private TokenRefreshResponse validateResponse(TokenResponse response, Object debugInfoForRefreshToken) {
         if (!response.indicatesSuccess()) {
             TokenErrorResponse errorResponse = (TokenErrorResponse) response;
             LOG.debug("Got token error response to refresh request for session '{}'", session.getSessionID());
@@ -132,8 +143,10 @@ public class TokenRefresherImpl extends OAuthRequestIssuer implements TokenRefre
             ErrorObject error = errorResponse.getErrorObject();
             TokenRefreshResponse.Error rError;
             if (OAuth2Error.INVALID_GRANT.equals(error)) {
+                LOG.debug("Invalid refresh token from session '{}': {}", session.getSessionID(), debugInfoForRefreshToken);
                 rError = new TokenRefreshResponse.Error(ErrorType.INVALID_REFRESH_TOKEN, error.getCode(), error.getDescription());
             } else {
+                LOG.debug("Got token error response for refresh request for session '{}' using refresh token '{}'", session.getSessionID(), debugInfoForRefreshToken);
                 rError = new TokenRefreshResponse.Error(ErrorType.TEMPORARY, error.getCode(), error.getDescription());
             }
 
@@ -141,7 +154,7 @@ public class TokenRefresherImpl extends OAuthRequestIssuer implements TokenRefre
         }
 
         AccessTokenResponse tokenResponse = (AccessTokenResponse) response;
-        LOG.debug("Got success token response to refresh request for session '{}'", session.getSessionID());
+        LOG.debug("Got successful token response for refresh request for session '{}' using refresh token '{}'", session.getSessionID(), debugInfoForRefreshToken);
         return new TokenRefreshResponse(convertNimbusTokens(tokenResponse.getTokens()));
     }
 
