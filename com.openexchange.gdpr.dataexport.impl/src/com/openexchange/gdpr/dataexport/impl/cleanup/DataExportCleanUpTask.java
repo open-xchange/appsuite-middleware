@@ -191,13 +191,13 @@ public class DataExportCleanUpTask implements Runnable {
         }
 
         DataExportLock lock = DataExportLock.getInstance();
-        boolean acquired = false;
         Thread currentThread = Thread.currentThread();
         String prevName = currentThread.getName();
         currentThread.setName("DataExportCleanUpTask");
+        DataExportLock.LockAcquisition acquisition = null;
         try {
-            acquired = lock.acquireCleanUpTaskLock(true, databaseService);
-            if (acquired == false) {
+            acquisition = lock.acquireCleanUpTaskLock(true, databaseService);
+            if (acquisition.isNotAcquired()) {
                 // Failed to acquire clean-up lock
                 LOG.info("Failed to acquire clean-up lock for data export files since another process is currently running. Aborting clean-up run...");
                 return;
@@ -220,9 +220,9 @@ public class DataExportCleanUpTask implements Runnable {
             ExceptionUtils.handleThrowable(t);
             LOG.warn("Failed clean-up run for data exports", t);
         } finally {
-            if (acquired) {
+            if (acquisition != null) {
                 try {
-                    lock.releaseCleanUpTaskLock(true, databaseService);
+                    lock.releaseCleanUpTaskLock(acquisition, databaseService);
                 } catch (Exception e) {
                     LOG.warn("Failed to release clean-up lock for data export files", e);
                 }
