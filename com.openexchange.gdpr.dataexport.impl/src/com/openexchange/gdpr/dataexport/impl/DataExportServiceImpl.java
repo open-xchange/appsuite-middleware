@@ -902,10 +902,9 @@ public class DataExportServiceImpl implements DataExportService {
         DatabaseService databaseService = services.getServiceSafe(DatabaseService.class);
 
         DataExportLock lock = DataExportLock.getInstance();
-        boolean acquired = false;
+        DataExportLock.LockAcquisition acquisition = lock.acquireCleanUpTaskLock(false, databaseService);
         try {
-            acquired = lock.acquireCleanUpTaskLock(false, databaseService);
-            if (acquired == false) {
+            if (acquisition.isNotAcquired()) {
                 // Failed to acquire clean-up lock
                 LOG.info("Failed to acquire clean-up lock for data export files. Skipping job execution run...");
                 return;
@@ -973,12 +972,10 @@ public class DataExportServiceImpl implements DataExportService {
                 }
             }
         } finally {
-            if (acquired) {
-                try {
-                    lock.releaseCleanUpTaskLock(false, databaseService);
-                } catch (Exception e) {
-                    LOG.warn("Failed to release clean-up lock for data export files", e);
-                }
+            try {
+                lock.releaseCleanUpTaskLock(acquisition, databaseService);
+            } catch (Exception e) {
+                LOG.warn("Failed to release clean-up lock for data export files", e);
             }
         }
     }
