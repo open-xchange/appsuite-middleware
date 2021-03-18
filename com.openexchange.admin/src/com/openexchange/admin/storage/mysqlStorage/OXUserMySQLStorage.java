@@ -131,6 +131,7 @@ import com.openexchange.tools.net.URIDefaults;
 import com.openexchange.tools.net.URIParser;
 import com.openexchange.tools.oxfolder.OXFolderAdminHelper;
 import com.openexchange.tools.sql.DBUtils;
+import com.openexchange.tools.update.Tools;
 
 /**
  * @author cutmasta
@@ -1632,14 +1633,17 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
 
                 // Insert aliases
                 if (usrdata.getAliases() != null && usrdata.getAliases().size() > 0) {
-                    stmt = con.prepareStatement("INSERT INTO user_alias (cid, user, alias, uuid) VALUES(?,?,?,?);");
+                    boolean columnExists = Tools.columnExists(con, "user_alias", "uuid");
+                    stmt = con.prepareStatement(columnExists ? "INSERT INTO user_alias (cid, user, alias, uuid) VALUES(?,?,?,?)" : "INSERT INTO user_alias (cid, user, alias) VALUES(?,?,?)");
                     stmt.setInt(1, contextId);
                     stmt.setInt(2, userId);
                     for (String alias : usrdata.getAliases()) {
                         alias = alias.trim();
                         if (0 < alias.length()) {
                             stmt.setString(3, alias);
-                            stmt.setBytes(4, UUIDs.toByteArray(UUID.randomUUID()));
+                            if (columnExists) {
+                                stmt.setBytes(4, UUIDs.toByteArray(UUID.randomUUID()));
+                            }
                             stmt.executeUpdate();
                         }
                     }
