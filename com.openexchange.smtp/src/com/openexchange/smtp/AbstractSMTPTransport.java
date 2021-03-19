@@ -731,11 +731,19 @@ abstract class AbstractSMTPTransport extends MailTransport implements MimeSuppor
                     auditLogService.log(eventId, DefaultAttribute.valueFor(Name.LOGIN, session.getLoginName()), DefaultAttribute.valueFor(Name.IP_ADDRESS, session.getLocalIp()), DefaultAttribute.timestampFor(new Date()), DefaultAttribute.arbitraryFor("smtp.login", null == login ? "<none>" : login), DefaultAttribute.arbitraryFor("smtp.server", server), DefaultAttribute.arbitraryFor("smtp.port", Integer.toString(port)));
                 }
             }
-        } catch (javax.mail.AuthenticationFailedException e) {
-            if (accountId == Account.DEFAULT_ID) {
-                LOG.warn("", e);
+        } catch (OXException e) {
+            if (accountId == Account.DEFAULT_ID && MimeMailException.isAuthenticationFailedException(e)) {
+                // Do log failed authentication attempts against primary mail server
+                LOG.warn("Failed authentication against primary transport server", e);
             }
-            throw MimeMailExceptionCode.TRANSPORT_INVALID_CREDENTIALS.create(e, smtpConfig.getServer(), e.getMessage());
+            throw e;
+        } catch (javax.mail.AuthenticationFailedException e) {
+            OXException oxe = MimeMailExceptionCode.TRANSPORT_INVALID_CREDENTIALS.create(e, smtpConfig.getServer(), e.getMessage());
+            if (accountId == Account.DEFAULT_ID) {
+                // Do log failed authentication attempts against primary mail server
+                LOG.warn("Failed authentication against primary transport server", oxe);
+            }
+            throw oxe;
         } catch (MessagingException e) {
             if (MimeMailException.isSSLHandshakeException(e)) {
                 List<Object> displayArgs = new ArrayList<>(2);
@@ -814,7 +822,7 @@ abstract class AbstractSMTPTransport extends MailTransport implements MimeSuppor
                     switch (type) {
                         case RETRY:
                             transport.connect(host, port, user, password);
-                            break;
+                            return;
                         case EXCEPTION:
                             throw result.getError();
                         default:
