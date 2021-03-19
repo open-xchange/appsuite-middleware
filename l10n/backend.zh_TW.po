@@ -5,7 +5,7 @@ msgstr ""
 "Project-Id-Version: errors.zh_TW\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: \n"
-"PO-Revision-Date: 2021-01-14 21:54+0800\n"
+"PO-Revision-Date: 2021-03-19 10:15+0100\n"
 "Last-Translator: \n"
 "Language-Team: Traditional Chinese <LL@li.org>\n"
 "Language: zh_TW\n"
@@ -2857,6 +2857,10 @@ msgstr "「%2$s」當中已有名為「%1$s」的資料夾。"
 msgid "Push via long polling is disabled for user \"%1$s\" in context \"%1$s\""
 msgstr "使用者「%1$s」於環境「%1$s」的 long polling 推送已經停用"
 
+#: com.openexchange.drive/src/com/openexchange/drive/DriveExceptionMessages.java:100
+msgid "The directory is no longer accessible. Please select another directory."
+msgstr ""
+
 #: com.openexchange.external.account/src/com/openexchange/external/account/ExternalAccountExceptionMessages.java:62
 msgid "No external account provider found for module '%1$s'."
 msgstr "找不到模組「%1$s」的外部帳號提供者。"
@@ -3090,13 +3094,12 @@ msgstr "無法將資料夾「%1$s」移動至「%2$s」。"
 msgid "The file \"%1$s\" cannot be moved to \"%2$s\"."
 msgstr "無法將檔案「%1$s」移動至「%2$s」。"
 
-#. The notes of the file \"%1$s\" in folder \"%2$s\" are lost when moving it into the account \"%3$s\".
+#. The description of the file \"%1$s\" in folder \"%2$s\" are lost when moving it into the account \"%3$s\".
 #: com.openexchange.file.storage/src/com/openexchange/file/storage/FileStorageExceptionMessages.java:101
 msgid ""
-"The notes of the file \"%1$s\" in folder \"%2$s\" are lost when moving it "
-"into the account \"%3$s\"."
+"The description of the file \"%1$s\" in folder \"%2$s\" are lost when moving "
+"it into the account \"%3$s\"."
 msgstr ""
-"當移動至帳號「%3$s」時，「%2$s」資料夾中的「%1$s」檔案的所有註記皆將遺失。"
 
 #. All previous versions of the file \"%1$s\" in folder \"%2$s\" are lost when moving it into the account \"%3$s\".
 #: com.openexchange.file.storage/src/com/openexchange/file/storage/FileStorageExceptionMessages.java:104
@@ -3203,10 +3206,11 @@ msgstr "關聯的 %2$s 帳號不再存在。"
 msgid "Individual permissions are not supported in account \"%1$s\"."
 msgstr "「%1$s」帳號不支援獨立權限。"
 
-#. Saving notes for file \"%1$s\" is not supported in account \"%2$s\".
+#. Saving description for file \"%1$s\" is not supported in account \"%2$s\".
 #: com.openexchange.file.storage/src/com/openexchange/file/storage/FileStorageExceptionMessages.java:157
-msgid "Saving notes for file \"%1$s\" is not supported in account \"%2$s\"."
-msgstr "「%2$s」帳號不支援為「%1$s」檔案儲存註記。"
+msgid ""
+"Saving description for file \"%1$s\" is not supported in account \"%2$s\"."
+msgstr ""
 
 #. Assigning categories to file \"%1$s\" is not supported in account \"%2$s\".
 #: com.openexchange.file.storage/src/com/openexchange/file/storage/FileStorageExceptionMessages.java:160
@@ -14458,6 +14462,15 @@ msgstr "UTC"
 #: TimeZones.java:533
 msgid "Zulu"
 msgstr "祖魯"
+
+#~ msgid ""
+#~ "The notes of the file \"%1$s\" in folder \"%2$s\" are lost when moving it "
+#~ "into the account \"%3$s\"."
+#~ msgstr ""
+#~ "當移動至帳號「%3$s」時，「%2$s」資料夾中的「%1$s」檔案的所有註記皆將遺失。"
+
+#~ msgid "Saving notes for file \"%1$s\" is not supported in account \"%2$s\"."
+#~ msgstr "「%2$s」帳號不支援為「%1$s」檔案儲存註記。"
 
 #~ msgid ""
 #~ "%1$s has shared the %2$s \"%3$s\" with you. Please enter the share "

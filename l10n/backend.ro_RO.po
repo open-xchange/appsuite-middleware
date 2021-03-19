@@ -5,7 +5,7 @@ msgstr ""
 "Project-Id-Version: backend\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: \n"
-"PO-Revision-Date: 2021-01-25 14:59+0200\n"
+"PO-Revision-Date: 2021-03-19 10:14+0100\n"
 "Last-Translator: Adi David <adi@workshop-chapina.com>\n"
 "Language-Team: Romanian <ro@workshop-chapina.com>\n"
 "Language: ro_RO\n"
@@ -3042,6 +3042,10 @@ msgstr ""
 "Push prin votare la distanță este dezactivat pentru utilizator \"%1$s\" în "
 "contextul \"%2$s\""
 
+#: com.openexchange.drive/src/com/openexchange/drive/DriveExceptionMessages.java:100
+msgid "The directory is no longer accessible. Please select another directory."
+msgstr ""
+
 #: com.openexchange.external.account/src/com/openexchange/external/account/ExternalAccountExceptionMessages.java:62
 msgid "No external account provider found for module '%1$s'."
 msgstr "Nu s-a găsit niciun furnizor de cont extern pentru modulul '%1$s'."
@@ -3281,14 +3285,12 @@ msgstr "Dosarul \"%1$s\" nu poate fi mutat în \"%2$s\"."
 msgid "The file \"%1$s\" cannot be moved to \"%2$s\"."
 msgstr "Fișierul \"%1$s\" nu poate fi mutat în \"%2$s\"."
 
-#. The notes of the file \"%1$s\" in folder \"%2$s\" are lost when moving it into the account \"%3$s\".
+#. The description of the file \"%1$s\" in folder \"%2$s\" are lost when moving it into the account \"%3$s\".
 #: com.openexchange.file.storage/src/com/openexchange/file/storage/FileStorageExceptionMessages.java:101
 msgid ""
-"The notes of the file \"%1$s\" in folder \"%2$s\" are lost when moving it "
-"into the account \"%3$s\"."
+"The description of the file \"%1$s\" in folder \"%2$s\" are lost when moving "
+"it into the account \"%3$s\"."
 msgstr ""
-"Notele fișierului \"%1$s\" din dosarul \"%2$s\" vor fi pierdute la mutarea "
-"în contul \"%3$s\"."
 
 #. All previous versions of the file \"%1$s\" in folder \"%2$s\" are lost when moving it into the account \"%3$s\".
 #: com.openexchange.file.storage/src/com/openexchange/file/storage/FileStorageExceptionMessages.java:104
@@ -3404,12 +3406,11 @@ msgstr "Contul %2$s asociat nu mai există."
 msgid "Individual permissions are not supported in account \"%1$s\"."
 msgstr "Contul \"%1$s\" nu suportă permisiuni individuale."
 
-#. Saving notes for file \"%1$s\" is not supported in account \"%2$s\".
+#. Saving description for file \"%1$s\" is not supported in account \"%2$s\".
 #: com.openexchange.file.storage/src/com/openexchange/file/storage/FileStorageExceptionMessages.java:157
-msgid "Saving notes for file \"%1$s\" is not supported in account \"%2$s\"."
+msgid ""
+"Saving description for file \"%1$s\" is not supported in account \"%2$s\"."
 msgstr ""
-"Salvarea notelor pentru fișierul \"%1$s\" nu este suportată pentru contul "
-"\"%2$s\"."
 
 #. Assigning categories to file \"%1$s\" is not supported in account \"%2$s\".
 #: com.openexchange.file.storage/src/com/openexchange/file/storage/FileStorageExceptionMessages.java:160
@@ -15332,6 +15333,18 @@ msgstr "UTC"
 #: TimeZones.java:533
 msgid "Zulu"
 msgstr "Zulu"
+
+#~ msgid ""
+#~ "The notes of the file \"%1$s\" in folder \"%2$s\" are lost when moving it "
+#~ "into the account \"%3$s\"."
+#~ msgstr ""
+#~ "Notele fișierului \"%1$s\" din dosarul \"%2$s\" vor fi pierdute la "
+#~ "mutarea în contul \"%3$s\"."
+
+#~ msgid "Saving notes for file \"%1$s\" is not supported in account \"%2$s\"."
+#~ msgstr ""
+#~ "Salvarea notelor pentru fișierul \"%1$s\" nu este suportată pentru contul "
+#~ "\"%2$s\"."
 
 #~ msgid ""
 #~ "%1$s has shared the %2$s \"%3$s\" with you. Please enter the share "

@@ -5,7 +5,7 @@ msgstr ""
 "Project-Id-Version: backend\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: \n"
-"PO-Revision-Date: 2021-01-24 15:45+0100\n"
+"PO-Revision-Date: 2021-03-19 10:12+0100\n"
 "Last-Translator: Robert Kratky <robert@workshop-chapina.com>\n"
 "Language-Team: Czech <>\n"
 "Language: cs_CZ\n"
@@ -13,7 +13,7 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=3; plural=((n==1) ? 0 : (n>=2 && n<=4) ? 1 : 2);\n"
-"X-Generator: Lokalize 20.08.1\n"
+"X-Generator: Poedit 2.4.2\n"
 "X-Language: cs\n"
 "X-Source-Language: en\n"
 
@@ -2994,6 +2994,10 @@ msgid "Push via long polling is disabled for user \"%1$s\" in context \"%1$s\""
 msgstr ""
 "Push pomocí long polling je pro uživatele „%1$s“ v kontextu „%1$s“ vypnuté."
 
+#: com.openexchange.drive/src/com/openexchange/drive/DriveExceptionMessages.java:100
+msgid "The directory is no longer accessible. Please select another directory."
+msgstr ""
+
 #: com.openexchange.external.account/src/com/openexchange/external/account/ExternalAccountExceptionMessages.java:62
 msgid "No external account provider found for module '%1$s'."
 msgstr "Pro modul ‚%1$s‘ nebyl nalezen žádný externí poskytovatel účtů."
@@ -3231,14 +3235,12 @@ msgstr "Složku „%1$s“ nelze přesunout do „%2$s“."
 msgid "The file \"%1$s\" cannot be moved to \"%2$s\"."
 msgstr "Soubor „%1$s“ nelze přesunout do „%2$s“."
 
-#. The notes of the file \"%1$s\" in folder \"%2$s\" are lost when moving it into the account \"%3$s\".
+#. The description of the file \"%1$s\" in folder \"%2$s\" are lost when moving it into the account \"%3$s\".
 #: com.openexchange.file.storage/src/com/openexchange/file/storage/FileStorageExceptionMessages.java:101
 msgid ""
-"The notes of the file \"%1$s\" in folder \"%2$s\" are lost when moving it "
-"into the account \"%3$s\"."
+"The description of the file \"%1$s\" in folder \"%2$s\" are lost when moving "
+"it into the account \"%3$s\"."
 msgstr ""
-"Poznámky u souboru „%1$s“ ve složce „%2$s“ se ztratí při přesunu do účtu "
-"„%3$s“."
 
 #. All previous versions of the file \"%1$s\" in folder \"%2$s\" are lost when moving it into the account \"%3$s\".
 #: com.openexchange.file.storage/src/com/openexchange/file/storage/FileStorageExceptionMessages.java:104
@@ -3355,10 +3357,11 @@ msgstr "Připojený účet %2$s již neexistuje."
 msgid "Individual permissions are not supported in account \"%1$s\"."
 msgstr "V účtu „%1$s“ nejsou podporována individuální oprávnění."
 
-#. Saving notes for file \"%1$s\" is not supported in account \"%2$s\".
+#. Saving description for file \"%1$s\" is not supported in account \"%2$s\".
 #: com.openexchange.file.storage/src/com/openexchange/file/storage/FileStorageExceptionMessages.java:157
-msgid "Saving notes for file \"%1$s\" is not supported in account \"%2$s\"."
-msgstr "V účtu „%2$s“ není podporováno ukládání poznámek k souboru „%1$s“."
+msgid ""
+"Saving description for file \"%1$s\" is not supported in account \"%2$s\"."
+msgstr ""
 
 #. Assigning categories to file \"%1$s\" is not supported in account \"%2$s\".
 #: com.openexchange.file.storage/src/com/openexchange/file/storage/FileStorageExceptionMessages.java:160
@@ -15073,6 +15076,16 @@ msgstr "UTC"
 #: TimeZones.java:533
 msgid "Zulu"
 msgstr "Zulu"
+
+#~ msgid ""
+#~ "The notes of the file \"%1$s\" in folder \"%2$s\" are lost when moving it "
+#~ "into the account \"%3$s\"."
+#~ msgstr ""
+#~ "Poznámky u souboru „%1$s“ ve složce „%2$s“ se ztratí při přesunu do účtu "
+#~ "„%3$s“."
+
+#~ msgid "Saving notes for file \"%1$s\" is not supported in account \"%2$s\"."
+#~ msgstr "V účtu „%2$s“ není podporováno ukládání poznámek k souboru „%1$s“."
 
 #~ msgid ""
 #~ "%1$s has shared the %2$s \"%3$s\" with you. Please enter the share "

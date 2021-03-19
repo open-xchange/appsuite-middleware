@@ -5,7 +5,7 @@ msgstr ""
 "Project-Id-Version: backend\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: \n"
-"PO-Revision-Date: 2021-01-25 07:14+0100\n"
+"PO-Revision-Date: 2021-03-19 10:12+0100\n"
 "Last-Translator: Nicky Thomassen <nicky@workshop-chapina.com>\n"
 "Language-Team: Danish <da@workshop-chapina.com>\n"
 "Language: da_DK\n"
@@ -13,7 +13,7 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
-"X-Generator: Poedit 1.8.4\n"
+"X-Generator: Poedit 2.4.2\n"
 
 #. The verb "accepted", like "User A has accepted an appointment."
 #: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/ContextSensitiveMessages.java:84
@@ -2979,6 +2979,10 @@ msgstr ""
 "Skub via langsom forespørgelse er deaktiveret for bruger \"%1$s\" i kontekst "
 "\"%1$s\""
 
+#: com.openexchange.drive/src/com/openexchange/drive/DriveExceptionMessages.java:100
+msgid "The directory is no longer accessible. Please select another directory."
+msgstr ""
+
 #: com.openexchange.external.account/src/com/openexchange/external/account/ExternalAccountExceptionMessages.java:62
 msgid "No external account provider found for module '%1$s'."
 msgstr "Ingen ekstern kontoudbyder fundet til modulet '%1$s'."
@@ -3216,14 +3220,12 @@ msgstr "Mappen \"%1$s\" kan ikke flyttes til \"%2$s\"."
 msgid "The file \"%1$s\" cannot be moved to \"%2$s\"."
 msgstr "Filen \"%1$s\" kan ikke flyttes til \"%2$s\"."
 
-#. The notes of the file \"%1$s\" in folder \"%2$s\" are lost when moving it into the account \"%3$s\".
+#. The description of the file \"%1$s\" in folder \"%2$s\" are lost when moving it into the account \"%3$s\".
 #: com.openexchange.file.storage/src/com/openexchange/file/storage/FileStorageExceptionMessages.java:101
 msgid ""
-"The notes of the file \"%1$s\" in folder \"%2$s\" are lost when moving it into "
-"the account \"%3$s\"."
+"The description of the file \"%1$s\" in folder \"%2$s\" are lost when moving "
+"it into the account \"%3$s\"."
 msgstr ""
-"Noterne til filen \"%1$s\" i mappen \"%2$s\" vil gå tabt, når den bliver "
-"flyttet til kontoen \"%3$s\"."
 
 #. All previous versions of the file \"%1$s\" in folder \"%2$s\" are lost when moving it into the account \"%3$s\".
 #: com.openexchange.file.storage/src/com/openexchange/file/storage/FileStorageExceptionMessages.java:104
@@ -3338,10 +3340,11 @@ msgstr "Den tilknyttede %2$s-konto findes ikke mere."
 msgid "Individual permissions are not supported in account \"%1$s\"."
 msgstr "Individuelle brugerrettigheder er ikke tilladt for kontoen \"%1$s\"."
 
-#. Saving notes for file \"%1$s\" is not supported in account \"%2$s\".
+#. Saving description for file \"%1$s\" is not supported in account \"%2$s\".
 #: com.openexchange.file.storage/src/com/openexchange/file/storage/FileStorageExceptionMessages.java:157
-msgid "Saving notes for file \"%1$s\" is not supported in account \"%2$s\"."
-msgstr "Lagring af noter om filen \"%1$s\" er ikke tilladt for kontoen \"%2$s\"."
+msgid ""
+"Saving description for file \"%1$s\" is not supported in account \"%2$s\"."
+msgstr ""
 
 #. Assigning categories to file \"%1$s\" is not supported in account \"%2$s\".
 #: com.openexchange.file.storage/src/com/openexchange/file/storage/FileStorageExceptionMessages.java:160
@@ -15019,6 +15022,17 @@ msgstr "UTC"
 #: TimeZones.java:533
 msgid "Zulu"
 msgstr "Zulu"
+
+#~ msgid ""
+#~ "The notes of the file \"%1$s\" in folder \"%2$s\" are lost when moving it "
+#~ "into the account \"%3$s\"."
+#~ msgstr ""
+#~ "Noterne til filen \"%1$s\" i mappen \"%2$s\" vil gå tabt, når den bliver "
+#~ "flyttet til kontoen \"%3$s\"."
+
+#~ msgid "Saving notes for file \"%1$s\" is not supported in account \"%2$s\"."
+#~ msgstr ""
+#~ "Lagring af noter om filen \"%1$s\" er ikke tilladt for kontoen \"%2$s\"."
 
 #~ msgid ""
 #~ "%1$s has shared the %2$s \"%3$s\" with you. Please enter the share password "

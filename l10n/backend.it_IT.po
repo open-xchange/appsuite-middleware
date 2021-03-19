@@ -7,14 +7,14 @@ msgstr ""
 "Project-Id-Version: backend\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: \n"
-"PO-Revision-Date: 2021-01-22 10:49+0100\n"
+"PO-Revision-Date: 2021-03-19 10:13+0100\n"
 "Last-Translator: Vincenzo Reale <vincenzo@workshop-chapina.com>\n"
 "Language-Team: Italian <it@workshop-chapina.it>\n"
 "Language: it_IT\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"X-Generator: Lokalize 20.12.1\n"
+"X-Generator: Poedit 2.4.2\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 
 #. The verb "accepted", like "User A has accepted an appointment."
@@ -3064,6 +3064,10 @@ msgstr ""
 "Il push tramite long polling è disabilitato per l'utente \"%1$s\" nel "
 "contesto \"%1$s\""
 
+#: com.openexchange.drive/src/com/openexchange/drive/DriveExceptionMessages.java:100
+msgid "The directory is no longer accessible. Please select another directory."
+msgstr ""
+
 #: com.openexchange.external.account/src/com/openexchange/external/account/ExternalAccountExceptionMessages.java:62
 msgid "No external account provider found for module '%1$s'."
 msgstr "Nessun fornitore di account esterno trovato per il modulo '%1$s'."
@@ -3305,14 +3309,12 @@ msgstr "La cartella \"%1$s\" non può essere spostata in \"%2$s\"."
 msgid "The file \"%1$s\" cannot be moved to \"%2$s\"."
 msgstr "Il file \"%1$s\" non può essere spostato in \"%2$s\"."
 
-#. The notes of the file \"%1$s\" in folder \"%2$s\" are lost when moving it into the account \"%3$s\".
+#. The description of the file \"%1$s\" in folder \"%2$s\" are lost when moving it into the account \"%3$s\".
 #: com.openexchange.file.storage/src/com/openexchange/file/storage/FileStorageExceptionMessages.java:101
 msgid ""
-"The notes of the file \"%1$s\" in folder \"%2$s\" are lost when moving it "
-"into the account \"%3$s\"."
+"The description of the file \"%1$s\" in folder \"%2$s\" are lost when moving "
+"it into the account \"%3$s\"."
 msgstr ""
-"Le note del file \"%1$s\" nella cartella \"%2$s\" vengono perse quando si "
-"passa all'account \"%3$s\"."
 
 #. All previous versions of the file \"%1$s\" in folder \"%2$s\" are lost when moving it into the account \"%3$s\".
 #: com.openexchange.file.storage/src/com/openexchange/file/storage/FileStorageExceptionMessages.java:104
@@ -3428,12 +3430,11 @@ msgstr "L'account %2$s associato non esiste più."
 msgid "Individual permissions are not supported in account \"%1$s\"."
 msgstr "I permessi individuali non sono supportati nell'account \"%1$s\"."
 
-#. Saving notes for file \"%1$s\" is not supported in account \"%2$s\".
+#. Saving description for file \"%1$s\" is not supported in account \"%2$s\".
 #: com.openexchange.file.storage/src/com/openexchange/file/storage/FileStorageExceptionMessages.java:157
-msgid "Saving notes for file \"%1$s\" is not supported in account \"%2$s\"."
+msgid ""
+"Saving description for file \"%1$s\" is not supported in account \"%2$s\"."
 msgstr ""
-"Il salvataggio delle note per il file \"%1$s\" non è supportato nell'account "
-"\"%2$s\"."
 
 #. Assigning categories to file \"%1$s\" is not supported in account \"%2$s\".
 #: com.openexchange.file.storage/src/com/openexchange/file/storage/FileStorageExceptionMessages.java:160
@@ -11823,8 +11824,8 @@ msgid ""
 "%1$s has shared the file \"%2$s\" with you. Please enter your password to "
 "view it."
 msgstr ""
-"%1$s ha condiviso il file \"%2$s\" con te. Digita la password per"
-" visualizzarlo."
+"%1$s ha condiviso il file \"%2$s\" con te. Digita la password per "
+"visualizzarlo."
 
 #. The folder "Photos" is shared with you. Please enter the share password to view it.
 #: com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:77
@@ -11832,8 +11833,8 @@ msgid ""
 "The folder \"%1$s\" is shared with you. Please enter the share password to "
 "view it."
 msgstr ""
-"La cartella \"%1$s\" è condivisa con te. Digita la tua password di"
-" condivisione per visualizzarla."
+"La cartella \"%1$s\" è condivisa con te. Digita la tua password di "
+"condivisione per visualizzarla."
 
 #. The file "document.pdf" is shared with you. Please enter the share password to view it.
 #: com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:80
@@ -11841,8 +11842,8 @@ msgid ""
 "The file \"%1$s\" is shared with you. Please enter the share password to "
 "view it."
 msgstr ""
-"Il file \"%1$s\" è condiviso con te. Digita la tua password di"
-" condivisione per visualizzarlo."
+"Il file \"%1$s\" è condiviso con te. Digita la tua password di condivisione "
+"per visualizzarlo."
 
 #. The folder "Photos" is shared with you. Please enter your password to view it.
 #: com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:83
@@ -11850,16 +11851,16 @@ msgid ""
 "The folder \"%1$s\" is shared with you. Please enter your password to view "
 "it."
 msgstr ""
-"La cartella \"%1$s\" è condivisa con te. Digita la tua password per"
-" visualizzarla."
+"La cartella \"%1$s\" è condivisa con te. Digita la tua password per "
+"visualizzarla."
 
 #. The file "document.pdf" is shared with you. Please enter your password to view it.
 #: com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:86
 msgid ""
 "The file \"%1$s\" is shared with you. Please enter your password to view it."
 msgstr ""
-"Il file \"%1$s\" è condiviso con te. Digita la tua password per"
-" visualizzarlo."
+"Il file \"%1$s\" è condiviso con te. Digita la tua password per "
+"visualizzarlo."
 
 #. Login when opening a share protected with a password
 #: com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:89
@@ -15478,6 +15479,18 @@ msgstr "UTC"
 #: TimeZones.java:533
 msgid "Zulu"
 msgstr "Zulu"
+
+#~ msgid ""
+#~ "The notes of the file \"%1$s\" in folder \"%2$s\" are lost when moving it "
+#~ "into the account \"%3$s\"."
+#~ msgstr ""
+#~ "Le note del file \"%1$s\" nella cartella \"%2$s\" vengono perse quando si "
+#~ "passa all'account \"%3$s\"."
+
+#~ msgid "Saving notes for file \"%1$s\" is not supported in account \"%2$s\"."
+#~ msgstr ""
+#~ "Il salvataggio delle note per il file \"%1$s\" non è supportato "
+#~ "nell'account \"%2$s\"."
 
 #~ msgid ""
 #~ "%1$s has shared the %2$s \"%3$s\" with you. Please enter the share "

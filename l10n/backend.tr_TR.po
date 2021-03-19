@@ -7,7 +7,7 @@ msgstr ""
 "Project-Id-Version: \n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: \n"
-"PO-Revision-Date: 2021-01-14 15:02+0300\n"
+"PO-Revision-Date: 2021-03-19 10:15+0100\n"
 "Last-Translator: \n"
 "Language-Team: \n"
 "Language: tr\n"
@@ -3002,6 +3002,10 @@ msgstr ""
 "\"%1$s\" kullanıcısı için \"%1$s\" bağlamında long polling yoluyla push "
 "devre dışı"
 
+#: com.openexchange.drive/src/com/openexchange/drive/DriveExceptionMessages.java:100
+msgid "The directory is no longer accessible. Please select another directory."
+msgstr ""
+
 #: com.openexchange.external.account/src/com/openexchange/external/account/ExternalAccountExceptionMessages.java:62
 msgid "No external account provider found for module '%1$s'."
 msgstr "'%1$s' modülü için harici hesap sağlayıcısı bulunamadı."
@@ -3239,14 +3243,12 @@ msgstr "\"%1$s\" klasörü \"%2$s\" yoluna taşınamaz."
 msgid "The file \"%1$s\" cannot be moved to \"%2$s\"."
 msgstr "\"%1$s\" dosyası \"%2$s\" yoluna taşınamaz."
 
-#. The notes of the file \"%1$s\" in folder \"%2$s\" are lost when moving it into the account \"%3$s\".
+#. The description of the file \"%1$s\" in folder \"%2$s\" are lost when moving it into the account \"%3$s\".
 #: com.openexchange.file.storage/src/com/openexchange/file/storage/FileStorageExceptionMessages.java:101
 msgid ""
-"The notes of the file \"%1$s\" in folder \"%2$s\" are lost when moving it "
-"into the account \"%3$s\"."
+"The description of the file \"%1$s\" in folder \"%2$s\" are lost when moving "
+"it into the account \"%3$s\"."
 msgstr ""
-"\"%2$s\" klasöründeki \"%1$s\" dosyası \"%3$s\" hesabına taşınırsa dosya "
-"notları kaybolur."
 
 #. All previous versions of the file \"%1$s\" in folder \"%2$s\" are lost when moving it into the account \"%3$s\".
 #: com.openexchange.file.storage/src/com/openexchange/file/storage/FileStorageExceptionMessages.java:104
@@ -3363,10 +3365,11 @@ msgstr "İlişkili %2$s hesabı artık mevcut değil."
 msgid "Individual permissions are not supported in account \"%1$s\"."
 msgstr "Bireysel izinler \"%1$s\" hesabında desteklenmiyor."
 
-#. Saving notes for file \"%1$s\" is not supported in account \"%2$s\".
+#. Saving description for file \"%1$s\" is not supported in account \"%2$s\".
 #: com.openexchange.file.storage/src/com/openexchange/file/storage/FileStorageExceptionMessages.java:157
-msgid "Saving notes for file \"%1$s\" is not supported in account \"%2$s\"."
-msgstr "\"%2$s\" hesabında \"%1$s\" dosyası için not kaydetme desteklenmiyor."
+msgid ""
+"Saving description for file \"%1$s\" is not supported in account \"%2$s\"."
+msgstr ""
 
 #. Assigning categories to file \"%1$s\" is not supported in account \"%2$s\".
 #: com.openexchange.file.storage/src/com/openexchange/file/storage/FileStorageExceptionMessages.java:160
@@ -15167,6 +15170,17 @@ msgstr "UTC"
 #: TimeZones.java:533
 msgid "Zulu"
 msgstr "Zulu"
+
+#~ msgid ""
+#~ "The notes of the file \"%1$s\" in folder \"%2$s\" are lost when moving it "
+#~ "into the account \"%3$s\"."
+#~ msgstr ""
+#~ "\"%2$s\" klasöründeki \"%1$s\" dosyası \"%3$s\" hesabına taşınırsa dosya "
+#~ "notları kaybolur."
+
+#~ msgid "Saving notes for file \"%1$s\" is not supported in account \"%2$s\"."
+#~ msgstr ""
+#~ "\"%2$s\" hesabında \"%1$s\" dosyası için not kaydetme desteklenmiyor."
 
 #~ msgid ""
 #~ "%1$s has shared the %2$s \"%3$s\" with you. Please enter the share "

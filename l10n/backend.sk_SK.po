@@ -6,7 +6,7 @@ msgstr ""
 "Project-Id-Version: Open-Xchange 6\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: \n"
-"PO-Revision-Date: 2021-01-14 12:16+0200\n"
+"PO-Revision-Date: 2021-03-19 10:15+0100\n"
 "Last-Translator: \n"
 "Language-Team: x\n"
 "Language: sk\n"
@@ -14,7 +14,7 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=3; plural=(n==1) ? 0 : (n>=2 && n<=4) ? 1 : 2;\n"
-"X-Generator: Virtaal 0.7.1\n"
+"X-Generator: Poedit 2.4.2\n"
 
 #. The verb "accepted", like "User A has accepted an appointment."
 #: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/ContextSensitiveMessages.java:84
@@ -3014,6 +3014,10 @@ msgstr ""
 "Push metódou long polling je vypnutý pre používateľa \"%1$s\" v kontexte "
 "\"%1$s\""
 
+#: com.openexchange.drive/src/com/openexchange/drive/DriveExceptionMessages.java:100
+msgid "The directory is no longer accessible. Please select another directory."
+msgstr ""
+
 #: com.openexchange.external.account/src/com/openexchange/external/account/ExternalAccountExceptionMessages.java:62
 msgid "No external account provider found for module '%1$s'."
 msgstr "Nebol nájdený žiadny externý poskytovateľ účtu pre modul \"%1$s\"."
@@ -3252,14 +3256,12 @@ msgstr "Priečinok \"%1$s\" nemožno presunúť do \"%2$s\"."
 msgid "The file \"%1$s\" cannot be moved to \"%2$s\"."
 msgstr "Súbor \"%1$s\" nemožno presunúť do \"%2$s\"."
 
-#. The notes of the file \"%1$s\" in folder \"%2$s\" are lost when moving it into the account \"%3$s\".
+#. The description of the file \"%1$s\" in folder \"%2$s\" are lost when moving it into the account \"%3$s\".
 #: com.openexchange.file.storage/src/com/openexchange/file/storage/FileStorageExceptionMessages.java:101
 msgid ""
-"The notes of the file \"%1$s\" in folder \"%2$s\" are lost when moving it "
-"into the account \"%3$s\"."
+"The description of the file \"%1$s\" in folder \"%2$s\" are lost when moving "
+"it into the account \"%3$s\"."
 msgstr ""
-"Poznámky súboru \"%1$s\" v priečinku \"%2$s\" sa stratia ak ho presuniete do "
-"účtu \"%3$s\"."
 
 #. All previous versions of the file \"%1$s\" in folder \"%2$s\" are lost when moving it into the account \"%3$s\".
 #: com.openexchange.file.storage/src/com/openexchange/file/storage/FileStorageExceptionMessages.java:104
@@ -3376,11 +3378,11 @@ msgstr "Pridružený účet %2$s už neexistuje."
 msgid "Individual permissions are not supported in account \"%1$s\"."
 msgstr "Individuálne oprávnenia nie sú v účte \"%1$s\" podporované."
 
-#. Saving notes for file \"%1$s\" is not supported in account \"%2$s\".
+#. Saving description for file \"%1$s\" is not supported in account \"%2$s\".
 #: com.openexchange.file.storage/src/com/openexchange/file/storage/FileStorageExceptionMessages.java:157
-msgid "Saving notes for file \"%1$s\" is not supported in account \"%2$s\"."
+msgid ""
+"Saving description for file \"%1$s\" is not supported in account \"%2$s\"."
 msgstr ""
-"Ukladanie poznámok k súboru \"%1$s\" nie je v účte \"%2$s\" podporované."
 
 #. Assigning categories to file \"%1$s\" is not supported in account \"%2$s\".
 #: com.openexchange.file.storage/src/com/openexchange/file/storage/FileStorageExceptionMessages.java:160
@@ -11583,8 +11585,8 @@ msgid ""
 "%1$s has shared the file \"%2$s\" with you. Please enter the share password "
 "to view it."
 msgstr ""
-"%1$s s vami zdieľa súbor \"%2$s\". Prosím, zadajte heslo zdieľania, aby ste ho "
-"mohli zobraziť."
+"%1$s s vami zdieľa súbor \"%2$s\". Prosím, zadajte heslo zdieľania, aby ste "
+"ho mohli zobraziť."
 
 #. John Doe has shared the folder "Photos" with you. Please enter your password to view it.
 #: com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:71
@@ -11592,8 +11594,8 @@ msgid ""
 "%1$s has shared the folder \"%2$s\" with you. Please enter your password to "
 "view it."
 msgstr ""
-"%1$s s vami zdieľa priečinok \"%2$s\". Prosím, zadajte svoje heslo, aby ste ho "
-"mohli zobraziť."
+"%1$s s vami zdieľa priečinok \"%2$s\". Prosím, zadajte svoje heslo, aby ste "
+"ho mohli zobraziť."
 
 #. John Doe has shared the file "document.pdf" with you. Please enter your password to view it.
 #: com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:74
@@ -15205,6 +15207,17 @@ msgstr "UTC"
 #: TimeZones.java:533
 msgid "Zulu"
 msgstr "Zulu"
+
+#~ msgid ""
+#~ "The notes of the file \"%1$s\" in folder \"%2$s\" are lost when moving it "
+#~ "into the account \"%3$s\"."
+#~ msgstr ""
+#~ "Poznámky súboru \"%1$s\" v priečinku \"%2$s\" sa stratia ak ho presuniete "
+#~ "do účtu \"%3$s\"."
+
+#~ msgid "Saving notes for file \"%1$s\" is not supported in account \"%2$s\"."
+#~ msgstr ""
+#~ "Ukladanie poznámok k súboru \"%1$s\" nie je v účte \"%2$s\" podporované."
 
 #~ msgid ""
 #~ "%1$s has shared the %2$s \"%3$s\" with you. Please enter the share "
