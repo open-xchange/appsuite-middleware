@@ -119,7 +119,7 @@ public class EndpointPool {
         }
 
         LOG.debug("Sproxyd endpoint pool [{}]: Scheduling heartbeat timer task", filestoreId);
-        heartbeat = services.getServiceSafe(TimerService.class).scheduleWithFixedDelay(new Heartbeat(filestoreId, this), heartbeatInterval, heartbeatInterval);
+        heartbeat = services.getServiceSafe(TimerService.class).scheduleWithFixedDelay(new Heartbeat(filestoreId, this, services), heartbeatInterval, heartbeatInterval);
         initMetrics();
     }
 
@@ -252,16 +252,18 @@ public class EndpointPool {
         }
     }
 
-    private final class Heartbeat implements Runnable {
+    private static class Heartbeat implements Runnable {
 
         @SuppressWarnings("hiding")
         private final String filestoreId;
         private final EndpointPool endpoints;
+        private final ServiceLookup services;
 
-        Heartbeat(String filestoreId, EndpointPool endpoints) {
+        Heartbeat(String filestoreId, EndpointPool endpoints, ServiceLookup services) {
             super();
             this.filestoreId = filestoreId;
             this.endpoints = endpoints;
+            this.services = services;
         }
 
         @SuppressWarnings("synthetic-access")
