@@ -47,58 +47,31 @@
  *
  */
 
-package com.openexchange.contacts.json.actions;
+package com.openexchange.contact.provider;
 
-import java.util.Collections;
-import java.util.Date;
-import java.util.List;
-import java.util.Set;
-import com.google.common.collect.ImmutableSet;
-import com.openexchange.ajax.requesthandler.AJAXRequestResult;
-import com.openexchange.ajax.requesthandler.annotation.restricted.RestrictedAction;
-import com.openexchange.contact.provider.composition.IDBasedContactsAccess;
-import com.openexchange.contacts.json.ContactRequest;
+import com.openexchange.contact.common.ContactsAccount;
+import com.openexchange.contact.common.ContactsParameters;
 import com.openexchange.exception.OXException;
-import com.openexchange.groupware.contact.helpers.ContactField;
-import com.openexchange.groupware.container.Contact;
-import com.openexchange.server.ServiceLookup;
+import com.openexchange.session.Session;
 
 /**
- * {@link BirthdaysAction}
+ * {@link FallbackAwareContactsProvider}
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
- * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
+ * @since v8.0.0
  */
-@RestrictedAction(module = IDBasedContactAction.MODULE_NAME, type = RestrictedAction.Type.READ)
-public class BirthdaysAction extends IDBasedContactAction {
-
-    private static final Set<String> OPTIONAL_PARAMETERS = ImmutableSet.of(PARAM_FIELDS, PARAM_ORDER, PARAM_ORDER_BY, PARAM_LEFT_HAND_LIMIT, PARAM_RIGHT_HAND_LIMIT, PARAM_COLLATION);
+public interface FallbackAwareContactsProvider extends ContactsProvider {
 
     /**
-     * Initializes a new {@link BirthdaysAction}.
+     * Initializes a <i>fallback</i> {@link ContactsAccess} for a specific contacts account to be used as placeholder after the regular
+     * access could not be established due to an error.
      *
-     * @param serviceLookup The service lookup to use
+     * @param session The user's session
+     * @param account The contacts account to connect to
+     * @param parameters Additional contacts parameters
+     * @param error The error to include in the accesses' contact settings or folders, or <code>null</code> if not defined
+     * @return A fallback contacts access for the calendar account
      */
-    public BirthdaysAction(ServiceLookup serviceLookup) {
-        super(serviceLookup);
-    }
+    ContactsAccess connectFallback(Session session, ContactsAccount account, ContactsParameters parameters, OXException error);
 
-    @Override
-    protected AJAXRequestResult perform(IDBasedContactsAccess access, ContactRequest request) throws OXException {
-        Date from = request.getStart();
-        Date until = request.getEnd();
-        List<String> folderIds = null != request.optFolderID() ? Collections.singletonList(request.optFolderID()) : null;
-        List<Contact> contacts = access.searchContactsWithBirthday(folderIds, from, until);
-        return new AJAXRequestResult(sortIfNeeded(request, contacts, ContactField.BIRTHDAY), getLatestTimestamp(contacts), "contact");
-    }
-
-    @Override
-    protected ContactField[] getFields(ContactRequest request) throws OXException {
-        return request.getFields(ContactField.BIRTHDAY);
-    }
-
-    @Override
-    protected Set<String> getOptionalParameters() {
-        return OPTIONAL_PARAMETERS;
-    }
 }

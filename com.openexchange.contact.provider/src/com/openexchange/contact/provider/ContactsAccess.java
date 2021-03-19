@@ -56,5 +56,10 @@ package com.openexchange.contact.provider;
  * @since v7.10.5
  */
 public interface ContactsAccess {
-    //Marker interface
+
+    /**
+     * Closes the contacts access.
+     */
+    void close();
+
 }

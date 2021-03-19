@@ -1,3 +1,5 @@
+
+package com.openexchange.contact.provider.groupware;
 /*
  *
  *    OPEN-XCHANGE legal information
@@ -8,7 +10,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH group of companies.
+ *    trademarks of the OX Software GmbH. group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -47,58 +49,77 @@
  *
  */
 
-package com.openexchange.contacts.json.actions;
-
-import java.util.Collections;
-import java.util.Date;
 import java.util.List;
-import java.util.Set;
-import com.google.common.collect.ImmutableSet;
-import com.openexchange.ajax.requesthandler.AJAXRequestResult;
-import com.openexchange.ajax.requesthandler.annotation.restricted.RestrictedAction;
-import com.openexchange.contact.provider.composition.IDBasedContactsAccess;
-import com.openexchange.contacts.json.ContactRequest;
+import com.openexchange.contact.common.ContactsParameters;
+import com.openexchange.contact.common.GroupwareContactsFolder;
 import com.openexchange.exception.OXException;
-import com.openexchange.groupware.contact.helpers.ContactField;
 import com.openexchange.groupware.container.Contact;
-import com.openexchange.server.ServiceLookup;
+import com.openexchange.groupware.search.ContactsSearchObject;
 
 /**
- * {@link BirthdaysAction}
+ * {@link InternalContactsAccess}
+ *
+ * The {@link GroupwareContactsAccess} for the default internal address books.
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
- * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
+ * @since v8.0.0
  */
-@RestrictedAction(module = IDBasedContactAction.MODULE_NAME, type = RestrictedAction.Type.READ)
-public class BirthdaysAction extends IDBasedContactAction {
-
-    private static final Set<String> OPTIONAL_PARAMETERS = ImmutableSet.of(PARAM_FIELDS, PARAM_ORDER, PARAM_ORDER_BY, PARAM_LEFT_HAND_LIMIT, PARAM_RIGHT_HAND_LIMIT, PARAM_COLLATION);
+public interface InternalContactsAccess extends GroupwareContactsAccess {
 
     /**
-     * Initializes a new {@link BirthdaysAction}.
+     * Gets the user's default contacts folder.
      *
-     * @param serviceLookup The service lookup to use
+     * @return The default folder
      */
-    public BirthdaysAction(ServiceLookup serviceLookup) {
-        super(serviceLookup);
-    }
+    GroupwareContactsFolder getDefaultFolder() throws OXException;
 
-    @Override
-    protected AJAXRequestResult perform(IDBasedContactsAccess access, ContactRequest request) throws OXException {
-        Date from = request.getStart();
-        Date until = request.getEnd();
-        List<String> folderIds = null != request.optFolderID() ? Collections.singletonList(request.optFolderID()) : null;
-        List<Contact> contacts = access.searchContactsWithBirthday(folderIds, from, until);
-        return new AJAXRequestResult(sortIfNeeded(request, contacts, ContactField.BIRTHDAY), getLatestTimestamp(contacts), "contact");
-    }
+    /**
+     * Gets a value indicating if the folder with the supplied identifier contains foreign objects, i.e. contacts that were not created
+     * by the current session's user.
+     *
+     * @param folderId The ID of the folder to check
+     * @return <code>true</code> if the folder contains foreign objects, <code>false</code>, otherwise.
+     */
+    boolean containsForeignObjectInFolder(String folderId) throws OXException;
 
-    @Override
-    protected ContactField[] getFields(ContactRequest request) throws OXException {
-        return request.getFields(ContactField.BIRTHDAY);
-    }
+    /**
+     * Counts all contacts within the given folder.
+     *
+     * @param folderId ID of the folder to count in
+     * @return the number of contacts
+     * @throws OXException if an error is occurred
+     */
+    int countContacts(String folderId) throws OXException;
 
-    @Override
-    protected Set<String> getOptionalParameters() {
-        return OPTIONAL_PARAMETERS;
-    }
+    /**
+     * Deletes all contacts in the specified folder
+     *
+     * @param folderId The folder identifier
+     * @throws OXException if an error is occurred
+     */
+    void deleteContacts(String folderId) throws OXException;
+
+    /**
+     * Gets a value indicating if the folder with the supplied identifier is empty.
+     *
+     * @param folderId The ID of the folder to check
+     * @return <code>true</code> if the folder is empty, <code>false</code>, otherwise.
+     */
+    boolean isFolderEmpty(String folderId) throws OXException;
+
+    /**
+     * Searches for contacts.
+     * <p/>
+     * The following contacts parameters are evaluated:
+     * <ul>
+     * <li>{@link ContactsParameters#PARAMETER_FIELDS}</li>
+     * <li>{@link ContactsParameters#PARAMETER_ORDER}</li>
+     * <li>{@link ContactsParameters#PARAMETER_ORDER_BY}</li>
+     * </ul>
+     *
+     * @param contactSearch The contact search object
+     * @return The contacts found with the search
+     */
+    List<Contact> searchContacts(ContactsSearchObject contactSearch) throws OXException;
+
 }

@@ -94,8 +94,8 @@ import com.openexchange.contact.common.GroupwareFolderType;
 import com.openexchange.contact.common.UsedForSync;
 import com.openexchange.contact.provider.ContactsProviderExceptionCodes;
 import com.openexchange.contact.provider.composition.impl.idmangling.IDMangler;
-import com.openexchange.contact.provider.extensions.BasicSearchAware;
-import com.openexchange.contact.provider.groupware.GroupwareContactsAccess;
+import com.openexchange.contact.provider.folder.AnnualDateFolderSearchAware;
+import com.openexchange.contact.provider.folder.FolderSearchAware;
 import com.openexchange.exception.OXException;
 import com.openexchange.folderstorage.ContactsFolderConverter;
 import com.openexchange.folderstorage.ContentType;
@@ -109,7 +109,6 @@ import com.openexchange.groupware.contact.helpers.ContactField;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.search.ContactSearchObject;
 import com.openexchange.groupware.search.ContactsSearchObject;
-import com.openexchange.groupware.search.ContactsSearchObject.Range;
 import com.openexchange.groupware.search.Order;
 import com.openexchange.java.Collators;
 import com.openexchange.java.Strings;
@@ -129,7 +128,7 @@ import com.openexchange.tools.session.ServerSessionAdapter;
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  * @since v7.10.5
  */
-public class InternalContactsAccess implements GroupwareContactsAccess, BasicSearchAware {
+public class InternalContactsAccess implements com.openexchange.contact.provider.groupware.InternalContactsAccess, FolderSearchAware, AnnualDateFolderSearchAware {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(InternalContactsAccess.class);
 
@@ -140,7 +139,7 @@ public class InternalContactsAccess implements GroupwareContactsAccess, BasicSea
 
     /**
      * Initializes a new {@link InternalContactsAccess}.
-     * 
+     *
      * @param session The session
      * @param services The services lookup instance
      */
@@ -148,6 +147,11 @@ public class InternalContactsAccess implements GroupwareContactsAccess, BasicSea
         super();
         this.session = session;
         this.services = services;
+    }
+
+    @Override
+    public void close() {
+        // nothing to do
     }
 
     @Override
@@ -287,18 +291,6 @@ public class InternalContactsAccess implements GroupwareContactsAccess, BasicSea
     }
 
     @Override
-    public List<Contact> getContactsInFolders(List<String> folderIds) throws OXException {
-        decorateSessionWithReadOnlyConnection();
-        return iterateContacts(getContactService().getAllContacts(session.getSession(), folderIds, getFields(), getSortOptions()));
-    }
-
-    @Override
-    public List<Contact> getContacts() throws OXException {
-        decorateSessionWithReadOnlyConnection();
-        return iterateContacts(getContactService().getAllContacts(session.getSession(), getFields(), getSortOptions()));
-    }
-
-    @Override
     public List<Contact> getDeletedContacts(String folderId, Date from) throws OXException {
         decorateSessionWithReadOnlyConnection();
         return iterateContacts(getContactService().getDeletedContacts(session.getSession(), folderId, from, getFields(), getSortOptions()));
@@ -343,21 +335,24 @@ public class InternalContactsAccess implements GroupwareContactsAccess, BasicSea
     }
 
     @Override
-    public List<Contact> autocompleteContacts(String query, AutocompleteParameters parameters) throws OXException {
+    public List<Contact> autocompleteContacts(List<String> folderIds, String query) throws OXException {
         decorateSessionWithReadOnlyConnection();
-        return iterateContacts(getContactService().autocompleteContacts(session.getSession(), query, parameters, getFields(), getSortOptions()));
+        AutocompleteParameters parameters = AutocompleteParameters.newInstance();
+        parameters.put(AutocompleteParameters.REQUIRE_EMAIL, session.get(ContactsParameters.PARAMETER_REQUIRE_EMAIL, Boolean.class));
+        parameters.put(AutocompleteParameters.IGNORE_DISTRIBUTION_LISTS, session.get(ContactsParameters.PARAMETER_IGNORE_DISTRIBUTION_LISTS, Boolean.class));
+        return iterateContacts(getContactService().autocompleteContacts(session.getSession(), folderIds, query, parameters, getFields(), getSortOptions()));
     }
 
     @Override
-    public List<Contact> searchContactsWithBirthday(Date from, Date until) throws OXException {
+    public List<Contact> searchContactsWithBirthday(List<String> folderIds, Date from, Date until) throws OXException {
         decorateSessionWithReadOnlyConnection();
-        return iterateContacts(getContactService().searchContactsWithBirthday(session.getSession(), from, until, getFields(), getSortOptions()));
+        return iterateContacts(getContactService().searchContactsWithBirthday(session.getSession(), folderIds, from, until, getFields(), getSortOptions()));
     }
 
     @Override
-    public List<Contact> searchContactsWithAnniversary(Date from, Date until) throws OXException {
+    public List<Contact> searchContactsWithAnniversary(List<String> folderIds, Date from, Date until) throws OXException {
         decorateSessionWithReadOnlyConnection();
-        return iterateContacts(getContactService().searchContactsWithAnniversary(session.getSession(), from, until, getFields(), getSortOptions()));
+        return iterateContacts(getContactService().searchContactsWithAnniversary(session.getSession(), folderIds, from, until, getFields(), getSortOptions()));
     }
 
     ///////////////////////////////// CONTACTS PARAMETERS /////////////////////////////
@@ -797,25 +792,28 @@ public class InternalContactsAccess implements GroupwareContactsAccess, BasicSea
 
     /**
      * Converts the new {@link ContactsSearchObject} to its legacy counter-part {@link ContactSearchObject}
-     * 
+     *
      * @param contactSearch the object to convert
      * @return The converted object
      */
-    @SuppressWarnings("deprecation")
     private ContactSearchObject convert(ContactsSearchObject contactSearch) {
         ContactSearchObject cso = new ContactSearchObject();
-        for (String folderId : contactSearch.getFolders()) {
-            try {
-                cso.addFolder(i(Integer.valueOf(IDMangler.getRelativeFolderId(folderId))));
-            } catch (@SuppressWarnings("unused") OXException e) {
-                LOGGER.warn("Ignoring malformed folder id {}", folderId);
+        if (null != contactSearch.getFolders()) {
+            for (String folderId : contactSearch.getFolders()) {
+                try {
+                    cso.addFolder(i(Integer.valueOf(IDMangler.getRelativeFolderId(folderId))));
+                } catch (@SuppressWarnings("unused") OXException e) {
+                    LOGGER.warn("Ignoring malformed folder id {}", folderId);
+                }
             }
         }
-        for (String folderId : contactSearch.getExcludeFolders()) {
-            try {
-                cso.addExcludeFolder(i(Integer.valueOf(IDMangler.getRelativeFolderId(folderId))));
-            } catch (@SuppressWarnings("unused") OXException e) {
-                LOGGER.warn("Ignoring malformed excluded folder id {}", folderId);
+        if (null != contactSearch.getExcludeFolders()) {
+            for (String folderId : contactSearch.getExcludeFolders()) {
+                try {
+                    cso.addExcludeFolder(i(Integer.valueOf(IDMangler.getRelativeFolderId(folderId))));
+                } catch (@SuppressWarnings("unused") OXException e) {
+                    LOGGER.warn("Ignoring malformed excluded folder id {}", folderId);
+                }
             }
         }
         cso.setPattern(contactSearch.getPattern());
@@ -830,25 +828,8 @@ public class InternalContactsAccess implements GroupwareContactsAccess, BasicSea
         cso.setEmail1(contactSearch.getEmail1());
         cso.setEmail2(contactSearch.getEmail2());
         cso.setEmail3(contactSearch.getEmail3());
-        cso.setDepartment(contactSearch.getDepartment());
-        cso.setStreetBusiness(contactSearch.getStreetBusiness());
-        cso.setCityBusiness(contactSearch.getCityBusiness());
-        cso.setDynamicSearchField(contactSearch.getDynamicSearchField());
-        cso.setDynamicSearchFieldValue(contactSearch.getDynamicSearchFieldValue());
-        cso.setPrivatePostalCodeRange((String[]) contactSearch.getRange(Range.PRIVATE_POSTAL_CODE_RANGE));
-        cso.setBusinessPostalCodeRange((String[]) contactSearch.getRange(Range.BUSINESS_POSTAL_CODE_RANGE));
-        cso.setOtherPostalCodeRange((String[]) contactSearch.getRange(Range.OTHER_POSTAL_CODE_RANGE));
-        cso.setBirthdayRange((Date[]) contactSearch.getRange(Range.BIRTHDAY_RANGE));
-        cso.setAnniversaryRange((Date[]) contactSearch.getRange(Range.ANNIVERSARY_RANGE));
-        cso.setNumberOfEmployeesRange((String[]) contactSearch.getRange(Range.NUMBER_OF_EMPLOYEE_RANGE));
-        cso.setSalesVolumeRange((String[]) contactSearch.getRange(Range.SALES_VOLUME_RANGE));
-        cso.setCreationDateRange((Date[]) contactSearch.getRange(Range.CREATION_DATE_RANGE));
-        cso.setLastModifiedRange((Date[]) contactSearch.getRange(Range.LAST_MODIFIED_RANGE));
         cso.setCatgories(contactSearch.getCatgories());
         cso.setSubfolderSearch(contactSearch.isSubfolderSearch());
-        cso.setYomiCompany(contactSearch.getYomiCompany());
-        cso.setYomiFirstname(contactSearch.getYomiFirstName());
-        cso.setYomiLastName(contactSearch.getYomiLastName());
         return cso;
     }
 

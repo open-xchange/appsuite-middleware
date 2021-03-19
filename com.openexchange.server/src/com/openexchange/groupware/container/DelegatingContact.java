@@ -69,7 +69,7 @@ public class DelegatingContact extends Contact {
 
     /**
      * Initializes a new {@link DelegatingContact}.
-     * 
+     *
      * @param delegate The contact delegate
      * @throws IllegalArgumentException if the delegate is <code>null</code>
      */
@@ -2652,6 +2652,46 @@ public class DelegatingContact extends Contact {
     }
 
     @Override
+    public boolean containsId() {
+        return delegate.containsId();
+    }
+
+    @Override
+    public String getId() {
+        return delegate.getId();
+    }
+
+    @Override
+    public void setId(String id) {
+        delegate.setId(id);
+    }
+
+    @Override
+    public void removeId() {
+        delegate.removeId();
+    }
+
+    @Override
+    public boolean containsFolderId() {
+        return delegate.containsFolderId();
+    }
+
+    @Override
+    public String getFolderId() {
+        return delegate.getFolderId();
+    }
+
+    @Override
+    public void setFolderId(String id) {
+        delegate.setFolderId(id);
+    }
+
+    @Override
+    public void removeFolderId() {
+        delegate.removeFolderId();
+    }
+
+    @Override
     public void set(int field, Object value) {
         delegate.set(field, value);
     }
@@ -2715,4 +2755,5 @@ public class DelegatingContact extends Contact {
     public String getSortName(Locale locale) {
         return delegate.getSortName(locale);
     }
+
 }

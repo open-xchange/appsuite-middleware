@@ -23,15 +23,18 @@ properties:
       This paramenter is optional but searching in all contact folders that are
       viewable and where objects can be read in is more expensive on that
       database than searching in a dedicated number of them.
+      
+      Mutual exclusive with 'exclude_folders'.
     items:
-      type: integer
+      type: string
   exclude_folders:
     type: array
     description: >
       If a list of folder identifiers or at least a single folder identifier is
-      given, those folders will not be searched for contacts.
+      given, those folders will not be searched for contacts. Mutual exclusive with 
+      'folders'.
     items:
-      type: integer
+      type: string
   last_name:
     type: string
     description: Searches contacts where the last name match with the given last name.

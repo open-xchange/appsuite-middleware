@@ -20,8 +20,8 @@ public class YomiContactSearchTests extends AbstractManagedContactTest {
 
         contact = new Contact();
         contact.setTitle("Herr");
-        contact.setGivenName("Baab");
-        contact.setSurName("Abba");
+        contact.setGivenName(YOMI_FIRST_NAME);
+        contact.setSurName(YOMI_LAST_NAME);
         contact.setDisplayName("Baab Abba");
         contact.setStreetBusiness("Franz-Meier Weg 17");
         contact.setCityBusiness("Test Stadt");
@@ -52,8 +52,6 @@ public class YomiContactSearchTests extends AbstractManagedContactTest {
         search.setEmail2(b);
         search.setEmail3(b);
         search.setCatgories(b);
-        search.setYomiFirstname(b);
-        search.setYomiLastName(b);
         search.setOrSearch(true);
         Contact[] results = cotm.searchAction(search);
 

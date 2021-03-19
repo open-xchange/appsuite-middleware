@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2016-2020 OX Software GmbH
+ *     Copyright (C) 2017-2020 OX Software GmbH
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,58 +47,23 @@
  *
  */
 
-package com.openexchange.contacts.json.actions;
+package com.openexchange.contact.provider.composition.impl;
 
-import java.util.Collections;
-import java.util.Date;
-import java.util.List;
-import java.util.Set;
-import com.google.common.collect.ImmutableSet;
-import com.openexchange.ajax.requesthandler.AJAXRequestResult;
-import com.openexchange.ajax.requesthandler.annotation.restricted.RestrictedAction;
-import com.openexchange.contact.provider.composition.IDBasedContactsAccess;
-import com.openexchange.contacts.json.ContactRequest;
-import com.openexchange.exception.OXException;
-import com.openexchange.groupware.contact.helpers.ContactField;
-import com.openexchange.groupware.container.Contact;
-import com.openexchange.server.ServiceLookup;
+import static com.openexchange.java.Autoboxing.I;
+import com.openexchange.config.lean.DefaultProperty;
+import com.openexchange.config.lean.Property;
 
 /**
- * {@link BirthdaysAction}
+ * {@link ContactsProviderProperty}
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
- * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
+ * @since v8.0.0
  */
-@RestrictedAction(module = IDBasedContactAction.MODULE_NAME, type = RestrictedAction.Type.READ)
-public class BirthdaysAction extends IDBasedContactAction {
+public enum ContactsProviderProperty {
+    ;
 
-    private static final Set<String> OPTIONAL_PARAMETERS = ImmutableSet.of(PARAM_FIELDS, PARAM_ORDER, PARAM_ORDER_BY, PARAM_LEFT_HAND_LIMIT, PARAM_RIGHT_HAND_LIMIT, PARAM_COLLATION);
+    static final Property ALL_FOLDERS_FOR_AUTOCOMPLETE = DefaultProperty.valueOf("com.openexchange.contacts.allFoldersForAutoComplete", Boolean.TRUE);
 
-    /**
-     * Initializes a new {@link BirthdaysAction}.
-     *
-     * @param serviceLookup The service lookup to use
-     */
-    public BirthdaysAction(ServiceLookup serviceLookup) {
-        super(serviceLookup);
-    }
+    static final Property MINIMUM_SEARCH_CHARACTERS = DefaultProperty.valueOf("com.openexchange.MinimumSearchCharacters", I(0));
 
-    @Override
-    protected AJAXRequestResult perform(IDBasedContactsAccess access, ContactRequest request) throws OXException {
-        Date from = request.getStart();
-        Date until = request.getEnd();
-        List<String> folderIds = null != request.optFolderID() ? Collections.singletonList(request.optFolderID()) : null;
-        List<Contact> contacts = access.searchContactsWithBirthday(folderIds, from, until);
-        return new AJAXRequestResult(sortIfNeeded(request, contacts, ContactField.BIRTHDAY), getLatestTimestamp(contacts), "contact");
-    }
-
-    @Override
-    protected ContactField[] getFields(ContactRequest request) throws OXException {
-        return request.getFields(ContactField.BIRTHDAY);
-    }
-
-    @Override
-    protected Set<String> getOptionalParameters() {
-        return OPTIONAL_PARAMETERS;
-    }
 }

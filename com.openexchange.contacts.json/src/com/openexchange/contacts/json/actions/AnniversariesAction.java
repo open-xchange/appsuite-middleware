@@ -49,7 +49,7 @@
 
 package com.openexchange.contacts.json.actions;
 
-import static com.google.common.collect.ImmutableList.of;
+import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import java.util.Set;
@@ -87,7 +87,8 @@ public class AnniversariesAction extends IDBasedContactAction {
     protected AJAXRequestResult perform(IDBasedContactsAccess access, ContactRequest request) throws OXException {
         Date from = request.getStart();
         Date until = request.getEnd();
-        List<Contact> contacts = request.optFolderID() == null ? access.searchContactsWithAnniversary(from, until) : access.searchContactsWithAnniversary(of(request.getFolderID()), from, until);
+        List<String> folderIds = null != request.optFolderID() ? Collections.singletonList(request.optFolderID()) : null;
+        List<Contact> contacts = access.searchContactsWithAnniversary(folderIds, from, until);
         return new AJAXRequestResult(sortIfNeeded(request, contacts, ContactField.ANNIVERSARY), getLatestTimestamp(contacts), "contact");
     }
 

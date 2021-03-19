@@ -53,22 +53,17 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Set;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.junit.Assert;
 import org.junit.Test;
-import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.contact.action.AllRequest;
 import com.openexchange.ajax.framework.CommonAllResponse;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.container.FolderObject;
-import com.openexchange.test.ContactTestManager;
 import com.openexchange.tools.arrays.Arrays;
 
 public class AllTest extends AbstractManagedContactTest {
@@ -120,45 +115,6 @@ public class AllTest extends AbstractManagedContactTest {
          */
         Assert.assertArrayEquals("'admin=true' differs from default result", allContactsDefault, allContactsWithAdmin);
         assertEquals("unexpected number of contacts in result", allContactsWithAdmin.length, allContactsWithoutAdmin.length);
-    }
-
-    @Test
-    public void testAllVisibleFolders() throws Exception {
-        /*
-         * ensure there's at least one contact in another folder (besides the global addressbook)
-         */
-        cotm.newAction(ContactTestManager.generateContact(getClient().getValues().getPrivateContactFolder()));
-        /*
-         * prepare special all request without folder ID
-         */
-        int columnIDs[] = new int[] { Contact.OBJECT_ID, Contact.FOLDER_ID };
-        AllRequest allRequest = new AllRequest(-1, columnIDs) {
-
-            @Override
-            public Parameter[] getParameters() {
-                List<Parameter> paramsWithoutFolder = new ArrayList<Parameter>();
-                Parameter[] params = super.getParameters();
-                for (Parameter param : params) {
-                    if (false == AJAXServlet.PARAMETER_FOLDERID.equals(param.getName())) {
-                        paramsWithoutFolder.add(param);
-                    }
-                }
-                return paramsWithoutFolder.toArray(new Parameter[paramsWithoutFolder.size()]);
-            }
-        };
-        /*
-         * check results
-         */
-        CommonAllResponse response = cotm.getClient().execute(allRequest);
-        JSONArray data = (JSONArray) response.getResponse().getData();
-        List<Contact> contacts = cotm.transform(data, columnIDs);
-        assertNotNull("got no contacts", contacts);
-        assertTrue("got no contacts", 0 < contacts.size());
-        Set<String> folderIDs = new HashSet<String>();
-        for (Contact contact : contacts) {
-            folderIDs.add(String.valueOf(contact.getParentFolderID()));
-        }
-        assertTrue("got no results from different folders", 1 < folderIDs.size());
     }
 
     private Contact[] allAction(int folderId, int[] columns, Boolean admin) throws OXException, IOException, JSONException {

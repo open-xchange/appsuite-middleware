@@ -49,12 +49,14 @@
 
 package com.openexchange.contact.provider.folder;
 
+import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import com.openexchange.contact.ContactID;
 import com.openexchange.contact.common.ContactsFolder;
 import com.openexchange.contact.common.ContactsParameters;
 import com.openexchange.contact.provider.ContactsAccess;
+import com.openexchange.contact.provider.ContactsProviderExceptionCodes;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contact.helpers.ContactField;
 import com.openexchange.groupware.container.Contact;
@@ -93,33 +95,18 @@ public interface FolderContactsAccess extends ContactsAccess {
      * @param clientTimestamp The last know timestamp by the client
      * @throws OXException if an error is occurred
      */
-    void deleteContact(ContactID contactId, long clientTimestamp) throws OXException;
+    default void deleteContact(ContactID contactId, long clientTimestamp) throws OXException {
+        deleteContacts(Collections.singletonList(contactId), clientTimestamp);
+    }
 
     /**
      * Deletes all contacts with the specified contact identifiers
-     * 
+     *
      * @param contactIds The contact identifiers
      * @param clientTimestamp The last know timestamp by the client
      * @throws OXException if an error is occurred
      */
     void deleteContacts(List<ContactID> contactsIds, long clientTimestamp) throws OXException;
-
-    /**
-     * Deletes all contacts in the specified folder
-     * 
-     * @param folderId The folder identifier
-     * @throws OXException if an error is occurred
-     */
-    void deleteContacts(String folderId) throws OXException;
-
-    /**
-     * Counts all contacts within the given folder.
-     *
-     * @param folderId ID of the folder to count in
-     * @return the number of contacts
-     * @throws OXException if an error is occurred
-     */
-    int countContacts(String folderId) throws OXException;
 
     /**
      * Creates a new folder.
@@ -169,16 +156,22 @@ public interface FolderContactsAccess extends ContactsAccess {
      * <ul>
      * <li>{@link ContactsParameters#PARAMETER_FIELDS}</li>
      * </ul>
-     * 
+     *
      * @param folderId The identifier of the folder representing the current user's contacts
      * @param contactId The identifier of the contact to get
      * @return The contact
      */
-    Contact getContact(String folderId, String contactId) throws OXException;
+    default Contact getContact(String folderId, String contactId) throws OXException {
+        List<Contact> contacts = getContacts(Collections.singletonList(new ContactID(folderId, contactId)));
+        if (null == contacts || contacts.isEmpty()) {
+            throw ContactsProviderExceptionCodes.CONTACT_NOT_FOUND_IN_FOLDER.create(folderId, contactId);
+        }
+        return contacts.get(0);
+    }
 
     /**
      * Gets a list of contacts with the specified identifiers.
-     * 
+     *
      * <p/>
      * The following contacts parameters are evaluated:
      * <ul>
@@ -192,7 +185,7 @@ public interface FolderContactsAccess extends ContactsAccess {
 
     /**
      * Gets all contacts in a specific contacts folder.
-     * 
+     *
      * <p/>
      * The following contacts parameters are evaluated:
      * <ul>
@@ -200,27 +193,11 @@ public interface FolderContactsAccess extends ContactsAccess {
      * <li>{@link ContactsParameters#PARAMETER_ORDER}</li>
      * <li>{@link ContactsParameters#PARAMETER_ORDER_BY}</li>
      * </ul>
-     * 
+     *
      * @param folderId The identifier of the folder to get the contacts from
      * @return The contacts
      */
     List<Contact> getContacts(String folderId) throws OXException;
-
-    /**
-     * Gets all contacts from one or more specific contact folders.
-     * 
-     * <p/>
-     * The following contacts parameters are evaluated:
-     * <ul>
-     * <li>{@link ContactsParameters#PARAMETER_FIELDS}</li>
-     * <li>{@link ContactsParameters#PARAMETER_ORDER}</li>
-     * <li>{@link ContactsParameters#PARAMETER_ORDER_BY}</li>
-     * </ul>
-     * 
-     * @param folderId The identifier of the folder to get the contacts from
-     * @return The resulting contacts
-     */
-    List<Contact> getContactsInFolders(List<String> folderIds) throws OXException;
 
     /**
      * Gets a list of modified contacts in the specified folder
@@ -230,7 +207,7 @@ public interface FolderContactsAccess extends ContactsAccess {
      * <li>{@link ContactsParameters#PARAMETER_FIELDS}</li>
      * <li>{@link ContactsParameters#PARAMETER_ORDER}</li>
      * <li>{@link ContactsParameters#PARAMETER_ORDER_BY}</li>
-     * 
+     *
      * @param folderId the folder identifier
      * @param from Specifies the lower inclusive limit of the queried range, i.e. only
      *            contacts modified on or after this date should be returned.
@@ -246,34 +223,13 @@ public interface FolderContactsAccess extends ContactsAccess {
      * <li>{@link ContactsParameters#PARAMETER_FIELDS}</li>
      * <li>{@link ContactsParameters#PARAMETER_ORDER}</li>
      * <li>{@link ContactsParameters#PARAMETER_ORDER_BY}</li>
-     * 
+     *
      * @param folderId the folder identifier
      * @param from Specifies the lower inclusive limit of the queried range, i.e. only
      *            contacts deleted on or after this date should be returned.
      * @return The list of deleted contacts
      */
     List<Contact> getDeletedContacts(String folderId, Date from) throws OXException;
-
-    /**
-     * Gets all contacts from all visible folders.
-     * <p/>
-     * The following contacts parameters are evaluated:
-     * <ul>
-     * <li>{@link ContactsParameters#PARAMETER_FIELDS}</li>
-     * <li>{@link ContactsParameters#PARAMETER_ORDER}</li>
-     * <li>{@link ContactsParameters#PARAMETER_ORDER_BY}</li>
-     * 
-     * @return the contacts
-     */
-    List<Contact> getContacts() throws OXException;
-
-    /**
-     * Gets a value indicating if the folder with the supplied identifier is empty.
-     *
-     * @param folderId The ID of the folder to check
-     * @return <code>true</code> if the folder is empty, <code>false</code>, otherwise.
-     */
-    boolean isFolderEmpty(String folderId) throws OXException;
 
     /**
      * Returns if the provided {@link ContactField}s are supported by the storage. To 'support' the given field the storage should

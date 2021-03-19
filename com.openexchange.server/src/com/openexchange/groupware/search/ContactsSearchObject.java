@@ -49,10 +49,6 @@
 
 package com.openexchange.groupware.search;
 
-import java.util.Date;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
 import java.util.Set;
 
 /**
@@ -62,53 +58,6 @@ import java.util.Set;
  * @since v7.10.5
  */
 public class ContactsSearchObject {
-
-    public enum Range {
-
-        PRIVATE_POSTAL_CODE_RANGE("privatepostalcoderange", String.class),
-        BUSINESS_POSTAL_CODE_RANGE("businesspostalcoderange", String.class),
-        OTHER_POSTAL_CODE_RANGE("otherspostalcoderange", String.class),
-        BIRTHDAY_RANGE("birthdayrange", Date.class),
-        ANNIVERSARY_RANGE("anniversaryrange", Date.class),
-        NUMBER_OF_EMPLOYEE_RANGE("numberofemployeerange", Date.class),
-        SALES_VOLUME_RANGE("salesvolumerange", String.class),
-        CREATION_DATE_RANGE("creationdaterange", Date.class),
-        LAST_MODIFIED_RANGE("lastmodifiedrange", Date.class);
-
-        private final String key;
-        private final Class<?> type;
-
-        /**
-         * Initializes a new {@link ContactsSearchObject.Range}.
-         */
-        private Range(String key, Class<?> type) {
-            this.key = key;
-            this.type = type;
-        }
-
-        /**
-         * Returns the key
-         *
-         * @return
-         */
-        public String getKey() {
-            return key;
-        }
-
-        /**
-         * Returns the type of the expected values
-         *
-         * @return The type of the expected values
-         */
-        public Class<?> getType() {
-            return type;
-        }
-    }
-
-    /**
-     * Undefined integer value.
-     */
-    public static final int NO_FOLDER = -1;
 
     /**
      * No search pattern.
@@ -123,19 +72,12 @@ public class ContactsSearchObject {
     private String givenname = null;
     private String surname = null;
     private String displayName = null;
-    private String yomiSurname = null;
-    private String yomiGivenname = null;
 
     private String company = null;
-    private String yomiCompany = null;
 
     private String email1 = null;
     private String email2 = null;
     private String email3 = null;
-
-    private String city_business = null;
-    private String street_business = null;
-    private String department = null;
 
     private boolean startLetter = false;
     private boolean emailAutoComplete = false;
@@ -143,36 +85,13 @@ public class ContactsSearchObject {
     private boolean orSearch = false;
     private boolean exactMatch = false;
 
-    private final Set<String> folders = new HashSet<>();
-    private final Set<String> excludeFolders = new HashSet<>();
+    private Set<String> folders;
+    private Set<String> excludeFolders;
 
     private String pattern = NO_PATTERN;
     private String catgories = NO_CATEGORIES;
 
     private boolean subfolderSearch;
-    private boolean allfoldersSearch;
-
-    @Deprecated
-    private int[] dynamicSearchField = null;
-    @Deprecated
-    private String[] dynamicSearchFieldValue = null;
-
-    /**
-     * Search ranges such as:
-     * <ul>
-     * <li>private postal code ({@link String} array)</li>
-     * <li>business postal code ({@link String} array)</li>
-     * <li>other postal code ({@link String} array)</li>
-     * <li>birthday range ({@link Date} array)</li>
-     * <li>anniversary range ({@link Date} array)</li>
-     * <li>number of employees range ({@link String} array)</li>
-     * <li>sales volume range ({@link String} array)</li>
-     * <li>creation date range ({@link Date} array)</li>
-     * <li>last modified range ({@link Date} array)</li>
-     * </ul>
-     * can be defined.
-     */
-    private final Map<Range, Object[]> ranges = new HashMap<>();
 
     /**
      * Initializes a new {@link ContactsSearchObject}.
@@ -182,17 +101,29 @@ public class ContactsSearchObject {
     }
 
     /**
-     * Convenience method to set all E-Mail fields to specified value.
-     * <p>
-     * Simply a short-hand for calling {@link #setEmail1(String) setEmail1},
-     * {@link #setEmail2(String) setEmail2} and {@link #setEmail3(String) setEmail3} for the same value.
+     * Initializes a new {@link ContactsSearchObject} based on antoher one.
      *
-     * @param email The E-Mail address to set
+     * @param other The search object to take over the properties from
      */
-    public void setAllEmail(final String email) {
-        this.email1 = email;
-        this.email2 = email;
-        this.email3 = email;
+    public ContactsSearchObject(ContactsSearchObject other) {
+        this();
+        setCatgories(other.getCatgories());
+        setCompany(other.getCompany());
+        setDisplayName(other.getDisplayName());
+        setEmail1(other.getEmail1());
+        setEmail2(other.getEmail2());
+        setEmail3(other.getEmail3());
+        setEmailAutoComplete(other.isEmailAutoComplete());
+        setExactMatch(other.isExactMatch());
+        setExcludeFolders(other.getExcludeFolders());
+        setFolders(other.getExcludeFolders());
+        setGivenName(other.getGivenName());
+        setHasImage(other.isHasImage());
+        setOrSearch(other.isOrSearch());
+        setPattern(other.getPattern());
+        setStartLetter(other.isStartLetter());
+        setSubfolderSearch(other.isSubfolderSearch());
+        setSurname(other.getSurname());
     }
 
     /**
@@ -249,41 +180,6 @@ public class ContactsSearchObject {
         this.displayName = displayName;
     }
 
-    /**
-     * Gets the yomiSurname
-     *
-     * @return The yomiSurname
-     */
-    public String getYomiLastName() {
-        return yomiSurname;
-    }
-
-    /**
-     * Sets the yomiSurname
-     *
-     * @param yomiSurname The yomiSurname to set
-     */
-    public void setYomiLastName(String yomiLastName) {
-        this.yomiSurname = yomiLastName;
-    }
-
-    /**
-     * Gets the yomiGivenname
-     *
-     * @return The yomiGivenname
-     */
-    public String getYomiFirstName() {
-        return yomiGivenname;
-    }
-
-    /**
-     * Sets the yomiGivenname
-     *
-     * @param yomiGivenname The yomiGivenname to set
-     */
-    public void setYomiFirstname(String yomiFirstName) {
-        this.yomiGivenname = yomiFirstName;
-    }
 
     /**
      * Gets the company
@@ -301,24 +197,6 @@ public class ContactsSearchObject {
      */
     public void setCompany(String company) {
         this.company = company;
-    }
-
-    /**
-     * Gets the yomiCompany
-     *
-     * @return The yomiCompany
-     */
-    public String getYomiCompany() {
-        return yomiCompany;
-    }
-
-    /**
-     * Sets the yomiCompany
-     *
-     * @param yomiCompany The yomiCompany to set
-     */
-    public void setYomiCompany(String yomiCompany) {
-        this.yomiCompany = yomiCompany;
     }
 
     /**
@@ -373,60 +251,6 @@ public class ContactsSearchObject {
      */
     public void setEmail3(String email3) {
         this.email3 = email3;
-    }
-
-    /**
-     * Gets the city_business
-     *
-     * @return The city_business
-     */
-    public String getCityBusiness() {
-        return city_business;
-    }
-
-    /**
-     * Sets the city_business
-     *
-     * @param city_business The city_business to set
-     */
-    public void setCityBusiness(String city_business) {
-        this.city_business = city_business;
-    }
-
-    /**
-     * Gets the street_business
-     *
-     * @return The street_business
-     */
-    public String getStreetBusiness() {
-        return street_business;
-    }
-
-    /**
-     * Sets the street_business
-     *
-     * @param street_business The street_business to set
-     */
-    public void setStreetBusiness(String street_business) {
-        this.street_business = street_business;
-    }
-
-    /**
-     * Gets the department
-     *
-     * @return The department
-     */
-    public String getDepartment() {
-        return department;
-    }
-
-    /**
-     * Sets the department
-     *
-     * @param department The department to set
-     */
-    public void setDepartment(String department) {
-        this.department = department;
     }
 
     /**
@@ -534,38 +358,7 @@ public class ContactsSearchObject {
      * @param folders The folders to set
      */
     public void setFolders(Set<String> folders) {
-        this.folders.clear();
-        this.folders.addAll(folders);
-    }
-
-    /**
-     * Sets the folders
-     *
-     * @param folders The folders to set
-     */
-    public void setFolders(String... folders) {
-        this.folders.clear();
-        for (String folderId : folders) {
-            this.folders.add(folderId);
-        }
-    }
-
-    /**
-     * Adds the specified folder
-     *
-     * @param folder The folder
-     */
-    public void addFolder(String folder) {
-        folders.add(folder);
-    }
-
-    /**
-     * Checks whether any folders are set
-     *
-     * @return <code>true</code> if there are folders set; <code>false</code> otherwise
-     */
-    public boolean hasFolders() {
-        return !folders.isEmpty();
+        this.folders = folders;
     }
 
     /**
@@ -623,24 +416,6 @@ public class ContactsSearchObject {
     }
 
     /**
-     * Gets the allfoldersSearch
-     *
-     * @return The allfoldersSearch
-     */
-    public boolean isAllfoldersSearch() {
-        return allfoldersSearch;
-    }
-
-    /**
-     * Sets the allfoldersSearch
-     *
-     * @param allfoldersSearch The allfoldersSearch to set
-     */
-    public void setAllfoldersSearch(boolean allfoldersSearch) {
-        this.allfoldersSearch = allfoldersSearch;
-    }
-
-    /**
      * Gets the excludeFolders
      *
      * @return The excludeFolders
@@ -649,62 +424,8 @@ public class ContactsSearchObject {
         return excludeFolders;
     }
 
-    public void addExcludeFolder(String folder) {
-        excludeFolders.add(folder);
+    public void setExcludeFolders(Set<String> excludeFolders) {
+        this.excludeFolders = excludeFolders;
     }
 
-    public void setExcludeFolders(String... folders) {
-        excludeFolders.clear();
-        for (String folderId : folders) {
-            excludeFolders.add(folderId);
-        }
-    }
-
-    public void clearExcludeFolders() {
-        excludeFolders.clear();
-    }
-
-    public boolean hasExcludeFolders() {
-        return !excludeFolders.isEmpty();
-    }
-
-    public void setRange(Range range, Object[] rangeValues) {
-        if (rangeValues == null || rangeValues.length == 0) {
-            return;
-        }
-        for (Object o : rangeValues) {
-            if (false == o.getClass().isAssignableFrom(range.getType())) {
-                throw new IllegalArgumentException("Incompatible range type " + o.getClass() + " for range key " + range.getKey());
-            }
-        }
-        ranges.put(range, rangeValues);
-    }
-
-    public Map<Range, Object[]> getRanges() {
-        return ranges;
-    }
-
-    public Object[] getRange(Range range) {
-        return ranges.get(range);
-    }
-
-    @Deprecated
-    public int[] getDynamicSearchField() {
-        return dynamicSearchField;
-    }
-
-    @Deprecated
-    public void setDynamicSearchField(final int[] dynamicSearchField) {
-        this.dynamicSearchField = dynamicSearchField;
-    }
-
-    @Deprecated
-    public String[] getDynamicSearchFieldValue() {
-        return dynamicSearchFieldValue;
-    }
-
-    @Deprecated
-    public void setDynamicSearchFieldValue(final String[] dynamicSearchFieldValue) {
-        this.dynamicSearchFieldValue = dynamicSearchFieldValue;
-    }
 }

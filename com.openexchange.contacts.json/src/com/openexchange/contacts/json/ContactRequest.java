@@ -345,7 +345,7 @@ public class ContactRequest {
 
     /**
      * Gets a search term from the json array named 'filter in the request.
-     * 
+     *
      * @return the search term
      * @throws OXException
      */
@@ -456,19 +456,6 @@ public class ContactRequest {
         return folderID;
     }
 
-    public int getId() throws OXException {
-        //TODO: as String
-        if (request.isSet("id")) {
-            return request.getParameter("id", int.class).intValue();
-        }
-        return user.getContactId();
-    }
-
-    public int getFolder() throws OXException {
-        //TODO: as String
-        return request.getParameter("folder", int.class).intValue();
-    }
-
     public TimeZone getTimeZone() {
         final String timezone = request.getParameter("timezone");
         return timezone == null ? TimeZoneUtils.getTimeZone(user.getTimeZone()) : TimeZoneUtils.getTimeZone(timezone);
@@ -497,10 +484,6 @@ public class ContactRequest {
     public int getRightHandLimit() throws OXException {
         return RequestTools.getNullableIntParameter(request, "right_hand_limit");
     }
-
-    //    public boolean isExcludeAdmin() throws OXException {
-    //        return request.containsParameter("admin") && false == request.getParameter("admin", boolean.class).booleanValue();
-    //    }
 
     public boolean isRequireEmail() throws OXException {
         return false == request.containsParameter("email") || request.getParameter("email", boolean.class).booleanValue();

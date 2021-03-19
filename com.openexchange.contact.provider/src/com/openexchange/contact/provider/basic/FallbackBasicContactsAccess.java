@@ -47,58 +47,56 @@
  *
  */
 
-package com.openexchange.contacts.json.actions;
+package com.openexchange.contact.provider.basic;
 
 import java.util.Collections;
-import java.util.Date;
 import java.util.List;
-import java.util.Set;
-import com.google.common.collect.ImmutableSet;
-import com.openexchange.ajax.requesthandler.AJAXRequestResult;
-import com.openexchange.ajax.requesthandler.annotation.restricted.RestrictedAction;
-import com.openexchange.contact.provider.composition.IDBasedContactsAccess;
-import com.openexchange.contacts.json.ContactRequest;
+import com.openexchange.contact.common.ContactsAccount;
+import com.openexchange.contact.provider.ContactsProviderExceptionCodes;
 import com.openexchange.exception.OXException;
-import com.openexchange.groupware.contact.helpers.ContactField;
 import com.openexchange.groupware.container.Contact;
-import com.openexchange.server.ServiceLookup;
 
 /**
- * {@link BirthdaysAction}
+ * {@link FallbackBasicContactsAccess}
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
- * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
+ * @since v8.0.0
  */
-@RestrictedAction(module = IDBasedContactAction.MODULE_NAME, type = RestrictedAction.Type.READ)
-public class BirthdaysAction extends IDBasedContactAction {
+public abstract class FallbackBasicContactsAccess implements BasicContactsAccess {
 
-    private static final Set<String> OPTIONAL_PARAMETERS = ImmutableSet.of(PARAM_FIELDS, PARAM_ORDER, PARAM_ORDER_BY, PARAM_LEFT_HAND_LIMIT, PARAM_RIGHT_HAND_LIMIT, PARAM_COLLATION);
+    protected final ContactsAccount account;
 
     /**
-     * Initializes a new {@link BirthdaysAction}.
+     * Initializes a new {@link FallbackBasicContactsAccess}.
      *
-     * @param serviceLookup The service lookup to use
+     * @param account The underlying account
      */
-    public BirthdaysAction(ServiceLookup serviceLookup) {
-        super(serviceLookup);
+    protected FallbackBasicContactsAccess(ContactsAccount account) {
+        super();
+        this.account = account;
     }
 
     @Override
-    protected AJAXRequestResult perform(IDBasedContactsAccess access, ContactRequest request) throws OXException {
-        Date from = request.getStart();
-        Date until = request.getEnd();
-        List<String> folderIds = null != request.optFolderID() ? Collections.singletonList(request.optFolderID()) : null;
-        List<Contact> contacts = access.searchContactsWithBirthday(folderIds, from, until);
-        return new AJAXRequestResult(sortIfNeeded(request, contacts, ContactField.BIRTHDAY), getLatestTimestamp(contacts), "contact");
+    public void close() {
+        // nothing to do
     }
 
     @Override
-    protected ContactField[] getFields(ContactRequest request) throws OXException {
-        return request.getFields(ContactField.BIRTHDAY);
+    public List<Contact> getContacts(List<String> contactIds) throws OXException {
+        if (null == contactIds || contactIds.isEmpty()) {
+            return Collections.emptyList();
+        }
+        throw ContactsProviderExceptionCodes.CONTACT_NOT_FOUND_IN_FOLDER.create(BasicContactsAccess.FOLDER_ID, contactIds.get(0));
     }
 
     @Override
-    protected Set<String> getOptionalParameters() {
-        return OPTIONAL_PARAMETERS;
+    public List<Contact> getContacts() throws OXException {
+        return Collections.emptyList();
     }
+
+    @Override
+    public String toString() {
+        return "FallbackBasicContactsAccess [account=" + account + "]";
+    }
+
 }

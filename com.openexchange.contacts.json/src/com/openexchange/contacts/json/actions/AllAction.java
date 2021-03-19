@@ -83,7 +83,7 @@ public class AllAction extends IDBasedContactAction {
 
     @Override
     protected AJAXRequestResult perform(IDBasedContactsAccess access, ContactRequest request) throws OXException {
-        List<Contact> contacts = (null == request.optFolderID()) ? access.getContacts() : access.getContacts(request.getFolderID());
+        List<Contact> contacts = access.getContacts(request.getFolderID());
         return new AJAXRequestResult(sortIfNeeded(request, contacts), getLatestTimestamp(contacts), "contact");
     }
 

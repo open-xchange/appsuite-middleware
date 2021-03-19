@@ -47,58 +47,71 @@
  *
  */
 
-package com.openexchange.contacts.json.actions;
+package com.openexchange.contact.provider.folder;
 
-import java.util.Collections;
-import java.util.Date;
 import java.util.List;
-import java.util.Set;
-import com.google.common.collect.ImmutableSet;
-import com.openexchange.ajax.requesthandler.AJAXRequestResult;
-import com.openexchange.ajax.requesthandler.annotation.restricted.RestrictedAction;
-import com.openexchange.contact.provider.composition.IDBasedContactsAccess;
-import com.openexchange.contacts.json.ContactRequest;
+import com.openexchange.contact.common.ContactsParameters;
+import com.openexchange.contact.provider.extensions.SearchAware;
 import com.openexchange.exception.OXException;
-import com.openexchange.groupware.contact.helpers.ContactField;
 import com.openexchange.groupware.container.Contact;
-import com.openexchange.server.ServiceLookup;
+import com.openexchange.groupware.search.ContactsSearchObject;
+import com.openexchange.search.SearchTerm;
 
 /**
- * {@link BirthdaysAction}
+ * {@link FolderSearchAware}
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
- * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
+ * @since v8.0.0
  */
-@RestrictedAction(module = IDBasedContactAction.MODULE_NAME, type = RestrictedAction.Type.READ)
-public class BirthdaysAction extends IDBasedContactAction {
-
-    private static final Set<String> OPTIONAL_PARAMETERS = ImmutableSet.of(PARAM_FIELDS, PARAM_ORDER, PARAM_ORDER_BY, PARAM_LEFT_HAND_LIMIT, PARAM_RIGHT_HAND_LIMIT, PARAM_COLLATION);
+public interface FolderSearchAware extends SearchAware {
 
     /**
-     * Initializes a new {@link BirthdaysAction}.
+     * Performs an "auto-complete" lookup for contacts.
+     * <p/>
+     * The following contacts parameters are evaluated:
+     * <ul>
+     * <li>{@link ContactsParameters#PARAMETER_FIELDS}</li>
+     * <li>{@link ContactsParameters#PARAMETER_ORDER}</li>
+     * <li>{@link ContactsParameters#PARAMETER_ORDER_BY}</li>
+     * <li>{@link ContactsParameters#PARAMETER_RIGHT_HAND_LIMIT}</li>
+     * <li>{@link ContactsParameters#PARAMETER_REQUIRE_EMAIL}</li>
+     * <li>{@link ContactsParameters#PARAMETER_IGNORE_DISTRIBUTION_LISTS}</li>
+     * </ul>
      *
-     * @param serviceLookup The service lookup to use
+     * @param folderIds The identifiers of the folders to perform the search in, or <code>null</code> to search in all folders
+     * @param query The search query as supplied by the client
+     * @return The resulting contacts
      */
-    public BirthdaysAction(ServiceLookup serviceLookup) {
-        super(serviceLookup);
-    }
+    List<Contact> autocompleteContacts(List<String> folderIds, String query) throws OXException;
 
-    @Override
-    protected AJAXRequestResult perform(IDBasedContactsAccess access, ContactRequest request) throws OXException {
-        Date from = request.getStart();
-        Date until = request.getEnd();
-        List<String> folderIds = null != request.optFolderID() ? Collections.singletonList(request.optFolderID()) : null;
-        List<Contact> contacts = access.searchContactsWithBirthday(folderIds, from, until);
-        return new AJAXRequestResult(sortIfNeeded(request, contacts, ContactField.BIRTHDAY), getLatestTimestamp(contacts), "contact");
-    }
+    /**
+     * Searches for contacts.
+     * <p/>
+     * The following contacts parameters are evaluated:
+     * <ul>
+     * <li>{@link ContactsParameters#PARAMETER_FIELDS}</li>
+     * <li>{@link ContactsParameters#PARAMETER_ORDER}</li>
+     * <li>{@link ContactsParameters#PARAMETER_ORDER_BY}</li>
+     * </ul>
+     *
+     * @param term The search term
+     * @return The found contacts
+     */
+    <O> List<Contact> searchContacts(SearchTerm<O> term) throws OXException;
 
-    @Override
-    protected ContactField[] getFields(ContactRequest request) throws OXException {
-        return request.getFields(ContactField.BIRTHDAY);
-    }
+    /**
+     * Searches for contacts.
+     * <p/>
+     * The following contacts parameters are evaluated:
+     * <ul>
+     * <li>{@link ContactsParameters#PARAMETER_FIELDS}</li>
+     * <li>{@link ContactsParameters#PARAMETER_ORDER}</li>
+     * <li>{@link ContactsParameters#PARAMETER_ORDER_BY}</li>
+     * </ul>
+     *
+     * @param contactSearch The contact search object
+     * @return The found contacts
+     */
+    List<Contact> searchContacts(ContactsSearchObject contactSearch) throws OXException;
 
-    @Override
-    protected Set<String> getOptionalParameters() {
-        return OPTIONAL_PARAMETERS;
-    }
 }

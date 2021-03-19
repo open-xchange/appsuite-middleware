@@ -49,7 +49,7 @@
 
 package com.openexchange.contact.provider;
 
-import com.openexchange.contact.provider.folder.ContactsFolderProvider;
+import com.openexchange.contact.provider.folder.FolderContactsProvider;
 
 /**
  * {@link GroupwareContactsProvider}
@@ -57,6 +57,6 @@ import com.openexchange.contact.provider.folder.ContactsFolderProvider;
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  * @since v7.10.5
  */
-public interface GroupwareContactsProvider extends ContactsFolderProvider {
+public interface GroupwareContactsProvider extends FolderContactsProvider {
     // Marker interface
 }

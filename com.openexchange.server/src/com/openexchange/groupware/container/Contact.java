@@ -843,7 +843,7 @@ public class Contact extends CommonObject {
 
     /**
      * Initializes a new {@link Contact}.
-     * 
+     *
      * @param reset optionally performs a reset
      */
     public Contact(boolean reset) {
@@ -4064,7 +4064,9 @@ public class Contact extends CommonObject {
             name.append(getDisplayName());
         }
         name.insert(0, "] ");
-        if (containsObjectID()) {
+        if (containsId()) {
+            name.insert(0, getId());
+        } else if (containsObjectID()) {
             name.insert(0, getObjectID());
         } else {
             name.insert(0, "new");

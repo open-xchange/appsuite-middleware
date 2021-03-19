@@ -49,10 +49,11 @@
 
 package com.openexchange.contact.provider.basic;
 
+import java.util.Collections;
 import java.util.List;
-import com.openexchange.contact.ContactID;
 import com.openexchange.contact.common.ContactsParameters;
 import com.openexchange.contact.provider.ContactsAccess;
+import com.openexchange.contact.provider.ContactsProviderExceptionCodes;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.Contact;
 
@@ -75,50 +76,49 @@ public interface BasicContactsAccess extends ContactsAccess {
     ContactsSettings getSettings();
 
     /**
-     * Counts all contacts.
-     *
-     * @return the number of contacts
-     * @throws OXException if an error is occurred
-     */
-    int countContacts() throws OXException;
-
-    /**
      * Gets a specific contact
      * <p/>
      * The following contacts parameters are evaluated:
      * <ul>
      * <li>{@link ContactsParameters#PARAMETER_FIELDS}</li>
      * </ul>
-     * 
+     *
      * @param contactId The identifier of the contact to get
      * @return The contact
      */
-    Contact getContact(String contactId) throws OXException;
+    default Contact getContact(String contactId) throws OXException {
+        List<Contact> contacts = getContacts(Collections.singletonList(contactId));
+        if (null == contacts || contacts.isEmpty()) {
+            throw ContactsProviderExceptionCodes.CONTACT_NOT_FOUND_IN_FOLDER.create(FOLDER_ID, contactId);
+        }
+        return contacts.get(0);
+    }
 
     /**
      * Gets a list of contacts with the specified identifiers.
-     * 
+     *
      * <p/>
      * The following contacts parameters are evaluated:
      * <ul>
      * <li>{@link ContactsParameters#PARAMETER_FIELDS}</li>
      * </ul>
      *
-     * @param contactIDs A list of the identifiers of the contacts to get
+     * @param contactIds A list of the identifiers of the contacts to get
      * @return The contacts
      */
-    List<Contact> getContacts(List<ContactID> contactIDs) throws OXException;
+    List<Contact> getContacts(List<String> contactIds) throws OXException;
 
     /**
-     * Gets all contacts from all visible folders.
+     * Gets all contacts in this account.
      * <p/>
      * The following contacts parameters are evaluated:
      * <ul>
      * <li>{@link ContactsParameters#PARAMETER_FIELDS}</li>
      * <li>{@link ContactsParameters#PARAMETER_ORDER}</li>
      * <li>{@link ContactsParameters#PARAMETER_ORDER_BY}</li>
-     * 
-     * @return the contacts
+     *
+     * @return The contacts
      */
     List<Contact> getContacts() throws OXException;
+
 }

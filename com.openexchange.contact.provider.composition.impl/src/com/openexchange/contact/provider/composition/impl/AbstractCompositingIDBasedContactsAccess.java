@@ -50,10 +50,7 @@
 package com.openexchange.contact.provider.composition.impl;
 
 import static com.openexchange.java.Autoboxing.I;
-import static com.openexchange.java.Autoboxing.i;
 import static com.openexchange.osgi.Tools.requireService;
-import java.io.Closeable;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.LinkedList;
@@ -80,11 +77,12 @@ import com.openexchange.contact.provider.ContactsProvider;
 import com.openexchange.contact.provider.ContactsProviderExceptionCodes;
 import com.openexchange.contact.provider.ContactsProviderRegistry;
 import com.openexchange.contact.provider.ContactsProviders;
+import com.openexchange.contact.provider.FallbackAwareContactsProvider;
 import com.openexchange.contact.provider.basic.BasicContactsAccess;
 import com.openexchange.contact.provider.composition.impl.idmangling.IDMangler;
 import com.openexchange.contact.provider.extensions.WarningsAware;
 import com.openexchange.contact.provider.folder.FolderContactsAccess;
-import com.openexchange.contact.provider.folder.ContactsFolderProvider;
+import com.openexchange.contact.provider.folder.FolderContactsProvider;
 import com.openexchange.contact.provider.groupware.GroupwareContactsAccess;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.CallerRunsCompletionService;
@@ -110,8 +108,8 @@ abstract class AbstractCompositingIDBasedContactsAccess implements TransactionAw
     protected final ServiceLookup services;
     protected final ServerSession session;
     protected final List<OXException> warnings;
+    protected final ContactsParameters parameters;
 
-    private final ContactsParameters parameters;
     private final ContactsProviderRegistry providerRegistry;
     private final ConcurrentMap<Integer, ContactsAccess> connectedAccesses;
 
@@ -171,6 +169,9 @@ abstract class AbstractCompositingIDBasedContactsAccess implements TransactionAw
 
     @Override
     public void finish() throws OXException {
+        /*
+         * close any connected calendar accesses
+         */
         ConcurrentMap<Integer, ContactsAccess> connectedAccesses = this.connectedAccesses;
         for (Iterator<Entry<Integer, ContactsAccess>> iterator = connectedAccesses.entrySet().iterator(); iterator.hasNext();) {
             Entry<Integer, ContactsAccess> entry = iterator.next();
@@ -182,7 +183,7 @@ abstract class AbstractCompositingIDBasedContactsAccess implements TransactionAw
                     this.warnings.addAll(warnings);
                 }
             }
-            closeAccess(access, i(entry.getKey()));
+            access.close();
             iterator.remove();
         }
     }
@@ -302,18 +303,16 @@ abstract class AbstractCompositingIDBasedContactsAccess implements TransactionAw
      * @param account The account to get the contacts access for
      * @return The contacts access for the specified account
      */
-    protected ContactsAccess getAccess(ContactsAccount account) throws OXException {
+    protected ContactsAccess getAccess(ContactsAccount account) {
         ConcurrentMap<Integer, ContactsAccess> connectedAccesses = this.connectedAccesses;
         ContactsAccess access = connectedAccesses.get(I(account.getAccountId()));
-        if (null != access) {
-            return access;
-        }
-        ContactsProvider provider = providerRegistry.getContactProvider(account.getProviderId()).orElseThrow(() -> ContactsProviderExceptionCodes.PROVIDER_NOT_AVAILABLE.create(account.getProviderId()));
-        access = provider.connect(session, account, parameters);
-        ContactsAccess existingAccess = connectedAccesses.put(I(account.getAccountId()), access);
-        if (null != existingAccess) {
-            closeAccess(access, account.getAccountId());
-            access = existingAccess;
+        if (null == access) {
+            access = initAccess(account);
+            ContactsAccess existingAccess = connectedAccesses.put(I(account.getAccountId()), access);
+            if (null != existingAccess) {
+                access.close();
+                access = existingAccess;
+            }
         }
         return access;
     }
@@ -457,7 +456,7 @@ abstract class AbstractCompositingIDBasedContactsAccess implements TransactionAw
      * @param capability the capability
      * @return <code>true</code> if the provider of the specified account supports the specified capability;
      *         <code>false</code> otherwise.
-     * 
+     *
      */
     protected boolean supports(ContactsAccount account, ContactsAccessCapability capability) {
         Optional<ContactsProvider> provider = providerRegistry.getContactProvider(account.getProviderId());
@@ -532,15 +531,15 @@ abstract class AbstractCompositingIDBasedContactsAccess implements TransactionAw
     }
 
     /**
-     * Checks if the {@link ContactsProvider} for the given account is a {@link ContactsFolderProvider}.
-     * 
+     * Checks if the {@link ContactsProvider} for the given account is a {@link FolderContactsProvider}.
+     *
      * @param accountId the account identifier
-     * @return <code>true</code> if the specified account is a {@link ContactsFolderProvider}
+     * @return <code>true</code> if the specified account is a {@link FolderContactsProvider}
      * @throws OXException if an error is occurred
      */
     protected boolean isContactsFolderProvider(int accountId) throws OXException {
         Optional<ContactsProvider> provider = providerRegistry.getContactProvider(getAccount(accountId).getProviderId());
-        return provider.isPresent() ? ContactsFolderProvider.class.isInstance(provider.get()) : false;
+        return provider.isPresent() ? FolderContactsProvider.class.isInstance(provider.get()) : false;
     }
 
     /**
@@ -580,20 +579,26 @@ abstract class AbstractCompositingIDBasedContactsAccess implements TransactionAw
         return requireService(IDMangler.class, services);
     }
 
-    /**
-     * Closes the specified access if possible
-     * 
-     * @param access The access to close
-     * @param account The account of the access
-     */
-    private void closeAccess(ContactsAccess access, int accountId) {
-        if (false == Closeable.class.isInstance(access)) {
-            return;
-        }
+    private ContactsAccess initAccess(ContactsAccount account) {
+        Optional<ContactsProvider> optionalProvider = providerRegistry.getContactProvider(account.getProviderId());
         try {
-            Closeable.class.cast(access).close();
-        } catch (IOException e) {
-            LOG.error("Unable to close access account '{}' of user '{}' in context '{}'", I(accountId), I(session.getUserId()), I(session.getContextId()), e);
+            if (false == optionalProvider.isPresent()) {
+                throw ContactsProviderExceptionCodes.PROVIDER_NOT_AVAILABLE.create(account.getProviderId());
+            }
+            ContactsProvider provider = optionalProvider.get();
+            if (false == hasCapability(provider.getId())) {
+                throw ContactsProviderExceptionCodes.MISSING_CAPABILITY.create(ContactsProviders.getCapabilityName(provider.getId()));
+            }
+            return provider.connect(session, account, parameters);
+        } catch (OXException e) {
+            if (optionalProvider.isPresent() && FallbackAwareContactsProvider.class.isInstance(optionalProvider.get())) {
+                return ((FallbackAwareContactsProvider) optionalProvider.get()).connectFallback(session, account, parameters, e);
+            }
+            if (optionalProvider.isPresent() && AutoProvisioningContactsProvider.class.isInstance(optionalProvider.get())) {
+                return new FallbackEmptyContactsAccess(account, e);
+            }
+            return new FallbackUnknownContactsAccess(account, e);
         }
     }
+
 }

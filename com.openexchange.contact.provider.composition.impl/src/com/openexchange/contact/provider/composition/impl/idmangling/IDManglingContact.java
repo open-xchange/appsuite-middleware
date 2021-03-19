@@ -81,7 +81,7 @@ public class IDManglingContact extends DelegatingContact {
     }
 
     @Override
-    public boolean containsParentFolderID() {
+    public boolean containsFolderId() {
         return true;
     }
 

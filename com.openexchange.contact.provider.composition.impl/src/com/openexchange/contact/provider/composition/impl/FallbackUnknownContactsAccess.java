@@ -47,58 +47,68 @@
  *
  */
 
-package com.openexchange.contacts.json.actions;
+package com.openexchange.contact.provider.composition.impl;
 
-import java.util.Collections;
-import java.util.Date;
-import java.util.List;
-import java.util.Set;
-import com.google.common.collect.ImmutableSet;
-import com.openexchange.ajax.requesthandler.AJAXRequestResult;
-import com.openexchange.ajax.requesthandler.annotation.restricted.RestrictedAction;
-import com.openexchange.contact.provider.composition.IDBasedContactsAccess;
-import com.openexchange.contacts.json.ContactRequest;
+import org.json.JSONObject;
+import org.slf4j.LoggerFactory;
+import com.openexchange.contact.common.ContactsAccount;
+import com.openexchange.contact.common.UsedForSync;
+import com.openexchange.contact.provider.CommonContactsConfigurationFields;
+import com.openexchange.contact.provider.basic.ContactsSettings;
+import com.openexchange.contact.provider.basic.FallbackBasicContactsAccess;
 import com.openexchange.exception.OXException;
-import com.openexchange.groupware.contact.helpers.ContactField;
-import com.openexchange.groupware.container.Contact;
-import com.openexchange.server.ServiceLookup;
 
 /**
- * {@link BirthdaysAction}
+ * {@link FallbackUnknownContactsAccess}
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
- * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
+ * @since v8.0.0
  */
-@RestrictedAction(module = IDBasedContactAction.MODULE_NAME, type = RestrictedAction.Type.READ)
-public class BirthdaysAction extends IDBasedContactAction {
+public class FallbackUnknownContactsAccess extends FallbackBasicContactsAccess {
 
-    private static final Set<String> OPTIONAL_PARAMETERS = ImmutableSet.of(PARAM_FIELDS, PARAM_ORDER, PARAM_ORDER_BY, PARAM_LEFT_HAND_LIMIT, PARAM_RIGHT_HAND_LIMIT, PARAM_COLLATION);
+    private final OXException error;
 
     /**
-     * Initializes a new {@link BirthdaysAction}.
+     * Initializes a new {@link FallbackUnknownContactsAccess}.
      *
-     * @param serviceLookup The service lookup to use
+     * @param account The underlying contacts account
+     * @param error The error to include in the accesses' contacts settings, or <code>null</code> if not defined
      */
-    public BirthdaysAction(ServiceLookup serviceLookup) {
-        super(serviceLookup);
+    public FallbackUnknownContactsAccess(ContactsAccount account, OXException error) {
+        super(account);
+        this.error = error;
     }
 
     @Override
-    protected AJAXRequestResult perform(IDBasedContactsAccess access, ContactRequest request) throws OXException {
-        Date from = request.getStart();
-        Date until = request.getEnd();
-        List<String> folderIds = null != request.optFolderID() ? Collections.singletonList(request.optFolderID()) : null;
-        List<Contact> contacts = access.searchContactsWithBirthday(folderIds, from, until);
-        return new AJAXRequestResult(sortIfNeeded(request, contacts, ContactField.BIRTHDAY), getLatestTimestamp(contacts), "contact");
+    public ContactsSettings getSettings() {
+        ContactsSettings settings = new ContactsSettings();
+        settings.setLastModified(account.getLastModified());
+        settings.setConfig(account.getUserConfiguration());
+        settings.setName(getAccountName(account));
+        settings.setSubscribed(true);
+        settings.setUsedForSync(UsedForSync.DEACTIVATED);
+        settings.setError(error);
+        return settings;
     }
 
-    @Override
-    protected ContactField[] getFields(ContactRequest request) throws OXException {
-        return request.getFields(ContactField.BIRTHDAY);
+    /**
+     * Gets a (fallback) for the account's display name, in case the corresponding settings are not available.
+     *
+     * @param account The account to get the name for
+     * @return The account name
+     */
+    private static String getAccountName(ContactsAccount account) {
+        String fallbackName = "Account " + account.getAccountId();
+        try {
+            JSONObject internalConfig = account.getInternalConfiguration();
+            if (null != internalConfig) {
+                return internalConfig.optString(CommonContactsConfigurationFields.NAME, fallbackName);
+            }
+        } catch (Exception e) {
+            LoggerFactory.getLogger(FallbackUnknownContactsAccess.class).debug(
+                "Error getting display name for contacts account \"{}\": {}", account.getProviderId(), e.getMessage());
+        }
+        return fallbackName;
     }
 
-    @Override
-    protected Set<String> getOptionalParameters() {
-        return OPTIONAL_PARAMETERS;
-    }
 }

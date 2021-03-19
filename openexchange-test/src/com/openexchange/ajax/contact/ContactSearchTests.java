@@ -2,7 +2,6 @@
 package com.openexchange.ajax.contact;
 
 import static org.junit.Assert.assertEquals;
-import java.rmi.server.UID;
 import org.junit.Before;
 import org.junit.Test;
 import com.openexchange.groupware.container.Contact;
@@ -15,7 +14,6 @@ public class ContactSearchTests extends AbstractManagedContactTest {
     private static final String BOB_LASTNAME = "Bob";
     private static final String BOB_DISPLAYNAME = "Carol19";
     private static final String BOB_MAIL2 = "bob@thebuilder.invalid";
-    private static final String BOB_DEPARTMENT = "Department_" + new UID().toString();
 
     @Override
     @Before
@@ -29,7 +27,6 @@ public class ContactSearchTests extends AbstractManagedContactTest {
         c2.setSurName(BOB_LASTNAME);
         c2.setDisplayName(BOB_DISPLAYNAME);
         c2.setEmail2(BOB_MAIL2);
-        c2.setDepartment(BOB_DEPARTMENT);
 
         cotm.newAction(c1, c2);
     }
@@ -103,16 +100,6 @@ public class ContactSearchTests extends AbstractManagedContactTest {
         assertEquals("Should find one contact", 1, results.length);
         assertEquals("Should find the right contact", BOB_MAIL2, results[0].getEmail2());
 
-    }
-
-    @Test
-    public void testDepartmentSearch() {
-        ContactSearchObject search = new ContactSearchObject();
-        search.addFolder(folderID);
-        search.setDepartment(BOB_DEPARTMENT);
-        Contact[] results = cotm.searchAction(search);
-        assertEquals("Should find one contact", 1, results.length);
-        assertEquals("Should find the right contact", BOB_LASTNAME, results[0].getSurName());
     }
 
 }

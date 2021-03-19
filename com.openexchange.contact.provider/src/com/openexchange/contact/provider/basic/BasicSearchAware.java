@@ -47,13 +47,12 @@
  *
  */
 
-package com.openexchange.contact.provider.extensions;
+package com.openexchange.contact.provider.basic;
 
-import java.util.Date;
 import java.util.List;
-import com.openexchange.contact.AutocompleteParameters;
 import com.openexchange.contact.common.ContactsParameters;
 import com.openexchange.contact.provider.ContactsAccess;
+import com.openexchange.contact.provider.extensions.SearchAware;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.search.ContactsSearchObject;
@@ -94,9 +93,8 @@ public interface BasicSearchAware extends SearchAware {
      * <li>{@link ContactsParameters#PARAMETER_ORDER_BY}</li>
      * </ul>
      *
-     * @param contactSearch the contact search object
-     * @return the contacts found with the search
-     * @throws OXException
+     * @param contactSearch The contact search object
+     * @return The found contacts
      */
     List<Contact> searchContacts(ContactsSearchObject contactSearch) throws OXException;
 
@@ -110,54 +108,11 @@ public interface BasicSearchAware extends SearchAware {
      * <li>{@link ContactsParameters#PARAMETER_ORDER}</li>
      * <li>{@link ContactsParameters#PARAMETER_ORDER_BY}</li>
      * </ul>
-     * 
-     * @param session The session
+     *
      * @param query The search query as supplied by the client
-     * @param parameters The additional parameters to refine the auto-complete search. Don't pass <code>null</code> here,
-     *            but use an empty instance to use the default parameter values.
-     * @param fields The contact fields that should be retrieved
-     * @param sortOptions The options to sort the results
      * @return The contacts found with the search
      * @throws OXException
      */
-    List<Contact> autocompleteContacts(String query, AutocompleteParameters parameters) throws OXException;
+    List<Contact> autocompleteContacts(String query) throws OXException;
 
-    /**
-     * Searches for contacts whose birthday falls into the specified period.
-     * 
-     * <p/>
-     * The following contacts parameters are evaluated:
-     * <ul>
-     * <li>{@link ContactsParameters#PARAMETER_FIELDS}</li>
-     * <li>{@link ContactsParameters#PARAMETER_ORDER}</li>
-     * <li>{@link ContactsParameters#PARAMETER_ORDER_BY}</li>
-     * </ul>
-     * 
-     * @param from Specifies the lower inclusive limit of the queried range, i.e. only
-     *            contacts whose birthdays start on or after this date should be returned.
-     * @param until Specifies the upper exclusive limit of the queried range, i.e. only
-     *            contacts whose birthdays end before this date should be returned.
-     * @return the contacts found with the search
-     * @throws OXException
-     */
-    List<Contact> searchContactsWithBirthday(Date from, Date until) throws OXException;
-
-    /**
-     * Searches for contacts whose anniversary falls into the specified period.
-     * <p/>
-     * The following contacts parameters are evaluated:
-     * <ul>
-     * <li>{@link ContactsParameters#PARAMETER_FIELDS}</li>
-     * <li>{@link ContactsParameters#PARAMETER_ORDER}</li>
-     * <li>{@link ContactsParameters#PARAMETER_ORDER_BY}</li>
-     * </ul>
-     * 
-     * @param from Specifies the lower inclusive limit of the queried range, i.e. only
-     *            contacts whose anniversaries start on or after this date should be returned.
-     * @param until Specifies the upper exclusive limit of the queried range, i.e. only
-     *            contacts whose anniversaries end before this date should be returned.
-     * @return the contacts found with the search
-     * @throws OXException
-     */
-    List<Contact> searchContactsWithAnniversary(Date from, Date until) throws OXException;
 }

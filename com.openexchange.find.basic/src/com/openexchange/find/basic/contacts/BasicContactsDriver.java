@@ -265,8 +265,9 @@ public class BasicContactsDriver extends AbstractContactFacetingModuleSearchDriv
                 DefaultFacetBuilder builder = newDefaultBuilder(ContactsFacetType.CONTACT);
                 for (Contact contact : contacts) {
                     String id = ContactsFacetType.CONTACT.getId();
-                    Filter filter = Filter.of(id, String.valueOf(contact.getObjectID()));
-                    String valueId = prepareFacetValueId(id, session.getContextId(), Integer.toString(contact.getObjectID()));
+                    String objectId = contact.containsId() ? contact.getId() : String.valueOf(contact.getObjectID());
+                    Filter filter = Filter.of(id, objectId);
+                    String valueId = prepareFacetValueId(id, session.getContextId(), objectId);
                     builder.addValue(FacetValue.newBuilder(valueId).withDisplayItem(DisplayItems.convert(contact, session.getUser().getLocale(), Services.optionalService(I18nServiceRegistry.class))).withFilter(filter).build());
                 }
                 facets.add(builder.build());
@@ -326,7 +327,7 @@ public class BasicContactsDriver extends AbstractContactFacetingModuleSearchDriv
             case CONTACT:
                 SingleSearchTerm searchTerm = new SingleSearchTerm(SingleOperation.EQUALS);
                 searchTerm.addOperand(new ContactFieldOperand(ContactField.OBJECT_ID));
-                searchTerm.addOperand(new ConstantOperand<>(Integer.valueOf(queries.get(0))));
+                searchTerm.addOperand(new ConstantOperand<>(queries.get(0)));
                 return searchTerm;
             case CONTACT_TYPE:
                 return ContactTypeFacet.getInstance().getSearchTerm(session, queries);

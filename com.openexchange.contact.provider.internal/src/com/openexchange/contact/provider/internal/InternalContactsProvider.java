@@ -60,9 +60,7 @@ import com.openexchange.contact.provider.AutoProvisioningContactsProvider;
 import com.openexchange.contact.provider.ContactsAccessCapability;
 import com.openexchange.contact.provider.ContactsProviderExceptionCodes;
 import com.openexchange.contact.provider.GroupwareContactsProvider;
-import com.openexchange.contact.provider.basic.ContactsSettings;
 import com.openexchange.contact.provider.folder.FolderContactsAccess;
-import com.openexchange.contact.provider.folder.ContactsFolderProvider;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.i18n.tools.StringHelper;
@@ -75,7 +73,7 @@ import com.openexchange.session.Session;
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  * @since v7.10.5
  */
-public class InternalContactsProvider implements AutoProvisioningContactsProvider, ContactsFolderProvider, GroupwareContactsProvider {
+public class InternalContactsProvider implements AutoProvisioningContactsProvider, GroupwareContactsProvider {
 
     private final ServiceLookup services;
 
@@ -113,12 +111,12 @@ public class InternalContactsProvider implements AutoProvisioningContactsProvide
     }
 
     @Override
-    public JSONObject configureAccount(Session session, ContactsSettings settings, ContactsParameters parameters) throws OXException {
+    public JSONObject configureAccount(Session session, JSONObject userConfig, ContactsParameters parameters) throws OXException {
         throw ContactsProviderExceptionCodes.UNSUPPORTED_OPERATION_FOR_PROVIDER.create(Constants.PROVIDER_ID);
     }
 
     @Override
-    public JSONObject reconfigureAccount(Session session, ContactsAccount account, ContactsSettings settings, ContactsParameters parameters) throws OXException {
+    public JSONObject reconfigureAccount(Session session, ContactsAccount account, JSONObject userConfig, ContactsParameters parameters) throws OXException {
         return null;
     }
 
@@ -146,4 +144,5 @@ public class InternalContactsProvider implements AutoProvisioningContactsProvide
         }
         return contactsSession;
     }
+
 }

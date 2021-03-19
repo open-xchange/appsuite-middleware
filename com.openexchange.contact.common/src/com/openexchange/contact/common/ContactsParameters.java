@@ -113,11 +113,25 @@ public interface ContactsParameters {
     static final String PARAMETER_UPDATE_CACHE = "updateCache";
 
     /**
+     * {@link Boolean}
+     * <p/>
+     * Indicates that the returned contacts should have at least one e-mail address defined (used during searches).
+     */
+    static final String PARAMETER_REQUIRE_EMAIL = "require_email";
+
+    /**
+     * {@link Boolean}
+     * <p/>
+     * Specifies that distribution lists shall be ignored and not be part of the returned results (used during searches).
+     */
+    static final String PARAMETER_IGNORE_DISTRIBUTION_LISTS = "ignore_distribution_lists";
+
+    /**
      * {@link java.sql.Connection}
      * <p/>
      * The (dynamic) parameter name where the underlying database connection is held during transactions, or when slipstreaming a
      * surrounding connection to the storage. Empty by default.
-     * 
+     *
      * @return The parameter name where the underlying database connection is held during transactions
      */
     static String PARAMETER_CONNECTION() {

@@ -47,58 +47,61 @@
  *
  */
 
-package com.openexchange.contacts.json.actions;
+package com.openexchange.contact.provider.folder;
 
-import java.util.Collections;
 import java.util.Date;
 import java.util.List;
-import java.util.Set;
-import com.google.common.collect.ImmutableSet;
-import com.openexchange.ajax.requesthandler.AJAXRequestResult;
-import com.openexchange.ajax.requesthandler.annotation.restricted.RestrictedAction;
-import com.openexchange.contact.provider.composition.IDBasedContactsAccess;
-import com.openexchange.contacts.json.ContactRequest;
+import com.openexchange.contact.common.ContactsParameters;
 import com.openexchange.exception.OXException;
-import com.openexchange.groupware.contact.helpers.ContactField;
 import com.openexchange.groupware.container.Contact;
-import com.openexchange.server.ServiceLookup;
 
 /**
- * {@link BirthdaysAction}
+ * {@link AnnualDateFolderSearchAware}
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
- * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
+ * @since v8.0.0
  */
-@RestrictedAction(module = IDBasedContactAction.MODULE_NAME, type = RestrictedAction.Type.READ)
-public class BirthdaysAction extends IDBasedContactAction {
-
-    private static final Set<String> OPTIONAL_PARAMETERS = ImmutableSet.of(PARAM_FIELDS, PARAM_ORDER, PARAM_ORDER_BY, PARAM_LEFT_HAND_LIMIT, PARAM_RIGHT_HAND_LIMIT, PARAM_COLLATION);
+public interface AnnualDateFolderSearchAware extends FolderSearchAware {
 
     /**
-     * Initializes a new {@link BirthdaysAction}.
+     * Searches for contacts whose birthday falls into the specified period.
      *
-     * @param serviceLookup The service lookup to use
+     * <p/>
+     * The following contacts parameters are evaluated:
+     * <ul>
+     * <li>{@link ContactsParameters#PARAMETER_FIELDS}</li>
+     * <li>{@link ContactsParameters#PARAMETER_ORDER}</li>
+     * <li>{@link ContactsParameters#PARAMETER_ORDER_BY}</li>
+     * </ul>
+     *
+     * @param folderIds The identifiers of the folders to perform the search in, or <code>null</code> to search in all folders
+     * @param from Specifies the lower inclusive limit of the queried range, i.e. only
+     *            contacts whose birthdays start on or after this date should be returned.
+     * @param until Specifies the upper exclusive limit of the queried range, i.e. only
+     *            contacts whose birthdays end before this date should be returned.
+     * @return the contacts found with the search
+     * @throws OXException
      */
-    public BirthdaysAction(ServiceLookup serviceLookup) {
-        super(serviceLookup);
-    }
+    List<Contact> searchContactsWithBirthday(List<String> folderIds, Date from, Date until) throws OXException;
 
-    @Override
-    protected AJAXRequestResult perform(IDBasedContactsAccess access, ContactRequest request) throws OXException {
-        Date from = request.getStart();
-        Date until = request.getEnd();
-        List<String> folderIds = null != request.optFolderID() ? Collections.singletonList(request.optFolderID()) : null;
-        List<Contact> contacts = access.searchContactsWithBirthday(folderIds, from, until);
-        return new AJAXRequestResult(sortIfNeeded(request, contacts, ContactField.BIRTHDAY), getLatestTimestamp(contacts), "contact");
-    }
+    /**
+     * Searches for contacts whose anniversary falls into the specified period.
+     * <p/>
+     * The following contacts parameters are evaluated:
+     * <ul>
+     * <li>{@link ContactsParameters#PARAMETER_FIELDS}</li>
+     * <li>{@link ContactsParameters#PARAMETER_ORDER}</li>
+     * <li>{@link ContactsParameters#PARAMETER_ORDER_BY}</li>
+     * </ul>
+     *
+     * @param folderIds The identifiers of the folders to perform the search in, or <code>null</code> to search in all folders
+     * @param from Specifies the lower inclusive limit of the queried range, i.e. only
+     *            contacts whose anniversaries start on or after this date should be returned.
+     * @param until Specifies the upper exclusive limit of the queried range, i.e. only
+     *            contacts whose anniversaries end before this date should be returned.
+     * @return the contacts found with the search
+     * @throws OXException
+     */
+    List<Contact> searchContactsWithAnniversary(List<String> folderIds, Date from, Date until) throws OXException;
 
-    @Override
-    protected ContactField[] getFields(ContactRequest request) throws OXException {
-        return request.getFields(ContactField.BIRTHDAY);
-    }
-
-    @Override
-    protected Set<String> getOptionalParameters() {
-        return OPTIONAL_PARAMETERS;
-    }
 }

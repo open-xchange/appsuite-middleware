@@ -49,6 +49,7 @@ package com.openexchange.find.basic;
  *
  */
 
+import static com.openexchange.java.Autoboxing.B;
 import static com.openexchange.java.Autoboxing.I;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -196,8 +197,10 @@ public abstract class AbstractContactFacetingModuleSearchDriver extends Abstract
             access.set(ContactsParameters.PARAMETER_ORDER, sortOptions.getOrder()[0].getOrder());
             access.set(ContactsParameters.PARAMETER_ORDER_BY, sortOptions.getOrder()[0].getBy());
             access.set(ContactsParameters.PARAMETER_RIGHT_HAND_LIMIT, I(sortOptions.getLimit()));
+            access.set(ContactsParameters.PARAMETER_REQUIRE_EMAIL, B(parameters.getBoolean(AutocompleteParameters.REQUIRE_EMAIL, true)));
+            access.set(ContactsParameters.PARAMETER_IGNORE_DISTRIBUTION_LISTS, B(parameters.getBoolean(AutocompleteParameters.IGNORE_DISTRIBUTION_LISTS, false)));
 
-            contacts = access.autocompleteContacts(folderIDs, prefix, parameters);
+            contacts = access.autocompleteContacts(folderIDs, prefix);
         } catch (OXException e) {
             if (ContactExceptionCodes.TOO_FEW_SEARCH_CHARS.equals(e)) {
                 return Collections.emptyList();

@@ -49,6 +49,8 @@
 
 package com.openexchange.contacts.json.actions;
 
+import java.util.Arrays;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import org.json.JSONArray;
@@ -66,8 +68,8 @@ import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.search.ContactSearchObject;
 import com.openexchange.groupware.search.ContactsSearchObject;
-import com.openexchange.groupware.search.ContactsSearchObject.Range;
 import com.openexchange.server.ServiceLookup;
+import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.servlet.OXJSONExceptionCodes;
 
 /**
@@ -104,34 +106,38 @@ public class SearchAction extends IDBasedContactAction {
         return OPTIONAL_PARAMETERS;
     }
 
+
     /**
      * Creates a {@link ContactSearchObject} based on the specifed json
      *
      * @param json The json object
      * @return The {@link ContactSearchObject}
      */
-    @SuppressWarnings("deprecation")
     private static ContactsSearchObject createContactsSearchObject(JSONObject json) throws OXException {
         ContactsSearchObject searchObject = null;
         try {
             searchObject = new ContactsSearchObject();
             if (json.has("folder")) {
+                Set<String> folders = new HashSet<String>();
                 if (json.get("folder").getClass().equals(JSONArray.class)) {
-                    for (String folder : DataParser.parseJSONStringArray(json, "folder")) {
-                        searchObject.addFolder(folder);
-                    }
+                    folders.addAll(Arrays.asList(DataParser.parseJSONStringArray(json, "folder")));
                 } else {
-                    searchObject.addFolder(DataParser.parseString(json, "folder"));
+                    folders.add(DataParser.parseString(json, "folder"));
                 }
+                searchObject.setFolders(folders);
             }
             if (json.has(EXCLUDE_FOLDERS_FIELD)) {
+                Set<String> excludeFolders = new HashSet<String>();
                 if (json.get(EXCLUDE_FOLDERS_FIELD).getClass().equals(JSONArray.class)) {
-                    for (String folder : DataParser.parseJSONStringArray(json, EXCLUDE_FOLDERS_FIELD)) {
-                        searchObject.addExcludeFolder(folder);
-                    }
+                    excludeFolders.addAll(Arrays.asList(DataParser.parseJSONStringArray(json, EXCLUDE_FOLDERS_FIELD)));
                 } else {
-                    searchObject.addExcludeFolder(DataParser.parseString(json, EXCLUDE_FOLDERS_FIELD));
+                    excludeFolders.add(DataParser.parseString(json, EXCLUDE_FOLDERS_FIELD));
                 }
+                searchObject.setExcludeFolders(excludeFolders);
+            }
+            if (null != searchObject.getFolders() && false == searchObject.getFolders().isEmpty() &&
+                null != searchObject.getExcludeFolders() && false == searchObject.getExcludeFolders().isEmpty()) {
+                throw AjaxExceptionCodes.UNEXPECTED_ERROR.create("'folder' and 'excludedFolders' are mutual exclusive'");
             }
             if (json.has(SearchFields.PATTERN)) {
                 searchObject.setPattern(DataParser.parseString(json, SearchFields.PATTERN));
@@ -148,7 +154,6 @@ public class SearchAction extends IDBasedContactAction {
             if (json.has("exactMatch") && json.getBoolean("exactMatch")) {
                 searchObject.setExactMatch(true);
             }
-
             searchObject.setSurname(DataParser.parseString(json, ContactFields.LAST_NAME));
             searchObject.setDisplayName(DataParser.parseString(json, ContactFields.DISPLAY_NAME));
             searchObject.setGivenName(DataParser.parseString(json, ContactFields.FIRST_NAME));
@@ -156,25 +161,7 @@ public class SearchAction extends IDBasedContactAction {
             searchObject.setEmail1(DataParser.parseString(json, ContactFields.EMAIL1));
             searchObject.setEmail2(DataParser.parseString(json, ContactFields.EMAIL2));
             searchObject.setEmail3(DataParser.parseString(json, ContactFields.EMAIL3));
-            searchObject.setDepartment(DataParser.parseString(json, ContactFields.DEPARTMENT));
-            searchObject.setStreetBusiness(DataParser.parseString(json, ContactFields.STREET_BUSINESS));
-            searchObject.setCityBusiness(DataParser.parseString(json, ContactFields.CITY_BUSINESS));
-            searchObject.setDynamicSearchField(DataParser.parseJSONIntArray(json, "dynamicsearchfield"));
-            searchObject.setDynamicSearchFieldValue(DataParser.parseJSONStringArray(json, "dynamicsearchfieldvalue"));
-            searchObject.setRange(Range.PRIVATE_POSTAL_CODE_RANGE, DataParser.parseJSONStringArray(json, "privatepostalcoderange"));
-            searchObject.setRange(Range.BUSINESS_POSTAL_CODE_RANGE, DataParser.parseJSONStringArray(json, "businesspostalcoderange"));
-            searchObject.setRange(Range.OTHER_POSTAL_CODE_RANGE, DataParser.parseJSONStringArray(json, "otherpostalcoderange"));
-            searchObject.setRange(Range.BIRTHDAY_RANGE, DataParser.parseJSONDateArray(json, "birthdayrange"));
-            searchObject.setRange(Range.ANNIVERSARY_RANGE, DataParser.parseJSONDateArray(json, "anniversaryrange"));
-            searchObject.setRange(Range.NUMBER_OF_EMPLOYEE_RANGE, DataParser.parseJSONStringArray(json, "numberofemployee"));
-            searchObject.setRange(Range.SALES_VOLUME_RANGE, DataParser.parseJSONStringArray(json, "salesvolumerange"));
-            searchObject.setRange(Range.CREATION_DATE_RANGE, DataParser.parseJSONDateArray(json, "creationdaterange"));
-            searchObject.setRange(Range.LAST_MODIFIED_RANGE, DataParser.parseJSONDateArray(json, "lastmodifiedrange"));
-            searchObject.setCatgories(DataParser.parseString(json, "categories"));
-            searchObject.setSubfolderSearch(DataParser.parseBoolean(json, "subfoldersearch"));
-            searchObject.setYomiCompany(DataParser.parseString(json, ContactFields.YOMI_COMPANY));
-            searchObject.setYomiFirstname(DataParser.parseString(json, ContactFields.YOMI_FIRST_NAME));
-            searchObject.setYomiLastName(DataParser.parseString(json, ContactFields.YOMI_LAST_NAME));
+            searchObject.setCatgories(DataParser.parseString(json, ContactFields.CATEGORIES));
         } catch (JSONException e) {
             throw OXJSONExceptionCodes.JSON_READ_ERROR.create(e);
         }

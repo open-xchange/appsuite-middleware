@@ -162,7 +162,7 @@ public final class IDMangler {
      * @return The contact representation with relative identifiers
      */
     public static Contact withRelativeID(Contact contact) throws OXException {
-        String newFolderId = getRelativeFolderId(Integer.toString(contact.getParentFolderID()));
+        String newFolderId = getRelativeFolderId(getEffectiveFolderId(contact));
         return new IDManglingContact(contact, newFolderId);
     }
 
@@ -207,7 +207,7 @@ public final class IDMangler {
             return contact;
         }
 
-        String newFolderId = getUniqueFolderId(accountId, Integer.toString(contact.getParentFolderID()));
+        String newFolderId = getUniqueFolderId(accountId, getEffectiveFolderId(contact));
         return new IDManglingContact(contact, newFolderId);
     }
 
@@ -234,7 +234,7 @@ public final class IDMangler {
      * Gets a contacts folder equipped with unique composite identifiers representing a contacts folder from a specific contacts account.
      *
      * @param folders The contacts folder from the account
-     * @param accountId The identifier of the account
+     * @param account The contacts account
      * @return The contacts folder representation with unique identifiers
      */
     public static AccountAwareContactsFolder withUniqueID(ContactsFolder folder, ContactsAccount account) {
@@ -263,7 +263,7 @@ public final class IDMangler {
         }
         List<Contact> contacts = new ArrayList<>(relativeResults.size());
         for (Contact contact : relativeResults) {
-            contacts.add(new IDManglingContact(contact, getUniqueFolderId(accountId, Integer.toString(contact.getParentFolderID()))));
+            contacts.add(new IDManglingContact(contact, getUniqueFolderId(accountId, getEffectiveFolderId(contact))));
         }
         return contacts;
     }
@@ -543,4 +543,22 @@ public final class IDMangler {
     private static boolean containsFolderId(Operand<?>[] operands, int i, ContactField field) {
         return null != field && ContactField.FOLDER_ID.equals(field) && i + 1 < operands.length && null != operands[i + 1] && null != operands[i + 1].getValue();
     }
+
+    /**
+     * Gets the parent folder identifier of the supplied contact, first probing {@link Contact#getFolderId()}, then falling back to
+     * {@link Contact#getParentFolderID()}.
+     *
+     * @param contact The contact to get the parent folder identifier for
+     * @return The parent folder identifier, or <code>null</code> if not set
+     */
+    private static String getEffectiveFolderId(Contact contact) {
+        if (contact.containsFolderId()) {
+            return contact.getFolderId();
+        }
+        if (contact.containsParentFolderID()) {
+            return String.valueOf(contact.getParentFolderID());
+        }
+        return null;
+    }
+
 }

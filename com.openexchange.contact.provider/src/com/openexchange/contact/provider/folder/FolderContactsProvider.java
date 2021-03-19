@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH. group of companies.
+ *    trademarks of the OX Software GmbH group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -53,31 +53,30 @@ import org.json.JSONObject;
 import com.openexchange.contact.common.ContactsAccount;
 import com.openexchange.contact.common.ContactsParameters;
 import com.openexchange.contact.provider.ContactsProvider;
-import com.openexchange.contact.provider.basic.ContactsSettings;
 import com.openexchange.exception.OXException;
 import com.openexchange.session.Session;
 
 /**
- * {@link ContactsFolderProvider}
+ * {@link FolderContactsProvider}
  *
- * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
- * @since v7.10.5
+ * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
+ * @since v8.0.0
  */
-public interface ContactsFolderProvider extends ContactsProvider {
+public interface FolderContactsProvider extends ContactsProvider {
 
     /**
      * Initializes the configuration prior creating a new contacts account.
      * <p/>
-     * Any permission or data validation checks are performed during this initialization phase. In case of erroneous or incomplete
+     * Any permission- or data validation checks are performed during this initialization phase. In case of erroneous or incomplete
      * configuration data, an appropriate exception will be thrown. Upon success, any <i>internal</i> configuration data is returned for
-     * persisting along with the newly created contacts account.
+     * persisting along with the newly created calendar account.
      *
      * @param session The user's session
-     * @param settings Contact settings for the new account as supplied by the client
+     * @param userConfig The <i>user</i> configuration as supplied by the client
      * @param parameters Additional contacts parameters, or <code>null</code> if not set
      * @return A JSON object holding the <i>internal</i> configuration to store along with the new account
      */
-    JSONObject configureAccount(Session session, ContactsSettings settings, ContactsParameters parameters) throws OXException;
+    JSONObject configureAccount(Session session, JSONObject userConfig, ContactsParameters parameters) throws OXException;
 
     /**
      * Re-initializes the configuration prior updating an existing contacts account.
@@ -88,11 +87,11 @@ public interface ContactsFolderProvider extends ContactsProvider {
      *
      * @param session The user's session
      * @param account The currently stored contacts account holding the obsolete user and current <i>internal</i> configuration
-     * @param settings The updated settings for the updated account as supplied by the client
+     * @param userConfig The updated <i>user</i> configuration as supplied by the client
      * @param parameters Additional contacts parameters, or <code>null</code> if not set
      * @return A JSON object holding the updated <i>internal</i> configuration to store along with update, or <code>null</code> if unchanged
      */
-    JSONObject reconfigureAccount(Session session, ContactsAccount account, ContactsSettings settings, ContactsParameters parameters) throws OXException;
+    JSONObject reconfigureAccount(Session session, ContactsAccount account, JSONObject userConfig, ContactsParameters parameters) throws OXException;
 
     /**
      * Initializes the connection to a specific contacts account.
@@ -104,4 +103,5 @@ public interface ContactsFolderProvider extends ContactsProvider {
      */
     @Override
     FolderContactsAccess connect(Session session, ContactsAccount account, ContactsParameters parameters) throws OXException;
+
 }

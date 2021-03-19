@@ -47,58 +47,52 @@
  *
  */
 
-package com.openexchange.contacts.json.actions;
+package com.openexchange.contact.provider.composition.impl;
 
 import java.util.Collections;
-import java.util.Date;
 import java.util.List;
-import java.util.Set;
-import com.google.common.collect.ImmutableSet;
-import com.openexchange.ajax.requesthandler.AJAXRequestResult;
-import com.openexchange.ajax.requesthandler.annotation.restricted.RestrictedAction;
-import com.openexchange.contact.provider.composition.IDBasedContactsAccess;
-import com.openexchange.contacts.json.ContactRequest;
+import com.openexchange.contact.common.ContactsAccount;
+import com.openexchange.contact.common.ContactsFolder;
+import com.openexchange.contact.provider.ContactsProviderExceptionCodes;
+import com.openexchange.contact.provider.extensions.WarningsAware;
+import com.openexchange.contact.provider.folder.FallbackFolderContactsAccess;
 import com.openexchange.exception.OXException;
-import com.openexchange.groupware.contact.helpers.ContactField;
-import com.openexchange.groupware.container.Contact;
-import com.openexchange.server.ServiceLookup;
 
 /**
- * {@link BirthdaysAction}
+ * {@link FallbackEmptyContactsAccess}
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
- * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
+ * @since v8.0.0
  */
-@RestrictedAction(module = IDBasedContactAction.MODULE_NAME, type = RestrictedAction.Type.READ)
-public class BirthdaysAction extends IDBasedContactAction {
+public class FallbackEmptyContactsAccess extends FallbackFolderContactsAccess implements WarningsAware {
 
-    private static final Set<String> OPTIONAL_PARAMETERS = ImmutableSet.of(PARAM_FIELDS, PARAM_ORDER, PARAM_ORDER_BY, PARAM_LEFT_HAND_LIMIT, PARAM_RIGHT_HAND_LIMIT, PARAM_COLLATION);
+    private final OXException error;
 
     /**
-     * Initializes a new {@link BirthdaysAction}.
+     * Initializes a new {@link FallbackEmptyContactsAccess}.
      *
-     * @param serviceLookup The service lookup to use
+     * @param account The underlying Contacts account
+     * @param error The error to include in the accesses' warnings, or <code>null</code> if not defined
      */
-    public BirthdaysAction(ServiceLookup serviceLookup) {
-        super(serviceLookup);
+    public FallbackEmptyContactsAccess(ContactsAccount account, OXException error) {
+        super(account);
+        this.error = error;
     }
 
     @Override
-    protected AJAXRequestResult perform(IDBasedContactsAccess access, ContactRequest request) throws OXException {
-        Date from = request.getStart();
-        Date until = request.getEnd();
-        List<String> folderIds = null != request.optFolderID() ? Collections.singletonList(request.optFolderID()) : null;
-        List<Contact> contacts = access.searchContactsWithBirthday(folderIds, from, until);
-        return new AJAXRequestResult(sortIfNeeded(request, contacts, ContactField.BIRTHDAY), getLatestTimestamp(contacts), "contact");
+    public List<OXException> getWarnings() {
+        return null == error ? Collections.emptyList() : Collections.singletonList(error);
     }
 
     @Override
-    protected ContactField[] getFields(ContactRequest request) throws OXException {
-        return request.getFields(ContactField.BIRTHDAY);
+    public ContactsFolder getFolder(String folderId) throws OXException {
+        throw ContactsProviderExceptionCodes.FOLDER_NOT_FOUND.create(folderId);
     }
 
     @Override
-    protected Set<String> getOptionalParameters() {
-        return OPTIONAL_PARAMETERS;
+    public List<ContactsFolder> getVisibleFolders() throws OXException {
+        return Collections.emptyList();
     }
+
 }
+

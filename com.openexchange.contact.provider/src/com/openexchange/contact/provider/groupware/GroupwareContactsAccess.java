@@ -49,7 +49,9 @@ package com.openexchange.contact.provider.groupware;
  *
  */
 
+import java.util.ArrayList;
 import java.util.List;
+import com.openexchange.contact.common.ContactsFolder;
 import com.openexchange.contact.common.GroupwareContactsFolder;
 import com.openexchange.contact.common.GroupwareFolderType;
 import com.openexchange.contact.provider.folder.FolderContactsAccess;
@@ -64,6 +66,18 @@ import com.openexchange.exception.OXException;
 public interface GroupwareContactsAccess extends FolderContactsAccess {
 
     /**
+     * Default implementation delegating to {@link #getVisibleFolders(GroupwareFolderType)} for all types. Override if applicable.
+     */
+    @Override
+    default List<ContactsFolder> getVisibleFolders() throws OXException {
+        List<ContactsFolder> folders = new ArrayList<ContactsFolder>();
+        for (GroupwareFolderType type : GroupwareFolderType.values()) {
+            folders.addAll(getVisibleFolders(type));
+        }
+        return folders;
+    }
+
+    /**
      * Gets a list of all visible contacts folders.
      *
      * @param type The type to get the visible folders for
@@ -71,19 +85,4 @@ public interface GroupwareContactsAccess extends FolderContactsAccess {
      */
     List<GroupwareContactsFolder> getVisibleFolders(GroupwareFolderType type) throws OXException;
 
-    /**
-     * Gets the default contacts folder.
-     *
-     * @return The default folder
-     */
-    GroupwareContactsFolder getDefaultFolder() throws OXException;
-
-    /**
-     * Gets a value indicating if the folder with the supplied identifier contains foreign objects, i.e. contacts that were not created
-     * by the current session's user.
-     *
-     * @param folderId The ID of the folder to check
-     * @return <code>true</code> if the folder contains foreign objects, <code>false</code>, otherwise.
-     */
-    boolean containsForeignObjectInFolder(String folderId) throws OXException;
 }

@@ -52,7 +52,6 @@ package com.openexchange.contact.provider.composition;
 import java.util.Date;
 import java.util.List;
 import org.json.JSONObject;
-import com.openexchange.contact.AutocompleteParameters;
 import com.openexchange.contact.ContactID;
 import com.openexchange.contact.common.AccountAwareContactsFolder;
 import com.openexchange.contact.common.ContactsFolder;
@@ -89,15 +88,6 @@ public interface IDBasedContactsAccess extends TransactionAware, ContactsParamet
     List<OXException> getWarnings();
 
     /**
-     * Counts all contacts within the given folder.
-     *
-     * @param folderId ID of the folder to count in
-     * @return the number of contacts
-     * @throws OXException if an error is occurred
-     */
-    int countContacts(String folderId) throws OXException;
-
-    /**
      * Creates a new contact
      *
      * @param folderId The fully qualified identifier of the parent folder to create the contact in
@@ -126,16 +116,8 @@ public interface IDBasedContactsAccess extends TransactionAware, ContactsParamet
     void deleteContact(ContactID contactId, long clientTimestamp) throws OXException;
 
     /**
-     * Deletes all contacts in a folder.
-     *
-     * @param folderId the ID of the parent folder
-     * @throws OXException if an error is occurred
-     */
-    void deleteContacts(String folderId) throws OXException;
-
-    /**
      * Deletes multiple contacts.
-     * 
+     *
      * @param contactIds The contact identifiers
      * @param clientTimestamp The last know timestamp by the client
      * @throws OXException if an error is occurred
@@ -149,9 +131,9 @@ public interface IDBasedContactsAccess extends TransactionAware, ContactsParamet
      * <ul>
      * <li>{@link ContactsParameters#PARAMETER_FIELDS}</li>
      * </ul>
-     * 
+     *
      * @param contactId The identifier of the contact to get
-     * 
+     *
      * @return The contact
      * @throws OXException if an error is occurred
      */
@@ -159,7 +141,7 @@ public interface IDBasedContactsAccess extends TransactionAware, ContactsParamet
 
     /**
      * Gets a list of contacts with the specified identifiers.
-     * 
+     *
      * <p/>
      * The following contacts parameters are evaluated:
      * <ul>
@@ -174,7 +156,7 @@ public interface IDBasedContactsAccess extends TransactionAware, ContactsParamet
 
     /**
      * Gets all contacts in a specific contacts folder.
-     * 
+     *
      * <p/>
      * The following contacts parameters are evaluated:
      * <ul>
@@ -182,26 +164,12 @@ public interface IDBasedContactsAccess extends TransactionAware, ContactsParamet
      * <li>{@link ContactsParameters#PARAMETER_ORDER}</li>
      * <li>{@link ContactsParameters#PARAMETER_ORDER_BY}</li>
      * </ul>
-     * 
+     *
      * @param folderId The identifier of the folder to get the contacts from
      * @return The contacts
      * @throws OXException if an error is occurred
      */
     List<Contact> getContacts(String folderId) throws OXException;
-
-    /**
-     * Gets all contacts from all visible folders.
-     * <p/>
-     * The following contacts parameters are evaluated:
-     * <ul>
-     * <li>{@link ContactsParameters#PARAMETER_FIELDS}</li>
-     * <li>{@link ContactsParameters#PARAMETER_ORDER}</li>
-     * <li>{@link ContactsParameters#PARAMETER_ORDER_BY}</li>
-     * 
-     * @return the contacts
-     * @throws OXException if an error is occurred
-     */
-    List<Contact> getContacts() throws OXException;
 
     /**
      * Gets a list of modified contacts in the specified folder
@@ -211,7 +179,7 @@ public interface IDBasedContactsAccess extends TransactionAware, ContactsParamet
      * <li>{@link ContactsParameters#PARAMETER_FIELDS}</li>
      * <li>{@link ContactsParameters#PARAMETER_ORDER}</li>
      * <li>{@link ContactsParameters#PARAMETER_ORDER_BY}</li>
-     * 
+     *
      * @param folderId the folder identifier
      * @param from Specifies the lower inclusive limit of the queried range, i.e. only
      *            contacts modified on or after this date should be returned.
@@ -228,7 +196,7 @@ public interface IDBasedContactsAccess extends TransactionAware, ContactsParamet
      * <li>{@link ContactsParameters#PARAMETER_FIELDS}</li>
      * <li>{@link ContactsParameters#PARAMETER_ORDER}</li>
      * <li>{@link ContactsParameters#PARAMETER_ORDER_BY}</li>
-     * 
+     *
      * @param folderId the folder identifier
      * @param from Specifies the lower inclusive limit of the queried range, i.e. only
      *            contacts deleted on or after this date should be returned.
@@ -238,23 +206,6 @@ public interface IDBasedContactsAccess extends TransactionAware, ContactsParamet
     List<Contact> getDeletedContacts(String folderId, Date from) throws OXException;
 
     ///////////////////////////////////// FOLDERS ////////////////////////////////////
-
-    /**
-     * Gets all contacts from one or more specific contact folders.
-     * 
-     * <p/>
-     * The following contacts parameters are evaluated:
-     * <ul>
-     * <li>{@link ContactsParameters#PARAMETER_FIELDS}</li>
-     * <li>{@link ContactsParameters#PARAMETER_ORDER}</li>
-     * <li>{@link ContactsParameters#PARAMETER_ORDER_BY}</li>
-     * </ul>
-     * 
-     * @param folderId The identifier of the folder to get the contacts from
-     * @return The resulting contacts
-     * @throws OXException if an error is occurred
-     */
-    List<Contact> getContactsInFolders(List<String> folderIds) throws OXException;
 
     /**
      * Gets a list of all visible contacts folders.
@@ -329,25 +280,6 @@ public interface IDBasedContactsAccess extends TransactionAware, ContactsParamet
     void deleteFolder(String folderId, long clientTimestamp) throws OXException;
 
     /**
-     * Gets a value indicating if the folder with the supplied identifier is empty.
-     *
-     * @param folderId The ID of the folder to check
-     * @return <code>true</code> if the folder is empty, <code>false</code>, otherwise.
-     * @throws OXException if an error is occurred
-     */
-    boolean isFolderEmpty(String folderId) throws OXException;
-
-    /**
-     * Gets a value indicating if the folder with the supplied identifier contains foreign objects, i.e. contacts that were not created
-     * by the current session's user.
-     *
-     * @param folderId The ID of the folder to check
-     * @return <code>true</code> if the folder contains foreign objects, <code>false</code>, otherwise.
-     * @throws OXException if an error is occurred
-     */
-    boolean containsForeignObjectInFolder(String folderId) throws OXException;
-
-    /**
      * Returns if the provided {@link ContactField}s are supported by the storage. To 'support' the given field the storage
      * should be able to set new values for it. If at least one of the provided fields is not supported <code>false</code> will be
      * returned.
@@ -369,7 +301,6 @@ public interface IDBasedContactsAccess extends TransactionAware, ContactsParamet
      * <li>{@link ContactsParameters#PARAMETER_FIELDS}</li>
      * <li>{@link ContactsParameters#PARAMETER_ORDER}</li>
      * <li>{@link ContactsParameters#PARAMETER_ORDER_BY}</li>
-     * <li>{@link ContactsParameters#PARAMETER_EXCLUDE_ADMIN}</li>
      * </ul>
      *
      * @param term the search term
@@ -381,12 +312,13 @@ public interface IDBasedContactsAccess extends TransactionAware, ContactsParamet
     /**
      * Searches for contacts.
      * <p/>
+     * <b>Note:</b> The search is only performed in the default <i>internal</i> groupware account.
+     * <p/>
      * The following contacts parameters are evaluated:
      * <ul>
      * <li>{@link ContactsParameters#PARAMETER_FIELDS}</li>
      * <li>{@link ContactsParameters#PARAMETER_ORDER}</li>
      * <li>{@link ContactsParameters#PARAMETER_ORDER_BY}</li>
-     * <li>{@link ContactsParameters#PARAMETER_EXCLUDE_ADMIN}</li>
      * </ul>
      *
      * @param contactSearch the contact search object
@@ -397,49 +329,22 @@ public interface IDBasedContactsAccess extends TransactionAware, ContactsParamet
 
     /**
      * Performs an "auto-complete" lookup for contacts.
-     * 
-     * @param query The search query as supplied by the client
-     * @param parameters The additional parameters to refine the auto-complete search. Don't pass <code>null</code> here,
-     *            but use an empty instance to use the default parameter values.
-     * @return The contacts found with the search
-     * @throws OXException if an error is occurred
-     *
-     * @see {@link AutocompleteParameters#newInstance()}
-     */
-    List<Contact> autocompleteContacts(String query, AutocompleteParameters parameters) throws OXException;
-
-    /**
-     * Performs an "auto-complete" lookup for contacts. Depending <code>com.openexchange.contacts.allFoldersForAutoComplete</code>, either
-     * all folders visible to the user, or a reduced set of specific folders is used for the search.
-     *
-     * @param folderIDs A list of folder IDs to restrict the search to
-     * @param query The search query as supplied by the client
-     * @param parameters The additional parameters to refine the auto-complete search. Don't pass <code>null</code> here,
-     *            but use an empty instance to use the default parameter values.
-     * @return The contacts found with the search
-     * @throws OXException if an error is occurred
-     */
-    List<Contact> autocompleteContacts(List<String> folderIds, String query, AutocompleteParameters parameters) throws OXException;
-
-    /**
-     * Searches for contacts whose birthday falls into the specified period.
-     * 
      * <p/>
      * The following contacts parameters are evaluated:
      * <ul>
      * <li>{@link ContactsParameters#PARAMETER_FIELDS}</li>
      * <li>{@link ContactsParameters#PARAMETER_ORDER}</li>
      * <li>{@link ContactsParameters#PARAMETER_ORDER_BY}</li>
+     * <li>{@link ContactsParameters#PARAMETER_RIGHT_HAND_LIMIT}</li>
+     * <li>{@link ContactsParameters#PARAMETER_REQUIRE_EMAIL}</li>
+     * <li>{@link ContactsParameters#PARAMETER_IGNORE_DISTRIBUTION_LISTS}</li>
      * </ul>
-     * 
-     * @param from Specifies the lower inclusive limit of the queried range, i.e. only
-     *            contacts whose birthdays start on or after this date should be returned.
-     * @param until Specifies the upper exclusive limit of the queried range, i.e. only
-     *            contacts whose birthdays end before this date should be returned.
-     * @return the contacts found with the search
-     * @throws OXException if an error is occurred
+     *
+     * @param folderIds The identifiers of the folders to perform the search in, or <code>null</code> to search in all folders
+     * @param query The search query as supplied by the client
+     * @return The resulting contacts
      */
-    List<Contact> searchContactsWithBirthday(Date from, Date until) throws OXException;
+    List<Contact> autocompleteContacts(List<String> folderIds, String query) throws OXException;
 
     /**
      * Searches for contacts whose birthday falls into the specified period.
@@ -450,8 +355,8 @@ public interface IDBasedContactsAccess extends TransactionAware, ContactsParamet
      * <li>{@link ContactsParameters#PARAMETER_ORDER}</li>
      * <li>{@link ContactsParameters#PARAMETER_ORDER_BY}</li>
      * </ul>
-     * 
-     * @param folderIDs the IDs of the parent folders
+     *
+     * @param folderIds the IDs of the parent folders
      * @param from Specifies the lower inclusive limit of the queried range, i.e. only
      *            contacts whose birthdays start on or after this date should be returned.
      * @param until Specifies the upper exclusive limit of the queried range, i.e. only
@@ -459,7 +364,7 @@ public interface IDBasedContactsAccess extends TransactionAware, ContactsParamet
      * @return the contacts found with the search
      * @throws OXException if an error is occurred
      */
-    List<Contact> searchContactsWithBirthday(List<String> folderIDs, Date from, Date until) throws OXException;
+    List<Contact> searchContactsWithBirthday(List<String> folderIds, Date from, Date until) throws OXException;
 
     /**
      * Searches for contacts whose anniversary falls into the specified period.
@@ -470,7 +375,8 @@ public interface IDBasedContactsAccess extends TransactionAware, ContactsParamet
      * <li>{@link ContactsParameters#PARAMETER_ORDER}</li>
      * <li>{@link ContactsParameters#PARAMETER_ORDER_BY}</li>
      * </ul>
-     * 
+     *
+     * @param folderIds the IDs of the parent folders
      * @param from Specifies the lower inclusive limit of the queried range, i.e. only
      *            contacts whose anniversaries start on or after this date should be returned.
      * @param until Specifies the upper exclusive limit of the queried range, i.e. only
@@ -478,25 +384,6 @@ public interface IDBasedContactsAccess extends TransactionAware, ContactsParamet
      * @return the contacts found with the search
      * @throws OXException if an error is occurred
      */
-    List<Contact> searchContactsWithAnniversary(Date from, Date until) throws OXException;
+    List<Contact> searchContactsWithAnniversary(List<String> folderIds, Date from, Date until) throws OXException;
 
-    /**
-     * Searches for contacts whose anniversary falls into the specified period.
-     * <p/>
-     * The following contacts parameters are evaluated:
-     * <ul>
-     * <li>{@link ContactsParameters#PARAMETER_FIELDS}</li>
-     * <li>{@link ContactsParameters#PARAMETER_ORDER}</li>
-     * <li>{@link ContactsParameters#PARAMETER_ORDER_BY}</li>
-     * </ul>
-     * 
-     * @param folderIDs the IDs of the parent folders
-     * @param from Specifies the lower inclusive limit of the queried range, i.e. only
-     *            contacts whose anniversaries start on or after this date should be returned.
-     * @param until Specifies the upper exclusive limit of the queried range, i.e. only
-     *            contacts whose anniversaries end before this date should be returned.
-     * @return the contacts found with the search
-     * @throws OXException if an error is occurred
-     */
-    List<Contact> searchContactsWithAnniversary(List<String> folderIDs, Date from, Date until) throws OXException;
 }
