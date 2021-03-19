@@ -61,7 +61,6 @@ import java.util.concurrent.atomic.AtomicReference;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import javax.mail.Address;
-import javax.mail.AuthenticationFailedException;
 import javax.mail.Folder;
 import javax.mail.MessageRemovedException;
 import javax.mail.MessagingException;
@@ -646,7 +645,7 @@ public class MimeMailException extends OXException {
             case AUTHENTICATIONFAILED:
                 {
                     Response offendingResponse = pe.getResponse();
-                    AuthenticationFailedException afe = new AuthenticationFailedException(null == offendingResponse ? pe.getMessage() : offendingResponse.getRest(), pe).setReason(rc.getName());
+                    javax.mail.AuthenticationFailedException afe = new javax.mail.AuthenticationFailedException(null == offendingResponse ? pe.getMessage() : offendingResponse.getRest(), pe).setReason(rc.getName());
                     return handleAuthenticationFailedException(afe, mailConfig, session);
                 }
             case CANNOT:
@@ -1104,8 +1103,58 @@ public class MimeMailException extends OXException {
         return isEitherOf(e, com.sun.mail.iap.ByeIOException.class);
     }
 
+    /**
+     * Checks if cause of specified exception indicates an SSL hand-shake problem.
+     *
+     * @param e The exception to examine
+     * @return <code>true</code> if an SSL hand-shake problem is indicated; otherwise <code>false</code>
+     */
     public static boolean isSSLHandshakeException(MessagingException e) {
         return isEitherOf(e, javax.net.ssl.SSLHandshakeException.class);
+    }
+
+    /**
+     * Checks if cause of specified exception indicates a failed authentication problem.
+     *
+     * @param e The exception to examine
+     * @return <code>true</code> if a failed authentication problem is indicated; otherwise <code>false</code>
+     */
+    public static boolean isAuthenticationFailedException(OXException e) {
+        if (null == e) {
+            return false;
+        }
+
+        Throwable next = e.getCause();
+        if (next instanceof OXException) {
+            return isAuthenticationFailedException((OXException) next);
+        }
+        if (next instanceof MessagingException) {
+            return isAuthenticationFailedException((MessagingException) next);
+        }
+        return isEitherOf(next == null ? e : next, javax.mail.AuthenticationFailedException.class);
+    }
+
+    /**
+     * Checks if specified messaging exception or its cause chain indicates a failed authentication problem.
+     *
+     * @param e The messaging exception to examine
+     * @return <code>true</code> if a failed authentication problem is indicated; otherwise <code>false</code>
+     */
+    private static boolean isAuthenticationFailedException(MessagingException e) {
+        if (null == e) {
+            return false;
+        }
+
+        if (e instanceof javax.mail.AuthenticationFailedException) {
+            return true;
+        }
+
+        javax.mail.AuthenticationFailedException authFailedError = lookupNested(e, javax.mail.AuthenticationFailedException.class);
+        if (null != authFailedError) {
+            return true;
+        }
+
+        return isEitherOf(e, javax.mail.AuthenticationFailedException.class);
     }
 
     // ------------------------------------------------- SMTP error stuff ----------------------------------------------------------------
