@@ -308,7 +308,7 @@ public class IncomingSchedulingMail implements IncomingSchedulingObject {
     }
 
     private String removeCidPrefix(String uri) {
-        if (Strings.isNotEmpty(uri) && uri.startsWith("CID:")) {
+        if (Strings.isNotEmpty(uri) && uri.toUpperCase().startsWith("CID:")) {
             return uri.substring(4);
         }
         return uri;

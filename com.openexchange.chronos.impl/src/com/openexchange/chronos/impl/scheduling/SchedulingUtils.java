@@ -54,8 +54,16 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import com.openexchange.chronos.Attachment;
+import com.openexchange.chronos.Attendee;
+import com.openexchange.chronos.AttendeeField;
+import com.openexchange.chronos.CalendarUser;
+import com.openexchange.chronos.Event;
 import com.openexchange.chronos.EventField;
+import com.openexchange.chronos.Organizer;
+import com.openexchange.chronos.ParticipationStatus;
 import com.openexchange.chronos.common.CalendarUtils;
+import com.openexchange.chronos.common.mapping.AttendeeMapper;
+import com.openexchange.chronos.exception.CalendarExceptionCodes;
 import com.openexchange.chronos.impl.Utils;
 import com.openexchange.chronos.scheduling.IncomingSchedulingMessage;
 import com.openexchange.chronos.service.CalendarParameters;
@@ -63,6 +71,8 @@ import com.openexchange.chronos.service.CalendarSession;
 import com.openexchange.chronos.service.EventUpdate;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.tools.mappings.common.SimpleCollectionUpdate;
+import com.openexchange.java.Strings;
+import com.openexchange.tools.arrays.Arrays;
 
 /**
  * {@link SchedulingUtils}
@@ -77,6 +87,20 @@ public class SchedulingUtils {
     }
 
     /**
+     * 
+     * Check if originator is allowed to perform any action, either by perfect match comparing to the organizer or by comparing to the sent-by field of the organizer
+     *
+     * @param originalEvent The original event to get the organizer from
+     * @param originator The originator of a scheduling action
+     * @return <code>true</code> if the originator matches the organizer, <code>false</code> otherwise
+     */
+    public static boolean originatorMatches(Event originalEvent, CalendarUser originator) {
+        Organizer organizer = originalEvent.getOrganizer();
+        return CalendarUtils.matches(originator, organizer) //perfect match 
+            || (null != organizer.getSentBy() && CalendarUtils.matches(originator, organizer.getSentBy()));
+    }
+
+    /**
      * Filters the updated attachments for new items and replaces them with their binary representation
      * 
      * @param originalAttachments The original attachments
@@ -85,6 +109,9 @@ public class SchedulingUtils {
      * @return The filtered attachments
      */
     public static List<Attachment> filterAttachments(List<Attachment> originalAttachments, List<Attachment> updatedAttachments, IncomingSchedulingMessage message) {
+        if (null == updatedAttachments || updatedAttachments.isEmpty()) {
+            return null;
+        }
         SimpleCollectionUpdate<Attachment> attachmentUpdates = CalendarUtils.getAttachmentUpdates(originalAttachments, updatedAttachments);
         List<Attachment> binaryAttachments = getBinaryAttachments(attachmentUpdates.getAddedItems(), message);
         List<Attachment> newAttachments = new ArrayList<>(updatedAttachments.size());
@@ -128,6 +155,9 @@ public class SchedulingUtils {
     public static boolean needsConflictCheck(CalendarSession session, EventUpdate eventUpdate) throws OXException {
         Boolean checkConflicts = session.get(CalendarParameters.PARAMETER_CHECK_CONFLICTS, Boolean.class);
         if (null != checkConflicts && Boolean.FALSE.equals(checkConflicts)) {
+            /*
+             * Was explicit set to false
+             */
             return false;
         }
         if (Utils.coversDifferentTimePeriod(eventUpdate.getOriginal(), eventUpdate.getUpdate())) {
@@ -149,6 +179,127 @@ public class SchedulingUtils {
             return true;
         }
         return false;
+    }
+
+    /**
+     * Gets a value indicating whether an update of an event is only about adjusted
+     * timestamps for consistency, e.g. master is "touched" when exceptions is updated
+     *
+     * @param eventUpdate The update to check
+     * @return <code>true</code> if the event was only touched for consistency, <code>false</code> otherwise
+     */
+    public static boolean isTouchedEvent(EventUpdate eventUpdate) {
+        return 3 == eventUpdate.getUpdatedFields().size() // @formatter:off
+            && eventUpdate.getUpdatedFields().contains(EventField.LAST_MODIFIED) 
+            && eventUpdate.getUpdatedFields().contains(EventField.MODIFIED_BY) 
+            && eventUpdate.getUpdatedFields().contains(EventField.TIMESTAMP);// @formatter:on
+    }
+
+    /**
+     * Prepares the attendee list including the attendee of the acting user. Will add the
+     * current user to the list of attendees if not present
+     * 
+     * @param session The calendar session
+     * @param original The original event or <code>null</code>
+     * @param update The (modifiable) updated event
+     * @param calendarUser The {@link CalendarUser}
+     * @throws OXException In case copying fails
+     */
+    public static void prepareAttendees(CalendarSession session, Event original, Event update, CalendarUser calendarUser) throws OXException {
+        prepareAttendees(session, original, update, calendarUser, true);
+    }
+
+    /**
+     * Prepares the attendee list including the attendee of the acting user
+     * 
+     * @param session The calendar session
+     * @param original The original event or <code>null</code>
+     * @param update The (modifiable) updated event
+     * @param calendarUser The {@link CalendarUser}
+     * @param addUserAttendee <code>true</code> to add the calendar user in the list of attendees if she is missing, <code>false</code> to throw error
+     * @throws OXException In case copying fails
+     */
+    public static void prepareAttendees(CalendarSession session, Event original, Event update, CalendarUser calendarUser, boolean addUserAttendee) throws OXException {
+        List<Attendee> attendees = AttendeeMapper.getInstance().copy(update.getAttendees(), (AttendeeField[]) null);
+        Attendee attendee = CalendarUtils.find(attendees, calendarUser);
+        if (null == attendee) {
+            if (addUserAttendee) {
+                /*
+                 * The scheduling objects seems to have been forwarded to us. We are a "party-crasher"
+                 * XXX We might can prepare a "delegation" here, too. See https://tools.ietf.org/html/rfc5546#section-3.2.2.3
+                 */
+                attendee = session.getEntityResolver().prepareUserAttendee(calendarUser.getEntity());
+                attendee.setPartStat(ParticipationStatus.NEEDS_ACTION);
+                attendees.add(attendee);
+            } else {
+                /*
+                 * Event without the current user
+                 */
+                throw CalendarExceptionCodes.ATTENDEE_NOT_FOUND.create(calendarUser, update);
+            }
+        }
+        if (null == original || null == attendee.getPartStat()) {
+            /*
+             * Set default value
+             */
+            attendee.setPartStat(ParticipationStatus.NEEDS_ACTION);
+        } else {
+            Attendee originalAttendee = CalendarUtils.find(original.getAttendees(), calendarUser);
+            if (null != originalAttendee) {
+                AttendeeField[] fields = new AttendeeField[0];
+                /*
+                 * Try to recover participant status based on the original event, if the event wasn't
+                 * rescheduled
+                 */
+                if (false == ParticipationStatus.NEEDS_ACTION.equals(originalAttendee.getPartStat())//
+                    && ParticipationStatus.NEEDS_ACTION.equals(attendee.getPartStat())//
+                    && false == Utils.isReschedule(original, update)) {
+                    fields = Arrays.add(fields, AttendeeField.PARTSTAT, AttendeeField.COMMENT);
+                }
+                if (originalAttendee.getTimestamp() > 0 && attendee.getTimestamp() <= 0) {
+                    fields = Arrays.add(fields, AttendeeField.TIMESTAMP);
+                }
+                if (fields.length > 0) {
+                    AttendeeMapper.getInstance().copy(originalAttendee, attendee, fields);
+                }
+            }
+        }
+        update.setAttendees(attendees);
+    }
+
+    /**
+     * Gets a value indicating whether the supplied event is considered as the <i>master</i> event of a recurring series or not, based
+     * on checking the properties {@link EventField#RECURRENCE_RULE}
+     *
+     * @param event The event to check
+     * @return <code>true</code> if the event is the series master, <code>false</code>, otherwise
+     */
+    public static boolean looksLikeSeriesMaster(Event event) {
+        return Strings.isNotEmpty(event.getRecurrenceRule());
+    }
+
+    /**
+     * Gets a value indicating whether the supplied event is considered as the <i>master</i> event of a recurring series or not, based
+     * on checking the properties {@link EventField#RECURRENCE_ID}
+     *
+     * @param event The event to check
+     * @return <code>true</code> if the event is the series master, <code>false</code>, otherwise
+     */
+    public static boolean looksLikeSeriesException(Event event) {
+        return null != event.getRecurrenceId();
+    }
+
+    /**
+     * Gets a value indicating whether the supplied event is an element of a recurring series or not, based on
+     * the property {@link EventField#RECURRENCE_RULE} or {@link EventField#RECURRENCE_ID}.
+     *
+     * @param event The event to check
+     * @return <code>true</code> if the event is part of an recurring series, <code>false</code> otherwise
+     * @see #looksLikeSeriesMaster(Event)
+     * @see #looksLikeSeriesException(Event)
+     */
+    public static boolean looksLikeSeriesEvent(Event event) {
+        return looksLikeSeriesMaster(event) || looksLikeSeriesException(event);
     }
 
     /**

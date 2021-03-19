@@ -49,66 +49,22 @@
 
 package com.openexchange.chronos.scheduling;
 
-import java.util.Date;
-import java.util.Optional;
-import com.openexchange.annotation.NonNull;
-import com.openexchange.chronos.CalendarObjectResource;
-
 /**
- * {@link IncomingSchedulingMessage} - Object containing information about an external triggered update of an calendar resource
+ * {@link SchedulingProperties}
  *
  * @author <a href="mailto:daniel.becker@open-xchange.com">Daniel Becker</a>
- * @since v7.10.4
+ * @since v8.0.0
  */
-public interface IncomingSchedulingMessage {
+public final class SchedulingProperties {
 
     /**
-     * The {@link SchedulingMethod} to process
-     * 
-     * @return The {@link SchedulingMethod}
+     * The action the client wants to execute
      */
-    @NonNull
-    SchedulingMethod getMethod();
+    public final static String ACTION = "action";
 
     /**
-     * Get the user identifier for whom to apply the change for
-     *
-     * @return The identifier of the target user.
+     * The optional comment a client wants to set for an attendee
      */
-    int getTargetUser();
-
-    /**
-     * Get the object that triggered the scheduling
-     *
-     * @return The object
-     */
-    @NonNull
-    IncomingSchedulingObject getSchedulingObject();
-
-    /**
-     * Get a the {@link CalendarObjectResource} as transmitted by the external
-     * entity scheduling the change.
-     * 
-     * @return {@link CalendarObjectResource}
-     */
-    @NonNull
-    CalendarObjectResource getResource();
-
-    /**
-     * The date when the change was created
-     *
-     * @return The date of the change
-     */
-    @NonNull
-    Date getTimeStamp();
-
-    /**
-     * Get additional information.
-     * 
-     * @param key The key for the value
-     * @param clazz The class the value has
-     * @return An Optional holding the value casted to the given class
-     */
-    <T> Optional<T> getAdditional(String key, Class<T> clazz);
+    public final static String COMMENT = "comment";
 
 }

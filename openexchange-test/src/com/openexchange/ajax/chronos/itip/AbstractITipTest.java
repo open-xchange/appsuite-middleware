@@ -232,6 +232,15 @@ public abstract class AbstractITipTest extends AbstractChronosTest {
     }
 
     /**
+     * @See {@link ChronosApi#tentative(String, String, String, ConversionDataSource)}
+     */
+    protected ActionResponse tentative(ApiClient apiClient, ConversionDataSource body, String comment) throws ApiException {
+        ActionResponse response = new ChronosApi(apiClient).tentative(DataSources.MAIL.getDataSource(), DescriptionFormat.HTML.getFormat(), body, comment);
+        validateActionResponse(response);
+        return response;
+    }
+
+    /**
      * @See {@link ChronosApi#decline(String, String, String, ConversionDataSource)}
      */
     protected ActionResponse decline(ConversionDataSource body, String comment) throws ApiException {

@@ -49,28 +49,29 @@
 
 package com.openexchange.chronos.impl.scheduling;
 
+import static com.openexchange.chronos.impl.Check.requireCalendarPermission;
+import static com.openexchange.folderstorage.Permission.CREATE_OBJECTS_IN_FOLDER;
+import static com.openexchange.folderstorage.Permission.NO_PERMISSIONS;
+import static com.openexchange.folderstorage.Permission.WRITE_OWN_OBJECTS;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import com.openexchange.chronos.Alarm;
-import com.openexchange.chronos.Attendee;
-import com.openexchange.chronos.AttendeeField;
+import com.openexchange.chronos.CalendarUser;
 import com.openexchange.chronos.Event;
 import com.openexchange.chronos.EventField;
-import com.openexchange.chronos.ParticipationStatus;
 import com.openexchange.chronos.RecurrenceId;
 import com.openexchange.chronos.common.CalendarUtils;
-import com.openexchange.chronos.common.mapping.AttendeeMapper;
 import com.openexchange.chronos.common.mapping.EventMapper;
 import com.openexchange.chronos.exception.CalendarExceptionCodes;
 import com.openexchange.chronos.impl.CalendarFolder;
 import com.openexchange.chronos.impl.Check;
+import com.openexchange.chronos.impl.InternalAttendeeUpdates;
 import com.openexchange.chronos.impl.InternalCalendarResult;
 import com.openexchange.chronos.impl.Utils;
 import com.openexchange.chronos.impl.performer.AbstractUpdatePerformer;
 import com.openexchange.chronos.scheduling.IncomingSchedulingMessage;
 import com.openexchange.chronos.scheduling.SchedulingMethod;
-import com.openexchange.chronos.scheduling.SchedulingSource;
 import com.openexchange.chronos.service.CalendarSession;
 import com.openexchange.chronos.service.EventID;
 import com.openexchange.chronos.storage.CalendarStorage;
@@ -84,8 +85,6 @@ import com.openexchange.exception.OXException;
  */
 public class AddProcessor extends AbstractUpdatePerformer {
 
-    /** The source the scheduling was triggered by */
-    private final SchedulingSource source;
     /** Flag to add attendee instead of throwing an error. For internal code re-usage. */
     private final boolean addUserAttendee;
 
@@ -95,11 +94,11 @@ public class AddProcessor extends AbstractUpdatePerformer {
      * @param storage The underlying calendar storage
      * @param session The calendar session
      * @param folder The calendar folder representing the current view on the events
-     * @param source The source from which the scheduling has been triggered
      * @throws OXException If initialization fails
      */
-    public AddProcessor(CalendarStorage storage, CalendarSession session, CalendarFolder folder, SchedulingSource source) throws OXException {
-        this(storage, session, folder, source, false);
+    public AddProcessor(CalendarStorage storage, CalendarSession session, CalendarFolder folder) throws OXException {
+        super(storage, session, folder);
+        this.addUserAttendee = false;
     }
 
     /**
@@ -111,11 +110,9 @@ public class AddProcessor extends AbstractUpdatePerformer {
      * @param source The source from which the scheduling has been triggered
      * @param addUserAttendee <code>true</code> to indicate that the calendar user shall be added to the list of attendees if she is missing.
      *            Set to <code>false</code> to throw an appropriated exception, which is default for the normal process of the {@link SchedulingMethod#ADD}.
-     * @throws OXException If initialization fails
      */
-    protected AddProcessor(CalendarStorage storage, CalendarSession session, CalendarFolder folder, SchedulingSource source, boolean addUserAttendee) throws OXException {
-        super(storage, session, folder);
-        this.source = source;
+    protected AddProcessor(AbstractUpdatePerformer performer, boolean addUserAttendee) {
+        super(performer);
         this.addUserAttendee = addUserAttendee;
     }
 
@@ -153,10 +150,23 @@ public class AddProcessor extends AbstractUpdatePerformer {
              */
             throw CalendarExceptionCodes.UNEXPECTED_ERROR.create("Can't add ocurrences to a non series event");
         }
+        /*
+         * Check internal constrains
+         */
+        CalendarUser originator = message.getSchedulingObject().getOriginator();
+        if (false == SchedulingUtils.originatorMatches(originalMasterEvent, originator)) {
+            throw CalendarExceptionCodes.NOT_ORGANIZER.create(folder.getId(), originalMasterEvent.getId(), originator.getUri(), originator.getCn());
+        }
+        requireCalendarPermission(folder, CREATE_OBJECTS_IN_FOLDER, NO_PERMISSIONS, WRITE_OWN_OBJECTS, NO_PERMISSIONS);
+        Check.eventIsVisible(folder, originalMasterEvent);
+        Check.eventIsInFolder(originalMasterEvent, folder);
+        requireWritePermissions(originalMasterEvent, true);
+
         List<Event> originalChangeExceptions = loadExceptionData(originalMasterEvent);
         for (Event exception : changeExceptions) {
             if (null != find(originalChangeExceptions, exception.getRecurrenceId())) {
-                LOG.debug("Unable to add existing recurrence");
+                LOG.warn("Unable to add existing recurrence with ID {}", exception.getRecurrenceId());
+                session.addWarning(CalendarExceptionCodes.IGNORED_INVALID_DATA.create(exception.getRecurrenceId(), EventField.CHANGE_EXCEPTION_DATES, "normal", "Change exception already exists."));
                 continue;
             }
             /*
@@ -204,13 +214,18 @@ public class AddProcessor extends AbstractUpdatePerformer {
      */
     private Event createNewChangeException(IncomingSchedulingMessage message, Event originalSeriesMaster, Event transmittedExceptionEvent) throws OXException {
         /*
+         * Check transmitted and new change exception before inserting
+         */
+        getSelfProtection().checkEvent(transmittedExceptionEvent);
+        Check.organizerMatches(originalSeriesMaster, transmittedExceptionEvent);
+        /*
          * Prepare new change exceptions
          */
         Map<Integer, List<Alarm>> seriesMasterAlarms = storage.getAlarmStorage().loadAlarms(originalSeriesMaster);
         Event newExceptionEvent = prepareException(originalSeriesMaster, transmittedExceptionEvent.getRecurrenceId());
         Check.quotaNotExceeded(storage, session);
         newExceptionEvent = prepareChangeException(message, newExceptionEvent, transmittedExceptionEvent);
-        prepareAttendees(newExceptionEvent, message.getChangedPartStat());
+        newExceptionEvent.setSeriesId(originalSeriesMaster.getId());
 
         /*
          * Create exception
@@ -218,9 +233,9 @@ public class AddProcessor extends AbstractUpdatePerformer {
         interceptorRegistry.triggerInterceptorsOnBeforeCreate(newExceptionEvent);
         storage.getEventStorage().insertEvent(newExceptionEvent);
 
-        storage.getAttendeeStorage().insertAttendees(newExceptionEvent.getId(), originalSeriesMaster.getAttendees());
-        storage.getAttachmentStorage().insertAttachments(session.getSession(), folder.getId(), newExceptionEvent.getId(), originalSeriesMaster.getAttachments());
-        storage.getConferenceStorage().insertConferences(newExceptionEvent.getId(), prepareConferences(originalSeriesMaster.getConferences()));
+        storage.getAttendeeStorage().insertAttendees(newExceptionEvent.getId(), newExceptionEvent.getAttendees());
+        storage.getAttachmentStorage().insertAttachments(session.getSession(), folder.getId(), newExceptionEvent.getId(), newExceptionEvent.getAttachments());
+        storage.getConferenceStorage().insertConferences(newExceptionEvent.getId(), newExceptionEvent.getConferences());
         insertAlarms(newExceptionEvent, prepareExceptionAlarms(seriesMasterAlarms), true);
         newExceptionEvent = loadEventData(newExceptionEvent.getId());
 
@@ -231,6 +246,7 @@ public class AddProcessor extends AbstractUpdatePerformer {
          */
         resultTracker.rememberOriginalEvent(originalSeriesMaster);
         addChangeExceptionDate(originalSeriesMaster, newExceptionEvent.getRecurrenceId(), false);
+        touch(originalSeriesMaster.getId());
         Event updatedMasterEvent = loadEventData(originalSeriesMaster.getId());
         resultTracker.trackUpdate(originalSeriesMaster, updatedMasterEvent);
         /*
@@ -257,50 +273,18 @@ public class AddProcessor extends AbstractUpdatePerformer {
          * Filter for attachments belonging to one special occurrence and add their binary representation
          */
         newExceptionEvent.setAttachments(SchedulingUtils.filterAttachments(newExceptionEvent.getAttachments(), transmittedExceptionEvent.getAttachments(), message));
+        SchedulingUtils.prepareAttendees(session, null, newExceptionEvent, calendarUser, addUserAttendee);
+        newExceptionEvent.setAttendees(Check.maxAttendees(getSelfProtection(), InternalAttendeeUpdates.onNewEvent(session, folder, transmittedExceptionEvent, timestamp).getAddedItems()));
+        newExceptionEvent.setConferences(prepareConferences(Check.maxConferences(getSelfProtection(), transmittedExceptionEvent.getConferences())));
         /*
          * Take over fields from transmitted event as-is
          */
         return EventMapper.getInstance().copy(transmittedExceptionEvent, newExceptionEvent, //@formatter:off
             new EventField[] { 
-                    EventField.ATTENDEES, EventField.CONFERENCES, EventField.DESCRIPTION, EventField.END_DATE, 
-                    EventField.EXTENDED_PROPERTIES, EventField.GEO, EventField.LOCATION, EventField.RELATED_TO, 
+                    EventField.DESCRIPTION, EventField.END_DATE, EventField.EXTENDED_PROPERTIES, 
+                    EventField.GEO, EventField.LOCATION, EventField.RELATED_TO, 
                     EventField.SEQUENCE, EventField.START_DATE, EventField.SUMMARY, EventField.URL
                 });//@formatter:on
-    }
-
-    /**
-     * Prepares the attendee list including the attendee of the acting user
-     *
-     * @param eventData The event
-     * @param partStat The {@link ParticipationStatus} to set for the acting user
-     * @throws OXException In case copying fails
-     */
-    private void prepareAttendees(Event event, ParticipationStatus partStat) throws OXException {
-        List<Attendee> attendees = AttendeeMapper.getInstance().copy(event.getAttendees(), (AttendeeField[]) null);
-        Attendee attendee = CalendarUtils.find(attendees, calendarUserId);
-        if (null == attendee) {
-            if (addUserAttendee) {
-                /*
-                 * The scheduling objects seems to have been forwarded to us. We are a "party-crasher"
-                 * TODO We might can prepare a "delegation" here, too. See https://tools.ietf.org/html/rfc5546#section-3.2.2.3
-                 */
-                attendee = session.getEntityResolver().prepareUserAttendee(calendarUserId);
-                attendees.add(attendee);
-            }
-            /*
-             * Change exception without the current user
-             */
-            throw CalendarExceptionCodes.ATTENDEE_NOT_FOUND.create(calendarUser, event);
-        }
-        /*
-         * Use transmitted participant status or (re-)set status to let the user decide
-         */
-        if (SchedulingSource.API.equals(source)) {
-            attendee.setPartStat(partStat);
-        } else {
-            attendee.setPartStat(ParticipationStatus.NEEDS_ACTION);
-        }
-        event.setAttendees(attendees);
     }
 
 }

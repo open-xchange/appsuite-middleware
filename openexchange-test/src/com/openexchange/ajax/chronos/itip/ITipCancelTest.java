@@ -52,6 +52,7 @@ package com.openexchange.ajax.chronos.itip;
 import static com.openexchange.ajax.chronos.itip.ITipAssertion.assertAttendeePartStat;
 import static com.openexchange.ajax.chronos.itip.ITipAssertion.assertSingleChange;
 import static com.openexchange.ajax.chronos.itip.ITipAssertion.assertSingleEvent;
+import static com.openexchange.ajax.chronos.itip.ITipUtil.checkNoReplyMailReceived;
 import static com.openexchange.ajax.chronos.itip.ITipUtil.constructBody;
 import static com.openexchange.ajax.chronos.itip.ITipUtil.receiveIMip;
 import static com.openexchange.java.Autoboxing.I;
@@ -61,7 +62,6 @@ import static org.hamcrest.Matchers.nullValue;
 import static org.hamcrest.Matchers.startsWith;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertThat;
 import java.util.List;
 import java.util.UUID;
@@ -74,6 +74,7 @@ import com.openexchange.ajax.chronos.factory.RRuleFactory;
 import com.openexchange.ajax.chronos.manager.ChronosApiException;
 import com.openexchange.ajax.chronos.util.DateTimeUtil;
 import com.openexchange.chronos.scheduling.SchedulingMethod;
+import com.openexchange.testing.httpclient.invoker.ApiException;
 import com.openexchange.testing.httpclient.models.AnalysisChangeNewEvent;
 import com.openexchange.testing.httpclient.models.Attendee;
 import com.openexchange.testing.httpclient.models.DateTimeData;
@@ -140,7 +141,7 @@ public class ITipCancelTest extends AbstractITipAnalyzeTest {
         /*
          * Check that there is no REPLY mail from the attendee
          */
-        checkNoReply(replyingAttendee);
+        checkNoReplyMailReceived(testUser.getApiClient(), replyingAttendee, summary);
     }
 
     @Test
@@ -178,11 +179,11 @@ public class ITipCancelTest extends AbstractITipAnalyzeTest {
         /*
          * Check that there is no REPLY mail from the attendee
          */
-        checkNoReply(replyingAttendee);
+        checkNoReplyMailReceived(testUser.getApiClient(), replyingAttendee, summary);
     }
 
     @Test
-    public void testSeriesEvent_CancleSeries() throws Exception {
+    public void testSeriesEvent_CanclSeries() throws Exception {
         EventData seriesToCreate = EventFactory.createSeriesEvent(0, summary, 10, defaultFolderId);
         Attendee replyingAttendee = prepareCommonAttendees(seriesToCreate);
         createdEvent = prepareSituation(seriesToCreate, replyingAttendee);
@@ -213,7 +214,7 @@ public class ITipCancelTest extends AbstractITipAnalyzeTest {
             e = cae;
         }
         Assert.assertNotNull("Excpected an error", e);
-        checkNoReply(replyingAttendee);
+        checkNoReplyMailReceived(testUser.getApiClient(), replyingAttendee, summary);
     }
 
     @Test
@@ -231,12 +232,12 @@ public class ITipCancelTest extends AbstractITipAnalyzeTest {
         eventId.setId(fifthOccurrence.getId());
         eventId.setFolder(defaultFolderId);
         eventId.setRecurrenceId(fifthOccurrence.getRecurrenceId());
-        eventId.setRecurrenceRange("THISANDFUTURE");
+        eventId.setRecurrenceRange(THIS_AND_FUTURE);
         eventManager.deleteEvent(eventId);
 
         /*
          * Receive REQUEST as attendee. Shorten the series behaves more like an update, most other
-         * calendar providers do it the same way.
+         * calendar providers do it the same way. However this will reset the attendees status.
          */
         MailData iMip = receiveIMip(apiClientC2, userResponseC1.getData().getEmail1(), summary, 1, SchedulingMethod.REQUEST);
         analyze(analyze(apiClientC2, iMip), CustomConsumers.ALL);
@@ -244,14 +245,14 @@ public class ITipCancelTest extends AbstractITipAnalyzeTest {
         update(apiClientC2, constructBody(iMip));
 
         /*
-         * Check that series has been shortened
+         * Check that series has been shortened and replying attendee kept the participant status
          */
         attendeeEvent = eventManagerC2.getEvent(folderIdC2, attendeeEvent.getId());
         assertThat("Missing rrule", attendeeEvent.getRrule(), is(not(nullValue())));
         DateTimeData expectedUntil = DateTimeUtil.getDateTimeWithoutTimeInformation(System.currentTimeMillis() + TimeUnit.DAYS.toMillis(5));
         String expectedRRule = RRuleFactory.RRuleBuilder.create().addFrequency(RecurringFrequency.DAILY).addUntil(expectedUntil).build();
         assertThat("Wrong rrule", attendeeEvent.getRrule(), startsWith(expectedRRule));
-        checkNoReply(replyingAttendee);
+        checkNoReplyMailReceived(testUser.getApiClient(), replyingAttendee, summary);
     }
 
     private EventData prepareSituation(EventData event, Attendee replyingAttendee) throws Exception {
@@ -275,33 +276,26 @@ public class ITipCancelTest extends AbstractITipAnalyzeTest {
         attendeeEvent = assertSingleEvent(accept(apiClientC2, constructBody(iMip), null), created.getUid());
         assertAttendeePartStat(attendeeEvent.getAttendees(), replyingAttendee.getEmail(), PartStat.ACCEPTED.status);
 
+        return receiveAndApplyUpdate(created, replyingAttendee, 0);
+    }
+
+    private EventData receiveAndApplyUpdate(EventData event, Attendee replyingAttendee, int sequence) throws Exception, ApiException {
         /*
          * Receive mail as organizer and check actions
          */
-        MailData reply = receiveIMip(testUser.getApiClient(), replyingAttendee.getEmail(), summary, 0, SchedulingMethod.REPLY);
+        MailData reply = receiveIMip(testUser.getApiClient(), replyingAttendee.getEmail(), summary, sequence, SchedulingMethod.REPLY);
         analyze(reply.getId());
 
         /*
          * Apply change as organizer via iTIP API
          */
-        assertSingleEvent(update(constructBody(reply)), created.getUid());
-        EventResponse eventResponse = chronosApi.getEvent(created.getId(), created.getFolder(), created.getRecurrenceId(), null, null);
-        assertNull(eventResponse.getError(), eventResponse.getError());
-        createdEvent = eventResponse.getData();
+        assertSingleEvent(update(constructBody(reply)), event.getUid());
+        EventResponse eventResponse = chronosApi.getEvent(event.getId(), event.getFolder(), event.getRecurrenceId(), null, null);
+        createdEvent = checkResponse(eventResponse.getError(), eventResponse.getErrorDesc(), eventResponse.getData());
         for (Attendee attendee : createdEvent.getAttendees()) {
             assertThat("Participant status is not correct.", PartStat.ACCEPTED.status, is(attendee.getPartStat()));
         }
-        return created;
-    }
-
-    private void checkNoReply(Attendee replyingAttendee) throws Exception {
-        Error error = null;
-        try {
-            receiveIMip(testUser.getApiClient(), replyingAttendee.getEmail(), summary, 1, SchedulingMethod.REPLY);
-        } catch (AssertionError ae) {
-            error = ae;
-        }
-        Assert.assertNotNull("Excpected an error", error);
+        return event;
     }
 
 }

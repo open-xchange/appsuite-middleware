@@ -183,6 +183,8 @@ public class SchedulingBrokerImpl extends RankingAwareNearRegistryServiceTracker
                 return utilities.processCancel(session, source, message);
             case REPLY:
                 return utilities.processReply(session, source, message);
+            case REQUEST:
+                return utilities.processRequest(session, source, message);
             default:
                 throw CalendarExceptionCodes.UNEXPECTED_ERROR.create("Unable to handle {} method", message.getMethod());
         }

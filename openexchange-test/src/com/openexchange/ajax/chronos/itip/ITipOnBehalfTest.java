@@ -56,9 +56,12 @@ import static com.openexchange.ajax.chronos.itip.ITipUtil.constructBody;
 import static com.openexchange.ajax.chronos.itip.ITipUtil.receiveIMip;
 import static com.openexchange.ajax.chronos.itip.ITipUtil.receiveNotification;
 import static com.openexchange.java.Autoboxing.I;
+import static org.hamcrest.Matchers.is;
+import static org.hamcrest.Matchers.notNullValue;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertThat;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
@@ -68,6 +71,7 @@ import com.openexchange.ajax.chronos.factory.EventFactory;
 import com.openexchange.chronos.scheduling.SchedulingMethod;
 import com.openexchange.test.common.test.TestClassConfig;
 import com.openexchange.testing.httpclient.invoker.ApiClient;
+import com.openexchange.testing.httpclient.models.ActionResponse;
 import com.openexchange.testing.httpclient.models.AnalysisChangeNewEvent;
 import com.openexchange.testing.httpclient.models.AnalyzeResponse;
 import com.openexchange.testing.httpclient.models.Attendee;
@@ -158,7 +162,7 @@ public class ITipOnBehalfTest extends AbstractITipAnalyzeTest {
 
     @Test
     public void testOnBehalfOfInvitation() throws Exception {
-        String summary = this.getClass().getSimpleName() + ".testOnBehalfOfInvitation";
+        String summary = this.getClass().getSimpleName() + ".testOnBehalfOfInvitation" + UUID.randomUUID();
         EventData data = EventFactory.createSingleTwoHourEvent(getUserId(), summary, defaultFolderId);
         Attendee replyingAttendee = prepareAttendees(data);
         ChronosCalendarResultResponse response = new ChronosApi(apiClientC1_2).createEvent(sharedFolder, data, Boolean.FALSE, null, Boolean.TRUE, null, null, null, Boolean.FALSE, null);
@@ -181,7 +185,7 @@ public class ITipOnBehalfTest extends AbstractITipAnalyzeTest {
         receiveNotification(apiClient, testUser.getLogin(), summary);
 
         /*
-         * Receive iMIP as attendee
+         * Receive iMIP as attendee and accept
          */
         MailData iMip = receiveIMip(apiClientC2, testUser.getLogin(), summary, 0, SchedulingMethod.REQUEST);
         AnalyzeResponse analyzeResponse = analyze(apiClientC2, iMip);
@@ -195,7 +199,7 @@ public class ITipOnBehalfTest extends AbstractITipAnalyzeTest {
         assertAttendeePartStat(attendeeEvent.getAttendees(), replyingAttendee.getEmail(), PartStat.ACCEPTED);
 
         /*
-         * Receive accept as organizer
+         * Receive accept as organizer and update event
          */
         iMip = receiveIMip(apiClient, testUserC2.getLogin(), summary, 0, SchedulingMethod.REPLY);
         analyzeResponse = analyze(apiClient, iMip);
@@ -204,6 +208,19 @@ public class ITipOnBehalfTest extends AbstractITipAnalyzeTest {
         assertEquals(createdEvent.getUid(), newEvent.getUid());
         assertAttendeePartStat(newEvent.getAttendees(), replyingAttendee.getEmail(), PartStat.ACCEPTED);
         analyze(analyzeResponse, CustomConsumers.UPDATE);
+
+        ActionResponse update = update(constructBody(iMip));
+        assertThat(update.getData(), is(notNullValue()));
+        assertThat(I(update.getData().size()), is(I(1)));
+        assertAttendeePartStat(update.getData().get(0).getAttendees(), replyingAttendee.getEmail(), PartStat.ACCEPTED);
+
+        /*
+         * Double check in the calendar folder
+         */
+        createdEvent = eventManager.getEvent(sharedFolder, secretaryEvent.getId());
+        assertEquals(secretaryEvent.getUid(), createdEvent.getUid());
+        assertAttendeePartStat(createdEvent.getAttendees(), testUser.getLogin(), PartStat.ACCEPTED);
+        assertAttendeePartStat(createdEvent.getAttendees(), replyingAttendee.getEmail(), PartStat.ACCEPTED);
     }
 
 }

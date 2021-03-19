@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH. group of companies.
+ *    trademarks of the OX Software GmbH group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -47,68 +47,74 @@
  *
  */
 
-package com.openexchange.chronos.scheduling;
+package com.openexchange.chronos.itip.json.action;
 
-import java.util.Date;
-import java.util.Optional;
-import com.openexchange.annotation.NonNull;
-import com.openexchange.chronos.CalendarObjectResource;
+import java.util.ArrayList;
+import java.util.List;
+import com.openexchange.chronos.Event;
+import com.openexchange.chronos.common.DefaultCalendarObjectResource;
+import com.openexchange.java.Strings;
 
 /**
- * {@link IncomingSchedulingMessage} - Object containing information about an external triggered update of an calendar resource
+ * 
+ * {@link IncomingCalendarObjectResource}
  *
  * @author <a href="mailto:daniel.becker@open-xchange.com">Daniel Becker</a>
- * @since v7.10.4
+ * @since v8.0.0
  */
-public interface IncomingSchedulingMessage {
+public class IncomingCalendarObjectResource extends DefaultCalendarObjectResource {
 
     /**
-     * The {@link SchedulingMethod} to process
+     * Initializes a new {@link IncomingCalendarObjectResource} for a single event.
      * 
-     * @return The {@link SchedulingMethod}
+     * @param event The event of the calendar object resource
      */
-    @NonNull
-    SchedulingMethod getMethod();
+    public IncomingCalendarObjectResource(Event event) {
+        super(event);
+    }
 
     /**
-     * Get the user identifier for whom to apply the change for
-     *
-     * @return The identifier of the target user.
-     */
-    int getTargetUser();
-
-    /**
-     * Get the object that triggered the scheduling
-     *
-     * @return The object
-     */
-    @NonNull
-    IncomingSchedulingObject getSchedulingObject();
-
-    /**
-     * Get a the {@link CalendarObjectResource} as transmitted by the external
-     * entity scheduling the change.
+     * Initializes a new {@link IncomingCalendarObjectResource} from one specific and further events.
      * 
-     * @return {@link CalendarObjectResource}
-     */
-    @NonNull
-    CalendarObjectResource getResource();
-
-    /**
-     * The date when the change was created
-     *
-     * @return The date of the change
-     */
-    @NonNull
-    Date getTimeStamp();
-
-    /**
-     * Get additional information.
+     * @param event One event of the calendar object resource
+     * @param events Further events of the calendar object resource
      * 
-     * @param key The key for the value
-     * @param clazz The class the value has
-     * @return An Optional holding the value casted to the given class
+     * @throws IllegalArgumentException If passed events do not represent a valid calendar object resource
      */
-    <T> Optional<T> getAdditional(String key, Class<T> clazz);
+    public IncomingCalendarObjectResource(Event event, List<Event> events) {
+        super(event, events);
+    }
+
+    /**
+     * Initializes a new {@link IncomingCalendarObjectResource}.
+     * 
+     * @param events The events of the calendar object resource
+     * @throws IllegalArgumentException If passed events do not represent a valid calendar object resource
+     */
+    public IncomingCalendarObjectResource(List<Event> events) {
+        super(events);
+    }
+
+    @Override
+    public Event getSeriesMaster() {
+        Event firstEvent = events.get(0);
+        return Strings.isNotEmpty(firstEvent.getRecurrenceRule()) ? firstEvent : null;
+    }
+
+    @Override
+    public List<Event> getChangeExceptions() {
+        List<Event> changeExceptions = new ArrayList<Event>(events.size());
+        for (Event event : events) {
+            if (null != event.getRecurrenceId()) {
+                changeExceptions.add(event);
+            }
+        }
+        return changeExceptions;
+    }
+
+    @Override
+    public Event getFirstEvent() {
+        return events.get(0);
+    }
 
 }

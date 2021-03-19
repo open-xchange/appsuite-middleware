@@ -67,6 +67,9 @@ import org.apache.commons.io.output.FileWriterWithEncoding;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.junit.Assert;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import com.google.api.services.calendar.model.Event.Organizer;
 import com.openexchange.ajax.chronos.factory.AttendeeFactory;
 import com.openexchange.chronos.Event;
@@ -107,6 +110,8 @@ import net.fortuna.ical4j.util.CompatibilityHints;
  * @since v7.10.3
  */
 public class ITipUtil {
+    
+    private static final Logger LOGGER = LoggerFactory.getLogger(ITipUtil.class);
 
     private static final String NOTIFY_ACCEPTED_DECLINED_AS_CREATOR = "notifyAcceptedDeclinedAsCreator";
     private static final String NOTIFY_ACCEPTED_DECLINED_AS_PARTICIPANT = "notifyAcceptedDeclinedAsParticipant";
@@ -316,6 +321,25 @@ public class ITipUtil {
             }
         }
         throw new AssertionError("no itip attachment found");
+    }
+
+    /**
+     * Checks that there is no REPLY mail received from given attendee
+     *
+     * @param client The client to use
+     * @param replyingAttendee The attendee that replies
+     * @param summary The summary
+     * @throws Exception Error while fetching mail
+     */
+    public static void checkNoReplyMailReceived(ApiClient client, Attendee replyingAttendee, String summary) throws Exception {
+        Error error = null;
+        try {
+            MailData mail = receiveIMip(client, replyingAttendee.getEmail(), summary, 1, SchedulingMethod.REPLY);
+            LOGGER.error("Found reply mail: {}", mail.toString());
+        } catch (AssertionError ae) {
+            error = ae;
+        }
+        Assert.assertNotNull("Excpected an error", error);
     }
 
     /**

@@ -119,6 +119,7 @@ public abstract class AbstractITipAction implements AJAXActionService {
         builder.add(new IncomingSchedulingAction(SchedulingMethod.ADD, services));
         builder.add(new IncomingSchedulingAction(SchedulingMethod.CANCEL, services));
         builder.add(new IncomingSchedulingAction(SchedulingMethod.REPLY, services));
+        builder.add(new IncomingSchedulingAction(SchedulingMethod.REQUEST, services));
         this.schedulingActions = builder.build();
     }
 

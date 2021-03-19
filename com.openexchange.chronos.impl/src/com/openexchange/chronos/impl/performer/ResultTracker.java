@@ -334,7 +334,7 @@ public class ResultTracker {
     /**
      * Track a change notification.
      * 
-     * @param message The scheduling message to track
+     * @param notification The scheduling message to track
      */
     public void trackChangeNotification(ChangeNotification notification) {
         result.addChangeNotification(notification);

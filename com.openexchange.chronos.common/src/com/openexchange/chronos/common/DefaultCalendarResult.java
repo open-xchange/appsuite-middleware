@@ -81,8 +81,8 @@ public class DefaultCalendarResult implements CalendarResult {
      * @param calendarUserId The actual calendar user
      * @param folderId The identifier of the targeted calendar folder
      * @param creations The create results, or <code>null</code> if there are none
-     * @param deletions The delete results, or <code>null</code> if there are none
      * @param updates The update results, or <code>null</code> if there are none
+     * @param deletions The delete results, or <code>null</code> if there are none
      */
     public DefaultCalendarResult(Session session, int calendarUserId, String folderId, List<CreateResult> creations, List<UpdateResult> updates, List<DeleteResult> deletions) {
         super();

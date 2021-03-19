@@ -117,7 +117,7 @@ public class SplitPerformer extends AbstractUpdatePerformer {
      *
      * @param updatePerformer The update performer to take over the settings from
      */
-    protected SplitPerformer(AbstractUpdatePerformer updatePerformer) {
+    public SplitPerformer(AbstractUpdatePerformer updatePerformer) {
         super(updatePerformer);
     }
 
@@ -164,7 +164,7 @@ public class SplitPerformer extends AbstractUpdatePerformer {
      * @return A map entry, where the key holds the (newly created) <i>detached</i> resource prior the split point (or <code>null</code>
      *         if no split took place), and the value the updated resource after it
      */
-    Entry<CalendarObjectResource, CalendarObjectResource> split(Event originalEvent, DateTime splitPoint, String uid) throws OXException {
+    public Entry<CalendarObjectResource, CalendarObjectResource> split(Event originalEvent, DateTime splitPoint, String uid) throws OXException {
         /*
          * check the supplied split point for validity & derive next recurrence
          */

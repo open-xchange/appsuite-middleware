@@ -329,10 +329,17 @@ public abstract class AbstractITipAnalyzer implements ITipAnalyzer {
             return false;
         }
         /*
-         * Check if they do only differ because of the participant status of the user, that has already been updated
+         * Check if events do only differ because of the participant status of the user, that has already been updated
          */
-        if (diff.isAboutCertainParticipantsStateChangeOnly(String.valueOf(session.getUserId())) && original.getTimestamp() > update.getTimestamp()) {
-            return false;
+        if (diff.isAboutCertainParticipantsStateChangeOnly(String.valueOf(session.getUserId()))) {
+            /*
+             * Get the update attendee and check if the status was "reset"
+             */
+            ItemUpdate<Attendee, AttendeeField> itemUpdate = diff.getAttendeeUpdates().getUpdatedItems().get(0);
+            if (false == ParticipationStatus.NEEDS_ACTION.matches(itemUpdate.getOriginal().getPartStat())//
+                && ParticipationStatus.NEEDS_ACTION.matches(itemUpdate.getUpdate().getPartStat())) {
+                return false;
+            }
         }
 
         return true;

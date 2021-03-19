@@ -46,6 +46,7 @@ properties:
                   description: A string describing the current situation
                event:
                   type: array
+                  title: Event
                   description: Additional events, set e.g. if an new exception is created but master can't be found.
                   items:
                       $ref: ../chronos/EventData.yaml

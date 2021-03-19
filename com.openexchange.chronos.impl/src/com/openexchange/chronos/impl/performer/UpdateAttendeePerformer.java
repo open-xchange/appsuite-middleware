@@ -111,6 +111,15 @@ public class UpdateAttendeePerformer extends AbstractUpdatePerformer {
     }
 
     /**
+     * Initializes a new {@link UpdateAttendeePerformer}.
+     *
+     * @param performer The existing instance
+     */
+    public UpdateAttendeePerformer(AbstractUpdatePerformer performer) {
+        super(performer);
+    }
+
+    /**
      * Performs the attendee update in an event.
      *
      * @param eventId The identifier of the event to update the attendee in

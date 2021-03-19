@@ -584,7 +584,7 @@ public class UpdatePerformer extends AbstractUpdatePerformer {
      * @param assumeExternalOrganizerUpdate <code>true</code> if an external organizer update can be assumed, <code>false</code>, otherwise
      * @return <code>true</code> if there were changes, <code>false</code>, otherwise
      */
-    private boolean storeEventUpdate(Event originalEvent, Event deltaEvent, Set<EventField> updatedFields, boolean assumeExternalOrganizerUpdate) throws OXException {
+    protected boolean storeEventUpdate(Event originalEvent, Event deltaEvent, Set<EventField> updatedFields, boolean assumeExternalOrganizerUpdate) throws OXException {
         HashSet<EventField> updatedEventFields = new HashSet<EventField>(updatedFields);
         updatedEventFields.removeAll(java.util.Arrays.asList(EventField.ATTACHMENTS, EventField.ALARMS, EventField.ATTENDEES));
         if (updatedEventFields.isEmpty()) {
@@ -616,7 +616,7 @@ public class UpdatePerformer extends AbstractUpdatePerformer {
      * @param assumeExternalOrganizerUpdate <code>true</code> if an external organizer update can be assumed, <code>false</code>, otherwise
      * @return <code>true</code> if there were changes, <code>false</code>, otherwise
      */
-    private boolean storeAttendeeUpdates(Event originalEvent, CollectionUpdate<Attendee, AttendeeField> attendeeUpdates, boolean assumeExternalOrganizerUpdate) throws OXException {
+    protected boolean storeAttendeeUpdates(Event originalEvent, CollectionUpdate<Attendee, AttendeeField> attendeeUpdates, boolean assumeExternalOrganizerUpdate) throws OXException {
         if (attendeeUpdates.isEmpty()) {
             return false;
         }
@@ -669,7 +669,7 @@ public class UpdatePerformer extends AbstractUpdatePerformer {
      * @param assumeExternalOrganizerUpdate <code>true</code> if an external organizer update can be assumed, <code>false</code>, otherwise
      * @return <code>true</code> if there were changes, <code>false</code>, otherwise
      */
-    private boolean storeConferenceUpdates(Event originalEvent, CollectionUpdate<Conference, ConferenceField> conferenceUpdates, boolean assumeExternalOrganizerUpdate) throws OXException {
+    protected boolean storeConferenceUpdates(Event originalEvent, CollectionUpdate<Conference, ConferenceField> conferenceUpdates, boolean assumeExternalOrganizerUpdate) throws OXException {
         if (conferenceUpdates.isEmpty()) {
             return false;
         }
@@ -711,7 +711,7 @@ public class UpdatePerformer extends AbstractUpdatePerformer {
      * @param assumeExternalOrganizerUpdate <code>true</code> if an external organizer update can be assumed, <code>false</code>, otherwise
      * @return <code>true</code> if there were changes, <code>false</code>, otherwise
      */
-    private boolean storeAttachmentUpdates(Event originalEvent, SimpleCollectionUpdate<Attachment> attachmentUpdates, boolean assumeExternalOrganizerUpdate) throws OXException {
+    protected boolean storeAttachmentUpdates(Event originalEvent, SimpleCollectionUpdate<Attachment> attachmentUpdates, boolean assumeExternalOrganizerUpdate) throws OXException {
         if (attachmentUpdates.isEmpty()) {
             return false;
         }
@@ -736,7 +736,7 @@ public class UpdatePerformer extends AbstractUpdatePerformer {
      * @return The possibly patched event, or the passed updated event data if not applicable
      * @see ResolvePerformer#injectKnownAttendeeData(Event, CalendarFolder)
      */
-    private Event restoreInjectedAttendeeDate(Event originalEvent, Event updatedEventData) {
+    protected Event restoreInjectedAttendeeDate(Event originalEvent, Event updatedEventData) {
         if (null == updatedEventData.getAttendees() || null == originalEvent.getAttendees() || null == originalEvent.getOrganizer() ||
             PublicType.getInstance().equals(folder.getType()) || isInternal(originalEvent.getOrganizer(), CalendarUserType.INDIVIDUAL)) {
             return updatedEventData;
@@ -787,7 +787,7 @@ public class UpdatePerformer extends AbstractUpdatePerformer {
      * @param updatedSeriesMaster The updated series master event (after the split)
      * @return The (possibly modified) updated event data to take over
      */
-    private static Event adjustUpdatedSeriesAfterSplit(Event originalSeriesMaster, Event updatedSeriesMaster) {
+    protected static Event adjustUpdatedSeriesAfterSplit(Event originalSeriesMaster, Event updatedSeriesMaster) {
         RelatedTo originalRelatedTo = originalSeriesMaster.getRelatedTo();
         return new DelegatingEvent(updatedSeriesMaster) {
 
@@ -811,7 +811,7 @@ public class UpdatePerformer extends AbstractUpdatePerformer {
      * @param clientUpdate The updated event data as passed by the client
      * @return The (possibly modified) client update to take over
      */
-    private static Event adjustClientUpdateAfterSplit(Event originalSeriesMaster, Event updatedSeriesMaster, Event clientUpdate) throws OXException {
+    protected static Event adjustClientUpdateAfterSplit(Event originalSeriesMaster, Event updatedSeriesMaster, Event clientUpdate) throws OXException {
         Event adjustedClientUpdate = EventMapper.getInstance().copy(clientUpdate, null, (EventField[]) null);
         /*
          * ensure the sequence number is incremented

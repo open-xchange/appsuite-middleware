@@ -62,15 +62,14 @@ import com.openexchange.chronos.Attendee;
 import com.openexchange.chronos.AttendeeField;
 import com.openexchange.chronos.Event;
 import com.openexchange.chronos.Organizer;
-import com.openexchange.chronos.ParticipationStatus;
 import com.openexchange.chronos.common.CalendarUtils;
-import com.openexchange.chronos.common.DefaultCalendarObjectResource;
 import com.openexchange.chronos.common.IncomingSchedulingMessageBuilder;
 import com.openexchange.chronos.common.mapping.AttendeeMapper;
 import com.openexchange.chronos.exception.CalendarExceptionCodes;
 import com.openexchange.chronos.ical.ImportedCalendar;
 import com.openexchange.chronos.scheduling.SchedulingBroker;
 import com.openexchange.chronos.scheduling.SchedulingMethod;
+import com.openexchange.chronos.scheduling.SchedulingProperties;
 import com.openexchange.chronos.scheduling.SchedulingSource;
 import com.openexchange.chronos.service.CalendarParameters;
 import com.openexchange.chronos.service.CalendarResult;
@@ -165,13 +164,15 @@ public class IncomingSchedulingAction {
         /*
          * Build message and send to scheduling broker for processing
          */
+        setCalendarParameters(request, session);
         IncomingSchedulingMessageBuilder builder = IncomingSchedulingMessageBuilder.newBuilder();
         builder.setMethod(method);
-        builder.setChangedPartStat(getPartStat(request, session));
         builder.setTargetUser(session.getUserId());
-        builder.setResource(new DefaultCalendarObjectResource(purifyEvents(calendar)));
+        builder.setResource(new IncomingCalendarObjectResource(purifyEvents(calendar)));
         builder.setSchedulingObject(new IncomingSchedulingMail(services, request, session.getSession()));
-
+        builder.addAdditionals(SchedulingProperties.ACTION, request.getAction());
+        builder.addAdditionals(SchedulingProperties.COMMENT, getComment(request));
+        
         SchedulingBroker schedulingBroker = services.getServiceSafe(SchedulingBroker.class);
         return schedulingBroker.handleIncomingScheduling(session, SchedulingSource.API, builder.build());
     }
@@ -262,30 +263,30 @@ public class IncomingSchedulingAction {
     }
 
     /**
-     * Get the changes {@link ParticipationStatus} if any
+     * Set required calendar parameters for the further operations
      *
      * @param request The request
-     * @param session The session to set calendar parameters on
-     * @return The {@link ParticipationStatus} or <code>null</code>
+     * @param session The calendar session to modify
      */
-    private ParticipationStatus getPartStat(AJAXRequestData request, CalendarSession calendarSession) {
-        if (false == SchedulingMethod.REQUEST.equals(method)) {
-            return null;
+    private void setCalendarParameters(AJAXRequestData request, CalendarSession session) {
+        if ("accept_and_ignore_conflicts".equalsIgnoreCase(request.getAction())) {
+            session.set(CalendarParameters.PARAMETER_CHECK_CONFLICTS, Boolean.FALSE);
         }
-        String action = request.getAction();
-        switch (action.toLowerCase()) {
-            case "accept_and_ignore_conflicts":
-                calendarSession.set(CalendarParameters.PARAMETER_CHECK_CONFLICTS, Boolean.TRUE);
-                //$FALL-THROUGH$
-            case "accept":
-                return ParticipationStatus.ACCEPTED;
-            case "tentative":
-                return ParticipationStatus.TENTATIVE;
-            case "decline":
-                return ParticipationStatus.DECLINED;
-            default:
-                return null;
+    }
+
+    /**
+     * Get the optional comment from the request
+     *
+     * @param request The request to get the comment from
+     * @return The comment
+     */
+    private String getComment(AJAXRequestData request) {
+        try {
+            return request.getParameter("message", String.class);
+        } catch (OXException e) {
+            // Ignore
         }
+        return null;
     }
 
 }

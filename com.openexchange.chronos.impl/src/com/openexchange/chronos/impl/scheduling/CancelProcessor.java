@@ -105,11 +105,19 @@ public class CancelProcessor extends AbstractUpdatePerformer {
      */
     public InternalCalendarResult process(IncomingSchedulingMessage message) throws OXException {
         CalendarUser originator = message.getSchedulingObject().getOriginator();
-        /*
-         * Delete transmitted occurrences one by one
-         */
-        for (Event deletee : message.getResource().getEvents()) {
-            delete(deletee, originator, message.getTargetUser());
+        Event seriesMaster = message.getResource().getSeriesMaster();
+        if (null != seriesMaster) {
+            /*
+             * Delete complete series, ignore transmitted exception as they get deleted in one transaction
+             */
+            delete(seriesMaster, originator, message.getTargetUser());
+        } else {
+            /*
+             * Delete transmitted occurrences one by one
+             */
+            for (Event deletee : message.getResource().getEvents()) {
+                delete(deletee, originator, message.getTargetUser());
+            }
         }
         return resultTracker.getResult();
     }
@@ -141,7 +149,7 @@ public class CancelProcessor extends AbstractUpdatePerformer {
         /*
          * Check if originator is allowed to cancel, either by perfect match comparing to the organizer or by comparing to the sent-by field of the organizer
          */
-        if (false == CalendarUtils.matches(originator, deletee.getOrganizer()) && (null == deletee.getOrganizer().getSentBy() || false == CalendarUtils.matches(originator, deletee.getOrganizer().getSentBy()))) {
+        if (false == SchedulingUtils.originatorMatches(originalEvent, originator)) {
             throw CalendarExceptionCodes.NOT_ORGANIZER.create(folder.getId(), originalEvent.getId(), originator.getUri(), originator.getCn());
         }
         Check.organizerMatches(originalEvent, Collections.singletonList(deletee));

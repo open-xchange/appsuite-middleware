@@ -231,7 +231,7 @@ public class Check extends com.openexchange.chronos.common.Check {
         if (original.getTimestamp() > 0 && updated.getTimestamp() > 0
             && original.getTimestamp() > updated.getTimestamp()
             && original.getTimestamp() - updated.getTimestamp() >= 1000) {
-            throw CalendarExceptionCodes.CONCURRENT_MODIFICATION.create(I(original.getEntity()), L(original.getTimestamp()), L(updated.getTimestamp()));
+            throw CalendarExceptionCodes.CONCURRENT_MODIFICATION.create(I(original.getEntity()), L(updated.getTimestamp()), L(original.getTimestamp()));
         }
     }
 
