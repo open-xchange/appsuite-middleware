@@ -63,6 +63,18 @@ import com.openexchange.osgi.annotation.SingletonService;
  */
 @SingletonService
 public interface SchedulingUtilities {
+    
+    /**
+     * Processes a {@link SchedulingMethod#ADD} and create or updates the event(s)
+     *
+     * @param calendarSession The calendar session
+     * @param source The source from which the scheduling has been triggered
+     * @param message The message to process
+     * @return A userized calendar result of the update
+     * @throws OXException if updating fails
+     */
+    CalendarResult processAdd(CalendarSession calendarSession, SchedulingSource source, IncomingSchedulingMessage message) throws OXException;
+
 
     /**
      * Processes a {@link SchedulingMethod#CANCEL} and removes the event(s)

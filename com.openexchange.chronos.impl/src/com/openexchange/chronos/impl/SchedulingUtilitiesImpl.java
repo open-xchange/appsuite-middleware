@@ -52,6 +52,7 @@ package com.openexchange.chronos.impl;
 import static com.openexchange.chronos.impl.Utils.getCalendarFolder;
 import static com.openexchange.chronos.impl.Utils.postProcess;
 import com.openexchange.chronos.Event;
+import com.openexchange.chronos.impl.scheduling.AddProcessor;
 import com.openexchange.chronos.impl.scheduling.CancelProcessor;
 import com.openexchange.chronos.impl.scheduling.ReplyProcessor;
 import com.openexchange.chronos.scheduling.IncomingSchedulingMessage;
@@ -87,6 +88,18 @@ public class SchedulingUtilitiesImpl implements SchedulingUtilities {
         this.serviceLookup = serviceLookup;
     }
 
+    @Override
+    public CalendarResult processAdd(CalendarSession session, SchedulingSource source, IncomingSchedulingMessage message) throws OXException {
+        return postProcess(serviceLookup, new InternalCalendarStorageOperation<InternalCalendarResult>(session) {
+            
+            @Override
+            protected InternalCalendarResult execute(CalendarSession session, CalendarStorage storage) throws OXException {
+                Event event = message.getResource().getFirstEvent();
+                return new AddProcessor(storage, session, getCalendarFolder(session, storage, event.getUid(), event.getRecurrenceId(), message.getTargetUser()), source).process(message);
+            }
+        }.executeUpdate()).getUserizedResult();
+    }
+    
     @Override
     public CalendarResult processCancel(CalendarSession session, SchedulingSource source, IncomingSchedulingMessage message) throws OXException {
         return postProcess(serviceLookup, new InternalCalendarStorageOperation<InternalCalendarResult>(session) {

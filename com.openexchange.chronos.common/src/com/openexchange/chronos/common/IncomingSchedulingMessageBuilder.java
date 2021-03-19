@@ -54,7 +54,9 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 import com.openexchange.annotation.NonNull;
+import com.openexchange.annotation.Nullable;
 import com.openexchange.chronos.CalendarObjectResource;
+import com.openexchange.chronos.ParticipationStatus;
 import com.openexchange.chronos.scheduling.IncomingSchedulingMessage;
 import com.openexchange.chronos.scheduling.IncomingSchedulingObject;
 import com.openexchange.chronos.scheduling.SchedulingMethod;
@@ -68,6 +70,7 @@ import com.openexchange.chronos.scheduling.SchedulingMethod;
 public class IncomingSchedulingMessageBuilder {
 
     protected SchedulingMethod method;
+    protected ParticipationStatus changedPartStat;
     protected int targetUser;
     protected IncomingSchedulingObject schedulingObject;
     protected CalendarObjectResource resource;
@@ -81,6 +84,11 @@ public class IncomingSchedulingMessageBuilder {
      */
     private IncomingSchedulingMessageBuilder() {}
 
+    /**
+     * Initializes a new {@link IncomingSchedulingMessageBuilder}.
+     *
+     * @return This instance for chaining
+     */
     public static IncomingSchedulingMessageBuilder newBuilder() {
         return new IncomingSchedulingMessageBuilder();
     }
@@ -93,6 +101,19 @@ public class IncomingSchedulingMessageBuilder {
      */
     public IncomingSchedulingMessageBuilder setMethod(SchedulingMethod method) {
         this.method = method;
+        return this;
+    }
+
+    /**
+     * Sets the changed {@link ParticipationStatus} for the target user
+     * <p>
+     * Does only make sense to set if {@link SchedulingMethod#REQUEST} is set
+     *
+     * @param changedPartStat The changed {@link ParticipationStatus} if any
+     * @return This instance for chaining
+     */
+    public IncomingSchedulingMessageBuilder setChangedPartStat(ParticipationStatus changedPartStat) {
+        this.changedPartStat = changedPartStat;
         return this;
     }
 
@@ -167,6 +188,7 @@ public class IncomingSchedulingMessageBuilder {
 class Incoming implements IncomingSchedulingMessage {
 
     private final @NonNull SchedulingMethod method;
+    private final ParticipationStatus changedPartStat;
     private final int targetUser;
     private final @NonNull IncomingSchedulingObject schedulingObject;
     private final @NonNull CalendarObjectResource resource;
@@ -183,11 +205,12 @@ class Incoming implements IncomingSchedulingMessage {
     @SuppressWarnings("null")
     public Incoming(IncomingSchedulingMessageBuilder builder) throws IllegalStateException {
         this.method = notNull(builder.method);
-        this.schedulingObject = notNull(builder.schedulingObject);
+        this.changedPartStat = builder.changedPartStat;
         this.targetUser = builder.targetUser;
         if (targetUser <= 0) {
             throw new IllegalStateException("Target user must be set");
         }
+        this.schedulingObject = notNull(builder.schedulingObject);
         this.resource = notNull(builder.resource);
         this.timestamp = null == builder.timestamp ? new Date() : builder.timestamp;
         this.additionals = builder.additionals;
@@ -196,6 +219,12 @@ class Incoming implements IncomingSchedulingMessage {
     @Override
     public @NonNull SchedulingMethod getMethod() {
         return method;
+    }
+
+    @Override
+    @Nullable
+    public ParticipationStatus getChangedPartStat() {
+        return changedPartStat;
     }
 
     @Override

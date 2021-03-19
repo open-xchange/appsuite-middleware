@@ -62,6 +62,7 @@ import com.openexchange.chronos.Attendee;
 import com.openexchange.chronos.AttendeeField;
 import com.openexchange.chronos.Event;
 import com.openexchange.chronos.Organizer;
+import com.openexchange.chronos.ParticipationStatus;
 import com.openexchange.chronos.common.CalendarUtils;
 import com.openexchange.chronos.common.DefaultCalendarObjectResource;
 import com.openexchange.chronos.common.IncomingSchedulingMessageBuilder;
@@ -71,6 +72,7 @@ import com.openexchange.chronos.ical.ImportedCalendar;
 import com.openexchange.chronos.scheduling.SchedulingBroker;
 import com.openexchange.chronos.scheduling.SchedulingMethod;
 import com.openexchange.chronos.scheduling.SchedulingSource;
+import com.openexchange.chronos.service.CalendarParameters;
 import com.openexchange.chronos.service.CalendarResult;
 import com.openexchange.chronos.service.CalendarSession;
 import com.openexchange.chronos.service.CreateResult;
@@ -165,6 +167,7 @@ public class IncomingSchedulingAction {
          */
         IncomingSchedulingMessageBuilder builder = IncomingSchedulingMessageBuilder.newBuilder();
         builder.setMethod(method);
+        builder.setChangedPartStat(getPartStat(request, session));
         builder.setTargetUser(session.getUserId());
         builder.setResource(new DefaultCalendarObjectResource(purifyEvents(calendar)));
         builder.setSchedulingObject(new IncomingSchedulingMail(services, request, session.getSession()));
@@ -219,7 +222,7 @@ public class IncomingSchedulingAction {
         Organizer organizer = organizerEvent.get().getOrganizer();
         events.stream().filter(e -> null == e.getOrganizer()).forEach((e) -> e.setOrganizer(new Organizer(organizer)));
     }
-    
+
     /**
      * Adds (if at least present once) attendees(s) to all given events
      *
@@ -256,6 +259,33 @@ public class IncomingSchedulingAction {
     private static boolean looksLikeMicrosoft(ImportedCalendar calendar) {
         String property = calendar.getProdId();
         return Strings.isNotEmpty(property) && Strings.toLowerCase(property).indexOf("microsoft") >= 0;
+    }
+
+    /**
+     * Get the changes {@link ParticipationStatus} if any
+     *
+     * @param request The request
+     * @param session The session to set calendar parameters on
+     * @return The {@link ParticipationStatus} or <code>null</code>
+     */
+    private ParticipationStatus getPartStat(AJAXRequestData request, CalendarSession calendarSession) {
+        if (false == SchedulingMethod.REQUEST.equals(method)) {
+            return null;
+        }
+        String action = request.getAction();
+        switch (action.toLowerCase()) {
+            case "accept_and_ignore_conflicts":
+                calendarSession.set(CalendarParameters.PARAMETER_CHECK_CONFLICTS, Boolean.TRUE);
+                //$FALL-THROUGH$
+            case "accept":
+                return ParticipationStatus.ACCEPTED;
+            case "tentative":
+                return ParticipationStatus.TENTATIVE;
+            case "decline":
+                return ParticipationStatus.DECLINED;
+            default:
+                return null;
+        }
     }
 
 }

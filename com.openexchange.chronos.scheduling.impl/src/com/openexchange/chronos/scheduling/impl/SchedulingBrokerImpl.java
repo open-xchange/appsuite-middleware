@@ -177,6 +177,8 @@ public class SchedulingBrokerImpl extends RankingAwareNearRegistryServiceTracker
         }
 
         switch (message.getMethod()) {
+            case ADD:
+                return utilities.processAdd(session, source, message);
             case CANCEL:
                 return utilities.processCancel(session, source, message);
             case REPLY:

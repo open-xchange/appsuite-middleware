@@ -352,7 +352,7 @@ public class CalendarUtils {
      *
      * @param events The events to search in
      * @param objectID The object identifier of the event to search
-     * @param recurrenceID The rcurrence identifier of the event to search
+     * @param recurrenceID The recurrence identifier of the event to search
      * @return The event, or <code>null</code> if not found
      * @see RecurrenceId#matches(RecurrenceId)
      */
@@ -2443,6 +2443,58 @@ public class CalendarUtils {
     }
 
     /**
+     * Gets a value indicating whether the value of one attachment matches another one, based on
+     * either the managed ID of an attachments or its content
+     *
+     * @param attachment1 The first attachment to match, or <code>null</code>
+     * @param attachment2 The second attachment to match, or <code>null</code>
+     * @return <code>true</code> if both attachments are <code>null</code> or their either their ID or content matches, <code>false</code>, otherwise
+     */
+    public static boolean matches(Attachment attachment1, Attachment attachment2) {
+        if (0 < attachment1.getManagedId() && 0 < attachment2.getManagedId()) {
+            return attachment1.getManagedId() == attachment2.getManagedId();
+        }
+        if (null != attachment1.getChecksum() && attachment1.getChecksum().equals(attachment2.getChecksum()) && //@formatter:off
+            null != attachment1.getFilename() && attachment1.getFilename().equals(attachment2.getFilename()) &&
+            null != attachment1.getFormatType() && attachment1.getFormatType().equals(attachment2.getFormatType()) &&
+            0 < attachment1.getSize() && attachment1.getSize() == attachment2.getSize()) { //@formatter:on
+            return true;
+        }
+        return false;
+    }
+
+    /**
+     * Looks up a specific attachment within a collection of attachments, based on its ID or content. The lookup is
+     * performed based on {@link #matches(Attachment, Attachment)}.
+     *
+     * @param attachments The attachments to search
+     * @param attachment The attachment id to lookup
+     * @return The matching attachment, or <code>null</code> if not found
+     */
+    public static Attachment find(List<Attachment> attachments, Attachment attachment) {
+        return attachments.stream().filter(a -> matches(a, attachment)).findFirst().orElse(null);
+    }
+
+    /**
+     * Looks up a specific attachment within a collection of attachments, based on its URI.
+     * 
+     * @param attachments The attachments to search
+     * @param attachment The attachment id to lookup
+     * @return The matching attachment, or <code>null</code> if not found
+     */
+    public static Attachment findByUri(List<Attachment> attachments, Attachment attachment) {
+        if (null == attachment.getUri()) {
+            return null;
+        }
+        for (Attachment a : attachments) {
+            if (null != a.getUri() && a.getUri().equals(attachment.getUri())) {
+                return a;
+            }
+        }
+        return null;
+    }
+
+    /**
      * Initializes a new attachment collection update based on the supplied original and updated attachment lists.
      *
      * @param originalAttachments The original attachments
@@ -2454,16 +2506,7 @@ public class CalendarUtils {
 
             @Override
             protected boolean matches(Attachment item1, Attachment item2) {
-                if (0 < item1.getManagedId() && 0 < item2.getManagedId()) {
-                    return item1.getManagedId() == item2.getManagedId();
-                }
-                if (null != item1.getChecksum() && item1.getChecksum().equals(item2.getChecksum()) &&
-                    null != item1.getFilename() && item1.getFilename().equals(item2.getFilename()) &&
-                    null != item1.getFormatType() && item1.getFormatType().equals(item2.getFormatType()) &&
-                    0 < item1.getSize() && item1.getSize() == item2.getSize()) {
-                    return true;
-                }
-                return false;
+                return CalendarUtils.matches(item1, item2);
             }
         };
     }

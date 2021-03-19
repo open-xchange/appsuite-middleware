@@ -52,7 +52,9 @@ package com.openexchange.chronos.scheduling;
 import java.util.Date;
 import java.util.Optional;
 import com.openexchange.annotation.NonNull;
+import com.openexchange.annotation.Nullable;
 import com.openexchange.chronos.CalendarObjectResource;
+import com.openexchange.chronos.ParticipationStatus;
 
 /**
  * {@link IncomingSchedulingMessage} - Object containing information about an external triggered update of an calendar resource
@@ -69,6 +71,16 @@ public interface IncomingSchedulingMessage {
      */
     @NonNull
     SchedulingMethod getMethod();
+    
+    /**
+     * Get the new {@link ParticipationStatus} of the target user.
+     * <p>
+     * Makes only sense to set if {@link #getMethod()} is {@link SchedulingMethod#REQUEST}
+     *
+     * @return The changes participant status or <code>null</code>
+     */
+    @Nullable
+    ParticipationStatus getChangedPartStat();
 
     /**
      * Get the user identifier for whom to apply the change for
