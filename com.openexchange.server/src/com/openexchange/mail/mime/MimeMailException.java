@@ -250,7 +250,7 @@ public class MimeMailException extends OXException {
                 }
                 throw MailExceptionCode.MAIL_NOT_FOUND_SIMPLE.create(e, new Object[0]);
             }
-            if ((e instanceof javax.mail.AuthenticationFailedException) || ((toLowerCase(e.getMessage(), "").indexOf(ERR_AUTH_FAILED) != -1))) {
+            if ((e instanceof javax.mail.AuthenticationFailedException) || ((toLowerCase(e.getMessage(), "").indexOf(ERR_AUTH_FAILED) >= 0))) {
                 // Authentication failed
                 return handleAuthenticationFailedException(e, mailConfig, session);
             } else if (e instanceof javax.mail.FolderClosedException) {
