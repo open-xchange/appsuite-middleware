@@ -52,6 +52,7 @@ package com.openexchange.rest.client.httpclient;
 import java.io.FilterInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.Optional;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.config.RequestConfig;
@@ -186,10 +187,11 @@ public final class HttpClients {
      * Initializes a new {@link HttpResponseStream} for given HTTP response.
      *
      * @param response The HTTP response to create the stream for
+     * @param optionalRequest The optional HTTP request; if present request will be reset when returned stream gets closed
      * @return The newly created response stream
      * @throws IOException If initialization fails
      */
-    public static HttpResponseStream createHttpResponseStreamFor(HttpResponse response) throws IOException {
+    public static HttpResponseStream createHttpResponseStreamFor(HttpResponse response, Optional<HttpRequestBase> optionalRequest) throws IOException {
         if (response == null) {
             return null;
         }
@@ -202,7 +204,7 @@ public final class HttpClients {
         long contentLength = entity.getContentLength();
         if (contentLength < 0) {
             // No content length advertised
-            return new HttpResponseStream(entity.getContent(), response);
+            return new HttpResponseStream(entity.getContent(), response, optionalRequest);
         }
 
         /*-
@@ -220,7 +222,7 @@ public final class HttpClients {
          *  ...
          * }
          */
-        return new ContentLengthAwareHttpResponseStream(contentLength, entity.getContent(), response);
+        return new ContentLengthAwareHttpResponseStream(contentLength, entity.getContent(), response, optionalRequest);
     }
 
     private static class HttpResponseStream extends FilterInputStream {
@@ -228,21 +230,29 @@ public final class HttpClients {
         /** The HTTP response whose entity's content is read from */
         protected final HttpResponse response;
 
+        /** The optional HTTP request; if present request will be reset when returned stream gets closed */
+        protected final Optional<HttpRequestBase> optionalRequest;
+
         /**
          * Initializes a new {@link HttpResponseStream}.
          *
          * @param entityStream The response entity's input stream
+         * @param optionalRequest The optional HTTP request; if present request will be reset when returned stream gets closed
          * @param response The HTTP response whose entity stream shall be read from
          */
-        HttpResponseStream(InputStream entityStream, HttpResponse response) {
+        HttpResponseStream(InputStream entityStream, HttpResponse response, Optional<HttpRequestBase> optionalRequest) {
             super(entityStream);
             this.response = response;
+            this.optionalRequest = optionalRequest;
         }
 
         @Override
         public void close() throws IOException {
             try {
                 HttpClients.close(response, true);
+                if (optionalRequest.isPresent()) {
+                    HttpClients.close(optionalRequest.get(), null);
+                }
             } finally {
                 super.close();
             }
@@ -267,8 +277,8 @@ public final class HttpClients {
          * @param entityStream The response entity's input stream
          * @param response The HTTP response whose entity stream shall be read from
          */
-        ContentLengthAwareHttpResponseStream(long contentLength, InputStream entityStream, HttpResponse response) {
-            super(entityStream, response);
+        ContentLengthAwareHttpResponseStream(long contentLength, InputStream entityStream, HttpResponse response, Optional<HttpRequestBase> optionalRequest) {
+            super(entityStream, response, optionalRequest);
             this.contentLength = contentLength;
         }
 
@@ -280,6 +290,9 @@ public final class HttpClients {
                     HttpClients.close(response, false);
                 } else {
                     HttpClients.close(response, true);
+                }
+                if (optionalRequest.isPresent()) {
+                    HttpClients.close(optionalRequest.get(), null);
                 }
             } finally {
                 in.close();
