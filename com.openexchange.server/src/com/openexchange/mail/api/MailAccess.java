@@ -812,6 +812,7 @@ public abstract class MailAccess<F extends IMailFolderStorage, M extends IMailMe
                 doConnect0(enableDebug, mailConfig);
             } catch (OXException e) {
                 if (accountId == Account.DEFAULT_ID && MimeMailException.isAuthenticationFailedException(e)) {
+                    // Do log failed authentication attempts against primary mail server
                     LOG.warn("Failed authentication against primary mail server", e);
                 }
                 throw e;
