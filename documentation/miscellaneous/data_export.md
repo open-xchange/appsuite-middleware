@@ -6,6 +6,12 @@ tags: Configuration, Installation
 
 The data export feature allows users to submit a data export of his/her personal data packed into one or more ZIP archives. The actual export is a background task that completes at any time in future. Once ready, the user is notified via E-Mail that he/she is now able to download the packages.
 
+As mentioned before, a data export is designed as a background task. When triggered by the user, it collects user-related data, which can be a lengthy as well as an I/O- and compute-intensive operation. For this reason, the data export feature provides several options to distribute and schedule this operation as best as possible. The most important options for this, which are also mentioned and presented below:
+
+* Only certain nodes handle the processing of triggered data exports via `com.openexchange.gdpr.dataexport.active`. These could be special nodes in a cluster not serving regular calls.
+* Processing of data exports takes place only at certain times via `com.openexchange.gdpr.dataexport.schedule`
+* The number of data exports processed in parallel is controlled by `com.openexchange.gdpr.dataexport.numberOfConcurrentTasks`
+
 Since the artefacts and result files are typically quite big files, the configuration for the data export feature requires to specify a dedicated file storage, which is used to manage those big files. Thus common file storage associated with a context or user is not burdened and quota is unaffected as well.
 
 Furthermore, scheduling of data export tasks within an Open-Xchange installation is a global task. Therefore, the common payload databases are not suitable to store data export information since determination execution of the next adequate data export task requires to look-up every payload database on every registered database host. Therefore, the data export feature requires setup of the global database to have a central database for fast and easy look-up.
