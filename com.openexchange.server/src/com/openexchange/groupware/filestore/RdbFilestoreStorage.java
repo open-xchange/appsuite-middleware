@@ -56,8 +56,11 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.LinkedHashMap;
+import java.util.Map;
 import com.openexchange.database.Databases;
 import com.openexchange.exception.OXException;
+import com.openexchange.java.Strings;
 import com.openexchange.server.impl.DBPool;
 
 public class RdbFilestoreStorage extends FilestoreStorage {
@@ -90,16 +93,9 @@ public class RdbFilestoreStorage extends FilestoreStorage {
 
             FilestoreImpl filestore = new FilestoreImpl();
             filestore.setId(id);
-            String tmp = null;
-            try {
-                tmp = result.getString("uri");
-                filestore.setUri(new URI(tmp));
-            } catch (URISyntaxException e) {
-                throw FilestoreExceptionCodes.URI_CREATION_FAILED.create(e, tmp);
-            }
-
-            filestore.setSize(result.getLong("size"));
-            filestore.setMaxContext(result.getLong("max_context"));
+            setUriAsString(result.getString(1), filestore);
+            filestore.setSize(result.getLong(2));
+            filestore.setMaxContext(result.getLong(3));
             return filestore;
         } catch (SQLException e) {
             throw FilestoreExceptionCodes.SQL_PROBLEM.create(e, e.getMessage());
@@ -135,30 +131,78 @@ public class RdbFilestoreStorage extends FilestoreStorage {
         ResultSet result = null;
         try {
             stmt = con.prepareStatement("SELECT id, uri, size, max_context FROM filestore WHERE (? LIKE CONCAT(uri, '%'))");
-            stmt.setString(1, uri.toString());
+            String sUriToLookUp = uri.toString();
+            stmt.setString(1, sUriToLookUp);
             result = stmt.executeQuery();
             if (!result.next()) {
-                throw FilestoreExceptionCodes.NO_SUCH_FILESTORE.create(uri);
+                throw FilestoreExceptionCodes.NO_SUCH_FILESTORE.create(sUriToLookUp);
             }
 
+            sUriToLookUp = Strings.asciiLowerCase(sUriToLookUp);
             FilestoreImpl filestore = new FilestoreImpl();
             filestore.setId(result.getInt(1));
-            String tmp = null;
-            try {
-                tmp = result.getString("uri");
-                filestore.setUri(new URI(tmp));
-            } catch (URISyntaxException e) {
-                throw FilestoreExceptionCodes.URI_CREATION_FAILED.create(e, tmp);
+            String sUri = result.getString(2);
+            setUriAsString(sUri, filestore);
+            filestore.setSize(result.getLong(3));
+            filestore.setMaxContext(result.getLong(4));
+
+            // Check if there are further matches
+            if (result.next() == false) {
+                // No further matches
+                return filestore;
             }
 
-            filestore.setSize(result.getLong("size"));
-            filestore.setMaxContext(result.getLong("max_context"));
-            return filestore;
+            // Collect all matches...
+            Map<String, FilestoreImpl> filestores = new LinkedHashMap<>(4);
+            filestores.put(sUri, filestore);
+            do {
+                filestore = new FilestoreImpl();
+                filestore.setId(result.getInt(1));
+                sUri = result.getString(2);
+                setUriAsString(sUri, filestore);
+                filestore.setSize(result.getLong(3));
+                filestore.setMaxContext(result.getLong(4));
+                filestores.put(sUri, filestore);
+            } while (result.next());
+
+            return findMatchOrElse(sUriToLookUp, filestores);
         } catch (SQLException e) {
             throw FilestoreExceptionCodes.SQL_PROBLEM.create(e, e.getMessage());
         } finally {
             Databases.closeSQLStuff(result, stmt);
         }
-
     }
+
+    private static Filestore findMatchOrElse(String uriToLookUp, Map<String, FilestoreImpl> filestores) throws OXException {
+        for (Map.Entry<String, FilestoreImpl> fs : filestores.entrySet()) {
+            String sUri = Strings.asciiLowerCase(fs.getKey());
+            if (uriToLookUp.equals(sUri)) {
+                // Exact match; e.g. "s3://mys3" == "s3://mys3"
+                return fs.getValue();
+            }
+            if (sUri.endsWith("/")) {
+                if (uriToLookUp.equals(sUri.substring(0, sUri.length() - 1))) {
+                    // Exact match; e.g. "s3://mys3" == "s3://mys3/"
+                    return fs.getValue();
+                }
+            } else {
+                sUri = new StringBuilder(sUri.length() + 1).append(sUri).append('/').toString();
+            }
+            if (uriToLookUp.startsWith(sUri)) {
+                // Match by path prefix; e.g. "s3://mys3/myprefix" starts with "s3://mys3/"
+                return fs.getValue();
+            }
+        }
+
+        throw FilestoreExceptionCodes.NO_SUCH_FILESTORE.create(uriToLookUp);
+    }
+
+    private static void setUriAsString(String uri, FilestoreImpl filestore) throws OXException {
+        try {
+            filestore.setUri(new URI(uri));
+        } catch (URISyntaxException e) {
+            throw FilestoreExceptionCodes.URI_CREATION_FAILED.create(e, uri);
+        }
+    }
+
 }
