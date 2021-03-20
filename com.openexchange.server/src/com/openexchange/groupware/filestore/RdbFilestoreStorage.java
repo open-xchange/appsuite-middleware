@@ -173,7 +173,15 @@ public class RdbFilestoreStorage extends FilestoreStorage {
         }
     }
 
-    private static Filestore findMatchOrElse(String uriToLookUp, Map<String, FilestoreImpl> filestores) throws OXException {
+    /**
+     * Finds the appropriate match for specified URI from given file storage mapping.
+     *
+     * @param uriToLookUp The URI (as string) to look-up
+     * @param filestores The collection of file storages
+     * @return The matching file storage
+     * @throws OXException If no suitable file storage can be found
+     */
+    static Filestore findMatchOrElse(String uriToLookUp, Map<String, FilestoreImpl> filestores) throws OXException {
         for (Map.Entry<String, FilestoreImpl> fs : filestores.entrySet()) {
             String sUri = Strings.asciiLowerCase(fs.getKey());
             if (uriToLookUp.equals(sUri)) {
@@ -197,7 +205,14 @@ public class RdbFilestoreStorage extends FilestoreStorage {
         throw FilestoreExceptionCodes.NO_SUCH_FILESTORE.create(uriToLookUp);
     }
 
-    private static void setUriAsString(String uri, FilestoreImpl filestore) throws OXException {
+    /**
+     * Sets the given URI string to specified file store.
+     *
+     * @param uri The URI to set
+     * @param filestore The file store to apply URI to
+     * @throws OXException If given URI string cannot be parsed into a {@link java.net.URI}
+     */
+    static void setUriAsString(String uri, FilestoreImpl filestore) throws OXException {
         try {
             filestore.setUri(new URI(uri));
         } catch (URISyntaxException e) {

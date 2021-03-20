@@ -117,6 +117,7 @@ import com.openexchange.lock.impl.AccessControlImplTest;
     com.openexchange.config.admin.internal.HideAdminServiceImplTest.class,
     AccessControlImplTest.class,
     com.openexchange.i18n.tools.replacement.AuthorizationTest.class,
+    com.openexchange.groupware.filestore.MWB1009Test.class,
 })
 public class UnitTests {
 
