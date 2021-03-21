@@ -112,7 +112,7 @@ public class RdbContactsAccountStorage extends RdbStorage implements ContactsAcc
 
     /**
      * Initializes a new {@link RdbContactsAccountStorage}.
-     * 
+     *
      * @param context The context
      * @param dbProvider The database provider to use
      * @param txPolicy The transaction policy
@@ -241,6 +241,11 @@ public class RdbContactsAccountStorage extends RdbStorage implements ContactsAcc
     @Override
     public List<ContactsAccount> loadAccounts(int userId, String... providerIds) throws OXException {
         return loadAccounts(new int[] { userId }, providerIds);
+    }
+
+    @Override
+    public void invalidateAccount(int userId, int accountId) throws OXException {
+        // no
     }
 
     //////////////////////////////////////// HELPERS //////////////////////////////////
@@ -491,4 +496,5 @@ public class RdbContactsAccountStorage extends RdbStorage implements ContactsAcc
         }
         return accounts;
     }
+
 }

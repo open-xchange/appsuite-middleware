@@ -212,22 +212,16 @@ public class CachingContactsAccountStorage implements ContactsAccountStorage {
         return delegate.loadAccounts(userId, providerIds);
     }
 
-    /////////////////////////////////// HELPERS //////////////////////////////
-
-    /**
-     * Invalidates any cached references of a specific contacts account.
-     *
-     * @param userId The identifier of the user to invalidate the account for
-     * @param accountId The identifier of the account to invalidate, or <code>-1</code> to only invalidate the user's list of known accounts
-     * @throws OXException if an error is occurred
-     */
-    private void invalidateAccount(int userId, int accountId) throws OXException {
+    @Override
+    public void invalidateAccount(int userId, int accountId) throws OXException {
         if (-1 == accountId) {
             cache.remove(getAccountIdsKey(userId));
         } else {
             cache.remove(Arrays.asList(new Serializable[] { getAccountIdsKey(userId), getAccountKey(userId, accountId) }));
         }
     }
+
+    /////////////////////////////////// HELPERS //////////////////////////////
 
     /**
      * Get the account's key

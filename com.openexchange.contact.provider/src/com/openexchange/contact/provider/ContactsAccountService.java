@@ -50,6 +50,7 @@
 package com.openexchange.contact.provider;
 
 import java.util.List;
+import org.json.JSONObject;
 import com.openexchange.contact.common.ContactsAccount;
 import com.openexchange.contact.common.ContactsParameters;
 import com.openexchange.contact.provider.basic.ContactsSettings;
@@ -108,6 +109,18 @@ public interface ContactsAccountService {
      * @throws OXException if an error is occurred
      */
     ContactsAccount updateAccount(Session session, int id, long clientTimestamp, ContactsSettings settings, ContactsParameters parameters) throws OXException;
+
+    /**
+     * Updates an existing contacts account.
+     *
+     * @param session The current session
+     * @param id The identifier of the account to update
+     * @param userConfig Updated provider-specific <i>user</i> configuration data for the contacts account
+     * @param clientTimestamp The last timestamp known by the client to catch concurrent updates
+     * @param parameters Additional contacts parameters, or <code>null</code> if not set
+     * @return The updated contacts account
+     */
+    ContactsAccount updateAccount(Session session, int id, JSONObject userConfig, long clientTimestamp, ContactsParameters parameters) throws OXException;
 
     /**
      * Deletes an existing contacts account, i.e. the one with the specified identifier

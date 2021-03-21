@@ -138,4 +138,13 @@ public interface ContactsAccountStorage {
      * @throws OXException if an error is occurred
      */
     List<ContactsAccount> loadAccounts(int userId, String... providerIds) throws OXException;
+
+    /**
+     * Invalidates any cached references of a specific contacts account.
+     *
+     * @param userId The identifier of the user to invalidate the account for
+     * @param accountId The identifier of the account to invalidate, or <code>-1</code> to only invalidate the user's list of known accounts
+     */
+    void invalidateAccount(int userId, int accountId) throws OXException;
+
 }

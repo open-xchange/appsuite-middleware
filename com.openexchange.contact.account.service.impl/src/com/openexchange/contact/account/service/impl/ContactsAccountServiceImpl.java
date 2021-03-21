@@ -80,6 +80,7 @@ import com.openexchange.contact.provider.ContactsProviderRegistry;
 import com.openexchange.contact.provider.ContactsProviders;
 import com.openexchange.contact.provider.basic.BasicContactsProvider;
 import com.openexchange.contact.provider.basic.ContactsSettings;
+import com.openexchange.contact.provider.folder.FolderContactsProvider;
 import com.openexchange.contact.storage.ContactStorages;
 import com.openexchange.contact.storage.ContactsAccountStorage;
 import com.openexchange.contact.storage.ContactsStorageFactory;
@@ -145,6 +146,34 @@ public class ContactsAccountServiceImpl implements ContactsAccountService {
     }
 
     @Override
+    public ContactsAccount updateAccount(Session session, int id, JSONObject userConfig, long clientTimestamp, ContactsParameters parameters) throws OXException {
+        /*
+         * get & check stored contacts account
+         */
+        ContactsAccount storedAccount = getAccount(session, id, parameters);
+        if (null != storedAccount.getLastModified() && storedAccount.getLastModified().getTime() > clientTimestamp) {
+            throw ContactsProviderExceptionCodes.CONCURRENT_MODIFICATION.create(String.valueOf(id), L(clientTimestamp), L(storedAccount.getLastModified().getTime()));
+        }
+        /*
+         * get associated contacts provider & initialize account config
+         */
+        ContactsProvider contactsProvider = requireCapability(getProvider(storedAccount.getProviderId()), session);
+        if (isGuest(session) || false == FolderContactsProvider.class.isInstance(contactsProvider)) {
+            throw ContactsProviderExceptionCodes.UNSUPPORTED_OPERATION_FOR_PROVIDER.create(storedAccount.getProviderId());
+        }
+        JSONObject internalConfig = ((FolderContactsProvider) contactsProvider).reconfigureAccount(session, storedAccount, userConfig, parameters);
+        /*
+         * update calendar account in storage within transaction
+         */
+        ContactsAccount account = updateAccount(session.getContextId(), session.getUserId(), id, internalConfig, userConfig, clientTimestamp, parameters);
+        /*
+         * let provider perform any additional initialization
+         */
+        //        contactsProvider.onAccountUpdated(session, account, parameters);
+        return account;
+    }
+
+    @Override
     public void deleteAccount(Session session, int id, long clientTimestamp, ContactsParameters parameters) throws OXException {
         ContactsAccount storedAccount = initAccountStorage(session.getContextId(), parameters).loadAccount(session.getUserId(), id);
         if (null != storedAccount.getLastModified() && storedAccount.getLastModified().getTime() > clientTimestamp) {
@@ -182,7 +211,7 @@ public class ContactsAccountServiceImpl implements ContactsAccountService {
         for (ContactsAccount account : storedAccounts) {
             if (null == account && ContactsAccount.DEFAULT_ACCOUNT.getAccountId() == i(ids.get(index))) {
                 // Return a virtual default contacts account for guest users or
-                // get default account from list to implicitly trigger pending 
+                // get default account from list to implicitly trigger pending
                 // auto-provisioning tasks of the default account.
                 storedAccounts.set(index, isGuest(session) ? getVirtualDefaultAccount(session) : find(getAccounts(session, parameters), ContactsAccount.DEFAULT_ACCOUNT.getProviderId()));
             }
@@ -315,16 +344,23 @@ public class ContactsAccountServiceImpl implements ContactsAccountService {
      * @throws OXException if an error is occurred
      */
     private ContactsAccount insertAccount(Session session, ContactsProvider provider, JSONObject internalConfig, JSONObject userConfig, ContactsParameters parameters) throws OXException {
-        return new GroupwareContactsDatabasePerformer<ContactsAccount>(services, session.getContextId(), parameters) {
+        try {
+            return new GroupwareContactsDatabasePerformer<ContactsAccount>(services, session.getContextId(), parameters) {
 
-            @Override
-            ContactsAccount perform(ContactStorages storage) throws OXException {
-                ContactsAccountStorage accountsStorage = storage.getContactsAccountsStorage();
-                int accountId = ContactsAccount.DEFAULT_ACCOUNT.getProviderId().equals(provider.getId()) ? ContactsAccount.DEFAULT_ACCOUNT.getAccountId() : accountsStorage.nextId();
-                accountsStorage.insertAccount(new DefaultContactsAccount(provider.getId(), accountId, session.getUserId(), internalConfig, userConfig, new Date()));
-                return accountsStorage.loadAccount(session.getUserId(), accountId);
-            }
-        }.executeUpdate();
+                @Override
+                ContactsAccount perform(ContactStorages storage) throws OXException {
+                    ContactsAccountStorage accountsStorage = storage.getContactsAccountsStorage();
+                    int accountId = ContactsAccount.DEFAULT_ACCOUNT.getProviderId().equals(provider.getId()) ? ContactsAccount.DEFAULT_ACCOUNT.getAccountId() : accountsStorage.nextId();
+                    accountsStorage.insertAccount(new DefaultContactsAccount(provider.getId(), accountId, session.getUserId(), internalConfig, userConfig, new Date()));
+                    return accountsStorage.loadAccount(session.getUserId(), accountId);
+                }
+            }.executeUpdate();
+        } finally {
+            /*
+             * (re-)invalidate caches outside of transaction
+             */
+            invalidateStorage(session.getContextId(), session.getUserId());
+        }
     }
 
     /**
@@ -356,20 +392,53 @@ public class ContactsAccountServiceImpl implements ContactsAccountService {
      * @throws OXException if an error is occurred
      */
     private ContactsAccount updateAccount(Session session, int accountId, long clientTimestamp, JSONObject internalConfig, JSONObject userConfig, ContactsParameters parameters) throws OXException {
-        return new GroupwareContactsDatabasePerformer<ContactsAccount>(services, session.getContextId(), parameters) {
+        try {
+            return new GroupwareContactsDatabasePerformer<ContactsAccount>(services, session.getContextId(), parameters) {
 
-            @Override
-            ContactsAccount perform(ContactStorages storage) throws OXException {
-                ContactsAccount account = storage.getContactsAccountsStorage().loadAccount(session.getUserId(), accountId);
-                if (null != account.getLastModified() && account.getLastModified().getTime() > clientTimestamp) {
-                    throw ContactsProviderExceptionCodes.CONCURRENT_MODIFICATION.create(String.valueOf(accountId), L(clientTimestamp), L(account.getLastModified().getTime()));
+                @Override
+                ContactsAccount perform(ContactStorages storage) throws OXException {
+                    ContactsAccount account = storage.getContactsAccountsStorage().loadAccount(session.getUserId(), accountId);
+                    if (null != account.getLastModified() && account.getLastModified().getTime() > clientTimestamp) {
+                        throw ContactsProviderExceptionCodes.CONCURRENT_MODIFICATION.create(String.valueOf(accountId), L(clientTimestamp), L(account.getLastModified().getTime()));
+                    }
+                    ContactsAccount accountUpdate = new DefaultContactsAccount(account.getProviderId(), account.getAccountId(), account.getUserId(), internalConfig, userConfig, new Date());
+                    storage.getContactsAccountsStorage().updateAccount(accountUpdate, clientTimestamp);
+                    return storage.getContactsAccountsStorage().loadAccount(session.getUserId(), accountId);
                 }
-                ContactsAccount accountUpdate = new DefaultContactsAccount(account.getProviderId(), account.getAccountId(), account.getUserId(), internalConfig, userConfig, new Date());
-                storage.getContactsAccountsStorage().updateAccount(accountUpdate, clientTimestamp);
-                return storage.getContactsAccountsStorage().loadAccount(session.getUserId(), accountId);
-            }
 
-        }.executeUpdate();
+            }.executeUpdate();
+        } finally {
+            /*
+             * (re-)invalidate caches outside of transaction
+             */
+            invalidateStorage(session.getContextId(), session.getUserId(), accountId);
+        }
+    }
+
+    private ContactsAccount updateAccount(int contextId, int userId, int accountId, JSONObject internalConfig, JSONObject userConfig, long clientTimestamp, ContactsParameters parameters) throws OXException {
+        try {
+            return new GroupwareContactsDatabasePerformer<ContactsAccount>(services, contextId, parameters) {
+
+                @Override
+                protected ContactsAccount perform(ContactStorages storage) throws OXException {
+                    ContactsAccount account = storage.getContactsAccountsStorage().loadAccount(userId, accountId);
+                    if (null == account) {
+                        throw ContactsProviderExceptionCodes.ACCOUNT_NOT_FOUND.create(I(accountId));
+                    }
+                    if (null != account.getLastModified() && account.getLastModified().getTime() > clientTimestamp) {
+                        throw ContactsProviderExceptionCodes.CONCURRENT_MODIFICATION.create(String.valueOf(accountId), L(clientTimestamp), L(account.getLastModified().getTime()));
+                    }
+                    ContactsAccount accountUpdate = new DefaultContactsAccount(account.getProviderId(), account.getAccountId(), account.getUserId(), internalConfig, userConfig, new Date());
+                    storage.getContactsAccountsStorage().updateAccount(accountUpdate, clientTimestamp);
+                    return storage.getContactsAccountsStorage().loadAccount(userId, accountId);
+                }
+            }.executeUpdate();
+        } finally {
+            /*
+             * (re-)invalidate caches outside of transaction
+             */
+            invalidateStorage(contextId, userId, accountId);
+        }
     }
 
     /**
@@ -466,21 +535,36 @@ public class ContactsAccountServiceImpl implements ContactsAccountService {
                     return accounts;
                 }
             };
-            RetryPolicy retryPolicy = new ExponentialBackOffRetryPolicy(5);
-            do {
-                try {
-                    // ... execute as many times as necessary
-                    accounts.addAll(performer.executeUpdate());
-                    return;
-                } catch (OXException e) {
-                    if (false == ContactsProviderExceptionCodes.ACCOUNT_NOT_WRITTEN.equals(e)) {
-                        throw e;
+            try {
+                RetryPolicy retryPolicy = new ExponentialBackOffRetryPolicy(5);
+                do {
+                    try {
+                        // ... execute as many times as necessary
+                        accounts.addAll(performer.executeUpdate());
+                        return;
+                    } catch (OXException e) {
+                        if (false == ContactsProviderExceptionCodes.ACCOUNT_NOT_WRITTEN.equals(e)) {
+                            throw e;
+                        }
                     }
-                }
-            } while (retryPolicy.isRetryAllowed());
+                } while (retryPolicy.isRetryAllowed());
+            } finally {
+                /*
+                 * ensure to (re-)invalidate caches outside of transaction afterwards
+                 */
+                invalidateStorage(session.getContextId(), session.getUserId());
+            }
         } finally {
             lock.unlock();
         }
+    }
+
+    private void invalidateStorage(int contextId, int userId) throws OXException {
+        invalidateStorage(contextId, userId, -1);
+    }
+
+    private void invalidateStorage(int contextId, int userId, int accountId) throws OXException {
+        initAccountStorage(contextId, null).invalidateAccount(userId, accountId);
     }
 
     /**
