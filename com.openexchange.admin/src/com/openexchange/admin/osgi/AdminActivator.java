@@ -96,6 +96,8 @@ import com.openexchange.database.JdbcProperties;
 import com.openexchange.filestore.FileStorageUnregisterListenerRegistry;
 import com.openexchange.groupware.filestore.FileLocationHandler;
 import com.openexchange.groupware.userconfiguration.PermissionConfigurationChecker;
+import com.openexchange.imagetransformation.ImageMetadataService;
+import com.openexchange.imagetransformation.ImageTransformationService;
 import com.openexchange.mailaccount.MailAccountStorageService;
 import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.osgi.RankingAwareNearRegistryServiceTracker;
@@ -162,6 +164,8 @@ public class AdminActivator extends HousekeepingActivator {
         UserServiceInterceptorRegistry interceptorRegistry = new UserServiceInterceptorRegistry(context);
         track(UserServiceInterceptor.class, interceptorRegistry);
         track(UserService.class, new RegistryServiceTrackerCustomizer<UserService>(context, AdminServiceRegistry.getInstance(), UserService.class));
+        track(ImageTransformationService.class, new RegistryServiceTrackerCustomizer<ImageTransformationService>(context, AdminServiceRegistry.getInstance(), ImageTransformationService.class));
+        track(ImageMetadataService.class, new RegistryServiceTrackerCustomizer<ImageMetadataService>(context, AdminServiceRegistry.getInstance(), ImageMetadataService.class));
         track(FileStorageUnregisterListenerRegistry.class, new RegistryServiceTrackerCustomizer<FileStorageUnregisterListenerRegistry>(context, AdminServiceRegistry.getInstance(), FileStorageUnregisterListenerRegistry.class));
         track(PluginsLoadedService.class, new RegistryServiceTrackerCustomizer<PluginsLoadedService>(context, AdminServiceRegistry.getInstance(), PluginsLoadedService.class));
         track(QuotaAwareSnippetService.class, new RankingAwareRegistryServiceTrackerCustomizer<QuotaAwareSnippetService>(context, AdminServiceRegistry.getInstance(), QuotaAwareSnippetService.class));

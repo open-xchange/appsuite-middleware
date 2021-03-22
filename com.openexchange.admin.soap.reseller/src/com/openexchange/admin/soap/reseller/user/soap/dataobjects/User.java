@@ -149,6 +149,8 @@ import javax.xml.datatype.XMLGregorianCalendar;
  * &lt;element name="primaryAccountName" type="{http://www.w3.org/2001/XMLSchema}string" minOccurs="0"/>
  * &lt;element name="convert_drive_user_folders" type="{http://www.w3.org/2001/XMLSchema}boolean" minOccurs="0"/>
  * &lt;element name="load_remote_mail_content_by_default" type="{http://www.w3.org/2001/XMLSchema}boolean" minOccurs="0"/>
+ * &lt;element name="image1" type="{http://www.w3.org/2001/XMLSchema}base64Binary" minOccurs="0"/>
+ * &lt;element name="image1ContentType" type="{http://www.w3.org/2001/XMLSchema}string" minOccurs="0"/>
  * &lt;/sequence>
  * &lt;/restriction>
  * &lt;/complexContent>
@@ -292,7 +294,9 @@ import javax.xml.datatype.XMLGregorianCalendar;
     "userfield20",
     "primaryAccountName",
     "convertDriveUserFolders",
-    "loadRemoteMailContentByDefault"
+    "loadRemoteMailContentByDefault",
+    "image1",
+    "image1ContentType"
 })
 public class User {
 
@@ -563,6 +567,10 @@ public class User {
     protected Boolean convertDriveUserFolders;
     @XmlElement(name = "load_remote_mail_content_by_default", nillable = true)
     protected Boolean loadRemoteMailContentByDefault;
+    @XmlElement(name = "image1", nillable = true)
+    protected byte[] image1;
+    @XmlElement(name = "image1ContentType", nillable = true)
+    protected String image1ContentType;
 
     /**
      * Gets the value of the aliases property.
@@ -1030,10 +1038,10 @@ public class User {
     public void setDefaultSenderAddress(String value) {
         this.defaultSenderAddress = value;
     }
-    
+
     /**
      * Get driveUserFolderMode value.
-     * 
+     *
      * @return
      *      possible object is
      *     {@link String }
@@ -3744,10 +3752,10 @@ public class User {
     public void setConvertDriveUserFolders(Boolean convertDriveUserFolders) {
         this.convertDriveUserFolders = convertDriveUserFolders;
     }
-    
+
     /**
      * Indicates whether the loading of content from remote servers is allowed per default when displaying HTML mails
-     * 
+     *
      * @return A {@link Boolean}. The boolean is
      *         <code>true</code> if loading of content from remote servers is allowed per default when displaying HTML mails
      *         <code>false</code> if loading of content from remote servers isn't allowed per default when displaying HTML mails
@@ -3756,14 +3764,50 @@ public class User {
     public Boolean isLoadRemoteMailContentByDefault() {
         return loadRemoteMailContentByDefault;
     }
-    
+
     /**
      * Set the value for load-remote-mail-content-by-default
-     * 
+     *
      * @param loadRemoteMailContentByDefault The {@link Boolean} to set
      */
     public void setLoadRemoteMailContentByDefault(Boolean loadRemoteMailContentByDefault) {
         this.loadRemoteMailContentByDefault = loadRemoteMailContentByDefault;
+    }
+
+    /**
+     * Gets the image1
+     *
+     * @return The image1
+     */
+    public byte[] getImage1() {
+        return image1;
+    }
+
+    /**
+     * Sets the image1
+     *
+     * @param image1 The image1 to set
+     */
+    public void setImage1(byte[] image1) {
+        this.image1 = image1;
+    }
+
+    /**
+     * Gets the image1ContentType
+     *
+     * @return The image1ContentType
+     */
+    public String getImage1ContentType() {
+        return image1ContentType;
+    }
+
+    /**
+     * Sets the image1ContentType
+     *
+     * @param image1ContentType The image1ContentType to set
+     */
+    public void setImage1ContentType(String image1ContentType) {
+        this.image1ContentType = image1ContentType;
     }
 
 }

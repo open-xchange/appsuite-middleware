@@ -291,6 +291,12 @@ This command line tool creates new users in a given context. The displayname mus
 **--uploadfilesizelimit** *string*
 : 	Total upload file size limit for mail attachments
 
+**--image1** *string*
+: 	The contact picture as base64 encoded string or file:// URI
+
+**--image1_content_type** *string*
+: 	The content type of the contact picture
+
 **--url** *string*
 : 	Url
 

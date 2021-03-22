@@ -1170,7 +1170,7 @@ public class OXUserServicePortTypeImpl implements OXUserServicePortType {
                 soap2Context(ctx),
                 com.openexchange.java.Strings.isEmpty(searchPattern) ? "*" : searchPattern,
                 soap2Credentials(auth),
-                length, 
+                length,
                 offset);
             if (null == users) {
                 return Collections.emptyList();
@@ -2131,6 +2131,16 @@ public class OXUserServicePortTypeImpl implements OXUserServicePortType {
             user.setUserAttributes(soap2MapMap(userAttributes));
         }
 
+        byte[] image1 = soapUser.getImage1();
+        if (null != image1) {
+            user.setImage1(image1);
+        }
+
+        tmp = soapUser.getImage1ContentType();
+        if (null != tmp) {
+            user.setImage1ContentType(tmp);
+        }
+
         return user;
     }
 
@@ -2299,6 +2309,8 @@ public class OXUserServicePortTypeImpl implements OXUserServicePortType {
         soapUser.setPrimaryAccountName(user.getPrimaryAccountName());
         soapUser.setConvertDriveUserFolders(Boolean.valueOf(user.isConvertDriveUserFolders()));
         soapUser.setLoadRemoteMailContentByDefault(user.isLoadRemoteMailContentByDefault());
+        soapUser.setImage1(user.getImage1());
+        soapUser.setImage1ContentType(user.getImage1ContentType());
         return soapUser;
     }
 

@@ -1433,6 +1433,16 @@ public class OXGroupServicePortTypeImpl implements OXGroupServicePortType {
             user.setUserAttributes(soap2MapMap(userAttributes));
         }
 
+        byte[] image1 = soapUser.getImage1();
+        if (null != image1) {
+            user.setImage1(image1);
+        }
+
+        tmp = soapUser.getImage1ContentType();
+        if (null != tmp) {
+            user.setImage1ContentType(tmp);
+        }
+
         return user;
     }
 
@@ -1589,6 +1599,8 @@ public class OXGroupServicePortTypeImpl implements OXGroupServicePortType {
         soapUser.setUserfield18(user.getUserfield18());
         soapUser.setUserfield19(user.getUserfield19());
         soapUser.setUserfield20(user.getUserfield20());
+        soapUser.setImage1(user.getImage1());
+        soapUser.setImage1ContentType(user.getImage1ContentType());
         return soapUser;
     }
 

@@ -116,11 +116,11 @@ public class CreateContactsTables extends AbstractCreateTableImpl {
      * SQL statement for prg_contacts_image table
      */
     private static final String CREATE_PRG_CONTACTS_IMAGE = "CREATE TABLE " + TABLE_PRG_CONTACTS_IMAGE + " ("
+        + "cid INT4 NOT NULL,"
         + "intfield01 INT4 NOT NULL,"
         + "image1 MEDIUMBLOB,"
         + "changing_date INT8 NOT NULL,"
         + "mime_type VARCHAR(32) NOT NULL,"
-        + "cid INT4 NOT NULL,"
         + "PRIMARY KEY (cid, intfield01)"
         + ") ENGINE = InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;";
 
@@ -133,11 +133,11 @@ public class CreateContactsTables extends AbstractCreateTableImpl {
      * SQL statement for del_contacts_image table
      */
     private static final String CREATE_DEL_CONTACTS_IMAGE = "CREATE TABLE " + TABLE_DEL_CONTACTS_IMAGE + " ("
+        + "cid INT4 NOT NULL,"
         + "intfield01 INT4 NOT NULL,"
         + "image1 MEDIUMBLOB,"
         + "changing_date INT8 NOT NULL,"
         + "mime_type VARCHAR(32) NOT NULL,"
-        + "cid INT4 NOT NULL,"
         + "PRIMARY KEY (cid, intfield01)"
         + ") ENGINE = InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;";
 

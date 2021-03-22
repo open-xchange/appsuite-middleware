@@ -50,6 +50,7 @@
 package com.openexchange.admin.rmi;
 
 import static org.hamcrest.CoreMatchers.is;
+import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
@@ -62,6 +63,7 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.rmi.Naming;
 import java.util.ArrayList;
+import java.util.Base64;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
@@ -714,6 +716,35 @@ public class UserTest extends AbstractRMITest {
     }
 
     /**
+     * Tests to create a user with an image and to change it
+     *
+     * @throws Exception
+     */
+    @Test
+    public void testCreateChangeImage() throws Exception {
+        UserModuleAccess access = new UserModuleAccess();
+        User usr = UserFactory.createUser(VALID_CHAR_TESTUSER + System.currentTimeMillis(), pass, TEST_DOMAIN, context);
+        final byte[] originalImage = Base64.getDecoder().decode("iVBORw0KGgoAAAANSUhEUgAAAAEAAAABAQMAAAAl21bKAAAAA1BMVEUVAPQHR2pEAAAAAXRSTlPM0jRW/QAAAApJREFUeJxjYgAAAAYAAzY3fKgAAAAASUVORK5CYII=");
+        usr.setImage1(originalImage);
+        usr.setImage1ContentType("application/png");
+        User createduser = getUserManager().create(context, usr, access, contextAdminCredentials);
+        assertArrayEquals(originalImage, createduser.getImage1());
+        assertNotNull(createduser.getImage1());
+
+        //set the user's image
+        final byte[] testImage = Base64.getDecoder().decode("iVBORw0KGgoAAAANSUhEUgAAAAEAAAABAQMAAAAl21bKAAAAA1BMVEX/GBiIlQk4AAAAAXRSTlPM0jRW/QAAAApJREFUeJxjYgAAAAYAAzY3fKgAAAAASUVORK5CYII=");
+        createduser.setImage1(testImage);
+        createduser.setImage1ContentType("application/png");
+        getUserManager().change(context, createduser, contextAdminCredentials);
+
+        //Check if it was set
+        User srv_loaded = getUserManager().getData(context, id(createduser), contextAdminCredentials);
+        assertArrayEquals(testImage, srv_loaded.getImage1());
+        assertNotNull(srv_loaded.getImage1());
+    }
+
+
+    /**
      * Tests changing the alias of a user to one with a very long name
      */
     @Test
@@ -994,6 +1025,7 @@ public class UserTest extends AbstractRMITest {
 
         notallowed.add("setPrimaryAccountName");
         notallowed.add("setDriveFolderMode");
+        notallowed.add("setImage1ContentType");
 
         // loop through methods and change each attribute per single call and load and compare
         MethodMapObject[] meth_objects = getSetableAttributeMethods(usr.getClass());

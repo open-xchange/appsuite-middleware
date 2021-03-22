@@ -215,6 +215,7 @@ public class RequestTools {
             }
             contact.setImage1(outputStream.toByteArray());
             contact.setImageContentType(null == mimeType ? checkedMimeType : mimeType);
+            contact.setNumberOfImages(1);
         } catch (FileNotFoundException e) {
             throw AjaxExceptionCodes.NO_UPLOAD_IMAGE.create(e);
         } catch (IOException e) {

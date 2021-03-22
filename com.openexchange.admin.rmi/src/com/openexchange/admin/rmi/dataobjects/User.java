@@ -488,6 +488,14 @@ public class User extends ExtendableDataObject implements NameAndIdObject, Passw
 
     private boolean uploadFileSizeLimitPerFileset = false;
 
+    private byte[] image1;
+
+    private boolean image1set = false;
+
+    private String image1ContentType;
+
+    private boolean image1ContentTypeSet = false;
+
     private String url;
 
     private boolean urlset = false;
@@ -627,16 +635,16 @@ public class User extends ExtendableDataObject implements NameAndIdObject, Passw
      * @return Returns the id of the user as a long.
      */
     @Override
-    final public Integer getId() {
+    public Integer getId() {
         return id;
     }
-    
+
     /**
      * Used to check if the used quota fieldd of this user object has been changed
      *
      * @return true if set; false if not
      */
-    final public boolean isUsedQuotaSet() {
+    public boolean isUsedQuotaSet() {
         return usedQuotaset;
     }
 
@@ -645,7 +653,7 @@ public class User extends ExtendableDataObject implements NameAndIdObject, Passw
      *
      * @return true if set; false if not
      **/
-    final public boolean isAliasesset() {
+    public boolean isAliasesset() {
         return aliasesset;
     }
 
@@ -654,7 +662,7 @@ public class User extends ExtendableDataObject implements NameAndIdObject, Passw
      *
      * @return true if set; false if not
      **/
-    final public boolean isAnniversaryset() {
+    public boolean isAnniversaryset() {
         return anniversaryset;
     }
 
@@ -663,7 +671,7 @@ public class User extends ExtendableDataObject implements NameAndIdObject, Passw
      *
      * @return true if set; false if not
      **/
-    final public boolean isAssistant_nameset() {
+    public boolean isAssistant_nameset() {
         return assistant_nameset;
     }
 
@@ -672,7 +680,7 @@ public class User extends ExtendableDataObject implements NameAndIdObject, Passw
      *
      * @return true if set; false if not
      **/
-    final public boolean isBirthdayset() {
+    public boolean isBirthdayset() {
         return birthdayset;
     }
 
@@ -681,7 +689,7 @@ public class User extends ExtendableDataObject implements NameAndIdObject, Passw
      *
      * @return true if set; false if not
      **/
-    final public boolean isBranchesset() {
+    public boolean isBranchesset() {
         return branchesset;
     }
 
@@ -690,7 +698,7 @@ public class User extends ExtendableDataObject implements NameAndIdObject, Passw
      *
      * @return true if set; false if not
      **/
-    final public boolean isBusiness_categoryset() {
+    public boolean isBusiness_categoryset() {
         return business_categoryset;
     }
 
@@ -699,7 +707,7 @@ public class User extends ExtendableDataObject implements NameAndIdObject, Passw
      *
      * @return true if set; false if not
      **/
-    final public boolean isCategoriesset() {
+    public boolean isCategoriesset() {
         return categoriesset;
     }
 
@@ -708,7 +716,7 @@ public class User extends ExtendableDataObject implements NameAndIdObject, Passw
      *
      * @return true if set; false if not
      **/
-    final public boolean isCellular_telephone1set() {
+    public boolean isCellular_telephone1set() {
         return cellular_telephone1set;
     }
 
@@ -717,7 +725,7 @@ public class User extends ExtendableDataObject implements NameAndIdObject, Passw
      *
      * @return true if set; false if not
      **/
-    final public boolean isCellular_telephone2set() {
+    public boolean isCellular_telephone2set() {
         return cellular_telephone2set;
     }
 
@@ -726,7 +734,7 @@ public class User extends ExtendableDataObject implements NameAndIdObject, Passw
      *
      * @return true if set; false if not
      **/
-    final public boolean isCity_businessset() {
+    public boolean isCity_businessset() {
         return city_businessset;
     }
 
@@ -735,7 +743,7 @@ public class User extends ExtendableDataObject implements NameAndIdObject, Passw
      *
      * @return true if set; false if not
      **/
-    final public boolean isCity_homeset() {
+    public boolean isCity_homeset() {
         return city_homeset;
     }
 
@@ -744,7 +752,7 @@ public class User extends ExtendableDataObject implements NameAndIdObject, Passw
      *
      * @return true if set; false if not
      **/
-    final public boolean isCity_otherset() {
+    public boolean isCity_otherset() {
         return city_otherset;
     }
 
@@ -753,7 +761,7 @@ public class User extends ExtendableDataObject implements NameAndIdObject, Passw
      *
      * @return true if set; false if not
      **/
-    final public boolean isCommercial_registerset() {
+    public boolean isCommercial_registerset() {
         return commercial_registerset;
     }
 
@@ -762,7 +770,7 @@ public class User extends ExtendableDataObject implements NameAndIdObject, Passw
      *
      * @return true if set; false if not
      **/
-    final public boolean isCompanyset() {
+    public boolean isCompanyset() {
         return companyset;
     }
 
@@ -771,7 +779,7 @@ public class User extends ExtendableDataObject implements NameAndIdObject, Passw
      *
      * @return true if set; false if not
      **/
-    final public boolean isCountry_businessset() {
+    public boolean isCountry_businessset() {
         return country_businessset;
     }
 
@@ -780,7 +788,7 @@ public class User extends ExtendableDataObject implements NameAndIdObject, Passw
      *
      * @return true if set; false if not
      **/
-    final public boolean isCountry_homeset() {
+    public boolean isCountry_homeset() {
         return country_homeset;
     }
 
@@ -789,7 +797,7 @@ public class User extends ExtendableDataObject implements NameAndIdObject, Passw
      *
      * @return true if set; false if not
      **/
-    final public boolean isCountry_otherset() {
+    public boolean isCountry_otherset() {
         return country_otherset;
     }
 
@@ -798,7 +806,7 @@ public class User extends ExtendableDataObject implements NameAndIdObject, Passw
      *
      * @return true if set; false if not
      **/
-    final public boolean isDefault_groupset() {
+    public boolean isDefault_groupset() {
         return default_groupset;
     }
 
@@ -807,7 +815,7 @@ public class User extends ExtendableDataObject implements NameAndIdObject, Passw
      *
      * @return true if set; false if not
      **/
-    final public boolean isDepartmentset() {
+    public boolean isDepartmentset() {
         return departmentset;
     }
 
@@ -816,7 +824,7 @@ public class User extends ExtendableDataObject implements NameAndIdObject, Passw
      *
      * @return true if set; false if not
      **/
-    final public boolean isDisplay_nameset() {
+    public boolean isDisplay_nameset() {
         return display_nameset;
     }
 
@@ -825,7 +833,7 @@ public class User extends ExtendableDataObject implements NameAndIdObject, Passw
      *
      * @return true if set; false if not
      **/
-    final public boolean isEmail1set() {
+    public boolean isEmail1set() {
         return email1set;
     }
 
@@ -834,7 +842,7 @@ public class User extends ExtendableDataObject implements NameAndIdObject, Passw
      *
      * @return true if set; false if not
      **/
-    final public boolean isEmail2set() {
+    public boolean isEmail2set() {
         return email2set;
     }
 
@@ -843,7 +851,7 @@ public class User extends ExtendableDataObject implements NameAndIdObject, Passw
      *
      * @return true if set; false if not
      **/
-    final public boolean isEmail3set() {
+    public boolean isEmail3set() {
         return email3set;
     }
 
@@ -852,7 +860,7 @@ public class User extends ExtendableDataObject implements NameAndIdObject, Passw
      *
      * @return true if set; false if not
      **/
-    final public boolean isEmployeeTypeset() {
+    public boolean isEmployeeTypeset() {
         return employeeTypeset;
     }
 
@@ -861,7 +869,7 @@ public class User extends ExtendableDataObject implements NameAndIdObject, Passw
      *
      * @return true if set; false if not
      */
-    final public Boolean getMailenabled() {
+    public Boolean getMailenabled() {
         return mailenabled;
     }
 
@@ -870,7 +878,7 @@ public class User extends ExtendableDataObject implements NameAndIdObject, Passw
      *
      * @return true if set; false if not
      **/
-    final public boolean isMailenabledset() {
+    public boolean isMailenabledset() {
         return mailenabledset;
     }
 
@@ -879,7 +887,7 @@ public class User extends ExtendableDataObject implements NameAndIdObject, Passw
      *
      * @return true if set; false if not
      **/
-    final public boolean isFax_businessset() {
+    public boolean isFax_businessset() {
         return fax_businessset;
     }
 
@@ -888,7 +896,7 @@ public class User extends ExtendableDataObject implements NameAndIdObject, Passw
      *
      * @return true if set; false if not
      **/
-    final public boolean isFax_homeset() {
+    public boolean isFax_homeset() {
         return fax_homeset;
     }
 
@@ -897,7 +905,7 @@ public class User extends ExtendableDataObject implements NameAndIdObject, Passw
      *
      * @return true if set; false if not
      **/
-    final public boolean isFax_otherset() {
+    public boolean isFax_otherset() {
         return fax_otherset;
     }
 
@@ -906,7 +914,7 @@ public class User extends ExtendableDataObject implements NameAndIdObject, Passw
      *
      * @return true if set; false if not
      **/
-    final public boolean isGiven_nameset() {
+    public boolean isGiven_nameset() {
         return given_nameset;
     }
 
@@ -915,7 +923,7 @@ public class User extends ExtendableDataObject implements NameAndIdObject, Passw
      *
      * @return true if set; false if not
      **/
-    final public boolean isIdset() {
+    public boolean isIdset() {
         return idset;
     }
 
@@ -924,7 +932,7 @@ public class User extends ExtendableDataObject implements NameAndIdObject, Passw
      *
      * @return true if set; false if not
      **/
-    final public boolean isImapServerset() {
+    public boolean isImapServerset() {
         return imapServerset;
     }
 
@@ -933,7 +941,7 @@ public class User extends ExtendableDataObject implements NameAndIdObject, Passw
      *
      * @return true if set; false if not
      **/
-    final public boolean isImapLoginset() {
+    public boolean isImapLoginset() {
         return imapLoginset;
     }
 
@@ -942,7 +950,7 @@ public class User extends ExtendableDataObject implements NameAndIdObject, Passw
      *
      * @return true if set; false if not
      **/
-    final public boolean isInfoset() {
+    public boolean isInfoset() {
         return infoset;
     }
 
@@ -951,7 +959,7 @@ public class User extends ExtendableDataObject implements NameAndIdObject, Passw
      *
      * @return true if set; false if not
      **/
-    final public boolean isInstant_messenger1set() {
+    public boolean isInstant_messenger1set() {
         return instant_messenger1set;
     }
 
@@ -960,7 +968,7 @@ public class User extends ExtendableDataObject implements NameAndIdObject, Passw
      *
      * @return true if set; false if not
      **/
-    final public boolean isInstant_messenger2set() {
+    public boolean isInstant_messenger2set() {
         return instant_messenger2set;
     }
 
@@ -969,7 +977,7 @@ public class User extends ExtendableDataObject implements NameAndIdObject, Passw
      *
      * @return true if set; false if not
      **/
-    final public boolean isLanguageset() {
+    public boolean isLanguageset() {
         return languageset;
     }
 
@@ -978,7 +986,7 @@ public class User extends ExtendableDataObject implements NameAndIdObject, Passw
      *
      * @return true if set; false if not
      **/
-    final public boolean isMail_folder_drafts_nameset() {
+    public boolean isMail_folder_drafts_nameset() {
         return mail_folder_drafts_nameset;
     }
 
@@ -987,7 +995,7 @@ public class User extends ExtendableDataObject implements NameAndIdObject, Passw
      *
      * @return true if set; false if not
      **/
-    final public boolean isMail_folder_sent_nameset() {
+    public boolean isMail_folder_sent_nameset() {
         return mail_folder_sent_nameset;
     }
 
@@ -996,7 +1004,7 @@ public class User extends ExtendableDataObject implements NameAndIdObject, Passw
      *
      * @return true if set; false if not
      **/
-    final public boolean isMail_folder_spam_nameset() {
+    public boolean isMail_folder_spam_nameset() {
         return mail_folder_spam_nameset;
     }
 
@@ -1005,7 +1013,7 @@ public class User extends ExtendableDataObject implements NameAndIdObject, Passw
      *
      * @return true if set; false if not
      **/
-    final public boolean isMail_folder_trash_nameset() {
+    public boolean isMail_folder_trash_nameset() {
         return mail_folder_trash_nameset;
     }
 
@@ -1014,7 +1022,7 @@ public class User extends ExtendableDataObject implements NameAndIdObject, Passw
      *
      * @return true if set; false if not
      **/
-    final public boolean isMail_folder_archive_full_nameset() {
+    public boolean isMail_folder_archive_full_nameset() {
         return mail_folder_archive_full_nameset;
     }
 
@@ -1023,7 +1031,7 @@ public class User extends ExtendableDataObject implements NameAndIdObject, Passw
      *
      * @return true if set; false if not
      **/
-    final public boolean isManager_nameset() {
+    public boolean isManager_nameset() {
         return manager_nameset;
     }
 
@@ -1032,7 +1040,7 @@ public class User extends ExtendableDataObject implements NameAndIdObject, Passw
      *
      * @return true if set; false if not
      **/
-    final public boolean isMarital_statusset() {
+    public boolean isMarital_statusset() {
         return marital_statusset;
     }
 
@@ -1041,7 +1049,7 @@ public class User extends ExtendableDataObject implements NameAndIdObject, Passw
      *
      * @return true if set; false if not
      **/
-    final public boolean isMiddle_nameset() {
+    public boolean isMiddle_nameset() {
         return middle_nameset;
     }
 
@@ -1050,7 +1058,7 @@ public class User extends ExtendableDataObject implements NameAndIdObject, Passw
      *
      * @return true if set; false if not
      **/
-    final public boolean isNicknameset() {
+    public boolean isNicknameset() {
         return nicknameset;
     }
 
@@ -1059,7 +1067,7 @@ public class User extends ExtendableDataObject implements NameAndIdObject, Passw
      *
      * @return true if set; false if not
      **/
-    final public boolean isNoteset() {
+    public boolean isNoteset() {
         return noteset;
     }
 
@@ -1068,7 +1076,7 @@ public class User extends ExtendableDataObject implements NameAndIdObject, Passw
      *
      * @return true if set; false if not
      **/
-    final public boolean isNumber_of_childrenset() {
+    public boolean isNumber_of_childrenset() {
         return number_of_childrenset;
     }
 
@@ -1077,7 +1085,7 @@ public class User extends ExtendableDataObject implements NameAndIdObject, Passw
      *
      * @return true if set; false if not
      **/
-    final public boolean isNumber_of_employeeset() {
+    public boolean isNumber_of_employeeset() {
         return number_of_employeeset;
     }
 
@@ -1086,7 +1094,7 @@ public class User extends ExtendableDataObject implements NameAndIdObject, Passw
      *
      * @return true if set; false if not
      **/
-    final public boolean isPassword_expiredset() {
+    public boolean isPassword_expiredset() {
         return password_expiredset;
     }
 
@@ -1095,7 +1103,7 @@ public class User extends ExtendableDataObject implements NameAndIdObject, Passw
      *
      * @return true if set; false if not
      **/
-    final public boolean isPasswordMechset() {
+    public boolean isPasswordMechset() {
         return passwordMechset;
     }
 
@@ -1104,7 +1112,7 @@ public class User extends ExtendableDataObject implements NameAndIdObject, Passw
      *
      * @return true if set; false if not
      **/
-    final public boolean isPasswordset() {
+    public boolean isPasswordset() {
         return passwordset;
     }
 
@@ -1113,7 +1121,7 @@ public class User extends ExtendableDataObject implements NameAndIdObject, Passw
      *
      * @return true if set; false if not
      **/
-    final public boolean isPositionset() {
+    public boolean isPositionset() {
         return positionset;
     }
 
@@ -1122,7 +1130,7 @@ public class User extends ExtendableDataObject implements NameAndIdObject, Passw
      *
      * @return true if set; false if not
      **/
-    final public boolean isPostal_code_businessset() {
+    public boolean isPostal_code_businessset() {
         return postal_code_businessset;
     }
 
@@ -1131,7 +1139,7 @@ public class User extends ExtendableDataObject implements NameAndIdObject, Passw
      *
      * @return true if set; false if not
      **/
-    final public boolean isPostal_code_homeset() {
+    public boolean isPostal_code_homeset() {
         return postal_code_homeset;
     }
 
@@ -1140,7 +1148,7 @@ public class User extends ExtendableDataObject implements NameAndIdObject, Passw
      *
      * @return true if set; false if not
      **/
-    final public boolean isPostal_code_otherset() {
+    public boolean isPostal_code_otherset() {
         return postal_code_otherset;
     }
 
@@ -1149,7 +1157,7 @@ public class User extends ExtendableDataObject implements NameAndIdObject, Passw
      *
      * @return true if set; false if not
      **/
-    final public boolean isPrimaryEmailset() {
+    public boolean isPrimaryEmailset() {
         return primaryEmailset;
     }
 
@@ -1158,7 +1166,7 @@ public class User extends ExtendableDataObject implements NameAndIdObject, Passw
      *
      * @return true if set; false if not
      **/
-    final public boolean isProfessionset() {
+    public boolean isProfessionset() {
         return professionset;
     }
 
@@ -1167,7 +1175,7 @@ public class User extends ExtendableDataObject implements NameAndIdObject, Passw
      *
      * @return true if set; false if not
      **/
-    final public boolean isRoom_numberset() {
+    public boolean isRoom_numberset() {
         return room_numberset;
     }
 
@@ -1176,7 +1184,7 @@ public class User extends ExtendableDataObject implements NameAndIdObject, Passw
      *
      * @return true if set; false if not
      **/
-    final public boolean isSales_volumeset() {
+    public boolean isSales_volumeset() {
         return sales_volumeset;
     }
 
@@ -1185,7 +1193,7 @@ public class User extends ExtendableDataObject implements NameAndIdObject, Passw
      *
      * @return true if set; false if not
      **/
-    final public boolean isSmtpServerset() {
+    public boolean isSmtpServerset() {
         return smtpServerset;
     }
 
@@ -1194,7 +1202,7 @@ public class User extends ExtendableDataObject implements NameAndIdObject, Passw
      *
      * @return true if set; false if not
      **/
-    final public boolean isSpouse_nameset() {
+    public boolean isSpouse_nameset() {
         return spouse_nameset;
     }
 
@@ -1203,7 +1211,7 @@ public class User extends ExtendableDataObject implements NameAndIdObject, Passw
      *
      * @return true if set; false if not
      **/
-    final public boolean isState_businessset() {
+    public boolean isState_businessset() {
         return state_businessset;
     }
 
@@ -1212,7 +1220,7 @@ public class User extends ExtendableDataObject implements NameAndIdObject, Passw
      *
      * @return true if set; false if not
      **/
-    final public boolean isState_homeset() {
+    public boolean isState_homeset() {
         return state_homeset;
     }
 
@@ -1221,7 +1229,7 @@ public class User extends ExtendableDataObject implements NameAndIdObject, Passw
      *
      * @return true if set; false if not
      **/
-    final public boolean isState_otherset() {
+    public boolean isState_otherset() {
         return state_otherset;
     }
 
@@ -1230,7 +1238,7 @@ public class User extends ExtendableDataObject implements NameAndIdObject, Passw
      *
      * @return true if set; false if not
      **/
-    final public boolean isStreet_businessset() {
+    public boolean isStreet_businessset() {
         return street_businessset;
     }
 
@@ -1239,7 +1247,7 @@ public class User extends ExtendableDataObject implements NameAndIdObject, Passw
      *
      * @return true if set; false if not
      **/
-    final public boolean isStreet_homeset() {
+    public boolean isStreet_homeset() {
         return street_homeset;
     }
 
@@ -1248,7 +1256,7 @@ public class User extends ExtendableDataObject implements NameAndIdObject, Passw
      *
      * @return true if set; false if not
      **/
-    final public boolean isStreet_otherset() {
+    public boolean isStreet_otherset() {
         return street_otherset;
     }
 
@@ -1257,7 +1265,7 @@ public class User extends ExtendableDataObject implements NameAndIdObject, Passw
      *
      * @return true if set; false if not
      **/
-    final public boolean isSuffixset() {
+    public boolean isSuffixset() {
         return suffixset;
     }
 
@@ -1266,7 +1274,7 @@ public class User extends ExtendableDataObject implements NameAndIdObject, Passw
      *
      * @return true if set; false if not
      **/
-    final public boolean isSur_nameset() {
+    public boolean isSur_nameset() {
         return sur_nameset;
     }
 
@@ -1275,7 +1283,7 @@ public class User extends ExtendableDataObject implements NameAndIdObject, Passw
      *
      * @return true if set; false if not
      **/
-    final public boolean isTax_idset() {
+    public boolean isTax_idset() {
         return tax_idset;
     }
 
@@ -1284,7 +1292,7 @@ public class User extends ExtendableDataObject implements NameAndIdObject, Passw
      *
      * @return true if set; false if not
      **/
-    final public boolean isTelephone_assistantset() {
+    public boolean isTelephone_assistantset() {
         return telephone_assistantset;
     }
 
@@ -1293,7 +1301,7 @@ public class User extends ExtendableDataObject implements NameAndIdObject, Passw
      *
      * @return true if set; false if not
      **/
-    final public boolean isTelephone_business1set() {
+    public boolean isTelephone_business1set() {
         return telephone_business1set;
     }
 
@@ -1302,7 +1310,7 @@ public class User extends ExtendableDataObject implements NameAndIdObject, Passw
      *
      * @return true if set; false if not
      **/
-    final public boolean isTelephone_business2set() {
+    public boolean isTelephone_business2set() {
         return telephone_business2set;
     }
 
@@ -1311,7 +1319,7 @@ public class User extends ExtendableDataObject implements NameAndIdObject, Passw
      *
      * @return true if set; false if not
      **/
-    final public boolean isTelephone_callbackset() {
+    public boolean isTelephone_callbackset() {
         return telephone_callbackset;
     }
 
@@ -1320,7 +1328,7 @@ public class User extends ExtendableDataObject implements NameAndIdObject, Passw
      *
      * @return true if set; false if not
      **/
-    final public boolean isTelephone_carset() {
+    public boolean isTelephone_carset() {
         return telephone_carset;
     }
 
@@ -1329,7 +1337,7 @@ public class User extends ExtendableDataObject implements NameAndIdObject, Passw
      *
      * @return true if set; false if not
      **/
-    final public boolean isTelephone_companyset() {
+    public boolean isTelephone_companyset() {
         return telephone_companyset;
     }
 
@@ -1338,7 +1346,7 @@ public class User extends ExtendableDataObject implements NameAndIdObject, Passw
      *
      * @return true if set; false if not
      **/
-    final public boolean isTelephone_home1set() {
+    public boolean isTelephone_home1set() {
         return telephone_home1set;
     }
 
@@ -1347,7 +1355,7 @@ public class User extends ExtendableDataObject implements NameAndIdObject, Passw
      *
      * @return true if set; false if not
      **/
-    final public boolean isTelephone_home2set() {
+    public boolean isTelephone_home2set() {
         return telephone_home2set;
     }
 
@@ -1356,7 +1364,7 @@ public class User extends ExtendableDataObject implements NameAndIdObject, Passw
      *
      * @return true if set; false if not
      **/
-    final public boolean isTelephone_ipset() {
+    public boolean isTelephone_ipset() {
         return telephone_ipset;
     }
 
@@ -1365,7 +1373,7 @@ public class User extends ExtendableDataObject implements NameAndIdObject, Passw
      *
      * @return true if set; false if not
      **/
-    final public boolean isTelephone_isdnset() {
+    public boolean isTelephone_isdnset() {
         return telephone_isdnset;
     }
 
@@ -1374,7 +1382,7 @@ public class User extends ExtendableDataObject implements NameAndIdObject, Passw
      *
      * @return true if set; false if not
      **/
-    final public boolean isTelephone_otherset() {
+    public boolean isTelephone_otherset() {
         return telephone_otherset;
     }
 
@@ -1383,7 +1391,7 @@ public class User extends ExtendableDataObject implements NameAndIdObject, Passw
      *
      * @return true if set; false if not
      **/
-    final public boolean isTelephone_pagerset() {
+    public boolean isTelephone_pagerset() {
         return telephone_pagerset;
     }
 
@@ -1392,7 +1400,7 @@ public class User extends ExtendableDataObject implements NameAndIdObject, Passw
      *
      * @return true if set; false if not
      **/
-    final public boolean isTelephone_primaryset() {
+    public boolean isTelephone_primaryset() {
         return telephone_primaryset;
     }
 
@@ -1401,7 +1409,7 @@ public class User extends ExtendableDataObject implements NameAndIdObject, Passw
      *
      * @return true if set; false if not
      **/
-    final public boolean isTelephone_radioset() {
+    public boolean isTelephone_radioset() {
         return telephone_radioset;
     }
 
@@ -1410,7 +1418,7 @@ public class User extends ExtendableDataObject implements NameAndIdObject, Passw
      *
      * @return true if set; false if not
      **/
-    final public boolean isTelephone_telexset() {
+    public boolean isTelephone_telexset() {
         return telephone_telexset;
     }
 
@@ -1419,7 +1427,7 @@ public class User extends ExtendableDataObject implements NameAndIdObject, Passw
      *
      * @return true if set; false if not
      **/
-    final public boolean isTelephone_ttytddset() {
+    public boolean isTelephone_ttytddset() {
         return telephone_ttytddset;
     }
 
@@ -1428,7 +1436,7 @@ public class User extends ExtendableDataObject implements NameAndIdObject, Passw
      *
      * @return true if set; false if not
      **/
-    final public boolean isTimezoneset() {
+    public boolean isTimezoneset() {
         return timezoneset;
     }
 
@@ -1437,7 +1445,7 @@ public class User extends ExtendableDataObject implements NameAndIdObject, Passw
      *
      * @return true if set; false if not
      **/
-    final public boolean isTitleset() {
+    public boolean isTitleset() {
         return titleset;
     }
 
@@ -1460,11 +1468,30 @@ public class User extends ExtendableDataObject implements NameAndIdObject, Passw
     }
 
     /**
+     * Used to check if the image1 field of this user object has been changed
+     *
+     * @return true if set; false if not
+     */
+    public boolean isImage1set() {
+        return image1set;
+    }
+
+    /**
+     * Used to check if the image1 content type field of this user object has been changed
+     *
+     * @return true if set; false if not
+     */
+    public boolean isImage1ContentTypeset() {
+        return image1ContentTypeSet;
+
+    }
+
+    /**
      * Used to check if the url field of this user object has been changed
      *
      * @return true if set; false if not
      **/
-    final public boolean isUrlset() {
+    public boolean isUrlset() {
         return urlset;
     }
 
@@ -1473,7 +1500,7 @@ public class User extends ExtendableDataObject implements NameAndIdObject, Passw
      *
      * @return true if set; false if not
      **/
-    final public boolean isUserfield01set() {
+    public boolean isUserfield01set() {
         return userfield01set;
     }
 
@@ -1482,7 +1509,7 @@ public class User extends ExtendableDataObject implements NameAndIdObject, Passw
      *
      * @return true if set; false if not
      **/
-    final public boolean isUserfield02set() {
+    public boolean isUserfield02set() {
         return userfield02set;
     }
 
@@ -1491,7 +1518,7 @@ public class User extends ExtendableDataObject implements NameAndIdObject, Passw
      *
      * @return true if set; false if not
      **/
-    final public boolean isUserfield03set() {
+    public boolean isUserfield03set() {
         return userfield03set;
     }
 
@@ -1500,7 +1527,7 @@ public class User extends ExtendableDataObject implements NameAndIdObject, Passw
      *
      * @return true if set; false if not
      **/
-    final public boolean isUserfield04set() {
+    public boolean isUserfield04set() {
         return userfield04set;
     }
 
@@ -1509,7 +1536,7 @@ public class User extends ExtendableDataObject implements NameAndIdObject, Passw
      *
      * @return true if set; false if not
      **/
-    final public boolean isUserfield05set() {
+    public boolean isUserfield05set() {
         return userfield05set;
     }
 
@@ -1518,7 +1545,7 @@ public class User extends ExtendableDataObject implements NameAndIdObject, Passw
      *
      * @return true if set; false if not
      **/
-    final public boolean isUserfield06set() {
+    public boolean isUserfield06set() {
         return userfield06set;
     }
 
@@ -1527,7 +1554,7 @@ public class User extends ExtendableDataObject implements NameAndIdObject, Passw
      *
      * @return true if set; false if not
      **/
-    final public boolean isUserfield07set() {
+    public boolean isUserfield07set() {
         return userfield07set;
     }
 
@@ -1536,7 +1563,7 @@ public class User extends ExtendableDataObject implements NameAndIdObject, Passw
      *
      * @return true if set; false if not
      **/
-    final public boolean isUserfield08set() {
+    public boolean isUserfield08set() {
         return userfield08set;
     }
 
@@ -1545,7 +1572,7 @@ public class User extends ExtendableDataObject implements NameAndIdObject, Passw
      *
      * @return true if set; false if not
      **/
-    final public boolean isUserfield09set() {
+    public boolean isUserfield09set() {
         return userfield09set;
     }
 
@@ -1554,7 +1581,7 @@ public class User extends ExtendableDataObject implements NameAndIdObject, Passw
      *
      * @return true if set; false if not
      **/
-    final public boolean isUserfield10set() {
+    public boolean isUserfield10set() {
         return userfield10set;
     }
 
@@ -1563,7 +1590,7 @@ public class User extends ExtendableDataObject implements NameAndIdObject, Passw
      *
      * @return true if set; false if not
      **/
-    final public boolean isUserfield11set() {
+    public boolean isUserfield11set() {
         return userfield11set;
     }
 
@@ -1572,7 +1599,7 @@ public class User extends ExtendableDataObject implements NameAndIdObject, Passw
      *
      * @return true if set; false if not
      **/
-    final public boolean isUserfield12set() {
+    public boolean isUserfield12set() {
         return userfield12set;
     }
 
@@ -1581,7 +1608,7 @@ public class User extends ExtendableDataObject implements NameAndIdObject, Passw
      *
      * @return true if set; false if not
      **/
-    final public boolean isUserfield13set() {
+    public boolean isUserfield13set() {
         return userfield13set;
     }
 
@@ -1590,7 +1617,7 @@ public class User extends ExtendableDataObject implements NameAndIdObject, Passw
      *
      * @return true if set; false if not
      **/
-    final public boolean isUserfield14set() {
+    public boolean isUserfield14set() {
         return userfield14set;
     }
 
@@ -1599,7 +1626,7 @@ public class User extends ExtendableDataObject implements NameAndIdObject, Passw
      *
      * @return true if set; false if not
      **/
-    final public boolean isUserfield15set() {
+    public boolean isUserfield15set() {
         return userfield15set;
     }
 
@@ -1608,7 +1635,7 @@ public class User extends ExtendableDataObject implements NameAndIdObject, Passw
      *
      * @return true if set; false if not
      **/
-    final public boolean isUserfield16set() {
+    public boolean isUserfield16set() {
         return userfield16set;
     }
 
@@ -1617,7 +1644,7 @@ public class User extends ExtendableDataObject implements NameAndIdObject, Passw
      *
      * @return true if set; false if not
      **/
-    final public boolean isUserfield17set() {
+    public boolean isUserfield17set() {
         return userfield17set;
     }
 
@@ -1626,7 +1653,7 @@ public class User extends ExtendableDataObject implements NameAndIdObject, Passw
      *
      * @return true if set; false if not
      **/
-    final public boolean isUserfield18set() {
+    public boolean isUserfield18set() {
         return userfield18set;
     }
 
@@ -1635,7 +1662,7 @@ public class User extends ExtendableDataObject implements NameAndIdObject, Passw
      *
      * @return true if set; false if not
      **/
-    final public boolean isUserfield19set() {
+    public boolean isUserfield19set() {
         return userfield19set;
     }
 
@@ -1644,7 +1671,7 @@ public class User extends ExtendableDataObject implements NameAndIdObject, Passw
      *
      * @return true if set; false if not
      **/
-    final public boolean isUserfield20set() {
+    public boolean isUserfield20set() {
         return userfield20set;
     }
 
@@ -1653,7 +1680,7 @@ public class User extends ExtendableDataObject implements NameAndIdObject, Passw
      *
      * @return true if set; false if not
      **/
-    final public boolean isNameset() {
+    public boolean isNameset() {
         return nameset;
     }
 
@@ -1663,7 +1690,7 @@ public class User extends ExtendableDataObject implements NameAndIdObject, Passw
      * @param userid An {@code Integer} containing the user id
      */
     @Override
-    final public void setId(final Integer userid) {
+    public void setId(final Integer userid) {
         if (null == userid) {
             this.idset = true;
         }
@@ -1671,7 +1698,7 @@ public class User extends ExtendableDataObject implements NameAndIdObject, Passw
     }
 
     @Override
-    final public String getName() {
+    public String getName() {
         return name;
     }
 
@@ -1681,7 +1708,7 @@ public class User extends ExtendableDataObject implements NameAndIdObject, Passw
      * @param username A {@code String} containing the user name
      */
     @Override
-    final public void setName(final String username) {
+    public void setName(final String username) {
         if (null == username) {
             this.nameset = true;
         }
@@ -1689,7 +1716,7 @@ public class User extends ExtendableDataObject implements NameAndIdObject, Passw
     }
 
     @Override
-    final public String getPassword() {
+    public String getPassword() {
         return password;
     }
 
@@ -1699,7 +1726,7 @@ public class User extends ExtendableDataObject implements NameAndIdObject, Passw
      * @param passwd A {@code String} containing the password
      * @see setPasswordMech
      */
-    final public void setPassword(final String passwd) {
+    public void setPassword(final String passwd) {
         if (null == passwd) {
             this.passwordset = true;
         }
@@ -1711,7 +1738,7 @@ public class User extends ExtendableDataObject implements NameAndIdObject, Passw
      *
      * @return A {@code String} containing the primary E-Mail address
      */
-    final public String getPrimaryEmail() {
+    public String getPrimaryEmail() {
         return primaryEmail;
     }
 
@@ -1721,7 +1748,7 @@ public class User extends ExtendableDataObject implements NameAndIdObject, Passw
      *
      * @param primaryEmail A {@code String} containing the primary E-Mail address
      */
-    final public void setPrimaryEmail(final String primaryEmail) {
+    public void setPrimaryEmail(final String primaryEmail) {
         if (null == primaryEmail) {
             this.primaryEmailset = true;
         }
@@ -1733,7 +1760,7 @@ public class User extends ExtendableDataObject implements NameAndIdObject, Passw
      *
      * @return A {@code String} containing the last name
      */
-    final public String getSur_name() {
+    public String getSur_name() {
         return sur_name;
     }
 
@@ -1742,7 +1769,7 @@ public class User extends ExtendableDataObject implements NameAndIdObject, Passw
      *
      * @param sur_name A {@code String} containing the last name
      */
-    final public void setSur_name(final String sur_name) {
+    public void setSur_name(final String sur_name) {
         if (null == sur_name) {
             this.sur_nameset = true;
         }
@@ -1754,7 +1781,7 @@ public class User extends ExtendableDataObject implements NameAndIdObject, Passw
      *
      * @return A {@code String} containing the first name
      */
-    final public String getGiven_name() {
+    public String getGiven_name() {
         return given_name;
     }
 
@@ -1763,7 +1790,7 @@ public class User extends ExtendableDataObject implements NameAndIdObject, Passw
      *
      * @param given_name A {@code String} containing the first name
      */
-    final public void setGiven_name(final String given_name) {
+    public void setGiven_name(final String given_name) {
         if (null == given_name) {
             this.given_nameset = true;
         }
@@ -1775,7 +1802,7 @@ public class User extends ExtendableDataObject implements NameAndIdObject, Passw
      *
      * @param enabled A {@code Boolean} to activate/deactivate
      */
-    final public void setMailenabled(final Boolean enabled) {
+    public void setMailenabled(final Boolean enabled) {
         if (null == enabled) {
             this.mailenabledset = true;
         }
@@ -1784,11 +1811,11 @@ public class User extends ExtendableDataObject implements NameAndIdObject, Passw
 
     // -----------------------------------------------------------------------------------------
 
-    public final Integer getFilestoreId() {
+    public Integer getFilestoreId() {
         return filestore_id;
     }
 
-    public final void setFilestoreId(final Integer filestore_id) {
+    public void setFilestoreId(final Integer filestore_id) {
         this.filestore_id = filestore_id;
         this.filestore_idset = true;
     }
@@ -1797,11 +1824,11 @@ public class User extends ExtendableDataObject implements NameAndIdObject, Passw
         return filestore_idset;
     }
 
-    public final Integer getFilestoreOwner() {
+    public Integer getFilestoreOwner() {
         return filestore_owner;
     }
 
-    public final void setFilestoreOwner(final Integer filestore_owner) {
+    public void setFilestoreOwner(final Integer filestore_owner) {
         this.filestore_owner = filestore_owner;
         this.filestore_ownerset = true;
     }
@@ -1813,7 +1840,7 @@ public class User extends ExtendableDataObject implements NameAndIdObject, Passw
     /**
      * @return max Quota (in MB)
      */
-    public final Long getMaxQuota() {
+    public Long getMaxQuota() {
         return maxQuota;
     }
 
@@ -1821,7 +1848,7 @@ public class User extends ExtendableDataObject implements NameAndIdObject, Passw
      *
      * @param maxQuota (in MB)
      */
-    public final void setMaxQuota(final Long maxQuota) {
+    public void setMaxQuota(final Long maxQuota) {
         this.maxQuota = maxQuota;
         this.maxQuotaset = true;
     }
@@ -1833,20 +1860,20 @@ public class User extends ExtendableDataObject implements NameAndIdObject, Passw
     /**
      * @return used Quota (in MB)
      */
-    public final Long getUsedQuota() {
+    public Long getUsedQuota() {
         return usedQuota;
     }
 
-    public final void setUsedQuota(final Long usedQuota) {
+    public void setUsedQuota(final Long usedQuota) {
         this.usedQuota = usedQuota;
         this.usedQuotaset = true;
     }
 
-    public final String getFilestore_name() {
+    public String getFilestore_name() {
         return filestore_name;
     }
 
-    public final void setFilestore_name(final String filestore_name) {
+    public void setFilestore_name(final String filestore_name) {
         this.filestore_name = filestore_name;
         this.filestore_nameset = true;
     }
@@ -1862,7 +1889,7 @@ public class User extends ExtendableDataObject implements NameAndIdObject, Passw
      *
      * @return A {@code Date} containing the birthday
      */
-    final public Date getBirthday() {
+    public Date getBirthday() {
         return birthday;
     }
 
@@ -1871,7 +1898,7 @@ public class User extends ExtendableDataObject implements NameAndIdObject, Passw
      *
      * @param birthday A {@code Date} containing the birthday
      */
-    final public void setBirthday(final Date birthday) {
+    public void setBirthday(final Date birthday) {
         if (null == birthday) {
             this.birthdayset = true;
         }
@@ -1883,7 +1910,7 @@ public class User extends ExtendableDataObject implements NameAndIdObject, Passw
      *
      * @return A {@code Date} containing the anniversary
      */
-    final public Date getAnniversary() {
+    public Date getAnniversary() {
         return anniversary;
     }
 
@@ -1892,7 +1919,7 @@ public class User extends ExtendableDataObject implements NameAndIdObject, Passw
      *
      * @param anniversary A {@code Date} containing the anniversary
      */
-    public final void setAnniversary(final Date anniversary) {
+    public void setAnniversary(final Date anniversary) {
         if (null == anniversary) {
             this.anniversaryset = true;
         }
@@ -1904,7 +1931,7 @@ public class User extends ExtendableDataObject implements NameAndIdObject, Passw
      *
      * @return A {@code String} containing the branches
      */
-    final public String getBranches() {
+    public String getBranches() {
         return branches;
     }
 
@@ -1913,7 +1940,7 @@ public class User extends ExtendableDataObject implements NameAndIdObject, Passw
      *
      * @param branches A {@code String} containing the branches
      */
-    final public void setBranches(final String branches) {
+    public void setBranches(final String branches) {
         if (null == branches) {
             this.branchesset = true;
         }
@@ -1925,7 +1952,7 @@ public class User extends ExtendableDataObject implements NameAndIdObject, Passw
      *
      * @return A {@code String} containing the business_category
      */
-    final public String getBusiness_category() {
+    public String getBusiness_category() {
         return business_category;
     }
 
@@ -1934,7 +1961,7 @@ public class User extends ExtendableDataObject implements NameAndIdObject, Passw
      *
      * @param business_category A {@code String} containing the business_category
      */
-    final public void setBusiness_category(final String business_category) {
+    public void setBusiness_category(final String business_category) {
         if (null == business_category) {
             this.business_categoryset = true;
         }
@@ -1946,7 +1973,7 @@ public class User extends ExtendableDataObject implements NameAndIdObject, Passw
      *
      * @return A {@code String} containing the postal_code_otherset
      */
-    final public String getPostal_code_business() {
+    public String getPostal_code_business() {
         return postal_code_business;
     }
 
@@ -1955,7 +1982,7 @@ public class User extends ExtendableDataObject implements NameAndIdObject, Passw
      *
      * @param postal_code_business A {@code String} containing the postal_code_otherset
      */
-    final public void setPostal_code_business(final String postal_code_business) {
+    public void setPostal_code_business(final String postal_code_business) {
         if (null == postal_code_business) {
             this.postal_code_businessset = true;
         }
@@ -1967,7 +1994,7 @@ public class User extends ExtendableDataObject implements NameAndIdObject, Passw
      *
      * @return A {@code String} containing the state of the business
      */
-    final public String getState_business() {
+    public String getState_business() {
         return state_business;
     }
 
@@ -1976,7 +2003,7 @@ public class User extends ExtendableDataObject implements NameAndIdObject, Passw
      *
      * @param state_business A {@code String} containing the state of the business
      */
-    final public void setState_business(final String state_business) {
+    public void setState_business(final String state_business) {
         if (null == state_business) {
             this.state_businessset = true;
         }
@@ -1988,7 +2015,7 @@ public class User extends ExtendableDataObject implements NameAndIdObject, Passw
      *
      * @return A {@code String} containing the street of the business
      */
-    final public String getStreet_business() {
+    public String getStreet_business() {
         return street_business;
     }
 
@@ -1997,7 +2024,7 @@ public class User extends ExtendableDataObject implements NameAndIdObject, Passw
      *
      * @param street_business A {@code String} containing the street of the business
      */
-    final public void setStreet_business(final String street_business) {
+    public void setStreet_business(final String street_business) {
         if (null == street_business) {
             this.street_businessset = true;
         }
@@ -2009,7 +2036,7 @@ public class User extends ExtendableDataObject implements NameAndIdObject, Passw
      *
      * @return A {@code String} containing the telephone_callback
      */
-    final public String getTelephone_callback() {
+    public String getTelephone_callback() {
         return telephone_callback;
     }
 
@@ -2018,7 +2045,7 @@ public class User extends ExtendableDataObject implements NameAndIdObject, Passw
      *
      * @param telephone_callback A {@code String} containing the telephone_callback
      */
-    final public void setTelephone_callback(final String telephone_callback) {
+    public void setTelephone_callback(final String telephone_callback) {
         if (null == telephone_callback) {
             this.telephone_callbackset = true;
         }
@@ -2030,7 +2057,7 @@ public class User extends ExtendableDataObject implements NameAndIdObject, Passw
      *
      * @return A {@code String} containing the city for the home location
      */
-    final public String getCity_home() {
+    public String getCity_home() {
         return city_home;
     }
 
@@ -2039,7 +2066,7 @@ public class User extends ExtendableDataObject implements NameAndIdObject, Passw
      *
      * @param city_home A {@code String} containing the city for the home location
      */
-    final public void setCity_home(final String city_home) {
+    public void setCity_home(final String city_home) {
         if (null == city_home) {
             this.city_homeset = true;
         }
@@ -2051,7 +2078,7 @@ public class User extends ExtendableDataObject implements NameAndIdObject, Passw
      *
      * @return A {@code String} containing commercial_register
      */
-    final public String getCommercial_register() {
+    public String getCommercial_register() {
         return commercial_register;
     }
 
@@ -2060,7 +2087,7 @@ public class User extends ExtendableDataObject implements NameAndIdObject, Passw
      *
      * @param commercial_register A {@code String} containing commercial_register
      */
-    final public void setCommercial_register(final String commercial_register) {
+    public void setCommercial_register(final String commercial_register) {
         if (null == commercial_register) {
             this.commercial_registerset = true;
         }
@@ -2072,7 +2099,7 @@ public class User extends ExtendableDataObject implements NameAndIdObject, Passw
      *
      * @return A {@code String} containing the country of the home location
      */
-    final public String getCountry_home() {
+    public String getCountry_home() {
         return country_home;
     }
 
@@ -2081,7 +2108,7 @@ public class User extends ExtendableDataObject implements NameAndIdObject, Passw
      *
      * @param country_home A {@code String} containing the country of the home location
      */
-    final public void setCountry_home(final String country_home) {
+    public void setCountry_home(final String country_home) {
         if (null == country_home) {
             this.country_homeset = true;
         }
@@ -2093,7 +2120,7 @@ public class User extends ExtendableDataObject implements NameAndIdObject, Passw
      *
      * @return A {@code String} containing the company
      */
-    final public String getCompany() {
+    public String getCompany() {
         return company;
     }
 
@@ -2102,7 +2129,7 @@ public class User extends ExtendableDataObject implements NameAndIdObject, Passw
      *
      * @param company A {@code String} containing the company
      */
-    final public void setCompany(final String company) {
+    public void setCompany(final String company) {
         if (null == company) {
             this.companyset = true;
         }
@@ -2114,7 +2141,7 @@ public class User extends ExtendableDataObject implements NameAndIdObject, Passw
      *
      * @return A {@code Group} object containing the default group
      */
-    final public Group getDefault_group() {
+    public Group getDefault_group() {
         return default_group;
     }
 
@@ -2124,7 +2151,7 @@ public class User extends ExtendableDataObject implements NameAndIdObject, Passw
      *
      * @param default_group A {@code Group} object containing the default group
      */
-    final public void setDefault_group(final Group default_group) {
+    public void setDefault_group(final Group default_group) {
         if (null == default_group) {
             this.default_groupset = true;
         }
@@ -2136,7 +2163,7 @@ public class User extends ExtendableDataObject implements NameAndIdObject, Passw
      *
      * @return A {@code String} containing the department
      */
-    final public String getDepartment() {
+    public String getDepartment() {
         return department;
     }
 
@@ -2145,7 +2172,7 @@ public class User extends ExtendableDataObject implements NameAndIdObject, Passw
      *
      * @param department A {@code String} containing the department
      */
-    final public void setDepartment(final String department) {
+    public void setDepartment(final String department) {
         if (null == department) {
             this.departmentset = true;
         }
@@ -2157,7 +2184,7 @@ public class User extends ExtendableDataObject implements NameAndIdObject, Passw
      *
      * @return A {@code String} containing the display name
      */
-    final public String getDisplay_name() {
+    public String getDisplay_name() {
         return display_name;
     }
 
@@ -2166,7 +2193,7 @@ public class User extends ExtendableDataObject implements NameAndIdObject, Passw
      *
      * @param display_name A {@code String} containing the display name
      */
-    final public void setDisplay_name(final String display_name) {
+    public void setDisplay_name(final String display_name) {
         if (null == display_name) {
             this.display_nameset = true;
         }
@@ -2178,7 +2205,7 @@ public class User extends ExtendableDataObject implements NameAndIdObject, Passw
      *
      * @return A {@code String} containing the home E-Mail
      */
-    final public String getEmail2() {
+    public String getEmail2() {
         return email2;
     }
 
@@ -2187,7 +2214,7 @@ public class User extends ExtendableDataObject implements NameAndIdObject, Passw
      *
      * @param email2 A {@code String} containing the home E-Mail
      */
-    final public void setEmail2(final String email2) {
+    public void setEmail2(final String email2) {
         if (null == email2) {
             this.email2set = true;
         }
@@ -2199,7 +2226,7 @@ public class User extends ExtendableDataObject implements NameAndIdObject, Passw
      *
      * @return A {@code String} containing the E-Mail (other)
      */
-    final public String getEmail3() {
+    public String getEmail3() {
         return email3;
     }
 
@@ -2208,7 +2235,7 @@ public class User extends ExtendableDataObject implements NameAndIdObject, Passw
      *
      * @param email3 A {@code String} containing the E-Mail (other)
      */
-    final public void setEmail3(final String email3) {
+    public void setEmail3(final String email3) {
         if (null == email3) {
             this.email3set = true;
         }
@@ -2220,7 +2247,7 @@ public class User extends ExtendableDataObject implements NameAndIdObject, Passw
      *
      * @return A {@code String} containing the job title
      */
-    final public String getEmployeeType() {
+    public String getEmployeeType() {
         return employeeType;
     }
 
@@ -2229,7 +2256,7 @@ public class User extends ExtendableDataObject implements NameAndIdObject, Passw
      *
      * @param employeeType A {@code String} containing the job title
      */
-    final public void setEmployeeType(final String employeeType) {
+    public void setEmployeeType(final String employeeType) {
         if (null == employeeType) {
             this.employeeTypeset = true;
         }
@@ -2241,7 +2268,7 @@ public class User extends ExtendableDataObject implements NameAndIdObject, Passw
      *
      * @return A {@code String} containing the fax number for the business location
      */
-    final public String getFax_business() {
+    public String getFax_business() {
         return fax_business;
     }
 
@@ -2250,7 +2277,7 @@ public class User extends ExtendableDataObject implements NameAndIdObject, Passw
      *
      * @param fax_business A {@code String} containing the fax number for the business location
      */
-    final public void setFax_business(final String fax_business) {
+    public void setFax_business(final String fax_business) {
         if (null == fax_business) {
             this.fax_businessset = true;
         }
@@ -2262,7 +2289,7 @@ public class User extends ExtendableDataObject implements NameAndIdObject, Passw
      *
      * @return A {@code String} containing the fax number for the home location
      */
-    final public String getFax_home() {
+    public String getFax_home() {
         return fax_home;
     }
 
@@ -2271,7 +2298,7 @@ public class User extends ExtendableDataObject implements NameAndIdObject, Passw
      *
      * @param fax_home A {@code String} containing the fax number for the home location
      */
-    final public void setFax_home(final String fax_home) {
+    public void setFax_home(final String fax_home) {
         if (null == fax_home) {
             this.fax_homeset = true;
         }
@@ -2283,7 +2310,7 @@ public class User extends ExtendableDataObject implements NameAndIdObject, Passw
      *
      * @return A {@code String} containing the FAX number for a further location
      */
-    final public String getFax_other() {
+    public String getFax_other() {
         return fax_other;
     }
 
@@ -2292,7 +2319,7 @@ public class User extends ExtendableDataObject implements NameAndIdObject, Passw
      *
      * @param fax_other A {@code String} containing the FAX number for a further location
      */
-    final public void setFax_other(final String fax_other) {
+    public void setFax_other(final String fax_other) {
         if (null == fax_other) {
             this.fax_otherset = true;
         }
@@ -2306,7 +2333,7 @@ public class User extends ExtendableDataObject implements NameAndIdObject, Passw
      * @deprecated since 6.20. Use {@link #getImapServerString()} instead.
      */
     @Deprecated
-    final public int getImapPort() {
+    public int getImapPort() {
         if (this.imapServer != null) {
             try {
                 return URIParser.parse(imapServer, URIDefaults.IMAP).getPort();
@@ -2324,7 +2351,7 @@ public class User extends ExtendableDataObject implements NameAndIdObject, Passw
      * @deprecated since 6.20. Use {@link #getImapServerString()} instead.
      */
     @Deprecated
-    final public String getImapServer() {
+    public String getImapServer() {
         if (this.imapServer != null) {
             try {
                 return URIParser.parse(imapServer, URIDefaults.IMAP).getHost();
@@ -2341,7 +2368,7 @@ public class User extends ExtendableDataObject implements NameAndIdObject, Passw
      *
      * @return A {@code String} containing the URL for the IMAP server.
      */
-    public final String getImapServerString() {
+    public String getImapServerString() {
         return imapServer;
     }
 
@@ -2352,7 +2379,7 @@ public class User extends ExtendableDataObject implements NameAndIdObject, Passw
      * @deprecated since 6.20. Use {@link #getImapServerString()} instead.
      */
     @Deprecated
-    final public String getImapSchema() {
+    public String getImapSchema() {
         if (this.imapServer != null) {
             try {
                 final String scheme = URIParser.parse(imapServer, URIDefaults.IMAP).getScheme();
@@ -2374,7 +2401,7 @@ public class User extends ExtendableDataObject implements NameAndIdObject, Passw
      *
      * @param imapServer A {@code String} containing the IMAP server
      */
-    final public void setImapServer(final String imapServer) {
+    public void setImapServer(final String imapServer) {
         if (null == imapServer) {
             this.imapServerset = true;
         }
@@ -2386,7 +2413,7 @@ public class User extends ExtendableDataObject implements NameAndIdObject, Passw
      *
      * @param imapLogin A {@code String} containing the login
      */
-    final public void setImapLogin(final String imapLogin) {
+    public void setImapLogin(final String imapLogin) {
         if (null == imapLogin) {
             this.imapLoginset = true;
         }
@@ -2398,7 +2425,7 @@ public class User extends ExtendableDataObject implements NameAndIdObject, Passw
      *
      * @return A {@code String} containing the login
      */
-    final public String getImapLogin() {
+    public String getImapLogin() {
         return this.imapLogin;
     }
 
@@ -2409,7 +2436,7 @@ public class User extends ExtendableDataObject implements NameAndIdObject, Passw
      * @deprecated since 6.20. Use {@link #getSmtpServerString()} instead.
      */
     @Deprecated
-    final public String getSmtpServer() {
+    public String getSmtpServer() {
         if (this.smtpServer != null) {
             try {
                 return URIParser.parse(smtpServer, URIDefaults.SMTP).getHost();
@@ -2427,7 +2454,7 @@ public class User extends ExtendableDataObject implements NameAndIdObject, Passw
      * @deprecated since 6.20. Use {@link #getSmtpServerString()} instead.
      */
     @Deprecated
-    final public String getSmtpSchema() {
+    public String getSmtpSchema() {
         if (this.smtpServer != null) {
             try {
                 final String scheme = URIParser.parse(smtpServer, URIDefaults.SMTP).getScheme();
@@ -2445,7 +2472,7 @@ public class User extends ExtendableDataObject implements NameAndIdObject, Passw
      *
      * @return A {@code String} containing the URL for the SMTP server.
      */
-    public final String getSmtpServerString() {
+    public String getSmtpServerString() {
         return smtpServer;
     }
 
@@ -2459,7 +2486,7 @@ public class User extends ExtendableDataObject implements NameAndIdObject, Passw
      *
      * @param smtpServer A {@code String} containing the SMTP server
      */
-    final public void setSmtpServer(final String smtpServer) {
+    public void setSmtpServer(final String smtpServer) {
         if (null == smtpServer) {
             this.smtpServerset = true;
         }
@@ -2473,7 +2500,7 @@ public class User extends ExtendableDataObject implements NameAndIdObject, Passw
      * @deprecated since 6.20. Use {@link #getSmtpServerString()} instead.
      */
     @Deprecated
-    final public int getSmtpPort() {
+    public int getSmtpPort() {
         if (this.smtpServer != null) {
             try {
                 return URIParser.parse(smtpServer, URIDefaults.SMTP).getPort();
@@ -2489,7 +2516,7 @@ public class User extends ExtendableDataObject implements NameAndIdObject, Passw
      *
      * @return A {@code String} containing the instant messenger address
      */
-    final public String getInstant_messenger1() {
+    public String getInstant_messenger1() {
         return instant_messenger1;
     }
 
@@ -2498,7 +2525,7 @@ public class User extends ExtendableDataObject implements NameAndIdObject, Passw
      *
      * @param instant_messenger1 A {@code String} containing the instant messenger address
      */
-    final public void setInstant_messenger1(final String instant_messenger1) {
+    public void setInstant_messenger1(final String instant_messenger1) {
         if (null == instant_messenger1) {
             this.instant_messenger1set = true;
         }
@@ -2510,7 +2537,7 @@ public class User extends ExtendableDataObject implements NameAndIdObject, Passw
      *
      * @return A {@code String} containing the instant messenger address for the private location
      */
-    final public String getInstant_messenger2() {
+    public String getInstant_messenger2() {
         return instant_messenger2;
     }
 
@@ -2519,7 +2546,7 @@ public class User extends ExtendableDataObject implements NameAndIdObject, Passw
      *
      * @param instant_messenger2 A {@code String} containing the instant messenger address for the private location
      */
-    final public void setInstant_messenger2(final String instant_messenger2) {
+    public void setInstant_messenger2(final String instant_messenger2) {
         if (null == instant_messenger2) {
             this.instant_messenger2set = true;
         }
@@ -2531,7 +2558,7 @@ public class User extends ExtendableDataObject implements NameAndIdObject, Passw
      *
      * @return A {@code String} containing the telephone number for IP telephony
      */
-    final public String getTelephone_ip() {
+    public String getTelephone_ip() {
         return telephone_ip;
     }
 
@@ -2540,7 +2567,7 @@ public class User extends ExtendableDataObject implements NameAndIdObject, Passw
      *
      * @param telephone_ip A {@code String} containing the telephone number for IP telephony
      */
-    final public void setTelephone_ip(final String telephone_ip) {
+    public void setTelephone_ip(final String telephone_ip) {
         if (null == telephone_ip) {
             this.telephone_ipset = true;
         }
@@ -2552,7 +2579,7 @@ public class User extends ExtendableDataObject implements NameAndIdObject, Passw
      *
      * @return A {@code String} containing the telephone number for ISDN telephony
      */
-    final public String getTelephone_isdn() {
+    public String getTelephone_isdn() {
         return telephone_isdn;
     }
 
@@ -2561,7 +2588,7 @@ public class User extends ExtendableDataObject implements NameAndIdObject, Passw
      *
      * @param telephone_isdn A {@code String} containing the telephone number for ISDN telephony
      */
-    final public void setTelephone_isdn(final String telephone_isdn) {
+    public void setTelephone_isdn(final String telephone_isdn) {
         if (null == telephone_isdn) {
             this.telephone_isdnset = true;
         }
@@ -2573,7 +2600,7 @@ public class User extends ExtendableDataObject implements NameAndIdObject, Passw
      *
      * @return A {@code String} object containing the language setting
      */
-    final public String getLanguage() {
+    public String getLanguage() {
         return language;
     }
 
@@ -2588,7 +2615,7 @@ public class User extends ExtendableDataObject implements NameAndIdObject, Passw
      *
      * @param language A {@code String} object containing the language setting
      */
-    final public void setLanguage(final String language) {
+    public void setLanguage(final String language) {
         if (null == language) {
             this.languageset = true;
         }
@@ -2600,7 +2627,7 @@ public class User extends ExtendableDataObject implements NameAndIdObject, Passw
      *
      * @return A {@code String} containing the mail folder name of the drafts folder
      */
-    final public String getMail_folder_drafts_name() {
+    public String getMail_folder_drafts_name() {
         return mail_folder_drafts_name;
     }
 
@@ -2609,7 +2636,7 @@ public class User extends ExtendableDataObject implements NameAndIdObject, Passw
      *
      * @param mail_folder_drafts_name A {@code String} containing the mail folder name of the drafts folder
      */
-    final public void setMail_folder_drafts_name(final String mail_folder_drafts_name) {
+    public void setMail_folder_drafts_name(final String mail_folder_drafts_name) {
         if (null == mail_folder_drafts_name) {
             this.mail_folder_drafts_nameset = true;
         }
@@ -2621,7 +2648,7 @@ public class User extends ExtendableDataObject implements NameAndIdObject, Passw
      *
      * @return A {@code String} containing the mail folder name of the sent folder
      */
-    final public String getMail_folder_sent_name() {
+    public String getMail_folder_sent_name() {
         return mail_folder_sent_name;
     }
 
@@ -2630,7 +2657,7 @@ public class User extends ExtendableDataObject implements NameAndIdObject, Passw
      *
      * @param mail_folder_sent_name A {@code String} containing the mail folder name of the sent folder
      */
-    final public void setMail_folder_sent_name(final String mail_folder_sent_name) {
+    public void setMail_folder_sent_name(final String mail_folder_sent_name) {
         if (null == mail_folder_sent_name) {
             this.mail_folder_sent_nameset = true;
         }
@@ -2642,7 +2669,7 @@ public class User extends ExtendableDataObject implements NameAndIdObject, Passw
      *
      * @return A {@code String} containing the mail folder name of the spam folder
      */
-    final public String getMail_folder_spam_name() {
+    public String getMail_folder_spam_name() {
         return mail_folder_spam_name;
     }
 
@@ -2652,7 +2679,7 @@ public class User extends ExtendableDataObject implements NameAndIdObject, Passw
      *
      * @param mail_folder_spam_name A {@code String} containing the mail folder name of the spam folder
      */
-    final public void setMail_folder_spam_name(final String mail_folder_spam_name) {
+    public void setMail_folder_spam_name(final String mail_folder_spam_name) {
         if (null == mail_folder_spam_name) {
             this.mail_folder_spam_nameset = true;
         }
@@ -2664,7 +2691,7 @@ public class User extends ExtendableDataObject implements NameAndIdObject, Passw
      *
      * @return A {@code String} containing the mail folder name of the trash folder
      */
-    final public String getMail_folder_trash_name() {
+    public String getMail_folder_trash_name() {
         return mail_folder_trash_name;
     }
 
@@ -2673,7 +2700,7 @@ public class User extends ExtendableDataObject implements NameAndIdObject, Passw
      *
      * @param mail_folder_trash_name A {@code String} containing the mail folder name of the trash folder
      */
-    final public void setMail_folder_trash_name(final String mail_folder_trash_name) {
+    public void setMail_folder_trash_name(final String mail_folder_trash_name) {
         if (null == mail_folder_trash_name) {
             this.mail_folder_trash_nameset = true;
         }
@@ -2685,7 +2712,7 @@ public class User extends ExtendableDataObject implements NameAndIdObject, Passw
      *
      * @return A {@code String} containing the mail folder full-name of the archive folder
      */
-    final public String getMail_folder_archive_full_name() {
+    public String getMail_folder_archive_full_name() {
         return mail_folder_archive_full_name;
     }
 
@@ -2694,7 +2721,7 @@ public class User extends ExtendableDataObject implements NameAndIdObject, Passw
      *
      * @param mail_folder_archive_full_name A {@code String} containing the mail folder full-name of the archive folder
      */
-    final public void setMail_folder_archive_full_name(final String mail_folder_archive_full_name) {
+    public void setMail_folder_archive_full_name(final String mail_folder_archive_full_name) {
         if (null == mail_folder_archive_full_name) {
             this.mail_folder_archive_full_nameset = true;
         }
@@ -2706,7 +2733,7 @@ public class User extends ExtendableDataObject implements NameAndIdObject, Passw
      *
      * @return A {@code String} containing the name of the manager
      */
-    final public String getManager_name() {
+    public String getManager_name() {
         return manager_name;
     }
 
@@ -2715,7 +2742,7 @@ public class User extends ExtendableDataObject implements NameAndIdObject, Passw
      *
      * @param manager_name A {@code String} containing the name of the manager
      */
-    final public void setManager_name(final String manager_name) {
+    public void setManager_name(final String manager_name) {
         if (null == manager_name) {
             this.manager_nameset = true;
         }
@@ -2727,7 +2754,7 @@ public class User extends ExtendableDataObject implements NameAndIdObject, Passw
      *
      * @return A {@code String} containing the marital status
      */
-    final public String getMarital_status() {
+    public String getMarital_status() {
         return marital_status;
     }
 
@@ -2736,7 +2763,7 @@ public class User extends ExtendableDataObject implements NameAndIdObject, Passw
      *
      * @param marital_status A {@code String} containing the marital status
      */
-    final public void setMarital_status(final String marital_status) {
+    public void setMarital_status(final String marital_status) {
         if (null == marital_status) {
             this.marital_statusset = true;
         }
@@ -2748,7 +2775,7 @@ public class User extends ExtendableDataObject implements NameAndIdObject, Passw
      *
      * @return A {@code String} containing the mobile phone number
      */
-    final public String getCellular_telephone1() {
+    public String getCellular_telephone1() {
         return cellular_telephone1;
     }
 
@@ -2757,7 +2784,7 @@ public class User extends ExtendableDataObject implements NameAndIdObject, Passw
      *
      * @param cellular_telephone1 A {@code String} containing the mobile phone number
      */
-    final public void setCellular_telephone1(final String cellular_telephone1) {
+    public void setCellular_telephone1(final String cellular_telephone1) {
         if (null == cellular_telephone1) {
             this.cellular_telephone1set = true;
         }
@@ -2769,7 +2796,7 @@ public class User extends ExtendableDataObject implements NameAndIdObject, Passw
      *
      * @return A {@code String} containing the second mobile phone number
      */
-    final public String getCellular_telephone2() {
+    public String getCellular_telephone2() {
         return cellular_telephone2;
     }
 
@@ -2778,7 +2805,7 @@ public class User extends ExtendableDataObject implements NameAndIdObject, Passw
      *
      * @param cellular_telephone2 A {@code String} containing the second mobile phone number
      */
-    final public void setCellular_telephone2(final String cellular_telephone2) {
+    public void setCellular_telephone2(final String cellular_telephone2) {
         if (null == cellular_telephone2) {
             this.cellular_telephone2set = true;
         }
@@ -2790,7 +2817,7 @@ public class User extends ExtendableDataObject implements NameAndIdObject, Passw
      *
      * @return A {@code String} containing the info field
      */
-    final public String getInfo() {
+    public String getInfo() {
         return info;
     }
 
@@ -2799,7 +2826,7 @@ public class User extends ExtendableDataObject implements NameAndIdObject, Passw
      *
      * @param info A {@code String} containing the info field
      */
-    final public void setInfo(final String info) {
+    public void setInfo(final String info) {
         if (null == info) {
             this.infoset = true;
         }
@@ -2811,7 +2838,7 @@ public class User extends ExtendableDataObject implements NameAndIdObject, Passw
      *
      * @return A {@code String} containing the nickname
      */
-    final public String getNickname() {
+    public String getNickname() {
         return nickname;
     }
 
@@ -2820,7 +2847,7 @@ public class User extends ExtendableDataObject implements NameAndIdObject, Passw
      *
      * @param nickname A {@code String} containing the nickname
      */
-    final public void setNickname(final String nickname) {
+    public void setNickname(final String nickname) {
         if (null == nickname) {
             this.nicknameset = true;
         }
@@ -2832,7 +2859,7 @@ public class User extends ExtendableDataObject implements NameAndIdObject, Passw
      *
      * @return A {@code String} containing the number of children
      */
-    final public String getNumber_of_children() {
+    public String getNumber_of_children() {
         return number_of_children;
     }
 
@@ -2841,7 +2868,7 @@ public class User extends ExtendableDataObject implements NameAndIdObject, Passw
      *
      * @param number_of_children A {@code String} containing the number of children
      */
-    final public void setNumber_of_children(final String number_of_children) {
+    public void setNumber_of_children(final String number_of_children) {
         if (null == number_of_children) {
             this.number_of_childrenset = true;
         }
@@ -2853,7 +2880,7 @@ public class User extends ExtendableDataObject implements NameAndIdObject, Passw
      *
      * @return A {@code String} containing the note field
      */
-    final public String getNote() {
+    public String getNote() {
         return note;
     }
 
@@ -2862,7 +2889,7 @@ public class User extends ExtendableDataObject implements NameAndIdObject, Passw
      *
      * @param note A {@code String} containing the note field
      */
-    final public void setNote(final String note) {
+    public void setNote(final String note) {
         if (null == note) {
             this.noteset = true;
         }
@@ -2874,7 +2901,7 @@ public class User extends ExtendableDataObject implements NameAndIdObject, Passw
      *
      * @return A {@code String} containing the employee identifier
      */
-    final public String getNumber_of_employee() {
+    public String getNumber_of_employee() {
         return number_of_employee;
     }
 
@@ -2883,7 +2910,7 @@ public class User extends ExtendableDataObject implements NameAndIdObject, Passw
      *
      * @param A {@code String} containing the employee identifier
      */
-    final public void setNumber_of_employee(final String number_of_employee) {
+    public void setNumber_of_employee(final String number_of_employee) {
         if (null == number_of_employee) {
             this.number_of_employeeset = true;
         }
@@ -2895,7 +2922,7 @@ public class User extends ExtendableDataObject implements NameAndIdObject, Passw
      *
      * @return A {@code String} containing the number of the telephone pager
      */
-    final public String getTelephone_pager() {
+    public String getTelephone_pager() {
         return telephone_pager;
     }
 
@@ -2904,7 +2931,7 @@ public class User extends ExtendableDataObject implements NameAndIdObject, Passw
      *
      * @param telephone_pager A {@code String} containing the number of the telephone pager
      */
-    final public void setTelephone_pager(final String telephone_pager) {
+    public void setTelephone_pager(final String telephone_pager) {
         if (null == telephone_pager) {
             this.telephone_pagerset = true;
         }
@@ -2916,7 +2943,7 @@ public class User extends ExtendableDataObject implements NameAndIdObject, Passw
      *
      * @return true if the password is expired; false otherwise
      */
-    final public Boolean getPassword_expired() {
+    public Boolean getPassword_expired() {
         return password_expired;
     }
 
@@ -2925,7 +2952,7 @@ public class User extends ExtendableDataObject implements NameAndIdObject, Passw
      *
      * @param password_expired A {@code Boolean} containing the value
      */
-    final public void setPassword_expired(final Boolean password_expired) {
+    public void setPassword_expired(final Boolean password_expired) {
         if (null == password_expired) {
             this.password_expiredset = true;
         }
@@ -2937,7 +2964,7 @@ public class User extends ExtendableDataObject implements NameAndIdObject, Passw
      *
      * @return A {@code String} containing the telephone number of the assistant
      */
-    final public String getTelephone_assistant() {
+    public String getTelephone_assistant() {
         return telephone_assistant;
     }
 
@@ -2946,7 +2973,7 @@ public class User extends ExtendableDataObject implements NameAndIdObject, Passw
      *
      * @param telephone_assistant A {@code String} containing the telephone number of the assistant
      */
-    final public void setTelephone_assistant(final String telephone_assistant) {
+    public void setTelephone_assistant(final String telephone_assistant) {
         if (null == telephone_assistant) {
             this.telephone_assistantset = true;
         }
@@ -2958,7 +2985,7 @@ public class User extends ExtendableDataObject implements NameAndIdObject, Passw
      *
      * @return A {@code String} containing the telephone number of the business location
      */
-    final public String getTelephone_business1() {
+    public String getTelephone_business1() {
         return telephone_business1;
     }
 
@@ -2967,7 +2994,7 @@ public class User extends ExtendableDataObject implements NameAndIdObject, Passw
      *
      * @param telephone_business1 A {@code String} containing the telephone number of the business location
      */
-    final public void setTelephone_business1(final String telephone_business1) {
+    public void setTelephone_business1(final String telephone_business1) {
         if (null == telephone_business1) {
             this.telephone_business1set = true;
         }
@@ -2979,7 +3006,7 @@ public class User extends ExtendableDataObject implements NameAndIdObject, Passw
      *
      * @return A {@code String} containing the second telephone number of the business location
      */
-    final public String getTelephone_business2() {
+    public String getTelephone_business2() {
         return telephone_business2;
     }
 
@@ -2988,7 +3015,7 @@ public class User extends ExtendableDataObject implements NameAndIdObject, Passw
      *
      * @param telephone_business2 A {@code String} containing the second telephone number of the business location
      */
-    final public void setTelephone_business2(final String telephone_business2) {
+    public void setTelephone_business2(final String telephone_business2) {
         if (null == telephone_business2) {
             this.telephone_business2set = true;
         }
@@ -3000,7 +3027,7 @@ public class User extends ExtendableDataObject implements NameAndIdObject, Passw
      *
      * @return A {@code String} containing the telephone number for the car phone
      */
-    final public String getTelephone_car() {
+    public String getTelephone_car() {
         return telephone_car;
     }
 
@@ -3009,7 +3036,7 @@ public class User extends ExtendableDataObject implements NameAndIdObject, Passw
      *
      * @param telephone_car A {@code String} containing the telephone number for the car phone
      */
-    final public void setTelephone_car(final String telephone_car) {
+    public void setTelephone_car(final String telephone_car) {
         if (null == telephone_car) {
             this.telephone_carset = true;
         }
@@ -3021,7 +3048,7 @@ public class User extends ExtendableDataObject implements NameAndIdObject, Passw
      *
      * @return A {@code String} containing the telephone number of the company
      */
-    final public String getTelephone_company() {
+    public String getTelephone_company() {
         return telephone_company;
     }
 
@@ -3030,7 +3057,7 @@ public class User extends ExtendableDataObject implements NameAndIdObject, Passw
      *
      * @param telephone_company A {@code String} containing the telephone number of the company
      */
-    final public void setTelephone_company(final String telephone_company) {
+    public void setTelephone_company(final String telephone_company) {
         if (null == telephone_company) {
             this.telephone_companyset = true;
         }
@@ -3042,7 +3069,7 @@ public class User extends ExtendableDataObject implements NameAndIdObject, Passw
      *
      * @return A {@code String} containing the first telephone number of the home location
      */
-    final public String getTelephone_home1() {
+    public String getTelephone_home1() {
         return telephone_home1;
     }
 
@@ -3051,7 +3078,7 @@ public class User extends ExtendableDataObject implements NameAndIdObject, Passw
      *
      * @param telephone_home1 A {@code String} containing the first telephone number of the home location
      */
-    final public void setTelephone_home1(final String telephone_home1) {
+    public void setTelephone_home1(final String telephone_home1) {
         if (null == telephone_home1) {
             this.telephone_home1set = true;
         }
@@ -3063,7 +3090,7 @@ public class User extends ExtendableDataObject implements NameAndIdObject, Passw
      *
      * @return A {@code String} containing the second telephone number of the home location
      */
-    final public String getTelephone_home2() {
+    public String getTelephone_home2() {
         return telephone_home2;
     }
 
@@ -3072,7 +3099,7 @@ public class User extends ExtendableDataObject implements NameAndIdObject, Passw
      *
      * @param telephone_home2 A {@code String} containing the second telephone number of the home location
      */
-    final public void setTelephone_home2(final String telephone_home2) {
+    public void setTelephone_home2(final String telephone_home2) {
         if (null == telephone_home2) {
             this.telephone_home2set = true;
         }
@@ -3084,7 +3111,7 @@ public class User extends ExtendableDataObject implements NameAndIdObject, Passw
      *
      * @return A {@code String} containing the number
      */
-    final public String getTelephone_other() {
+    public String getTelephone_other() {
         return telephone_other;
     }
 
@@ -3093,7 +3120,7 @@ public class User extends ExtendableDataObject implements NameAndIdObject, Passw
      *
      * @param telephone_other A {@code String} containing the further telephone number
      */
-    final public void setTelephone_other(final String telephone_other) {
+    public void setTelephone_other(final String telephone_other) {
         if (null == telephone_other) {
             this.telephone_otherset = true;
         }
@@ -3105,7 +3132,7 @@ public class User extends ExtendableDataObject implements NameAndIdObject, Passw
      *
      * @return A {@code String} containing the position
      */
-    final public String getPosition() {
+    public String getPosition() {
         return position;
     }
 
@@ -3114,7 +3141,7 @@ public class User extends ExtendableDataObject implements NameAndIdObject, Passw
      *
      * @param position A {@code String} containing the position field
      */
-    final public void setPosition(final String position) {
+    public void setPosition(final String position) {
         if (null == position) {
             this.positionset = true;
         }
@@ -3126,7 +3153,7 @@ public class User extends ExtendableDataObject implements NameAndIdObject, Passw
      *
      * @return A {@code String} containing the postal code of the home location
      */
-    final public String getPostal_code_home() {
+    public String getPostal_code_home() {
         return postal_code_home;
     }
 
@@ -3135,7 +3162,7 @@ public class User extends ExtendableDataObject implements NameAndIdObject, Passw
      *
      * @param postal_code_home A {@code String} containing the postal code of the home location
      */
-    final public void setPostal_code_home(final String postal_code_home) {
+    public void setPostal_code_home(final String postal_code_home) {
         if (null == postal_code_home) {
             this.postal_code_homeset = true;
         }
@@ -3147,7 +3174,7 @@ public class User extends ExtendableDataObject implements NameAndIdObject, Passw
      *
      * @return A {@code String} containing the profession
      */
-    final public String getProfession() {
+    public String getProfession() {
         return profession;
     }
 
@@ -3156,7 +3183,7 @@ public class User extends ExtendableDataObject implements NameAndIdObject, Passw
      *
      * @param profession A {@code String} containing the profession
      */
-    final public void setProfession(final String profession) {
+    public void setProfession(final String profession) {
         if (null == profession) {
             this.professionset = true;
         }
@@ -3168,7 +3195,7 @@ public class User extends ExtendableDataObject implements NameAndIdObject, Passw
      *
      * @return A {@code String} containing the field content
      */
-    final public String getTelephone_radio() {
+    public String getTelephone_radio() {
         return telephone_radio;
     }
 
@@ -3177,7 +3204,7 @@ public class User extends ExtendableDataObject implements NameAndIdObject, Passw
      *
      * @param test2 A {@code String} containing the field content
      */
-    final public void setTelephone_radio(final String telephone_radio) {
+    public void setTelephone_radio(final String telephone_radio) {
         if (null == telephone_radio) {
             this.telephone_radioset = true;
         }
@@ -3189,7 +3216,7 @@ public class User extends ExtendableDataObject implements NameAndIdObject, Passw
      *
      * @return A {@code String} containing the room number
      */
-    final public String getRoom_number() {
+    public String getRoom_number() {
         return room_number;
     }
 
@@ -3198,7 +3225,7 @@ public class User extends ExtendableDataObject implements NameAndIdObject, Passw
      *
      * @param room_number A {@code String} containing the room number
      */
-    final public void setRoom_number(final String room_number) {
+    public void setRoom_number(final String room_number) {
         if (null == room_number) {
             this.room_numberset = true;
         }
@@ -3210,7 +3237,7 @@ public class User extends ExtendableDataObject implements NameAndIdObject, Passw
      *
      * @return A {@code String} containing the sales volume
      */
-    final public String getSales_volume() {
+    public String getSales_volume() {
         return sales_volume;
     }
 
@@ -3219,7 +3246,7 @@ public class User extends ExtendableDataObject implements NameAndIdObject, Passw
      *
      * @param sales_volume A {@code String} containing the sales volume
      */
-    final public void setSales_volume(final String sales_volume) {
+    public void setSales_volume(final String sales_volume) {
         if (null == sales_volume) {
             this.sales_volumeset = true;
         }
@@ -3231,7 +3258,7 @@ public class User extends ExtendableDataObject implements NameAndIdObject, Passw
      *
      * @return A {@code String} containing the city for a further location
      */
-    final public String getCity_other() {
+    public String getCity_other() {
         return city_other;
     }
 
@@ -3240,7 +3267,7 @@ public class User extends ExtendableDataObject implements NameAndIdObject, Passw
      *
      * @param city_other A {@code String} containing the city for a further location
      */
-    final public void setCity_other(final String city_other) {
+    public void setCity_other(final String city_other) {
         if (null == city_other) {
             this.city_otherset = true;
         }
@@ -3252,7 +3279,7 @@ public class User extends ExtendableDataObject implements NameAndIdObject, Passw
      *
      * @return A {@code String} containing the country for a further location
      */
-    final public String getCountry_other() {
+    public String getCountry_other() {
         return country_other;
     }
 
@@ -3261,7 +3288,7 @@ public class User extends ExtendableDataObject implements NameAndIdObject, Passw
      *
      * @param country_other A {@code String} containing the country for a further location
      */
-    final public void setCountry_other(final String country_other) {
+    public void setCountry_other(final String country_other) {
         if (null == country_other) {
             this.country_otherset = true;
         }
@@ -3273,7 +3300,7 @@ public class User extends ExtendableDataObject implements NameAndIdObject, Passw
      *
      * @return A {@code String} containing the middle name
      */
-    final public String getMiddle_name() {
+    public String getMiddle_name() {
         return middle_name;
     }
 
@@ -3282,7 +3309,7 @@ public class User extends ExtendableDataObject implements NameAndIdObject, Passw
      *
      * @param middle_name A {@code String} containing the middle name
      */
-    final public void setMiddle_name(final String middle_name) {
+    public void setMiddle_name(final String middle_name) {
         if (null == middle_name) {
             this.middle_nameset = true;
         }
@@ -3294,7 +3321,7 @@ public class User extends ExtendableDataObject implements NameAndIdObject, Passw
      *
      * @return A {@code String} containing the postal code for a further location
      */
-    final public String getPostal_code_other() {
+    public String getPostal_code_other() {
         return postal_code_other;
     }
 
@@ -3303,7 +3330,7 @@ public class User extends ExtendableDataObject implements NameAndIdObject, Passw
      *
      * @param postal_code_other A {@code String} containing the postal code for a further location
      */
-    final public void setPostal_code_other(final String postal_code_other) {
+    public void setPostal_code_other(final String postal_code_other) {
         if (null == postal_code_other) {
             this.postal_code_otherset = true;
         }
@@ -3315,7 +3342,7 @@ public class User extends ExtendableDataObject implements NameAndIdObject, Passw
      *
      * @return A {@code String} containing the state for a further location
      */
-    final public String getState_other() {
+    public String getState_other() {
         return state_other;
     }
 
@@ -3324,7 +3351,7 @@ public class User extends ExtendableDataObject implements NameAndIdObject, Passw
      *
      * @param state_other A {@code String} containing the state for a further location
      */
-    final public void setState_other(final String state_other) {
+    public void setState_other(final String state_other) {
         if (null == state_other) {
             this.state_otherset = true;
         }
@@ -3336,7 +3363,7 @@ public class User extends ExtendableDataObject implements NameAndIdObject, Passw
      *
      * @return A {@code String} containing the street for a further location
      */
-    final public String getStreet_other() {
+    public String getStreet_other() {
         return street_other;
     }
 
@@ -3345,7 +3372,7 @@ public class User extends ExtendableDataObject implements NameAndIdObject, Passw
      *
      * @param street_other A {@code String} containing the street for a further location
      */
-    final public void setStreet_other(final String street_other) {
+    public void setStreet_other(final String street_other) {
         if (null == street_other) {
             this.street_otherset = true;
         }
@@ -3357,7 +3384,7 @@ public class User extends ExtendableDataObject implements NameAndIdObject, Passw
      *
      * @return A {@code String} containing the name of the spouse
      */
-    final public String getSpouse_name() {
+    public String getSpouse_name() {
         return spouse_name;
     }
 
@@ -3366,7 +3393,7 @@ public class User extends ExtendableDataObject implements NameAndIdObject, Passw
      *
      * @param spouse_name A {@code String} containing the name of the spouse
      */
-    final public void setSpouse_name(final String spouse_name) {
+    public void setSpouse_name(final String spouse_name) {
         if (null == spouse_name) {
             this.spouse_nameset = true;
         }
@@ -3378,7 +3405,7 @@ public class User extends ExtendableDataObject implements NameAndIdObject, Passw
      *
      * @return A {@code String} containing the state of the home location
      */
-    final public String getState_home() {
+    public String getState_home() {
         return state_home;
     }
 
@@ -3387,7 +3414,7 @@ public class User extends ExtendableDataObject implements NameAndIdObject, Passw
      *
      * @param state_home A {@code String} containing the state of the home location
      */
-    final public void setState_home(final String state_home) {
+    public void setState_home(final String state_home) {
         if (null == state_home) {
             this.state_homeset = true;
         }
@@ -3399,7 +3426,7 @@ public class User extends ExtendableDataObject implements NameAndIdObject, Passw
      *
      * @return A {@code String} containing the street of the home location
      */
-    final public String getStreet_home() {
+    public String getStreet_home() {
         return street_home;
     }
 
@@ -3408,7 +3435,7 @@ public class User extends ExtendableDataObject implements NameAndIdObject, Passw
      *
      * @param street_home A {@code String} containing the street of the home location
      */
-    final public void setStreet_home(final String street_home) {
+    public void setStreet_home(final String street_home) {
         if (null == street_home) {
             this.street_homeset = true;
         }
@@ -3420,7 +3447,7 @@ public class User extends ExtendableDataObject implements NameAndIdObject, Passw
      *
      * @return A {@code String} containing the suffix
      */
-    final public String getSuffix() {
+    public String getSuffix() {
         return suffix;
     }
 
@@ -3429,7 +3456,7 @@ public class User extends ExtendableDataObject implements NameAndIdObject, Passw
      *
      * @param suffix A {@code String} containing the suffix
      */
-    final public void setSuffix(final String suffix) {
+    public void setSuffix(final String suffix) {
         if (null == suffix) {
             this.suffixset = true;
         }
@@ -3441,7 +3468,7 @@ public class User extends ExtendableDataObject implements NameAndIdObject, Passw
      *
      * @return A {@code String} containing the tax id
      */
-    final public String getTax_id() {
+    public String getTax_id() {
         return tax_id;
     }
 
@@ -3450,7 +3477,7 @@ public class User extends ExtendableDataObject implements NameAndIdObject, Passw
      *
      * @param tax_id A {@code String} containing the tax id
      */
-    final public void setTax_id(final String tax_id) {
+    public void setTax_id(final String tax_id) {
         if (null == tax_id) {
             this.tax_idset = true;
         }
@@ -3462,7 +3489,7 @@ public class User extends ExtendableDataObject implements NameAndIdObject, Passw
      *
      * @return A {@code String} containing the telephone number for the telex
      */
-    final public String getTelephone_telex() {
+    public String getTelephone_telex() {
         return telephone_telex;
     }
 
@@ -3471,7 +3498,7 @@ public class User extends ExtendableDataObject implements NameAndIdObject, Passw
      *
      * @param telephone_telex A {@code String} containing the telephone number for the telex
      */
-    final public void setTelephone_telex(final String telephone_telex) {
+    public void setTelephone_telex(final String telephone_telex) {
         if (null == telephone_telex) {
             this.telephone_telexset = true;
         }
@@ -3483,7 +3510,7 @@ public class User extends ExtendableDataObject implements NameAndIdObject, Passw
      *
      * @return A {@code String} containing the timezone
      */
-    public final String getTimezone() {
+    public String getTimezone() {
         return timezone;
     }
 
@@ -3495,7 +3522,7 @@ public class User extends ExtendableDataObject implements NameAndIdObject, Passw
      *
      * @param timezone A {@code String} containing the timezone
      */
-    final public void setTimezone(final String timezone) {
+    public void setTimezone(final String timezone) {
         if (null == timezone) {
             this.timezoneset = true;
         }
@@ -3507,7 +3534,7 @@ public class User extends ExtendableDataObject implements NameAndIdObject, Passw
      *
      * @return A {@code String} containing the title
      */
-    final public String getTitle() {
+    public String getTitle() {
         return title;
     }
 
@@ -3516,7 +3543,7 @@ public class User extends ExtendableDataObject implements NameAndIdObject, Passw
      *
      * @param title A {@code String} containing the title
      */
-    final public void setTitle(final String title) {
+    public void setTitle(final String title) {
         if (null == title) {
             this.titleset = true;
         }
@@ -3528,7 +3555,7 @@ public class User extends ExtendableDataObject implements NameAndIdObject, Passw
      *
      * @return A {@code String} containing the telephone number for the TTY/TDD
      */
-    final public String getTelephone_ttytdd() {
+    public String getTelephone_ttytdd() {
         return telephone_ttytdd;
     }
 
@@ -3537,7 +3564,7 @@ public class User extends ExtendableDataObject implements NameAndIdObject, Passw
      *
      * @param telephone_ttytdd A {@code String} containing the telephone number for the TTY/TDD
      */
-    final public void setTelephone_ttytdd(final String telephone_ttytdd) {
+    public void setTelephone_ttytdd(final String telephone_ttytdd) {
         if (null == telephone_ttytdd) {
             this.telephone_ttytddset = true;
         }
@@ -3549,7 +3576,7 @@ public class User extends ExtendableDataObject implements NameAndIdObject, Passw
      *
      * @return An {@code int} containing the upload file size limit
      */
-    final public Integer getUploadFileSizeLimit() {
+    public Integer getUploadFileSizeLimit() {
         return uploadFileSizeLimit;
     }
 
@@ -3558,7 +3585,7 @@ public class User extends ExtendableDataObject implements NameAndIdObject, Passw
      *
      * @param upload_quota An {@code int} containing the upload file size limit
      */
-    final public void setUploadFileSizeLimit(final Integer upload_quota) {
+    public void setUploadFileSizeLimit(final Integer upload_quota) {
         if (null == upload_quota) {
             this.uploadFileSizeLimitset = true;
         }
@@ -3570,7 +3597,7 @@ public class User extends ExtendableDataObject implements NameAndIdObject, Passw
      *
      * @return An {@code int} containing the upload file size limit per file
      */
-    final public Integer getUploadFileSizeLimitPerFile() {
+    public Integer getUploadFileSizeLimitPerFile() {
         return uploadFileSizeLimitPerFile;
     }
 
@@ -3579,7 +3606,7 @@ public class User extends ExtendableDataObject implements NameAndIdObject, Passw
      *
      * @param upload_quota_per_file An {@code int} containing the upload file size limit per file
      */
-    final public void setUploadFileSizeLimitPerFile(final Integer upload_quota_per_file) {
+    public void setUploadFileSizeLimitPerFile(final Integer upload_quota_per_file) {
         if (null == upload_quota_per_file) {
             this.uploadFileSizeLimitPerFileset = true;
         }
@@ -3587,11 +3614,53 @@ public class User extends ExtendableDataObject implements NameAndIdObject, Passw
     }
 
     /**
+     * Returns the image of this user object
+     *
+     * @return The image
+     */
+    public byte[] getImage1() {
+        return image1;
+    }
+
+    /**
+     * Sets the image of this user object
+     *
+     * @param image The image to set
+     */
+    public void setImage1(byte[] image) {
+        if (null == image) {
+            this.image1set = true;
+        }
+        this.image1 = image;
+    }
+
+    /**
+     * Returns the image1 content type of this user object
+     *
+     * @return The content type of image1
+     */
+    public String getImage1ContentType() {
+        return image1ContentType;
+    }
+
+    /**
+     * Sets the content type of image1
+     *
+     * @param contentType The content type to set for image1
+     */
+    public void setImage1ContentType(String contentType) {
+        if(null == contentType) {
+            this.image1ContentTypeSet = true;
+        }
+        this.image1ContentType = contentType;
+    }
+
+    /**
      * Returns the URL of this user object
      *
      * @return A {@code String} containing the URL
      */
-    final public String getUrl() {
+    public String getUrl() {
         return url;
     }
 
@@ -3600,7 +3669,7 @@ public class User extends ExtendableDataObject implements NameAndIdObject, Passw
      *
      * @param url A {@code String} containing the URL
      */
-    final public void setUrl(final String url) {
+    public void setUrl(final String url) {
         if (null == url) {
             this.urlset = true;
         }
@@ -3612,7 +3681,7 @@ public class User extends ExtendableDataObject implements NameAndIdObject, Passw
      *
      * @return A {@code String} containing the dynamic field no 1
      */
-    final public String getUserfield01() {
+    public String getUserfield01() {
         return userfield01;
     }
 
@@ -3621,7 +3690,7 @@ public class User extends ExtendableDataObject implements NameAndIdObject, Passw
      *
      * @param userfield01 A {@code String} containing the dynamic field no 1
      */
-    final public void setUserfield01(final String userfield01) {
+    public void setUserfield01(final String userfield01) {
         if (null == userfield01) {
             this.userfield01set = true;
         }
@@ -3633,7 +3702,7 @@ public class User extends ExtendableDataObject implements NameAndIdObject, Passw
      *
      * @return A {@code String} containing the dynamic field no 2
      */
-    final public String getUserfield02() {
+    public String getUserfield02() {
         return userfield02;
     }
 
@@ -3642,7 +3711,7 @@ public class User extends ExtendableDataObject implements NameAndIdObject, Passw
      *
      * @param userfield02 A {@code String} containing the dynamic field no 2
      */
-    final public void setUserfield02(final String userfield02) {
+    public void setUserfield02(final String userfield02) {
         if (null == userfield02) {
             this.userfield02set = true;
         }
@@ -3654,7 +3723,7 @@ public class User extends ExtendableDataObject implements NameAndIdObject, Passw
      *
      * @return A {@code String} containing the dynamic field no 3
      */
-    final public String getUserfield03() {
+    public String getUserfield03() {
         return userfield03;
     }
 
@@ -3663,7 +3732,7 @@ public class User extends ExtendableDataObject implements NameAndIdObject, Passw
      *
      * @param userfield03 A {@code String} containing the dynamic field no 3
      */
-    final public void setUserfield03(final String userfield03) {
+    public void setUserfield03(final String userfield03) {
         if (null == userfield03) {
             this.userfield03set = true;
         }
@@ -3675,7 +3744,7 @@ public class User extends ExtendableDataObject implements NameAndIdObject, Passw
      *
      * @return A {@code String} containing the dynamic field no 4
      */
-    final public String getUserfield04() {
+    public String getUserfield04() {
         return userfield04;
     }
 
@@ -3684,7 +3753,7 @@ public class User extends ExtendableDataObject implements NameAndIdObject, Passw
      *
      * @param userfield04 A {@code String} containing the dynamic field no 4
      */
-    final public void setUserfield04(final String userfield04) {
+    public void setUserfield04(final String userfield04) {
         if (null == userfield04) {
             this.userfield04set = true;
         }
@@ -3696,7 +3765,7 @@ public class User extends ExtendableDataObject implements NameAndIdObject, Passw
      *
      * @return A {@code String} containing the dynamic field no 5
      */
-    final public String getUserfield05() {
+    public String getUserfield05() {
         return userfield05;
     }
 
@@ -3705,7 +3774,7 @@ public class User extends ExtendableDataObject implements NameAndIdObject, Passw
      *
      * @param userfield05 A {@code String} containing the dynamic field no 5
      */
-    final public void setUserfield05(final String userfield05) {
+    public void setUserfield05(final String userfield05) {
         if (null == userfield05) {
             this.userfield05set = true;
         }
@@ -3717,7 +3786,7 @@ public class User extends ExtendableDataObject implements NameAndIdObject, Passw
      *
      * @return A {@code String} containing the dynamic field no 6
      */
-    final public String getUserfield06() {
+    public String getUserfield06() {
         return userfield06;
     }
 
@@ -3726,7 +3795,7 @@ public class User extends ExtendableDataObject implements NameAndIdObject, Passw
      *
      * @param userfield06 A {@code String} containing the dynamic field no 6
      */
-    final public void setUserfield06(final String userfield06) {
+    public void setUserfield06(final String userfield06) {
         if (null == userfield06) {
             this.userfield06set = true;
         }
@@ -3738,7 +3807,7 @@ public class User extends ExtendableDataObject implements NameAndIdObject, Passw
      *
      * @return A {@code String} containing the dynamic field no 7
      */
-    final public String getUserfield07() {
+    public String getUserfield07() {
         return userfield07;
     }
 
@@ -3747,7 +3816,7 @@ public class User extends ExtendableDataObject implements NameAndIdObject, Passw
      *
      * @param userfield07 A {@code String} containing the dynamic field no 7
      */
-    final public void setUserfield07(final String userfield07) {
+    public void setUserfield07(final String userfield07) {
         if (null == userfield07) {
             this.userfield07set = true;
         }
@@ -3759,7 +3828,7 @@ public class User extends ExtendableDataObject implements NameAndIdObject, Passw
      *
      * @return A {@code String} containing the dynamic field no 8
      */
-    final public String getUserfield08() {
+    public String getUserfield08() {
         return userfield08;
     }
 
@@ -3768,7 +3837,7 @@ public class User extends ExtendableDataObject implements NameAndIdObject, Passw
      *
      * @param userfield08 A {@code String} containing the dynamic field no 8
      */
-    final public void setUserfield08(final String userfield08) {
+    public void setUserfield08(final String userfield08) {
         if (null == userfield08) {
             this.userfield08set = true;
         }
@@ -3780,7 +3849,7 @@ public class User extends ExtendableDataObject implements NameAndIdObject, Passw
      *
      * @return A {@code String} containing the dynamic field no 9
      */
-    final public String getUserfield09() {
+    public String getUserfield09() {
         return userfield09;
     }
 
@@ -3789,7 +3858,7 @@ public class User extends ExtendableDataObject implements NameAndIdObject, Passw
      *
      * @param userfield09 A {@code String} containing the dynamic field no 9
      */
-    final public void setUserfield09(final String userfield09) {
+    public void setUserfield09(final String userfield09) {
         if (null == userfield09) {
             this.userfield09set = true;
         }
@@ -3801,7 +3870,7 @@ public class User extends ExtendableDataObject implements NameAndIdObject, Passw
      *
      * @return A {@code String} containing the dynamic field no 10
      */
-    final public String getUserfield10() {
+    public String getUserfield10() {
         return userfield10;
     }
 
@@ -3810,7 +3879,7 @@ public class User extends ExtendableDataObject implements NameAndIdObject, Passw
      *
      * @param userfield10 A {@code String} containing the dynamic field no 10
      */
-    final public void setUserfield10(final String userfield10) {
+    public void setUserfield10(final String userfield10) {
         if (null == userfield10) {
             this.userfield10set = true;
         }
@@ -3822,7 +3891,7 @@ public class User extends ExtendableDataObject implements NameAndIdObject, Passw
      *
      * @return A {@code String} containing the dynamic field no 11
      */
-    final public String getUserfield11() {
+    public String getUserfield11() {
         return userfield11;
     }
 
@@ -3831,7 +3900,7 @@ public class User extends ExtendableDataObject implements NameAndIdObject, Passw
      *
      * @param userfield11 A {@code String} containing the dynamic field no 11
      */
-    final public void setUserfield11(final String userfield11) {
+    public void setUserfield11(final String userfield11) {
         if (null == userfield11) {
             this.userfield11set = true;
         }
@@ -3843,7 +3912,7 @@ public class User extends ExtendableDataObject implements NameAndIdObject, Passw
      *
      * @return A {@code String} containing the dynamic field no 12
      */
-    final public String getUserfield12() {
+    public String getUserfield12() {
         return userfield12;
     }
 
@@ -3852,7 +3921,7 @@ public class User extends ExtendableDataObject implements NameAndIdObject, Passw
      *
      * @param userfield12 A {@code String} containing the dynamic field no 12
      */
-    final public void setUserfield12(final String userfield12) {
+    public void setUserfield12(final String userfield12) {
         if (null == userfield12) {
             this.userfield12set = true;
         }
@@ -3864,7 +3933,7 @@ public class User extends ExtendableDataObject implements NameAndIdObject, Passw
      *
      * @return A {@code String} containing the dynamic field no 13
      */
-    final public String getUserfield13() {
+    public String getUserfield13() {
         return userfield13;
     }
 
@@ -3873,7 +3942,7 @@ public class User extends ExtendableDataObject implements NameAndIdObject, Passw
      *
      * @param userfield13 A {@code String} containing the dynamic field no 13
      */
-    final public void setUserfield13(final String userfield13) {
+    public void setUserfield13(final String userfield13) {
         if (null == userfield13) {
             this.userfield13set = true;
         }
@@ -3885,7 +3954,7 @@ public class User extends ExtendableDataObject implements NameAndIdObject, Passw
      *
      * @return A {@code String} containing the dynamic field no 14
      */
-    final public String getUserfield14() {
+    public String getUserfield14() {
         return userfield14;
     }
 
@@ -3894,7 +3963,7 @@ public class User extends ExtendableDataObject implements NameAndIdObject, Passw
      *
      * @param userfield14 A {@code String} containing the dynamic field no 14
      */
-    final public void setUserfield14(final String userfield14) {
+    public void setUserfield14(final String userfield14) {
         if (null == userfield14) {
             this.userfield14set = true;
         }
@@ -3906,7 +3975,7 @@ public class User extends ExtendableDataObject implements NameAndIdObject, Passw
      *
      * @return A {@code String} containing the dynamic field no 15
      */
-    final public String getUserfield15() {
+    public String getUserfield15() {
         return userfield15;
     }
 
@@ -3915,7 +3984,7 @@ public class User extends ExtendableDataObject implements NameAndIdObject, Passw
      *
      * @param userfield15 A {@code String} containing the dynamic field no 15
      */
-    final public void setUserfield15(final String userfield15) {
+    public void setUserfield15(final String userfield15) {
         if (null == userfield15) {
             this.userfield15set = true;
         }
@@ -3927,7 +3996,7 @@ public class User extends ExtendableDataObject implements NameAndIdObject, Passw
      *
      * @return A {@code String} containing the dynamic field no 16
      */
-    final public String getUserfield16() {
+    public String getUserfield16() {
         return userfield16;
     }
 
@@ -3936,7 +4005,7 @@ public class User extends ExtendableDataObject implements NameAndIdObject, Passw
      *
      * @param userfield16 A {@code String} containing the dynamic field no 16
      */
-    final public void setUserfield16(final String userfield16) {
+    public void setUserfield16(final String userfield16) {
         if (null == userfield16) {
             this.userfield16set = true;
         }
@@ -3948,7 +4017,7 @@ public class User extends ExtendableDataObject implements NameAndIdObject, Passw
      *
      * @return A {@code String} containing the dynamic field no 17
      */
-    final public String getUserfield17() {
+    public String getUserfield17() {
         return userfield17;
     }
 
@@ -3957,7 +4026,7 @@ public class User extends ExtendableDataObject implements NameAndIdObject, Passw
      *
      * @param userfield17 A {@code String} containing the dynamic field no 17
      */
-    final public void setUserfield17(final String userfield17) {
+    public void setUserfield17(final String userfield17) {
         if (null == userfield17) {
             this.userfield17set = true;
         }
@@ -3969,7 +4038,7 @@ public class User extends ExtendableDataObject implements NameAndIdObject, Passw
      *
      * @return A {@code String} containing the dynamic field no 18
      */
-    final public String getUserfield18() {
+    public String getUserfield18() {
         return userfield18;
     }
 
@@ -3978,7 +4047,7 @@ public class User extends ExtendableDataObject implements NameAndIdObject, Passw
      *
      * @param userfield18 A {@code String} containing the dynamic field no 18
      */
-    final public void setUserfield18(final String userfield18) {
+    public void setUserfield18(final String userfield18) {
         if (null == userfield18) {
             this.userfield18set = true;
         }
@@ -3990,7 +4059,7 @@ public class User extends ExtendableDataObject implements NameAndIdObject, Passw
      *
      * @return A {@code String} containing the dynamic field no 19
      */
-    final public String getUserfield19() {
+    public String getUserfield19() {
         return userfield19;
     }
 
@@ -3999,7 +4068,7 @@ public class User extends ExtendableDataObject implements NameAndIdObject, Passw
      *
      * @param userfield19 A {@code String} containing the dynamic field no 19
      */
-    final public void setUserfield19(final String userfield19) {
+    public void setUserfield19(final String userfield19) {
         if (null == userfield19) {
             this.userfield19set = true;
         }
@@ -4011,7 +4080,7 @@ public class User extends ExtendableDataObject implements NameAndIdObject, Passw
      *
      * @return A {@code String} containing the dynamic field no 20
      */
-    final public String getUserfield20() {
+    public String getUserfield20() {
         return userfield20;
     }
 
@@ -4020,7 +4089,7 @@ public class User extends ExtendableDataObject implements NameAndIdObject, Passw
      *
      * @param userfield20 A {@code String} containing the dynamic field no 20
      */
-    final public void setUserfield20(final String userfield20) {
+    public void setUserfield20(final String userfield20) {
         if (null == userfield20) {
             this.userfield20set = true;
         }
@@ -4032,7 +4101,7 @@ public class User extends ExtendableDataObject implements NameAndIdObject, Passw
      *
      * @return A {@code String} containing the name of the primary mail account
      */
-    final public String getPrimaryAccountName() {
+    public String getPrimaryAccountName() {
         return primaryAccountName;
     }
 
@@ -4041,14 +4110,14 @@ public class User extends ExtendableDataObject implements NameAndIdObject, Passw
      *
      * @param primaryAccountName A {@code String} containing the name of the primary mail account
      */
-    final public void setPrimaryAccountName(final String primaryAccountName) {
+    public void setPrimaryAccountName(final String primaryAccountName) {
         if (null == this.primaryAccountName) {
             this.primaryAccountNameSet = true;
         }
         this.primaryAccountName = primaryAccountName;
     }
 
-    final public boolean isPrimaryAccountNameSet() {
+    public boolean isPrimaryAccountNameSet() {
         return primaryAccountNameSet;
     }
 
@@ -4057,7 +4126,7 @@ public class User extends ExtendableDataObject implements NameAndIdObject, Passw
      *
      * @param aliases A {@code HashSet} containing the E-Mail aliases
      */
-    final public void setAliases(final HashSet<String> aliases) {
+    public void setAliases(final HashSet<String> aliases) {
         if (null == aliases) {
             this.aliasesset = true;
         }
@@ -4069,7 +4138,7 @@ public class User extends ExtendableDataObject implements NameAndIdObject, Passw
      *
      * @param alias A {@code String} containing the E-Mail alias to add
      */
-    final public void addAlias(final String alias) {
+    public void addAlias(final String alias) {
         if (this.aliases == null) {
             this.aliases = new HashSet<String>();
         }
@@ -4082,7 +4151,7 @@ public class User extends ExtendableDataObject implements NameAndIdObject, Passw
      * @param alias A {@code String} containing the E-Mail alias to be removed
      * @return true if removing was successful; false otherwise
      */
-    public final boolean removeAlias(String alias) {
+    public boolean removeAlias(String alias) {
         return null != aliases && aliases.remove(alias);
     }
 
@@ -4091,17 +4160,17 @@ public class User extends ExtendableDataObject implements NameAndIdObject, Passw
      *
      * @return A {@code HashSet} containing the complete E-mail aliases
      */
-    final public HashSet<String> getAliases() {
+    public HashSet<String> getAliases() {
         return this.aliases;
     }
 
-    final public void setAliasesForSOAP(List<String> aliases) {
+    public void setAliasesForSOAP(List<String> aliases) {
         if (aliases != null) {
             this.aliases = new HashSet<String>(aliases);
         }
     }
 
-    final public List<String> getAliasesForSOAP() {
+    public List<String> getAliasesForSOAP() {
         if (this.aliases == null) {
             return null;
         }
@@ -4113,7 +4182,7 @@ public class User extends ExtendableDataObject implements NameAndIdObject, Passw
      *
      * @return A {@code String} containing the city for the business location
      */
-    final public String getCity_business() {
+    public String getCity_business() {
         return city_business;
     }
 
@@ -4122,7 +4191,7 @@ public class User extends ExtendableDataObject implements NameAndIdObject, Passw
      *
      * @param city_business A {@code String} containing the city for the business location
      */
-    final public void setCity_business(final String city_business) {
+    public void setCity_business(final String city_business) {
         if (null == city_business) {
             this.city_businessset = true;
         }
@@ -4134,7 +4203,7 @@ public class User extends ExtendableDataObject implements NameAndIdObject, Passw
      *
      * @return A {@code String} containing the country for the business location
      */
-    final public String getCountry_business() {
+    public String getCountry_business() {
         return country_business;
     }
 
@@ -4143,7 +4212,7 @@ public class User extends ExtendableDataObject implements NameAndIdObject, Passw
      *
      * @param country_business A {@code String} containing the country for the business location
      */
-    final public void setCountry_business(final String country_business) {
+    public void setCountry_business(final String country_business) {
         if (null == country_business) {
             this.country_businessset = true;
         }
@@ -4155,7 +4224,7 @@ public class User extends ExtendableDataObject implements NameAndIdObject, Passw
      *
      * @return A {@code String} containing the name of the assistant
      */
-    final public String getAssistant_name() {
+    public String getAssistant_name() {
         return assistant_name;
     }
 
@@ -4164,7 +4233,7 @@ public class User extends ExtendableDataObject implements NameAndIdObject, Passw
      *
      * @param assistant_name A {@code String} containing the name of the assistant
      */
-    final public void setAssistant_name(final String assistant_name) {
+    public void setAssistant_name(final String assistant_name) {
         if (null == assistant_name) {
             this.assistant_nameset = true;
         }
@@ -4176,7 +4245,7 @@ public class User extends ExtendableDataObject implements NameAndIdObject, Passw
      *
      * @return A {@code String} containing the fields value
      */
-    final public String getTelephone_primary() {
+    public String getTelephone_primary() {
         return telephone_primary;
     }
 
@@ -4185,7 +4254,7 @@ public class User extends ExtendableDataObject implements NameAndIdObject, Passw
      *
      * @param telephone_primary A {@code String} containing the fields value
      */
-    final public void setTelephone_primary(final String telephone_primary) {
+    public void setTelephone_primary(final String telephone_primary) {
         if (null == telephone_primary) {
             this.telephone_primaryset = true;
         }
@@ -4197,7 +4266,7 @@ public class User extends ExtendableDataObject implements NameAndIdObject, Passw
      *
      * @return A {@code String} containing the categories
      */
-    final public String getCategories() {
+    public String getCategories() {
         return categories;
     }
 
@@ -4206,14 +4275,14 @@ public class User extends ExtendableDataObject implements NameAndIdObject, Passw
      *
      * @param categories A {@code String} containing the categories
      */
-    final public void setCategories(final String categories) {
+    public void setCategories(final String categories) {
         if (null == categories) {
             this.categoriesset = true;
         }
         this.categories = categories;
     }
 
-    final public String getEmail1() {
+    public String getEmail1() {
         return email1;
     }
 
@@ -4222,7 +4291,7 @@ public class User extends ExtendableDataObject implements NameAndIdObject, Passw
      *
      * @param email1 A {@code String} containing the E-Mail for the business location
      */
-    final public void setEmail1(final String email1) {
+    public void setEmail1(final String email1) {
         if (null == email1) {
             this.email1set = true;
         }
@@ -4258,7 +4327,7 @@ public class User extends ExtendableDataObject implements NameAndIdObject, Passw
      *
      * @return The {@code Hashtable} containing the keys/values of this user object
      */
-    final public Hashtable<String, Object> toHashtable() {
+    public Hashtable<String, Object> toHashtable() {
         final Hashtable<String, Object> ht = new Hashtable<String, Object>();
 
         for (final Field f : this.getClass().getDeclaredFields()) {
@@ -4475,6 +4544,8 @@ public class User extends ExtendableDataObject implements NameAndIdObject, Passw
         this.userAttributes = new HashMap<String, Map<String, String>>();
         this.primaryAccountName = null;
         this.loadRemoteMailContentByDefault = null;
+        this.image1 = null;
+        this.image1ContentType = null;
     }
 
     /**
@@ -4482,7 +4553,7 @@ public class User extends ExtendableDataObject implements NameAndIdObject, Passw
      * @deprecated
      */
     @Deprecated
-    final public void addExtension(final OXUserExtensionInterface extension) {
+    public void addExtension(final OXUserExtensionInterface extension) {
         getAllExtensionsAsHash().put(extension.getClass().getName(), extension);
     }
 
@@ -4491,7 +4562,7 @@ public class User extends ExtendableDataObject implements NameAndIdObject, Passw
      * @deprecated
      */
     @Deprecated
-    final public ArrayList<OXUserExtensionInterface> getExtensions() {
+    public ArrayList<OXUserExtensionInterface> getExtensions() {
         final ArrayList<OXUserExtensionInterface> retval = new ArrayList<OXUserExtensionInterface>();
         for (final OXCommonExtensionInterface commoninterface : getAllExtensionsAsHash().values()) {
             retval.add((OXUserExtensionInterface) commoninterface);
@@ -4505,7 +4576,7 @@ public class User extends ExtendableDataObject implements NameAndIdObject, Passw
      * @deprecated
      */
     @Deprecated
-    final public boolean removeExtension(final OXUserExtensionInterface o) {
+    public boolean removeExtension(final OXUserExtensionInterface o) {
         return null != getAllExtensionsAsHash().remove(o.getClass().getName());
     }
 
@@ -4515,7 +4586,7 @@ public class User extends ExtendableDataObject implements NameAndIdObject, Passw
      * @deprecated
      */
     @Deprecated
-    final public OXUserExtensionInterface removeExtensionByIndex(final int index) {
+    public OXUserExtensionInterface removeExtensionByIndex(final int index) {
         final ArrayList<OXCommonExtensionInterface> retval = new ArrayList<OXCommonExtensionInterface>(getAllExtensionsAsHash().values());
         final OXCommonExtensionInterface commonExtensionInterface = retval.get(index);
         return (OXUserExtensionInterface) getAllExtensionsAsHash().remove(commonExtensionInterface.getClass().getName());
@@ -4532,7 +4603,7 @@ public class User extends ExtendableDataObject implements NameAndIdObject, Passw
      * @deprecated
      */
     @Deprecated
-    final public ArrayList<OXUserExtensionInterface> getExtensionbyName(final String extname) {
+    public ArrayList<OXUserExtensionInterface> getExtensionbyName(final String extname) {
         final ArrayList<OXUserExtensionInterface> retval = new ArrayList<OXUserExtensionInterface>();
         for (final OXCommonExtensionInterface ext : getAllExtensionsAsHash().values()) {
             if (extname.equals(ext.getClass().getName())) {
@@ -4552,7 +4623,7 @@ public class User extends ExtendableDataObject implements NameAndIdObject, Passw
      * @deprecated
      */
     @Deprecated
-    final public OXUserExtensionInterface getFirstExtensionbyName(final String extname) {
+    public OXUserExtensionInterface getFirstExtensionbyName(final String extname) {
         final ArrayList<OXUserExtensionInterface> list = getExtensionbyName(extname);
         if (!list.isEmpty() && list.size() == 1) {
             return list.get(0);
@@ -4561,12 +4632,12 @@ public class User extends ExtendableDataObject implements NameAndIdObject, Passw
     }
 
     @Override
-    final public String getPasswordMech() {
+    public String getPasswordMech() {
         return passwordMech;
     }
 
     @Override
-    final public void setPasswordMech(final String passwordMech) {
+    public void setPasswordMech(final String passwordMech) {
         if (null == passwordMech) {
             this.passwordMechset = true;
         }
@@ -4575,11 +4646,11 @@ public class User extends ExtendableDataObject implements NameAndIdObject, Passw
     }
 
     @Override
-    final public byte[] getSalt() {
+    public byte[] getSalt() {
         return salt;
     }
 
-    final public void setSalt(final byte[] salt) {
+    public void setSalt(final byte[] salt) {
         if (null == salt) {
             this.saltSet = true;
         }
@@ -4589,7 +4660,7 @@ public class User extends ExtendableDataObject implements NameAndIdObject, Passw
     /**
      * @return the mail_folder_confirmed_ham_name
      */
-    final public String getMail_folder_confirmed_ham_name() {
+    public String getMail_folder_confirmed_ham_name() {
         return mail_folder_confirmed_ham_name;
     }
 
@@ -4597,7 +4668,7 @@ public class User extends ExtendableDataObject implements NameAndIdObject, Passw
      * Set the name of the folder where mail should be copied, that should be
      * learned as HAM using whatever mechanism on the server side
      */
-    final public void setMail_folder_confirmed_ham_name(String mail_folder_confirmed_ham_name) {
+    public void setMail_folder_confirmed_ham_name(String mail_folder_confirmed_ham_name) {
         this.mail_folder_confirmed_ham_nameset = true;
         this.mail_folder_confirmed_ham_name = mail_folder_confirmed_ham_name;
     }
@@ -4605,7 +4676,7 @@ public class User extends ExtendableDataObject implements NameAndIdObject, Passw
     /**
      * @return the mail_folder_confirmed_spam_name
      */
-    final public String getMail_folder_confirmed_spam_name() {
+    public String getMail_folder_confirmed_spam_name() {
         return mail_folder_confirmed_spam_name;
     }
 
@@ -4613,7 +4684,7 @@ public class User extends ExtendableDataObject implements NameAndIdObject, Passw
      * Set the name of the folder where mail should be moved, that should be
      * learned as SPAM using whatever mechanism on the server side
      */
-    final public void setMail_folder_confirmed_spam_name(String mail_folder_confirmed_spam_name) {
+    public void setMail_folder_confirmed_spam_name(String mail_folder_confirmed_spam_name) {
         this.mail_folder_confirmed_ham_nameset = true;
         this.mail_folder_confirmed_spam_name = mail_folder_confirmed_spam_name;
     }
@@ -4623,7 +4694,7 @@ public class User extends ExtendableDataObject implements NameAndIdObject, Passw
      *
      * @return true if set; false if not
      **/
-    final public boolean isMail_folder_confirmed_spamset() {
+    public boolean isMail_folder_confirmed_spamset() {
         return mail_folder_confirmed_spam_nameset;
     }
 
@@ -4632,7 +4703,7 @@ public class User extends ExtendableDataObject implements NameAndIdObject, Passw
      *
      * @return true if set; false if not
      **/
-    final public boolean isMail_folder_confirmed_hamset() {
+    public boolean isMail_folder_confirmed_hamset() {
         return mail_folder_confirmed_ham_nameset;
     }
 
@@ -4641,7 +4712,7 @@ public class User extends ExtendableDataObject implements NameAndIdObject, Passw
      *
      * @return true if set; false if not
      **/
-    final public boolean isGui_spam_filter_enabledset() {
+    public boolean isGui_spam_filter_enabledset() {
         return gui_spam_filter_enabledset;
     }
 
@@ -4652,14 +4723,14 @@ public class User extends ExtendableDataObject implements NameAndIdObject, Passw
      * @deprecated use {@link #isGui_spam_filter_enabledset()} instead
      **/
     @Deprecated
-    final public boolean isGUI_Spam_filter_capabilities_enabledset() {
+    public boolean isGUI_Spam_filter_capabilities_enabledset() {
         return gui_spam_filter_enabledset;
     }
 
     /**
      * @return the gui_spam_filter_enabled
      */
-    final public Boolean getGui_spam_filter_enabled() {
+    public Boolean getGui_spam_filter_enabled() {
         return gui_spam_filter_enabled;
     }
 
@@ -4668,7 +4739,7 @@ public class User extends ExtendableDataObject implements NameAndIdObject, Passw
      * @deprecated use {@link #getGui_spam_filter_enabled()} instead
      */
     @Deprecated
-    final public Boolean getGUI_Spam_filter_capabilities_enabled() {
+    public Boolean getGUI_Spam_filter_capabilities_enabled() {
         return gui_spam_filter_enabled;
     }
 
@@ -4677,7 +4748,7 @@ public class User extends ExtendableDataObject implements NameAndIdObject, Passw
      * @deprecated use {@link #getGui_spam_filter_enabled()} instead
      */
     @Deprecated
-    final public Boolean getSpam_filter_enabled() {
+    public Boolean getSpam_filter_enabled() {
         return gui_spam_filter_enabled;
     }
 
@@ -4685,7 +4756,7 @@ public class User extends ExtendableDataObject implements NameAndIdObject, Passw
      * @param gui_spam_filter_enabled
      *            the gui_spam_filter_enabled to set
      */
-    public final void setGui_spam_filter_enabled(Boolean gui_spam_filter_enabled) {
+    public void setGui_spam_filter_enabled(Boolean gui_spam_filter_enabled) {
         this.gui_spam_filter_enabledset = true;
         this.gui_spam_filter_enabled = gui_spam_filter_enabled;
     }
@@ -4696,7 +4767,7 @@ public class User extends ExtendableDataObject implements NameAndIdObject, Passw
      * @deprecated use {@link #setGui_spam_filter_enabled(Boolean)} instead
      */
     @Deprecated
-    public final void setGUI_Spam_filter_capabilities_enabled(Boolean gui_spam_filter_enabled) {
+    public void setGUI_Spam_filter_capabilities_enabled(Boolean gui_spam_filter_enabled) {
         this.gui_spam_filter_enabledset = true;
         this.gui_spam_filter_enabled = gui_spam_filter_enabled;
     }
@@ -4706,7 +4777,7 @@ public class User extends ExtendableDataObject implements NameAndIdObject, Passw
      *
      * @return true if set; false if not
      **/
-    public final boolean isContextadmin() {
+    public boolean isContextadmin() {
         return contextadmin;
     }
 
@@ -4715,7 +4786,7 @@ public class User extends ExtendableDataObject implements NameAndIdObject, Passw
      * stored within the ox subsystem, as it is not possible to change the admin
      * status of a user.
      */
-    public final void setContextadmin(boolean contextadmin) {
+    public void setContextadmin(boolean contextadmin) {
         this.contextadmin = contextadmin;
     }
 
@@ -4724,7 +4795,7 @@ public class User extends ExtendableDataObject implements NameAndIdObject, Passw
      *
      * @return A {@code String} containing the default sender address
      */
-    public final String getDefaultSenderAddress() {
+    public String getDefaultSenderAddress() {
         return defaultSenderAddress;
     }
 
@@ -4733,7 +4804,7 @@ public class User extends ExtendableDataObject implements NameAndIdObject, Passw
      *
      * @param defaultSenderAddress A {@code String} containing the default sender address
      */
-    public final void setDefaultSenderAddress(final String defaultSenderAddress) {
+    public void setDefaultSenderAddress(final String defaultSenderAddress) {
         this.defaultSenderAddressset = true;
         this.defaultSenderAddress = defaultSenderAddress;
     }
@@ -4743,7 +4814,7 @@ public class User extends ExtendableDataObject implements NameAndIdObject, Passw
      *
      * @return true if set; false if not
      **/
-    public final boolean isDefaultSenderAddressset() {
+    public boolean isDefaultSenderAddressset() {
         return defaultSenderAddressset;
     }
 
@@ -4822,14 +4893,14 @@ public class User extends ExtendableDataObject implements NameAndIdObject, Passw
     /**
      * @return true if set; false if not
      */
-    public final boolean isGuiPreferencesset() {
+    public boolean isGuiPreferencesset() {
         return guiPreferencesset;
     }
 
     /**
      * @return the guiPreferences
      */
-    public final Map<String, String> getGuiPreferences() {
+    public Map<String, String> getGuiPreferences() {
         return guiPreferences;
     }
 
@@ -4839,7 +4910,7 @@ public class User extends ExtendableDataObject implements NameAndIdObject, Passw
      * @param path
      * @param guiValue
      */
-    public final void addGuiPreferences(final String path, final String guiValue) {
+    public void addGuiPreferences(final String path, final String guiValue) {
         if (guiPreferences == null) {
             guiPreferences = new HashMap<String, String>();
         }
@@ -4851,7 +4922,7 @@ public class User extends ExtendableDataObject implements NameAndIdObject, Passw
      *
      * @param path
      */
-    public final void removeGuiPreferences(final String path) {
+    public void removeGuiPreferences(final String path) {
         if (guiPreferences != null) {
             guiPreferences.remove(path);
         }
@@ -4860,7 +4931,7 @@ public class User extends ExtendableDataObject implements NameAndIdObject, Passw
     /**
      * @param guiPreferences the guiPreferences to set
      */
-    public final void setGuiPreferences(final Map<String, String> guiPreferences) {
+    public void setGuiPreferences(final Map<String, String> guiPreferences) {
         if (guiPreferences != null) {
             this.guiPreferencesset = true;
         }
@@ -4873,7 +4944,7 @@ public class User extends ExtendableDataObject implements NameAndIdObject, Passw
      * are defined here
      */
     @Override
-    public final String[] getMandatoryMembersCreate() {
+    public String[] getMandatoryMembersCreate() {
         return new String[] { "name", "display_name", "password", "given_name", "sur_name", "primaryEmail", "email1" };
     }
 
@@ -4881,7 +4952,7 @@ public class User extends ExtendableDataObject implements NameAndIdObject, Passw
      * At the moment no fields are defined here
      */
     @Override
-    public final String[] getMandatoryMembersChange() {
+    public String[] getMandatoryMembersChange() {
         return null;
     }
 
@@ -5145,6 +5216,8 @@ public class User extends ExtendableDataObject implements NameAndIdObject, Passw
         result = prime * result + (primaryAccountNameSet ? 1231 : 1237);
         result = prime * result + (convertDriveUserFolders ? 1231 : 1237);
         result = prime * result + (loadRemoteMailContentByDefault == null ? 0 : loadRemoteMailContentByDefault.hashCode());
+        result = prime * result + (image1 == null ? 0 : image1.hashCode());
+        result = prime * result + (image1ContentType == null ? 0 : image1ContentType.hashCode());
         return result;
     }
 
@@ -6350,6 +6423,20 @@ public class User extends ExtendableDataObject implements NameAndIdObject, Passw
             return false;
         }
         if (convertDriveUserFolders != other.convertDriveUserFolders) {
+            return false;
+        }
+        if (image1 == null) {
+            if (other.image1 != null) {
+                return false;
+            }
+        } else if (!image1.equals(other.image1)) {
+            return false;
+        }
+        if (image1ContentType == null) {
+            if (other.image1ContentType != null) {
+                return false;
+            }
+        } else if (!image1ContentType.equals(other.image1ContentType)) {
             return false;
         }
         if (loadRemoteMailContentByDefault == null) {

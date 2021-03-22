@@ -1896,6 +1896,16 @@ public class OXResellerContextServicePortTypeImpl implements OXResellerContextSe
             user.setUserAttributes(soap2MapMap(userAttributes));
         }
 
+        byte[] image1 = soapUser.getImage1();
+        if (null != image1) {
+            user.setImage1(image1);
+        }
+
+        tmp = soapUser.getImage1ContentType();
+        if (null != tmp) {
+            user.setImage1ContentType(tmp);
+        }
+
         return user;
     }
 

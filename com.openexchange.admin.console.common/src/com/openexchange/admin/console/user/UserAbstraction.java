@@ -52,6 +52,9 @@ package com.openexchange.admin.console.user;
 import java.io.IOException;
 import java.lang.reflect.Method;
 import java.net.MalformedURLException;
+import java.net.URI;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.rmi.Naming;
 import java.rmi.NotBoundException;
 import java.rmi.RemoteException;
@@ -59,6 +62,7 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Base64;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
@@ -377,6 +381,8 @@ public abstract class UserAbstraction extends ObjectNamingAbstraction {
         remove_config(OPT_REMOVE_CONFIG_LONG, false),
         primary_account_name(OPT_PRIMARY_ACCOUNT_NAME, false),
         load_remote_mail_content_by_default(OPT_LOAD_REMOTE_MAIL_CONTENT_BY_DEFAULT, false),
+        image1(OPT_IMAGE1_LONG, false),
+        image1_content_type(OPT_IMAGE1_CONTENT_TYPE_LONG, false),
         ;
 
         private final String string;
@@ -552,6 +558,8 @@ public abstract class UserAbstraction extends ObjectNamingAbstraction {
     protected static final String OPT_UPLOADFILESIZELIMIT_LONG = "uploadfilesizelimit";
     protected static final String OPT_UPLOADFILESIZELIMITPERFILE_LONG = "uploadfilesizelimitperfile";
     protected static final String OPT_URL_LONG = "url";
+    protected static final String OPT_IMAGE1_LONG = "image1";
+    protected static final String OPT_IMAGE1_CONTENT_TYPE_LONG = "image1_content_type";
     protected static final String OPT_USERFIELD01_LONG = "userfield01";
     protected static final String OPT_USERFIELD02_LONG = "userfield02";
     protected static final String OPT_USERFIELD03_LONG = "userfield03";
@@ -758,6 +766,8 @@ public abstract class UserAbstraction extends ObjectNamingAbstraction {
     private CLIOption telephone_ttytddOption;
     private CLIOption uploadfilesizelimitOption;
     private CLIOption uploadfilesizelimitperfileOption;
+    private CLIOption image1Option;
+    private CLIOption image1ContentTypeOption;
     private CLIOption urlOption;
     private CLIOption userfield01Option;
     private CLIOption userfield02Option;
@@ -1843,6 +1853,20 @@ public abstract class UserAbstraction extends ObjectNamingAbstraction {
                 user.setLoadRemoteMailContentByDefault(Boolean.valueOf(stringToBool(value)));
             }
         });
+        setValue(nextLine, idarray, Constants.image1, new MethodStringClosure() {
+
+            @Override
+            public void callMethod(String value) throws ParseException, InvalidDataException {
+                user.setImage1(parseImage1(value));
+            }
+        });
+        setValue(nextLine, idarray, Constants.image1_content_type, new MethodStringClosure() {
+
+            @Override
+            public void callMethod(String value) throws ParseException, InvalidDataException {
+                user.setImage1ContentType(value);
+            }
+        });
         final int m2 = idarray[Constants.MAILALIAS.getIndex()];
         if (m2 >= 0) {
             String mailAlias = nextLine[m2];
@@ -2610,6 +2634,8 @@ public abstract class UserAbstraction extends ObjectNamingAbstraction {
         this.telephone_ttytddOption = setLongOpt(parser, OPT_TELEPHONE_TTYTDD_LONG, "stringvalue", "Telephone_ttytdd", true, false, true);
         this.uploadfilesizelimitOption = setIntegerLongOpt(parser, OPT_UPLOADFILESIZELIMIT_LONG, "intvalue", "UploadFileSizeLimit", true, false, true);
         this.uploadfilesizelimitperfileOption = setIntegerLongOpt(parser, OPT_UPLOADFILESIZELIMITPERFILE_LONG, "intvalue", "UploadFileSizeLimitPerFile", true, false, true);
+        this.image1Option = setLongOpt(parser, OPT_IMAGE1_LONG, "stringvalue", "The contact picture as base64 encoded string or file:// URI", true, false, true);
+        this.image1ContentTypeOption = setLongOpt(parser, OPT_IMAGE1_CONTENT_TYPE_LONG, "stringvalue", "The content type of the contact picture", true, false, true);
         this.urlOption = setLongOpt(parser, OPT_URL_LONG, "stringvalue", "Url", true, false, true);
         this.userfield01Option = setLongOpt(parser, OPT_USERFIELD01_LONG, "stringvalue", "Userfield01", true, false, true);
         this.userfield02Option = setLongOpt(parser, OPT_USERFIELD02_LONG, "stringvalue", "Userfield02", true, false, true);
@@ -2679,7 +2705,7 @@ public abstract class UserAbstraction extends ObjectNamingAbstraction {
         String addguival = (String) parser.getOptionValue(this.addGUISettingOption);
         if (addguival != null) {
             addguival = addguival.trim();
-            if (addguival.length() == 0) {
+            if (Strings.isEmpty(addguival)) {
                 throw new InvalidDataException("Argument for " + OPT_ADD_GUI_SETTING_LONG + "is wrong (empty value)");
             }
             if (addguival.indexOf('=') < 0) {
@@ -2697,7 +2723,7 @@ public abstract class UserAbstraction extends ObjectNamingAbstraction {
             String removeguival = (String) parser.getOptionValue(this.removeGUISettingOption);
             if (removeguival != null) {
                 removeguival = removeguival.trim();
-                if (removeguival.length() == 0) {
+                if (Strings.isEmpty(removeguival)) {
                     throw new InvalidDataException("Argument for " + OPT_REMOVE_GUI_SETTING_LONG + "is wrong (empty value)");
                 }
                 usr.removeGuiPreferences(removeguival);
@@ -2720,7 +2746,8 @@ public abstract class UserAbstraction extends ObjectNamingAbstraction {
             String value = (String) parser.getOptionValue(email1Option);
             if (null != value) {
                 // On the command line an empty string can be used to clear that specific attribute.
-                if (value.length() == 0) {
+                value = value.trim();
+                if (Strings.isEmpty(value)) {
                     value = null;
                 }
                 usr.setEmail1(value);
@@ -2738,7 +2765,7 @@ public abstract class UserAbstraction extends ObjectNamingAbstraction {
             try {
                 final String date = (String) parser.getOptionValue(birthdayOption);
                 if (null != date) {
-                    if ("null".equalsIgnoreCase(date) || 0 == date.length()) {
+                    if ("null".equalsIgnoreCase(date) || Strings.isEmpty(date)) {
                         usr.setBirthday(null);
                     } else {
                         usr.setBirthday(sdf.parse(date));
@@ -2754,7 +2781,7 @@ public abstract class UserAbstraction extends ObjectNamingAbstraction {
             try {
                 final String date = (String) parser.getOptionValue(anniversaryOption);
                 if (date != null) {
-                    if (Strings.isEmpty(date)) {
+                    if ("null".equalsIgnoreCase(date) || Strings.isEmpty(date)) {
                         usr.setAnniversary(null);
                     } else {
                         usr.setAnniversary(sdf.parse(date));
@@ -2768,7 +2795,8 @@ public abstract class UserAbstraction extends ObjectNamingAbstraction {
             String value = (String) parser.getOptionValue(branchesOption);
             if (null != value) {
                 // On the command line an empty string can be used to clear that specific attribute.
-                if ("".equals(value)) {
+                value = value.trim();
+                if (Strings.isEmpty(value)) {
                     value = null;
                 }
                 usr.setBranches(value);
@@ -2778,7 +2806,8 @@ public abstract class UserAbstraction extends ObjectNamingAbstraction {
             String value = (String) parser.getOptionValue(business_categoryOption);
             if (null != value) {
                 // On the command line an empty string can be used to clear that specific attribute.
-                if ("".equals(value)) {
+                value = value.trim();
+                if (Strings.isEmpty(value)) {
                     value = null;
                 }
                 usr.setBusiness_category(value);
@@ -2788,7 +2817,8 @@ public abstract class UserAbstraction extends ObjectNamingAbstraction {
             String value = (String) parser.getOptionValue(postal_code_businessOption);
             if (null != value) {
                 // On the command line an empty string can be used to clear that specific attribute.
-                if ("".equals(value)) {
+                value = value.trim();
+                if (Strings.isEmpty(value)) {
                     value = null;
                 }
                 usr.setPostal_code_business(value);
@@ -2798,7 +2828,8 @@ public abstract class UserAbstraction extends ObjectNamingAbstraction {
             String value = (String) parser.getOptionValue(state_businessOption);
             if (null != value) {
                 // On the command line an empty string can be used to clear that specific attribute.
-                if ("".equals(value)) {
+                value = value.trim();
+                if (Strings.isEmpty(value)) {
                     value = null;
                 }
                 usr.setState_business(value);
@@ -2808,7 +2839,8 @@ public abstract class UserAbstraction extends ObjectNamingAbstraction {
             String value = (String) parser.getOptionValue(street_businessOption);
             if (null != value) {
                 // On the command line an empty string can be used to clear that specific attribute.
-                if ("".equals(value)) {
+                value = value.trim();
+                if (Strings.isEmpty(value)) {
                     value = null;
                 }
                 usr.setStreet_business(value);
@@ -2818,7 +2850,8 @@ public abstract class UserAbstraction extends ObjectNamingAbstraction {
             String value = (String) parser.getOptionValue(telephone_callbackOption);
             if (null != value) {
                 // On the command line an empty string can be used to clear that specific attribute.
-                if ("".equals(value)) {
+                value = value.trim();
+                if (Strings.isEmpty(value)) {
                     value = null;
                 }
                 usr.setTelephone_callback(value);
@@ -2828,7 +2861,8 @@ public abstract class UserAbstraction extends ObjectNamingAbstraction {
             String value = (String) parser.getOptionValue(city_homeOption);
             if (null != value) {
                 // On the command line an empty string can be used to clear that specific attribute.
-                if ("".equals(value)) {
+                value = value.trim();
+                if (Strings.isEmpty(value)) {
                     value = null;
                 }
                 usr.setCity_home(value);
@@ -2838,7 +2872,8 @@ public abstract class UserAbstraction extends ObjectNamingAbstraction {
             String value = (String) parser.getOptionValue(commercial_registerOption);
             if (null != value) {
                 // On the command line an empty string can be used to clear that specific attribute.
-                if ("".equals(value)) {
+                value = value.trim();
+                if (Strings.isEmpty(value)) {
                     value = null;
                 }
                 usr.setCommercial_register(value);
@@ -2848,7 +2883,8 @@ public abstract class UserAbstraction extends ObjectNamingAbstraction {
             String value = (String) parser.getOptionValue(country_homeOption);
             if (null != value) {
                 // On the command line an empty string can be used to clear that specific attribute.
-                if ("".equals(value)) {
+                value = value.trim();
+                if (Strings.isEmpty(value)) {
                     value = null;
                 }
                 usr.setCountry_home(value);
@@ -2858,7 +2894,8 @@ public abstract class UserAbstraction extends ObjectNamingAbstraction {
             String value = (String) parser.getOptionValue(email2Option);
             if (null != value) {
                 // On the command line an empty string can be used to clear that specific attribute.
-                if ("".equals(value)) {
+                value = value.trim();
+                if (Strings.isEmpty(value)) {
                     value = null;
                 }
                 usr.setEmail2(value);
@@ -2868,7 +2905,8 @@ public abstract class UserAbstraction extends ObjectNamingAbstraction {
             String value = (String) parser.getOptionValue(email3Option);
             if (null != value) {
                 // On the command line an empty string can be used to clear that specific attribute.
-                if ("".equals(value)) {
+                value = value.trim();
+                if (Strings.isEmpty(value)) {
                     value = null;
                 }
                 usr.setEmail3(value);
@@ -2878,7 +2916,8 @@ public abstract class UserAbstraction extends ObjectNamingAbstraction {
             String value = (String) parser.getOptionValue(employeetypeOption);
             if (null != value) {
                 // On the command line an empty string can be used to clear that specific attribute.
-                if ("".equals(value)) {
+                value = value.trim();
+                if (Strings.isEmpty(value)) {
                     value = null;
                 }
                 usr.setEmployeeType(value);
@@ -2888,7 +2927,8 @@ public abstract class UserAbstraction extends ObjectNamingAbstraction {
             String value = (String) parser.getOptionValue(fax_businessOption);
             if (null != value) {
                 // On the command line an empty string can be used to clear that specific attribute.
-                if ("".equals(value)) {
+                value = value.trim();
+                if (Strings.isEmpty(value)) {
                     value = null;
                 }
                 usr.setFax_business(value);
@@ -2898,7 +2938,8 @@ public abstract class UserAbstraction extends ObjectNamingAbstraction {
             String value = (String) parser.getOptionValue(fax_homeOption);
             if (null != value) {
                 // On the command line an empty string can be used to clear that specific attribute.
-                if ("".equals(value)) {
+                value = value.trim();
+                if (Strings.isEmpty(value)) {
                     value = null;
                 }
                 usr.setFax_home(value);
@@ -2908,7 +2949,8 @@ public abstract class UserAbstraction extends ObjectNamingAbstraction {
             String value = (String) parser.getOptionValue(fax_otherOption);
             if (null != value) {
                 // On the command line an empty string can be used to clear that specific attribute.
-                if ("".equals(value)) {
+                value = value.trim();
+                if (Strings.isEmpty(value)) {
                     value = null;
                 }
                 usr.setFax_other(value);
@@ -2918,7 +2960,8 @@ public abstract class UserAbstraction extends ObjectNamingAbstraction {
             String value = (String) parser.getOptionValue(imapserverOption);
             if (null != value) {
                 // On the command line an empty string can be used to clear that specific attribute.
-                if ("".equals(value)) {
+                value = value.trim();
+                if (Strings.isEmpty(value)) {
                     value = null;
                 }
                 usr.setImapServer(value);
@@ -2928,7 +2971,8 @@ public abstract class UserAbstraction extends ObjectNamingAbstraction {
             String value = (String) parser.getOptionValue(imaploginOption);
             if (null != value) {
                 // On the command line an empty string can be used to clear that specific attribute.
-                if ("".equals(value)) {
+                value = value.trim();
+                if (Strings.isEmpty(value)) {
                     value = null;
                 }
                 usr.setImapLogin(value);
@@ -2938,7 +2982,8 @@ public abstract class UserAbstraction extends ObjectNamingAbstraction {
             String value = (String) parser.getOptionValue(smtpserverOption);
             if (null != value) {
                 // On the command line an empty string can be used to clear that specific attribute.
-                if ("".equals(value)) {
+                value = value.trim();
+                if (Strings.isEmpty(value)) {
                     value = null;
                 }
                 usr.setSmtpServer(value);
@@ -2948,7 +2993,8 @@ public abstract class UserAbstraction extends ObjectNamingAbstraction {
             String value = (String) parser.getOptionValue(instant_messenger1Option);
             if (null != value) {
                 // On the command line an empty string can be used to clear that specific attribute.
-                if ("".equals(value)) {
+                value = value.trim();
+                if (Strings.isEmpty(value)) {
                     value = null;
                 }
                 usr.setInstant_messenger1(value);
@@ -2958,7 +3004,8 @@ public abstract class UserAbstraction extends ObjectNamingAbstraction {
             String value = (String) parser.getOptionValue(instant_messenger2Option);
             if (null != value) {
                 // On the command line an empty string can be used to clear that specific attribute.
-                if ("".equals(value)) {
+                value = value.trim();
+                if (Strings.isEmpty(value)) {
                     value = null;
                 }
                 usr.setInstant_messenger2(value);
@@ -2968,7 +3015,8 @@ public abstract class UserAbstraction extends ObjectNamingAbstraction {
             String value = (String) parser.getOptionValue(telephone_ipOption);
             if (null != value) {
                 // On the command line an empty string can be used to clear that specific attribute.
-                if ("".equals(value)) {
+                value = value.trim();
+                if (Strings.isEmpty(value)) {
                     value = null;
                 }
                 usr.setTelephone_ip(value);
@@ -2978,7 +3026,8 @@ public abstract class UserAbstraction extends ObjectNamingAbstraction {
             String value = (String) parser.getOptionValue(telephone_isdnOption);
             if (null != value) {
                 // On the command line an empty string can be used to clear that specific attribute.
-                if ("".equals(value)) {
+                value = value.trim();
+                if (Strings.isEmpty(value)) {
                     value = null;
                 }
                 usr.setTelephone_isdn(value);
@@ -2987,30 +3036,55 @@ public abstract class UserAbstraction extends ObjectNamingAbstraction {
         {
             String value = (String) parser.getOptionValue(mail_folder_drafts_nameOption);
             if (null != value) {
+                // On the command line an empty string can be used to clear that specific attribute.
+                value = value.trim();
+                if (Strings.isEmpty(value)) {
+                    value = null;
+                }
                 usr.setMail_folder_drafts_name(value);
             }
         }
         {
             String value = (String) parser.getOptionValue(mail_folder_sent_nameOption);
             if (null != value) {
+                // On the command line an empty string can be used to clear that specific attribute.
+                value = value.trim();
+                if (Strings.isEmpty(value)) {
+                    value = null;
+                }
                 usr.setMail_folder_sent_name(value);
             }
         }
         {
             String value = (String) parser.getOptionValue(mail_folder_spam_nameOption);
             if (null != value) {
+                // On the command line an empty string can be used to clear that specific attribute.
+                value = value.trim();
+                if (Strings.isEmpty(value)) {
+                    value = null;
+                }
                 usr.setMail_folder_spam_name(value);
             }
         }
         {
             String value = (String) parser.getOptionValue(mail_folder_trash_nameOption);
             if (null != value) {
+                // On the command line an empty string can be used to clear that specific attribute.
+                value = value.trim();
+                if (Strings.isEmpty(value)) {
+                    value = null;
+                }
                 usr.setMail_folder_trash_name(value);
             }
         }
         {
             String value = (String) parser.getOptionValue(mail_folder_archive_full_nameOption);
             if (null != value) {
+                // On the command line an empty string can be used to clear that specific attribute.
+                value = value.trim();
+                if (Strings.isEmpty(value)) {
+                    value = null;
+                }
                 usr.setMail_folder_archive_full_name(value);
             }
         }
@@ -3018,7 +3092,8 @@ public abstract class UserAbstraction extends ObjectNamingAbstraction {
             String value = (String) parser.getOptionValue(manager_nameOption);
             if (null != value) {
                 // On the command line an empty string can be used to clear that specific attribute.
-                if ("".equals(value)) {
+                value = value.trim();
+                if (Strings.isEmpty(value)) {
                     value = null;
                 }
                 usr.setManager_name(value);
@@ -3028,7 +3103,8 @@ public abstract class UserAbstraction extends ObjectNamingAbstraction {
             String value = (String) parser.getOptionValue(marital_statusOption);
             if (null != value) {
                 // On the command line an empty string can be used to clear that specific attribute.
-                if ("".equals(value)) {
+                value = value.trim();
+                if (Strings.isEmpty(value)) {
                     value = null;
                 }
                 usr.setMarital_status(value);
@@ -3038,7 +3114,8 @@ public abstract class UserAbstraction extends ObjectNamingAbstraction {
             String value = (String) parser.getOptionValue(cellular_telephone1Option);
             if (null != value) {
                 // On the command line an empty string can be used to clear that specific attribute.
-                if ("".equals(value)) {
+                value = value.trim();
+                if (Strings.isEmpty(value)) {
                     value = null;
                 }
                 usr.setCellular_telephone1(value);
@@ -3048,7 +3125,8 @@ public abstract class UserAbstraction extends ObjectNamingAbstraction {
             String value = (String) parser.getOptionValue(cellular_telephone2Option);
             if (null != value) {
                 // On the command line an empty string can be used to clear that specific attribute.
-                if ("".equals(value)) {
+                value = value.trim();
+                if (Strings.isEmpty(value)) {
                     value = null;
                 }
                 usr.setCellular_telephone2(value);
@@ -3058,7 +3136,8 @@ public abstract class UserAbstraction extends ObjectNamingAbstraction {
             String value = (String) parser.getOptionValue(infoOption);
             if (null != value) {
                 // On the command line an empty string can be used to clear that specific attribute.
-                if ("".equals(value)) {
+                value = value.trim();
+                if (Strings.isEmpty(value)) {
                     value = null;
                 }
                 usr.setInfo(value);
@@ -3068,7 +3147,8 @@ public abstract class UserAbstraction extends ObjectNamingAbstraction {
             String value = (String) parser.getOptionValue(nicknameOption);
             if (null != value) {
                 // On the command line an empty string can be used to clear that specific attribute.
-                if ("".equals(value)) {
+                value = value.trim();
+                if (Strings.isEmpty(value)) {
                     value = null;
                 }
                 usr.setNickname(value);
@@ -3078,7 +3158,8 @@ public abstract class UserAbstraction extends ObjectNamingAbstraction {
             String value = (String) parser.getOptionValue(number_of_childrenOption);
             if (null != value) {
                 // On the command line an empty string can be used to clear that specific attribute.
-                if ("".equals(value)) {
+                value = value.trim();
+                if (Strings.isEmpty(value)) {
                     value = null;
                 }
                 usr.setNumber_of_children(value);
@@ -3088,7 +3169,8 @@ public abstract class UserAbstraction extends ObjectNamingAbstraction {
             String value = (String) parser.getOptionValue(noteOption);
             if (null != value) {
                 // On the command line an empty string can be used to clear that specific attribute.
-                if ("".equals(value)) {
+                value = value.trim();
+                if (Strings.isEmpty(value)) {
                     value = null;
                 }
                 usr.setNote(value);
@@ -3098,7 +3180,8 @@ public abstract class UserAbstraction extends ObjectNamingAbstraction {
             String value = (String) parser.getOptionValue(number_of_employeeOption);
             if (null != value) {
                 // On the command line an empty string can be used to clear that specific attribute.
-                if ("".equals(value)) {
+                value = value.trim();
+                if (Strings.isEmpty(value)) {
                     value = null;
                 }
                 usr.setNumber_of_employee(value);
@@ -3108,7 +3191,8 @@ public abstract class UserAbstraction extends ObjectNamingAbstraction {
             String value = (String) parser.getOptionValue(telephone_pagerOption);
             if (null != value) {
                 // On the command line an empty string can be used to clear that specific attribute.
-                if ("".equals(value)) {
+                value = value.trim();
+                if (Strings.isEmpty(value)) {
                     value = null;
                 }
                 usr.setTelephone_pager(value);
@@ -3124,7 +3208,8 @@ public abstract class UserAbstraction extends ObjectNamingAbstraction {
             String value = (String) parser.getOptionValue(telephone_assistantOption);
             if (null != value) {
                 // On the command line an empty string can be used to clear that specific attribute.
-                if ("".equals(value)) {
+                value = value.trim();
+                if (Strings.isEmpty(value)) {
                     value = null;
                 }
                 usr.setTelephone_assistant(value);
@@ -3134,7 +3219,8 @@ public abstract class UserAbstraction extends ObjectNamingAbstraction {
             String value = (String) parser.getOptionValue(telephone_business1Option);
             if (null != value) {
                 // On the command line an empty string can be used to clear that specific attribute.
-                if ("".equals(value)) {
+                value = value.trim();
+                if (Strings.isEmpty(value)) {
                     value = null;
                 }
                 usr.setTelephone_business1(value);
@@ -3144,7 +3230,8 @@ public abstract class UserAbstraction extends ObjectNamingAbstraction {
             String value = (String) parser.getOptionValue(telephone_business2Option);
             if (null != value) {
                 // On the command line an empty string can be used to clear that specific attribute.
-                if ("".equals(value)) {
+                value = value.trim();
+                if (Strings.isEmpty(value)) {
                     value = null;
                 }
                 usr.setTelephone_business2(value);
@@ -3154,7 +3241,8 @@ public abstract class UserAbstraction extends ObjectNamingAbstraction {
             String value = (String) parser.getOptionValue(telephone_carOption);
             if (null != value) {
                 // On the command line an empty string can be used to clear that specific attribute.
-                if ("".equals(value)) {
+                value = value.trim();
+                if (Strings.isEmpty(value)) {
                     value = null;
                 }
                 usr.setTelephone_car(value);
@@ -3164,7 +3252,8 @@ public abstract class UserAbstraction extends ObjectNamingAbstraction {
             String value = (String) parser.getOptionValue(telephone_companyOption);
             if (null != value) {
                 // On the command line an empty string can be used to clear that specific attribute.
-                if ("".equals(value)) {
+                value = value.trim();
+                if (Strings.isEmpty(value)) {
                     value = null;
                 }
                 usr.setTelephone_company(value);
@@ -3174,7 +3263,8 @@ public abstract class UserAbstraction extends ObjectNamingAbstraction {
             String value = (String) parser.getOptionValue(telephone_home1Option);
             if (null != value) {
                 // On the command line an empty string can be used to clear that specific attribute.
-                if ("".equals(value)) {
+                value = value.trim();
+                if (Strings.isEmpty(value)) {
                     value = null;
                 }
                 usr.setTelephone_home1(value);
@@ -3184,7 +3274,8 @@ public abstract class UserAbstraction extends ObjectNamingAbstraction {
             String value = (String) parser.getOptionValue(telephone_home2Option);
             if (null != value) {
                 // On the command line an empty string can be used to clear that specific attribute.
-                if ("".equals(value)) {
+                value = value.trim();
+                if (Strings.isEmpty(value)) {
                     value = null;
                 }
                 usr.setTelephone_home2(value);
@@ -3194,7 +3285,8 @@ public abstract class UserAbstraction extends ObjectNamingAbstraction {
             String value = (String) parser.getOptionValue(telephone_otherOption);
             if (null != value) {
                 // On the command line an empty string can be used to clear that specific attribute.
-                if ("".equals(value)) {
+                value = value.trim();
+                if (Strings.isEmpty(value)) {
                     value = null;
                 }
                 usr.setTelephone_other(value);
@@ -3204,7 +3296,8 @@ public abstract class UserAbstraction extends ObjectNamingAbstraction {
             String value = (String) parser.getOptionValue(postal_code_homeOption);
             if (null != value) {
                 // On the command line an empty string can be used to clear that specific attribute.
-                if ("".equals(value)) {
+                value = value.trim();
+                if (Strings.isEmpty(value)) {
                     value = null;
                 }
                 usr.setPostal_code_home(value);
@@ -3214,7 +3307,8 @@ public abstract class UserAbstraction extends ObjectNamingAbstraction {
             String value = (String) parser.getOptionValue(professionOption);
             if (null != value) {
                 // On the command line an empty string can be used to clear that specific attribute.
-                if ("".equals(value)) {
+                value = value.trim();
+                if (Strings.isEmpty(value)) {
                     value = null;
                 }
                 usr.setProfession(value);
@@ -3224,7 +3318,8 @@ public abstract class UserAbstraction extends ObjectNamingAbstraction {
             String value = (String) parser.getOptionValue(telephone_radioOption);
             if (null != value) {
                 // On the command line an empty string can be used to clear that specific attribute.
-                if ("".equals(value)) {
+                value = value.trim();
+                if (Strings.isEmpty(value)) {
                     value = null;
                 }
                 usr.setTelephone_radio(value);
@@ -3234,7 +3329,8 @@ public abstract class UserAbstraction extends ObjectNamingAbstraction {
             String value = (String) parser.getOptionValue(room_numberOption);
             if (null != value) {
                 // On the command line an empty string can be used to clear that specific attribute.
-                if ("".equals(value)) {
+                value = value.trim();
+                if (Strings.isEmpty(value)) {
                     value = null;
                 }
                 usr.setRoom_number(value);
@@ -3244,7 +3340,8 @@ public abstract class UserAbstraction extends ObjectNamingAbstraction {
             String value = (String) parser.getOptionValue(sales_volumeOption);
             if (null != value) {
                 // On the command line an empty string can be used to clear that specific attribute.
-                if ("".equals(value)) {
+                value = value.trim();
+                if (Strings.isEmpty(value)) {
                     value = null;
                 }
                 usr.setSales_volume(value);
@@ -3254,7 +3351,8 @@ public abstract class UserAbstraction extends ObjectNamingAbstraction {
             String value = (String) parser.getOptionValue(city_otherOption);
             if (null != value) {
                 // On the command line an empty string can be used to clear that specific attribute.
-                if ("".equals(value)) {
+                value = value.trim();
+                if (Strings.isEmpty(value)) {
                     value = null;
                 }
                 usr.setCity_other(value);
@@ -3264,7 +3362,8 @@ public abstract class UserAbstraction extends ObjectNamingAbstraction {
             String value = (String) parser.getOptionValue(country_otherOption);
             if (null != value) {
                 // On the command line an empty string can be used to clear that specific attribute.
-                if ("".equals(value)) {
+                value = value.trim();
+                if (Strings.isEmpty(value)) {
                     value = null;
                 }
                 usr.setCountry_other(value);
@@ -3274,7 +3373,8 @@ public abstract class UserAbstraction extends ObjectNamingAbstraction {
             String value = (String) parser.getOptionValue(middle_nameOption);
             if (null != value) {
                 // On the command line an empty string can be used to clear that specific attribute.
-                if ("".equals(value)) {
+                value = value.trim();
+                if (Strings.isEmpty(value)) {
                     value = null;
                 }
                 usr.setMiddle_name(value);
@@ -3284,7 +3384,8 @@ public abstract class UserAbstraction extends ObjectNamingAbstraction {
             String value = (String) parser.getOptionValue(postal_code_otherOption);
             if (null != value) {
                 // On the command line an empty string can be used to clear that specific attribute.
-                if ("".equals(value)) {
+                value = value.trim();
+                if (Strings.isEmpty(value)) {
                     value = null;
                 }
                 usr.setPostal_code_other(value);
@@ -3294,7 +3395,8 @@ public abstract class UserAbstraction extends ObjectNamingAbstraction {
             String value = (String) parser.getOptionValue(state_otherOption);
             if (null != value) {
                 // On the command line an empty string can be used to clear that specific attribute.
-                if ("".equals(value)) {
+                value = value.trim();
+                if (Strings.isEmpty(value)) {
                     value = null;
                 }
                 usr.setState_other(value);
@@ -3304,7 +3406,8 @@ public abstract class UserAbstraction extends ObjectNamingAbstraction {
             String value = (String) parser.getOptionValue(street_otherOption);
             if (null != value) {
                 // On the command line an empty string can be used to clear that specific attribute.
-                if ("".equals(value)) {
+                value = value.trim();
+                if (Strings.isEmpty(value)) {
                     value = null;
                 }
                 usr.setStreet_other(value);
@@ -3314,7 +3417,8 @@ public abstract class UserAbstraction extends ObjectNamingAbstraction {
             String value = (String) parser.getOptionValue(spouse_nameOption);
             if (null != value) {
                 // On the command line an empty string can be used to clear that specific attribute.
-                if ("".equals(value)) {
+                value = value.trim();
+                if (Strings.isEmpty(value)) {
                     value = null;
                 }
                 usr.setSpouse_name(value);
@@ -3324,7 +3428,8 @@ public abstract class UserAbstraction extends ObjectNamingAbstraction {
             String value = (String) parser.getOptionValue(state_homeOption);
             if (null != value) {
                 // On the command line an empty string can be used to clear that specific attribute.
-                if ("".equals(value)) {
+                value = value.trim();
+                if (Strings.isEmpty(value)) {
                     value = null;
                 }
                 usr.setState_home(value);
@@ -3334,7 +3439,8 @@ public abstract class UserAbstraction extends ObjectNamingAbstraction {
             String value = (String) parser.getOptionValue(street_homeOption);
             if (null != value) {
                 // On the command line an empty string can be used to clear that specific attribute.
-                if ("".equals(value)) {
+                value = value.trim();
+                if (Strings.isEmpty(value)) {
                     value = null;
                 }
                 usr.setStreet_home(value);
@@ -3344,7 +3450,8 @@ public abstract class UserAbstraction extends ObjectNamingAbstraction {
             String value = (String) parser.getOptionValue(suffixOption);
             if (null != value) {
                 // On the command line an empty string can be used to clear that specific attribute.
-                if ("".equals(value)) {
+                value = value.trim();
+                if (Strings.isEmpty(value)) {
                     value = null;
                 }
                 usr.setSuffix(value);
@@ -3354,7 +3461,8 @@ public abstract class UserAbstraction extends ObjectNamingAbstraction {
             String value = (String) parser.getOptionValue(tax_idOption);
             if (null != value) {
                 // On the command line an empty string can be used to clear that specific attribute.
-                if ("".equals(value)) {
+                value = value.trim();
+                if (Strings.isEmpty(value)) {
                     value = null;
                 }
                 usr.setTax_id(value);
@@ -3364,7 +3472,8 @@ public abstract class UserAbstraction extends ObjectNamingAbstraction {
             String value = (String) parser.getOptionValue(telephone_telexOption);
             if (null != value) {
                 // On the command line an empty string can be used to clear that specific attribute.
-                if ("".equals(value)) {
+                value = value.trim();
+                if (Strings.isEmpty(value)) {
                     value = null;
                 }
                 usr.setTelephone_telex(value);
@@ -3374,7 +3483,8 @@ public abstract class UserAbstraction extends ObjectNamingAbstraction {
             String value = (String) parser.getOptionValue(telephone_ttytddOption);
             if (null != value) {
                 // On the command line an empty string can be used to clear that specific attribute.
-                if ("".equals(value)) {
+                value = value.trim();
+                if (Strings.isEmpty(value)) {
                     value = null;
                 }
                 usr.setTelephone_ttytdd(value);
@@ -3393,10 +3503,34 @@ public abstract class UserAbstraction extends ObjectNamingAbstraction {
             }
         }
         {
+            String value = (String) parser.getOptionValue(image1Option);
+            if (null != value) {
+                // On the command line an empty string can be used to clear that specific attribute.
+                usr.setImage1(parseImage1(value));
+            }
+        }
+        {
+            String value = (String) parser.getOptionValue(image1ContentTypeOption);
+            if (null != value) {
+                // On the command line an empty string can be used to clear that specific attribute.
+                value = value.trim();
+                if (Strings.isEmpty(value)) {
+                    if (usr.getImage1() != null) {
+                        throw new InvalidDataException("No image content-type given, but image data set");
+                    }
+                    value = null;
+                }
+                usr.setImage1ContentType(value);
+            } else if (usr.getImage1() != null) {
+                throw new InvalidDataException("No image content-type given, but image data set");
+            }
+        }
+        {
             String value = (String) parser.getOptionValue(urlOption);
             if (null != value) {
                 // On the command line an empty string can be used to clear that specific attribute.
-                if ("".equals(value)) {
+                value = value.trim();
+                if (Strings.isEmpty(value)) {
                     value = null;
                 }
                 usr.setUrl(value);
@@ -3406,7 +3540,8 @@ public abstract class UserAbstraction extends ObjectNamingAbstraction {
             String value = (String) parser.getOptionValue(userfield01Option);
             if (null != value) {
                 // On the command line an empty string can be used to clear that specific attribute.
-                if ("".equals(value)) {
+                value = value.trim();
+                if (Strings.isEmpty(value)) {
                     value = null;
                 }
                 usr.setUserfield01(value);
@@ -3416,7 +3551,8 @@ public abstract class UserAbstraction extends ObjectNamingAbstraction {
             String value = (String) parser.getOptionValue(userfield02Option);
             if (null != value) {
                 // On the command line an empty string can be used to clear that specific attribute.
-                if ("".equals(value)) {
+                value = value.trim();
+                if (Strings.isEmpty(value)) {
                     value = null;
                 }
                 usr.setUserfield02(value);
@@ -3426,7 +3562,8 @@ public abstract class UserAbstraction extends ObjectNamingAbstraction {
             String value = (String) parser.getOptionValue(userfield03Option);
             if (null != value) {
                 // On the command line an empty string can be used to clear that specific attribute.
-                if ("".equals(value)) {
+                value = value.trim();
+                if (Strings.isEmpty(value)) {
                     value = null;
                 }
                 usr.setUserfield03(value);
@@ -3436,7 +3573,8 @@ public abstract class UserAbstraction extends ObjectNamingAbstraction {
             String value = (String) parser.getOptionValue(userfield04Option);
             if (null != value) {
                 // On the command line an empty string can be used to clear that specific attribute.
-                if ("".equals(value)) {
+                value = value.trim();
+                if (Strings.isEmpty(value)) {
                     value = null;
                 }
                 usr.setUserfield04(value);
@@ -3446,7 +3584,8 @@ public abstract class UserAbstraction extends ObjectNamingAbstraction {
             String value = (String) parser.getOptionValue(userfield05Option);
             if (null != value) {
                 // On the command line an empty string can be used to clear that specific attribute.
-                if ("".equals(value)) {
+                value = value.trim();
+                if (Strings.isEmpty(value)) {
                     value = null;
                 }
                 usr.setUserfield05(value);
@@ -3456,7 +3595,8 @@ public abstract class UserAbstraction extends ObjectNamingAbstraction {
             String value = (String) parser.getOptionValue(userfield06Option);
             if (null != value) {
                 // On the command line an empty string can be used to clear that specific attribute.
-                if ("".equals(value)) {
+                value = value.trim();
+                if (Strings.isEmpty(value)) {
                     value = null;
                 }
                 usr.setUserfield06(value);
@@ -3466,7 +3606,8 @@ public abstract class UserAbstraction extends ObjectNamingAbstraction {
             String value = (String) parser.getOptionValue(userfield07Option);
             if (null != value) {
                 // On the command line an empty string can be used to clear that specific attribute.
-                if ("".equals(value)) {
+                value = value.trim();
+                if (Strings.isEmpty(value)) {
                     value = null;
                 }
                 usr.setUserfield07(value);
@@ -3476,7 +3617,8 @@ public abstract class UserAbstraction extends ObjectNamingAbstraction {
             String value = (String) parser.getOptionValue(userfield08Option);
             if (null != value) {
                 // On the command line an empty string can be used to clear that specific attribute.
-                if ("".equals(value)) {
+                value = value.trim();
+                if (Strings.isEmpty(value)) {
                     value = null;
                 }
                 usr.setUserfield08(value);
@@ -3486,7 +3628,8 @@ public abstract class UserAbstraction extends ObjectNamingAbstraction {
             String value = (String) parser.getOptionValue(userfield09Option);
             if (null != value) {
                 // On the command line an empty string can be used to clear that specific attribute.
-                if ("".equals(value)) {
+                value = value.trim();
+                if (Strings.isEmpty(value)) {
                     value = null;
                 }
                 usr.setUserfield09(value);
@@ -3496,7 +3639,8 @@ public abstract class UserAbstraction extends ObjectNamingAbstraction {
             String value = (String) parser.getOptionValue(userfield10Option);
             if (null != value) {
                 // On the command line an empty string can be used to clear that specific attribute.
-                if ("".equals(value)) {
+                value = value.trim();
+                if (Strings.isEmpty(value)) {
                     value = null;
                 }
                 usr.setUserfield10(value);
@@ -3506,7 +3650,8 @@ public abstract class UserAbstraction extends ObjectNamingAbstraction {
             String value = (String) parser.getOptionValue(userfield11Option);
             if (null != value) {
                 // On the command line an empty string can be used to clear that specific attribute.
-                if ("".equals(value)) {
+                value = value.trim();
+                if (Strings.isEmpty(value)) {
                     value = null;
                 }
                 usr.setUserfield11(value);
@@ -3516,7 +3661,8 @@ public abstract class UserAbstraction extends ObjectNamingAbstraction {
             String value = (String) parser.getOptionValue(userfield12Option);
             if (null != value) {
                 // On the command line an empty string can be used to clear that specific attribute.
-                if ("".equals(value)) {
+                value = value.trim();
+                if (Strings.isEmpty(value)) {
                     value = null;
                 }
                 usr.setUserfield12(value);
@@ -3526,7 +3672,8 @@ public abstract class UserAbstraction extends ObjectNamingAbstraction {
             String value = (String) parser.getOptionValue(userfield13Option);
             if (null != value) {
                 // On the command line an empty string can be used to clear that specific attribute.
-                if ("".equals(value)) {
+                value = value.trim();
+                if (Strings.isEmpty(value)) {
                     value = null;
                 }
                 usr.setUserfield13(value);
@@ -3536,7 +3683,8 @@ public abstract class UserAbstraction extends ObjectNamingAbstraction {
             String value = (String) parser.getOptionValue(userfield14Option);
             if (null != value) {
                 // On the command line an empty string can be used to clear that specific attribute.
-                if ("".equals(value)) {
+                value = value.trim();
+                if (Strings.isEmpty(value)) {
                     value = null;
                 }
                 usr.setUserfield14(value);
@@ -3546,7 +3694,8 @@ public abstract class UserAbstraction extends ObjectNamingAbstraction {
             String value = (String) parser.getOptionValue(userfield15Option);
             if (null != value) {
                 // On the command line an empty string can be used to clear that specific attribute.
-                if ("".equals(value)) {
+                value = value.trim();
+                if (Strings.isEmpty(value)) {
                     value = null;
                 }
                 usr.setUserfield15(value);
@@ -3556,7 +3705,8 @@ public abstract class UserAbstraction extends ObjectNamingAbstraction {
             String value = (String) parser.getOptionValue(userfield16Option);
             if (null != value) {
                 // On the command line an empty string can be used to clear that specific attribute.
-                if ("".equals(value)) {
+                value = value.trim();
+                if (Strings.isEmpty(value)) {
                     value = null;
                 }
                 usr.setUserfield16(value);
@@ -3566,7 +3716,8 @@ public abstract class UserAbstraction extends ObjectNamingAbstraction {
             String value = (String) parser.getOptionValue(userfield17Option);
             if (null != value) {
                 // On the command line an empty string can be used to clear that specific attribute.
-                if ("".equals(value)) {
+                value = value.trim();
+                if (Strings.isEmpty(value)) {
                     value = null;
                 }
                 usr.setUserfield17(value);
@@ -3576,7 +3727,8 @@ public abstract class UserAbstraction extends ObjectNamingAbstraction {
             String value = (String) parser.getOptionValue(userfield18Option);
             if (null != value) {
                 // On the command line an empty string can be used to clear that specific attribute.
-                if ("".equals(value)) {
+                value = value.trim();
+                if (Strings.isEmpty(value)) {
                     value = null;
                 }
                 usr.setUserfield18(value);
@@ -3586,7 +3738,8 @@ public abstract class UserAbstraction extends ObjectNamingAbstraction {
             String value = (String) parser.getOptionValue(userfield19Option);
             if (null != value) {
                 // On the command line an empty string can be used to clear that specific attribute.
-                if ("".equals(value)) {
+                value = value.trim();
+                if (Strings.isEmpty(value)) {
                     value = null;
                 }
                 usr.setUserfield19(value);
@@ -3596,7 +3749,8 @@ public abstract class UserAbstraction extends ObjectNamingAbstraction {
             String value = (String) parser.getOptionValue(userfield20Option);
             if (null != value) {
                 // On the command line an empty string can be used to clear that specific attribute.
-                if ("".equals(value)) {
+                value = value.trim();
+                if (Strings.isEmpty(value)) {
                     value = null;
                 }
                 usr.setUserfield20(value);
@@ -3606,7 +3760,8 @@ public abstract class UserAbstraction extends ObjectNamingAbstraction {
             String value = (String) parser.getOptionValue(city_businessOption);
             if (null != value) {
                 // On the command line an empty string can be used to clear that specific attribute.
-                if ("".equals(value)) {
+                value = value.trim();
+                if (Strings.isEmpty(value)) {
                     value = null;
                 }
                 usr.setCity_business(value);
@@ -3616,7 +3771,8 @@ public abstract class UserAbstraction extends ObjectNamingAbstraction {
             String value = (String) parser.getOptionValue(assistant_nameOption);
             if (null != value) {
                 // On the command line an empty string can be used to clear that specific attribute.
-                if ("".equals(value)) {
+                value = value.trim();
+                if (Strings.isEmpty(value)) {
                     value = null;
                 }
                 usr.setAssistant_name(value);
@@ -3626,7 +3782,8 @@ public abstract class UserAbstraction extends ObjectNamingAbstraction {
             String value = (String) parser.getOptionValue(telephone_primaryOption);
             if (null != value) {
                 // On the command line an empty string can be used to clear that specific attribute.
-                if ("".equals(value)) {
+                value = value.trim();
+                if (Strings.isEmpty(value)) {
                     value = null;
                 }
                 usr.setTelephone_primary(value);
@@ -3636,7 +3793,8 @@ public abstract class UserAbstraction extends ObjectNamingAbstraction {
             String value = (String) parser.getOptionValue(categoriesOption);
             if (null != value) {
                 // On the command line an empty string can be used to clear that specific attribute.
-                if ("".equals(value)) {
+                value = value.trim();
+                if (Strings.isEmpty(value)) {
                     value = null;
                 }
                 usr.setCategories(value);
@@ -3646,7 +3804,8 @@ public abstract class UserAbstraction extends ObjectNamingAbstraction {
             String value = (String) parser.getOptionValue(passwordmechOption);
             if (null != value) {
                 // On the command line an empty string can be used to clear that specific attribute.
-                if ("".equals(value)) {
+                value = value.trim();
+                if (Strings.isEmpty(value)) {
                     value = null;
                 }
                 usr.setPasswordMech(value);
@@ -3656,7 +3815,8 @@ public abstract class UserAbstraction extends ObjectNamingAbstraction {
             String value = (String) parser.getOptionValue(mail_folder_confirmed_ham_nameOption);
             if (null != value) {
                 // On the command line an empty string can be used to clear that specific attribute.
-                if ("".equals(value)) {
+                value = value.trim();
+                if (Strings.isEmpty(value)) {
                     value = null;
                 }
                 usr.setMail_folder_confirmed_ham_name(value);
@@ -3666,7 +3826,8 @@ public abstract class UserAbstraction extends ObjectNamingAbstraction {
             String value = (String) parser.getOptionValue(mail_folder_confirmed_spam_nameOption);
             if (null != value) {
                 // On the command line an empty string can be used to clear that specific attribute.
-                if ("".equals(value)) {
+                value = value.trim();
+                if (Strings.isEmpty(value)) {
                     value = null;
                 }
                 usr.setMail_folder_confirmed_spam_name(value);
@@ -3676,7 +3837,8 @@ public abstract class UserAbstraction extends ObjectNamingAbstraction {
             String value = (String) parser.getOptionValue(defaultsenderaddressOption);
             if (null != value) {
                 // On the command line an empty string can be used to clear that specific attribute.
-                if ("".equals(value)) {
+                value = value.trim();
+                if (Strings.isEmpty(value)) {
                     value = null;
                 }
                 usr.setDefaultSenderAddress(value);
@@ -3686,7 +3848,8 @@ public abstract class UserAbstraction extends ObjectNamingAbstraction {
             String value = (String) parser.getOptionValue(country_businessOption);
             if (null != value) {
                 // On the command line an empty string can be used to clear that specific attribute.
-                if ("".equals(value)) {
+                value = value.trim();
+                if (Strings.isEmpty(value)) {
                     value = null;
                 }
                 usr.setCountry_business(value);
@@ -3702,7 +3865,8 @@ public abstract class UserAbstraction extends ObjectNamingAbstraction {
             String value = (String) parser.getOptionValue(titleOption);
             if (null != value) {
                 // On the command line an empty string can be used to clear that specific attribute.
-                if ("".equals(value)) {
+                value = value.trim();
+                if (Strings.isEmpty(value)) {
                     value = null;
                 }
                 usr.setTitle(value);
@@ -3712,15 +3876,21 @@ public abstract class UserAbstraction extends ObjectNamingAbstraction {
             String value = (String) parser.getOptionValue(positionOption);
             if (null != value) {
                 // On the command line an empty string can be used to clear that specific attribute.
-                if ("".equals(value)) {
+                value = value.trim();
+                if (Strings.isEmpty(value)) {
                     value = null;
                 }
                 usr.setPosition(value);
             }
         }
         {
-            final String value = (String) parser.getOptionValue(primaryAccountNameOption);
+            String value = (String) parser.getOptionValue(primaryAccountNameOption);
             if (null != value) {
+                // On the command line an empty string can be used to clear that specific attribute.
+                value = value.trim();
+                if (Strings.isEmpty(value)) {
+                    value = null;
+                }
                 usr.setPrimaryAccountName(value);
             }
         }
@@ -3764,6 +3934,47 @@ public abstract class UserAbstraction extends ObjectNamingAbstraction {
         //                }
         //            }
         //        }
+    }
+
+    /**
+     * Parses the image data from the given string value.
+     * <p>
+     * The value can be the base64-encoded image data or a <code>file://</code> URI pointing to the image file.
+     *
+     * @param value The value
+     * @return the image data, or <code>null</code> if value is an empty string
+     * @throws InvalidDataException If given string value is an invalid base64 or a broken <code>file://</code> URI
+     */
+    byte[] parseImage1(String value) throws InvalidDataException {
+        try {
+            if (Strings.isEmpty(value)) {
+                return null;
+            }
+
+            // Check for file
+            byte[] imageData;
+            {
+                String val = value.trim();
+                if (Strings.asciiLowerCase(val).startsWith("file://")) {
+                    try {
+                        // Read from file
+                        imageData = Files.readAllBytes(Paths.get(URI.create(val)));
+                    } catch (IOException e) {
+                        throw new InvalidDataException("Unable to read file \"" + val + "\"", e);
+                    }
+                } else {
+                    // Parse as base64 string
+                    imageData = Base64.getDecoder().decode(val.replaceAll(System.lineSeparator(), ""));
+                }
+            }
+
+            return imageData.length > 0 ? imageData : null;
+        } catch (OutOfMemoryError e) {
+            if ("Java heap space".equalsIgnoreCase(e.getMessage())) {
+                throw new InvalidDataException("Provided image data is too big", e);
+            }
+            throw e;
+        }
     }
 
     protected void applyDynamicOptionsToUser(final AdminParser parser, final User usr) {
