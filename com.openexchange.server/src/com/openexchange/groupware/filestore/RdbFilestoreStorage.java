@@ -164,6 +164,9 @@ public class RdbFilestoreStorage extends FilestoreStorage {
                 filestore.setMaxContext(result.getLong(4));
                 filestores.put(sUri, filestore);
             } while (result.next());
+            Databases.closeSQLStuff(result, stmt);
+            result = null;
+            stmt = null;
 
             return findMatchOrElse(sUriToLookUp, filestores);
         } catch (SQLException e) {
