@@ -191,21 +191,22 @@ public abstract class AbstractContactFacetingModuleSearchDriver extends Abstract
         sortOptions.setLimit(0 < limit ? limit : DEFAULT_LIMIT);
 
         List<Contact> contacts;
+        IDBasedContactsAccess access = Services.getIdBasedContactsAccessFactory().createAccess(session);
         try {
-            IDBasedContactsAccess access = Services.getIdBasedContactsAccessFactory().createAccess(session);
             access.set(ContactsParameters.PARAMETER_FIELDS, CONTACT_FIELDS);
             access.set(ContactsParameters.PARAMETER_ORDER, sortOptions.getOrder()[0].getOrder());
             access.set(ContactsParameters.PARAMETER_ORDER_BY, sortOptions.getOrder()[0].getBy());
             access.set(ContactsParameters.PARAMETER_RIGHT_HAND_LIMIT, I(sortOptions.getLimit()));
             access.set(ContactsParameters.PARAMETER_REQUIRE_EMAIL, B(parameters.getBoolean(AutocompleteParameters.REQUIRE_EMAIL, true)));
             access.set(ContactsParameters.PARAMETER_IGNORE_DISTRIBUTION_LISTS, B(parameters.getBoolean(AutocompleteParameters.IGNORE_DISTRIBUTION_LISTS, false)));
-
             contacts = access.autocompleteContacts(folderIDs, prefix);
         } catch (OXException e) {
             if (ContactExceptionCodes.TOO_FEW_SEARCH_CHARS.equals(e)) {
                 return Collections.emptyList();
             }
             throw e;
+        } finally {
+            access.finish();
         }
         if (null == contacts) {
             return Collections.emptyList();

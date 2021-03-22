@@ -99,7 +99,7 @@ public class ContactsFolderStorage implements SubfolderListingFolderStorage {
 
     /**
      * Initializes a new {@link ContactsFolderStorage}.
-     * 
+     *
      * @param accessFactory The underlying ID-based contacts access factory
      */
     public ContactsFolderStorage(IDBasedContactsAccessFactory accessFactory) {
@@ -334,33 +334,27 @@ public class ContactsFolderStorage implements SubfolderListingFolderStorage {
 
     @Override
     public void commitTransaction(StorageParameters storageParameters) throws OXException {
-        IDBasedContactsAccess access = storageParameters.getParameter(FOLDER_TYPE, PARAMETER_ACCESS);
-        if (null == access) {
-            return;
-        }
-        try {
-            access.commit();
-        } finally {
-            if (null != storageParameters.putParameter(FOLDER_TYPE, PARAMETER_ACCESS, null)) {
-                access.set(PARAMETER_CONNECTION(), null);
+        IDBasedContactsAccess contactsAccess = storageParameters.getParameter(FOLDER_TYPE, PARAMETER_ACCESS);
+        if (null != contactsAccess) {
+            try {
+                contactsAccess.commit();
+            } finally {
+                finish(storageParameters);
             }
         }
     }
 
     @Override
     public void rollback(StorageParameters storageParameters) {
-        IDBasedContactsAccess access = storageParameters.getParameter(FOLDER_TYPE, PARAMETER_ACCESS);
-        if (null == access) {
-            return;
-        }
-        try {
-            access.rollback();
-        } catch (Exception e) {
-            // Ignore
-            org.slf4j.LoggerFactory.getLogger(ContactsFolderStorage.class).warn("Unexpected error during rollback: {}", e.getMessage(), e);
-        } finally {
-            if (null != storageParameters.putParameter(FOLDER_TYPE, PARAMETER_ACCESS, null)) {
-                access.set(PARAMETER_CONNECTION(), null);
+        IDBasedContactsAccess contactsAccess = storageParameters.getParameter(FOLDER_TYPE, PARAMETER_ACCESS);
+        if (null != contactsAccess) {
+            try {
+                contactsAccess.rollback();
+            } catch (Exception e) {
+                // Ignore
+                org.slf4j.LoggerFactory.getLogger(ContactsFolderStorage.class).warn("Unexpected error during rollback: {}", e.getMessage(), e);
+            } finally {
+                finish(storageParameters);
             }
         }
     }
@@ -441,6 +435,30 @@ public class ContactsFolderStorage implements SubfolderListingFolderStorage {
             sortableIds.add(new ContactId(folders.get(i).getId(), i, null));
         }
         return sortableIds.toArray(new SortableId[sortableIds.size()]);
+    }
+
+    /**
+     * Performs possible clean-up operations after a commit/roll-back.
+     *
+     * @param storageParameters The storage parameters
+     */
+    private void finish(StorageParameters storageParameters) {
+        IDBasedContactsAccess contactsAccess = storageParameters.getParameter(FOLDER_TYPE, PARAMETER_ACCESS);
+        if (null != contactsAccess) {
+            try {
+                contactsAccess.finish();
+                for (OXException warning : contactsAccess.getWarnings()) {
+                    storageParameters.addWarning(warning);
+                }
+            } catch (Exception e) {
+                // Ignore
+                org.slf4j.LoggerFactory.getLogger(ContactsFolderStorage.class).warn("Unexpected error during finish: {}", e.getMessage(), e);
+            } finally {
+                if (null != storageParameters.putParameter(FOLDER_TYPE, PARAMETER_ACCESS, null)) {
+                    contactsAccess.set(PARAMETER_CONNECTION(), null);
+                }
+            }
+        }
     }
 
 }
