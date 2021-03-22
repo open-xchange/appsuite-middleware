@@ -127,7 +127,7 @@ public class DBMigrationExecutorServiceImpl implements DBMigrationExecutorServic
         Liquibase liquibase = null;
         try {
             connection = connectionProvider.get();
-            liquibase = LiquibaseHelper.prepareLiquibase(connection, migration);
+            liquibase = LiquibaseHelper.prepareLiquibase(connection, null, migration);
             return new ArrayList<ChangeSet>(liquibase.listUnrunChangeSets(LIQUIBASE_NO_DEFINED_CONTEXT));
         } catch (Exception exception) {
             Function<Exception, OXException> x = exceptionSpawners.get(exception.getClass());
@@ -160,7 +160,7 @@ public class DBMigrationExecutorServiceImpl implements DBMigrationExecutorServic
         Liquibase liquibase = null;
         try {
             connection = connectionProvider.get();
-            liquibase = LiquibaseHelper.prepareLiquibase(connection, migration);
+            liquibase = LiquibaseHelper.prepareLiquibase(connection, null, migration);
             StringWriter sw = new StringWriter();
             liquibase.reportStatus(true, LIQUIBASE_NO_DEFINED_CONTEXT, sw);
             return sw.toString();
@@ -186,7 +186,7 @@ public class DBMigrationExecutorServiceImpl implements DBMigrationExecutorServic
         Liquibase liquibase = null;
         try {
             connection = connectionProvider.get();
-            liquibase = LiquibaseHelper.prepareLiquibase(connection, migration);
+            liquibase = LiquibaseHelper.prepareLiquibase(connection, null, migration);
             ByteArrayOutputStream os = new ByteArrayOutputStream();
             PrintStream ps = new PrintStream(os, false, "UTF8");
             liquibase.reportLocks(ps);

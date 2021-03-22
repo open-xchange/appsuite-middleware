@@ -32,7 +32,6 @@ import com.openexchange.exception.OXException;
 import liquibase.Liquibase;
 import liquibase.database.Database;
 import liquibase.database.DatabaseConnection;
-import liquibase.database.core.MySQLDatabase;
 import liquibase.database.jvm.JdbcConnection;
 import liquibase.exception.DatabaseException;
 import liquibase.exception.LiquibaseException;
@@ -55,11 +54,12 @@ public class LiquibaseHelper {
      * the underlying database.
      *
      * @param connection The database connection to use
+     * @param lifeThreadConnection An optional additional database connection used for the life thread
      * @param migration The database migration
      * @return The initialized liquibase instance
      */
-    public static Liquibase prepareLiquibase(Connection connection, DBMigration migration) throws LiquibaseException {
-        return prepareLiquibase(connection, migration.getFileLocation(), migration.getAccessor());
+    public static Liquibase prepareLiquibase(Connection connection, Connection lifeThreadConnection, DBMigration migration) throws LiquibaseException {
+        return prepareLiquibase(connection, lifeThreadConnection, migration.getFileLocation(), migration.getAccessor());
     }
 
     /**
@@ -67,13 +67,15 @@ public class LiquibaseHelper {
      * the underlying database.
      *
      * @param connection The database connection to use
+     * @param lifeThreadConnection An optional additional database connection used for the life thread
      * @param fileLocation The file location
      * @param accessor Needed to access the given file
      * @return The initialized liquibase instance
      */
-    public static Liquibase prepareLiquibase(Connection connection, String fileLocation, ResourceAccessor accessor) throws LiquibaseException {
-        MySQLDatabase database = new MySQLDatabase();
+    public static Liquibase prepareLiquibase(Connection connection, Connection lifeThreadConnection, String fileLocation, ResourceAccessor accessor) throws LiquibaseException {
+        LifeThreadConnectionAwareMysqlDatabase database = new LifeThreadConnectionAwareMysqlDatabase();
         database.setConnection(new JdbcConnection(connection));
+        database.setLifeThreadConnection(lifeThreadConnection);
         return new Liquibase(fileLocation, LiquibaseHelper.prepareResourceAccessor(accessor), database);
     }
 
