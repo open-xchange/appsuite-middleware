@@ -61,10 +61,8 @@ import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
-import java.util.stream.Collectors;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import com.google.common.collect.ImmutableList;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.configuration.ServerConfig;
 import com.openexchange.contact.AutocompleteParameters;
@@ -75,6 +73,7 @@ import com.openexchange.contacts.json.mapping.ColumnParser;
 import com.openexchange.exception.OXException;
 import com.openexchange.find.AutocompleteRequest;
 import com.openexchange.find.AutocompleteResult;
+import com.openexchange.find.Document;
 import com.openexchange.find.FindExceptionCode;
 import com.openexchange.find.Module;
 import com.openexchange.find.SearchRequest;
@@ -179,13 +178,6 @@ public class BasicContactsDriver extends AbstractContactFacetingModuleSearchDriv
             searchTerm.addSearchTerm(term);
         }
         /*
-         * restrict to specific folders if set
-         */
-        SearchTerm<?> folderTypeTerm = getFolderTypeTerm(searchRequest, session);
-        if (folderTypeTerm != null) {
-            searchTerm.addSearchTerm(folderTypeTerm);
-        }
-        /*
          * combine with addressbook queries
          */
         SearchTerm<?> term = Utils.getSearchTerm(session, getConfiguredAddressbookFields(), searchRequest.getQueries());
@@ -199,39 +191,45 @@ public class BasicContactsDriver extends AbstractContactFacetingModuleSearchDriv
             return SearchResult.EMPTY;
         }
         /*
-         * extract requested contact fields
+         * extract requested contact fields & determine searched folders
          */
-        ;
         int[] columnIDs = searchRequest.getColumns().getIntColumns();
         if (0 == columnIDs.length) {
             columnIDs = ColumnParser.parseColumns("list");
         }
         ContactField[] contactFields = ColumnParser.getFieldsToQuery(columnIDs, SORT_FIELDS);
+        List<String> folderIds = Folders.getStringIDs(searchRequest, getModule(), session);
         /*
          * search
          */
+        List<OXException> warnings = null;
+        List<Contact> contacts;
         IDBasedContactsAccess access = Services.getIdBasedContactsAccessFactory().createAccess(session);
-        access.set(ContactsParameters.PARAMETER_FIELDS, contactFields);
-        access.set(ContactsParameters.PARAMETER_LEFT_HAND_LIMIT, I(searchRequest.getStart()));
-        access.set(ContactsParameters.PARAMETER_RIGHT_HAND_LIMIT, I(searchRequest.getSize() + searchRequest.getStart())); //compensate for the diff in InternalAccess
-
-        List<Contact> contacts = access.searchContacts(searchTerm);
-        List<OXException> accessWarnings = access.getWarnings();
-        List<OXException> warnings = new LinkedList<>();
-        if (null != accessWarnings && 0 < accessWarnings.size()) {
-            warnings.addAll(accessWarnings);
+        try {
+            access.set(ContactsParameters.PARAMETER_FIELDS, contactFields);
+            access.set(ContactsParameters.PARAMETER_LEFT_HAND_LIMIT, I(searchRequest.getStart()));
+            access.set(ContactsParameters.PARAMETER_RIGHT_HAND_LIMIT, I(searchRequest.getSize() + searchRequest.getStart())); //compensate for the diff in InternalAccess
+            contacts = access.searchContacts(folderIds, searchTerm);
+        } finally {
+            access.finish();
+            if (null != access.getWarnings() && 0 < access.getWarnings().size()) {
+                warnings = new ArrayList<OXException>(access.getWarnings());
+            }
         }
         /*
          * apply special sorting & convert resulting contacts
          */
-        if (null == contacts) {
-            return new SearchResult(-1, searchRequest.getStart(), ImmutableList.of(), searchRequest.getActiveFacets(), warnings);
+        List<Document> contactDocuments = new ArrayList<>();
+        if (null != contacts) {
+            if (1 < contacts.size()) {
+                SpecialAlphanumSortContactComparator comparator = new SpecialAlphanumSortContactComparator(session.getUser().getLocale());
+                Collections.sort(contacts, comparator);
+            }
+            for (Contact contact : contacts) {
+                contactDocuments.add(new ContactsDocument(contact));
+            }
         }
-        if (1 < contacts.size()) {
-            SpecialAlphanumSortContactComparator comparator = new SpecialAlphanumSortContactComparator(session.getUser().getLocale());
-            Collections.sort(contacts, comparator);
-        }
-        return new SearchResult(-1, searchRequest.getStart(), contacts.stream().map(ContactsDocument::new).collect(Collectors.toList()), searchRequest.getActiveFacets(), warnings);
+        return new SearchResult(-1, searchRequest.getStart(), contactDocuments, searchRequest.getActiveFacets(), warnings);
     }
 
     @Override
@@ -279,32 +277,6 @@ public class BasicContactsDriver extends AbstractContactFacetingModuleSearchDriv
          */
         facets.add(ContactTypeFacet.getInstance());
         return new AutocompleteResult(facets);
-    }
-
-    private SearchTerm<?> getFolderTypeTerm(SearchRequest searchRequest, ServerSession session) throws OXException {
-        List<String> folderIDs = Folders.getStringIDs(searchRequest, getModule(), session);
-        if (folderIDs == null) {
-            return null;
-        }
-
-        if (0 == folderIDs.size()) {
-            return null;
-        }
-        if (1 == folderIDs.size()) {
-            String folderID = folderIDs.get(0);
-            SingleSearchTerm searchTerm = new SingleSearchTerm(SingleOperation.EQUALS);
-            searchTerm.addOperand(new ContactFieldOperand(ContactField.FOLDER_ID));
-            searchTerm.addOperand(new ConstantOperand<>(folderID));
-            return searchTerm;
-        }
-        CompositeSearchTerm orTerm = new CompositeSearchTerm(CompositeOperation.OR);
-        for (String folderID : folderIDs) {
-            SingleSearchTerm searchTerm = new SingleSearchTerm(SingleOperation.EQUALS);
-            searchTerm.addOperand(new ContactFieldOperand(ContactField.FOLDER_ID));
-            searchTerm.addOperand(new ConstantOperand<>(folderID));
-            orTerm.addSearchTerm(searchTerm);
-        }
-        return orTerm;
     }
 
     /**

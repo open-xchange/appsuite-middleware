@@ -56,6 +56,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
+import java.util.stream.Collectors;
 import javax.servlet.http.HttpServletResponse;
 import com.openexchange.ajax.fileholder.IFileHolder;
 import com.openexchange.carddav.CarddavProtocol;
@@ -317,6 +318,15 @@ public class CardDAVCollection extends FolderCollection<Contact> {
         return Collections.singletonList(folder);
     }
 
+    /**
+     * Gets a list of the identifiers of the folder(s) represented by the collection.
+     *
+     * @return The folder identifiers
+     */
+    protected List<String> getFolderIds() throws OXException {
+        return getFolders().stream().map(folder -> folder.getID()).collect(Collectors.toList());
+    }
+
     @Override
     public String getResourceType() throws WebdavProtocolException {
         return super.getResourceType() + CarddavProtocol.ADDRESSBOOK;
@@ -332,14 +342,13 @@ public class CardDAVCollection extends FolderCollection<Contact> {
         List<WebdavResource> resources = new ArrayList<WebdavResource>();
         SearchIterator<Contact> searchIterator = null;
         try {
-            CompositeSearchTerm searchTerm = new CompositeSearchTerm(CompositeOperation.AND);
-            searchTerm.addSearchTerm(getFolderTerm(getFolders()));
-            if (false == isSyncDistributionLists()) {
-                searchTerm.addSearchTerm(getExcludeDistributionlistTerm());
+            SearchTerm<?> searchTerm;
+            if (isSyncDistributionLists()) {
+                searchTerm = term;
+            } else {
+                searchTerm = new CompositeSearchTerm(CompositeOperation.AND).addSearchTerm(term).addSearchTerm(getExcludeDistributionlistTerm());
             }
-
-            searchTerm.addSearchTerm(term);
-            searchIterator = factory.getContactService().searchContacts(factory.getSession(), searchTerm);
+            searchIterator = factory.getContactService().searchContacts(factory.getSession(), getFolderIds(), searchTerm, BASIC_FIELDS, SortOptions.EMPTY);
             while (searchIterator.hasNext()) {
                 Contact contact = searchIterator.next();
                 if (isSynchronized(contact)) {
@@ -433,24 +442,17 @@ public class CardDAVCollection extends FolderCollection<Contact> {
     @Override
     protected Collection<Contact> getObjects() throws OXException {
         /*
-         * prepare search term
+         * get contacts, either including or excluding distribution lists
          */
-        SearchTerm<?> searchTerm = getFolderTerm(getFolders());
-        if (false == isSyncDistributionLists()) {
-            searchTerm = new CompositeSearchTerm(CompositeOperation.AND)
-                .addSearchTerm(searchTerm)
-                .addSearchTerm(getExcludeDistributionlistTerm())
-            ;
-        }
-
         SortOptions sortOptions = new SortOptions(ContactField.OBJECT_ID, Order.ASCENDING);
         sortOptions.setLimit(factory.getState().getContactLimit());
-        /*
-         * get contacts
-         */
         SearchIterator<Contact> searchIterator = null;
         try {
-            searchIterator = factory.getContactService().searchContacts(factory.getSession(), searchTerm, BASIC_FIELDS, sortOptions);
+            if (isSyncDistributionLists()) {
+                searchIterator = factory.getContactService().getAllContacts(factory.getSession(), getFolderIds(), BASIC_FIELDS, sortOptions);
+            } else {
+                searchIterator = factory.getContactService().searchContacts(factory.getSession(), getFolderIds(), getExcludeDistributionlistTerm(), BASIC_FIELDS, sortOptions);
+            }
             return addSynchronizedContacts(searchIterator, new ArrayList<Contact>());
         } finally {
             SearchIterators.close(searchIterator);
@@ -459,17 +461,15 @@ public class CardDAVCollection extends FolderCollection<Contact> {
 
     @Override
     protected Contact getObject(String resourceName) throws OXException {
-        CompositeSearchTerm searchTerm = new CompositeSearchTerm(CompositeOperation.AND);
-        searchTerm.addSearchTerm(getFolderTerm(getFolders()));
+        SearchTerm<?> searchTerm = getResourceNameTerm(resourceName);
         if (false == isSyncDistributionLists()) {
-            searchTerm.addSearchTerm(getExcludeDistributionlistTerm());
+            searchTerm = new CompositeSearchTerm(CompositeOperation.AND).addSearchTerm(searchTerm).addSearchTerm(getExcludeDistributionlistTerm());
         }
-        searchTerm.addSearchTerm(getResourceNameTerm(resourceName));
         SortOptions sortOptions = new SortOptions(ContactField.OBJECT_ID, Order.ASCENDING);
         sortOptions.setLimit(1);
         SearchIterator<Contact> searchIterator = null;
         try {
-            searchIterator = factory.getContactService().searchContacts(factory.getSession(), searchTerm, BASIC_FIELDS, sortOptions);
+            searchIterator = factory.getContactService().searchContacts(factory.getSession(), getFolderIds(), searchTerm, BASIC_FIELDS, sortOptions);
             if (searchIterator.hasNext()) {
                 Contact contact = searchIterator.next();
                 if (isSynchronized(contact)) {
@@ -629,7 +629,7 @@ public class CardDAVCollection extends FolderCollection<Contact> {
      * @param folders The parent folders to restrict the results to
      * @return The search term
      */
-    protected static SearchTerm<?> getFolderTerm(List<UserizedFolder> folders) {
+    protected static SearchTerm<?> getFolderTerm1(List<UserizedFolder> folders) {
         if (null == folders || 0 == folders.size()) {
             SingleSearchTerm term = new SingleSearchTerm(SingleOperation.ISNULL);
             term.addOperand(new ContactFieldOperand(ContactField.FOLDER_ID));

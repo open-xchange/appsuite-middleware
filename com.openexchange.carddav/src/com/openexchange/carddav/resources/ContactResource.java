@@ -54,7 +54,9 @@ import static com.openexchange.java.Autoboxing.I;
 import static com.openexchange.java.Autoboxing.L;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.Date;
 import java.util.Enumeration;
 import java.util.HashSet;
@@ -72,6 +74,7 @@ import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.config.lean.LeanConfigurationService;
 import com.openexchange.contact.ContactFieldOperand;
 import com.openexchange.contact.ContactService;
+import com.openexchange.contact.SortOptions;
 import com.openexchange.contact.storage.ContactTombstoneStorage;
 import com.openexchange.contact.vcard.DistributionListMode;
 import com.openexchange.contact.vcard.VCardExport;
@@ -389,10 +392,13 @@ public class ContactResource extends CommonResource<Contact> {
             return;
         }
         // try to search for known contacts
-        SearchTerm<?> searchTerm = createSearchTerm(parentFolderID, Arrays.asList(contact.getDistributionList()), contact.getUid());
+        SearchTerm<?> searchTerm = createSearchTerm(contact.getDistributionList(), contact.getUid());
+        if (null == searchTerm) {
+            return;
+        }
         SearchIterator<Contact> contacts = null;
         try {
-            contacts = contactService.searchContacts(session, searchTerm, CONTACT_FIELDS_TO_LOAD);
+            contacts = contactService.searchContacts(session, Collections.singletonList(parentFolderID), searchTerm, CONTACT_FIELDS_TO_LOAD, SortOptions.EMPTY);
             List<Contact> dbContacts = SearchIterators.asList(contacts);
             Optional<Contact> originalContact = dbContacts.stream().filter(x -> x.getUid().equals(contact.getUid())).findFirst();
             List<DistributionListEntryObject> prepared = restoreDistributionListReferences0(originalContact, Arrays.asList(contact.getDistributionList()), dbContacts);
@@ -402,40 +408,31 @@ public class ContactResource extends CommonResource<Contact> {
         }
     }
 
-    private SearchTerm<?> createSearchTerm(String parentFolderID, List<DistributionListEntryObject> newDistList, String originalContactUID) {
-        SingleSearchTerm folderTerm = new SingleSearchTerm(SingleOperation.EQUALS);
-        folderTerm.addOperand(new ContactFieldOperand(ContactField.FOLDER_ID));
-        folderTerm.addOperand(new ConstantOperand<String>(parentFolderID));
-
-        CompositeSearchTerm uidOrTerm = null;
-        for (DistributionListEntryObject entry : newDistList) {
-            String uid = entry.getContactUid();
-            if (Strings.isNotEmpty(uid)) {
-                if (uidOrTerm == null) {
-                    uidOrTerm = new CompositeSearchTerm(CompositeOperation.OR);
+    private SearchTerm<?> createSearchTerm(DistributionListEntryObject[] newDistList, String originalContactUID) {
+        List<SingleSearchTerm> uidTerms = new ArrayList<SingleSearchTerm>();
+        if (Strings.isNotEmpty(originalContactUID)) {
+            uidTerms.add(new SingleSearchTerm(SingleOperation.EQUALS)
+                .addOperand(new ContactFieldOperand(ContactField.UID)).addOperand(new ConstantOperand<String>(originalContactUID)));
+        }
+        if (null != newDistList) {
+            for (DistributionListEntryObject entry : newDistList) {
+                if (Strings.isNotEmpty(entry.getContactUid())) {
+                    uidTerms.add(new SingleSearchTerm(SingleOperation.EQUALS)
+                        .addOperand(new ContactFieldOperand(ContactField.UID)).addOperand(new ConstantOperand<String>(entry.getContactUid())));
                 }
-                SingleSearchTerm uidTerm = new SingleSearchTerm(SingleOperation.EQUALS);
-                uidTerm.addOperand(new ContactFieldOperand(ContactField.UID));
-                uidTerm.addOperand(new ConstantOperand<String>(uid));
-                uidOrTerm.addSearchTerm(uidTerm);
             }
         }
-        SearchTerm<?> searchTerm = null;
-        if (uidOrTerm != null) {
-            if (Strings.isNotEmpty(originalContactUID)) {
-                SingleSearchTerm uidTerm = new SingleSearchTerm(SingleOperation.EQUALS);
-                uidTerm.addOperand(new ContactFieldOperand(ContactField.UID));
-                uidTerm.addOperand(new ConstantOperand<String>(originalContactUID));
-                uidOrTerm.addSearchTerm(uidTerm);
-            }
-            CompositeSearchTerm compSearchTerm = new CompositeSearchTerm(CompositeOperation.AND);
-            compSearchTerm.addSearchTerm(folderTerm);
-            compSearchTerm.addSearchTerm(uidOrTerm);
-            searchTerm = compSearchTerm;
-        } else {
-            searchTerm = folderTerm;
+        if (uidTerms.isEmpty()) {
+            return null;
         }
-        return searchTerm;
+        if (1 == uidTerms.size()) {
+            return uidTerms.get(0);
+        }
+        CompositeSearchTerm orTerm = new CompositeSearchTerm(CompositeOperation.OR);
+        for (SingleSearchTerm uidTerm : uidTerms) {
+            orTerm.addSearchTerm(uidTerm);
+        }
+        return orTerm;
     }
 
     private List<DistributionListEntryObject> restoreDistributionListReferences0(Optional<Contact> originalContact, List<DistributionListEntryObject> provided, List<Contact> dbContacts) {

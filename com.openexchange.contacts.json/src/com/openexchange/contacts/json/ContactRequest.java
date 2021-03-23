@@ -63,11 +63,8 @@ import org.json.JSONObject;
 import org.slf4j.Logger;
 import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.fields.OrderFields;
-import com.openexchange.ajax.fields.SearchTermFields;
-import com.openexchange.ajax.parser.SearchTermParser;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.configuration.ServerConfig;
-import com.openexchange.contact.ContactFieldOperand;
 import com.openexchange.contact.ContactID;
 import com.openexchange.contact.SortOptions;
 import com.openexchange.contact.SortOrder;
@@ -81,9 +78,6 @@ import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.search.Order;
 import com.openexchange.groupware.upload.impl.UploadEvent;
 import com.openexchange.java.Autoboxing;
-import com.openexchange.search.Operand;
-import com.openexchange.search.SearchExceptionMessages;
-import com.openexchange.search.SearchTerm;
 import com.openexchange.tools.TimeZoneUtils;
 import com.openexchange.tools.arrays.Arrays;
 import com.openexchange.tools.collections.PropertizedList;
@@ -341,20 +335,6 @@ public class ContactRequest {
          * get mapped fields
          */
         return ColumnParser.getFieldsToQuery(columnIDs, fields);
-    }
-
-    /**
-     * Gets a search term from the json array named 'filter in the request.
-     *
-     * @return the search term
-     * @throws OXException
-     */
-    public SearchTerm<?> getSearchFilter() throws OXException {
-        JSONArray jsonArray = this.getJSONData().optJSONArray("filter");
-        if (null == jsonArray) {
-            throw OXJSONExceptionCodes.MISSING_FIELD.create("filter");
-        }
-        return ContactSearchTermParser.INSTANCE.parseSearchTerm(jsonArray);
     }
 
     /**
@@ -631,31 +611,6 @@ public class ContactRequest {
      */
     public AJAXRequestData getRequest() {
         return request;
-    }
-
-    /**
-     * {@link ContactSearchTermParser}
-     *
-     * Custom {@link SearchTermParser} producing {@link ContactFieldOperand}s
-     * from ajax names.
-     */
-    private static final class ContactSearchTermParser extends SearchTermParser {
-
-        @SuppressWarnings("hiding")
-        public static final ContactSearchTermParser INSTANCE = new ContactSearchTermParser();
-
-        private ContactSearchTermParser() {
-            super();
-        }
-
-        @Override
-        protected Operand<?> parseOperand(final JSONObject operand) throws OXException {
-            if (false == operand.hasAndNotNull(SearchTermFields.FIELD)) {
-                throw SearchExceptionMessages.PARSING_FAILED_MISSING_FIELD.create(SearchTermFields.FIELD);
-            }
-            ContactField field = ContactMapper.getInstance().getMappedField(operand.optString(SearchTermFields.FIELD));
-            return new ContactFieldOperand(field);
-        }
     }
 
     private static long sysconfMaxUpload() {

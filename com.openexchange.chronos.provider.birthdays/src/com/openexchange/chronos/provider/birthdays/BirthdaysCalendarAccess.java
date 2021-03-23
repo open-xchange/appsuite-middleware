@@ -127,7 +127,6 @@ import com.openexchange.search.CompositeSearchTerm.CompositeOperation;
 import com.openexchange.search.SearchTerm;
 import com.openexchange.search.SingleSearchTerm;
 import com.openexchange.search.SingleSearchTerm.SingleOperation;
-import com.openexchange.search.internal.operands.ConstantOperand;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.tools.iterator.SearchIterator;
 import com.openexchange.tools.iterator.SearchIterators;
@@ -478,27 +477,6 @@ public class BirthdaysCalendarAccess implements BasicCalendarAccess, SubscribeAw
             searchTerm = new CompositeSearchTerm(CompositeOperation.AND).addSearchTerm(HAS_BIRTHDAY_TERM).addSearchTerm(searchTerm);
         }
         /*
-         * add parent folder restrictions
-         */
-        List<String> folderIds = getContactFolderIds();
-        if (null != folderIds && 0 < folderIds.size()) {
-            if (1 == folderIds.size()) {
-                searchTerm = new CompositeSearchTerm(CompositeOperation.AND)
-                    .addSearchTerm(new SingleSearchTerm(SingleOperation.EQUALS)
-                        .addOperand(new ContactFieldOperand(ContactField.FOLDER_ID))
-                        .addOperand(new ConstantOperand<>(folderIds.get(0))))
-                    .addSearchTerm(searchTerm);
-            } else {
-                CompositeSearchTerm orTerm = new CompositeSearchTerm(CompositeOperation.OR);
-                for (String folderId : folderIds) {
-                    orTerm.addSearchTerm(new SingleSearchTerm(SingleOperation.EQUALS)
-                        .addOperand(new ContactFieldOperand(ContactField.FOLDER_ID))
-                        .addOperand(new ConstantOperand<>(folderId)));
-                }
-                searchTerm = new CompositeSearchTerm(CompositeOperation.AND).addSearchTerm(orTerm).addSearchTerm(searchTerm);
-            }
-        }
-        /*
          * apply offset & limit for search
          */
         SortOptions sortOptions = null;
@@ -514,7 +492,7 @@ public class BirthdaysCalendarAccess implements BasicCalendarAccess, SubscribeAw
         List<Contact> contacts = new ArrayList<>();
         SearchIterator<Contact> searchIterator = null;
         try {
-            searchIterator = services.getService(ContactService.class).searchContacts(session, searchTerm, CONTACT_FIELDS, sortOptions);
+            searchIterator = services.getService(ContactService.class).searchContacts(session, getContactFolderIds(), searchTerm, CONTACT_FIELDS, sortOptions);
             while (searchIterator.hasNext()) {
                 Contact contact = searchIterator.next();
                 if (null == contact.getBirthday()) {
@@ -546,6 +524,11 @@ public class BirthdaysCalendarAccess implements BasicCalendarAccess, SubscribeAw
         return null != timeZone ? timeZone : optTimeZone(session.getUser().getTimeZone(), TimeZones.UTC);
     }
 
+    /**
+     * Gets the identifiers of all contact folders that contribute to the contents of the user's birthdays calendar.
+     *
+     * @return The parent contact folder identifiers, or <code>null</code> if there are not restrictions and all visible contacts are considered
+     */
     private List<String> getContactFolderIds() throws OXException {
         List<String> folderIds = new ArrayList<>();
         JSONArray typesJSONArray = account.getUserConfiguration().optJSONArray("folderTypes");
