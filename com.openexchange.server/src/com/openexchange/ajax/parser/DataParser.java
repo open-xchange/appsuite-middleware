@@ -424,23 +424,39 @@ public abstract class DataParser {
     /**
      * Parses optional array field out of specified JSON object
      *
-     * @param jsonObj
-     *            The JSON object to parse
-     * @param name
-     *            The optional array field's name
-     * @return The optional array field's value as an array of {@link String} or
-     *         <code>null</code> if there's no such field
-     * @throws JSONException
-     *             If a JSON error occurs
+     * @param jsonObj The JSON object to parse
+     * @param name The optional array field's name
+     * @return The optional array field's value as an array of {@link String} or <code>null</code> if there's no such field
+     * @throws JSONException If a JSON error occurs
      */
     public static String[] parseJSONStringArray(final JSONObject jsonObj, final String name) throws JSONException {
         if (!jsonObj.hasAndNotNull(name)) {
             return null;
         }
-        final JSONArray tmp = jsonObj.getJSONArray(name);
-        final String s[] = new String[tmp.length()];
-        for (int a = 0; a < tmp.length(); a++) {
+
+        JSONArray tmp = jsonObj.getJSONArray(name);
+        int length = tmp.length();
+        String s[] = new String[length];
+        for (int a = 0; a < length; a++) {
             s[a] = tmp.getString(a);
+        }
+        return s;
+    }
+
+    /**
+     * Parses given optional JSON array.
+     *
+     * @param jsonArr The JSON array to parse
+     * @return The optional array field's value as an array of {@link String} or <code>null</code> if given JSON array is <code>null</code>
+     * @throws JSONException If a JSON error occurs
+     */
+    public static String[] parseJSONStringArray(final JSONArray jsonArr) throws JSONException {
+        if (jsonArr == null) {
+            return null;
+        }
+        String s[] = new String[jsonArr.length()];
+        for (int a = 0; a < jsonArr.length(); a++) {
+            s[a] = jsonArr.getString(a);
         }
         return s;
     }

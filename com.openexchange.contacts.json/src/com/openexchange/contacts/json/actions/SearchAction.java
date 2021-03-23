@@ -117,23 +117,31 @@ public class SearchAction extends IDBasedContactAction {
         ContactsSearchObject searchObject = null;
         try {
             searchObject = new ContactsSearchObject();
-            if (json.has("folder")) {
-                Set<String> folders = new HashSet<String>();
-                if (json.get("folder").getClass().equals(JSONArray.class)) {
-                    folders.addAll(Arrays.asList(DataParser.parseJSONStringArray(json, "folder")));
-                } else {
-                    folders.add(DataParser.parseString(json, "folder"));
+            {
+                Object oFolders = json.opt("folder");
+                if (oFolders != null && !JSONObject.NULL.equals(oFolders)) {
+                    Set<String> folders;
+                    if (oFolders instanceof JSONArray) {
+                        folders = new HashSet<String>(Arrays.asList(DataParser.parseJSONStringArray((JSONArray) oFolders)));
+                    } else {
+                        folders = new HashSet<String>(2);
+                        folders.add(oFolders.toString());
+                    }
+                    searchObject.setFolders(folders);
                 }
-                searchObject.setFolders(folders);
             }
-            if (json.has(EXCLUDE_FOLDERS_FIELD)) {
-                Set<String> excludeFolders = new HashSet<String>();
-                if (json.get(EXCLUDE_FOLDERS_FIELD).getClass().equals(JSONArray.class)) {
-                    excludeFolders.addAll(Arrays.asList(DataParser.parseJSONStringArray(json, EXCLUDE_FOLDERS_FIELD)));
-                } else {
-                    excludeFolders.add(DataParser.parseString(json, EXCLUDE_FOLDERS_FIELD));
+            {
+                Object oExcludedFolders = json.opt(EXCLUDE_FOLDERS_FIELD);
+                if (oExcludedFolders != null && !JSONObject.NULL.equals(oExcludedFolders)) {
+                    Set<String> excludeFolders;
+                    if (oExcludedFolders instanceof JSONArray) {
+                        excludeFolders = new HashSet<String>(Arrays.asList(DataParser.parseJSONStringArray((JSONArray) oExcludedFolders)));
+                    } else {
+                        excludeFolders = new HashSet<String>(2);
+                        excludeFolders.add(oExcludedFolders.toString());
+                    }
+                    searchObject.setExcludeFolders(excludeFolders);
                 }
-                searchObject.setExcludeFolders(excludeFolders);
             }
             if (null != searchObject.getFolders() && false == searchObject.getFolders().isEmpty() &&
                 null != searchObject.getExcludeFolders() && false == searchObject.getExcludeFolders().isEmpty()) {
