@@ -150,16 +150,16 @@ public class SearchAction extends IDBasedContactAction {
             if (json.has(SearchFields.PATTERN)) {
                 searchObject.setPattern(DataParser.parseString(json, SearchFields.PATTERN));
             }
-            if (json.has("startletter")) {
-                searchObject.setStartLetter(DataParser.parseBoolean(json, "startletter"));
+            if (json.optBoolean("startletter", false)) {
+                searchObject.setStartLetter(true);
             }
-            if (json.has("emailAutoComplete") && json.getBoolean("emailAutoComplete")) {
+            if (json.optBoolean("emailAutoComplete", false)) {
                 searchObject.setEmailAutoComplete(true);
             }
-            if (json.has("orSearch") && json.getBoolean("orSearch")) {
+            if (json.optBoolean("orSearch", false)) {
                 searchObject.setOrSearch(true);
             }
-            if (json.has("exactMatch") && json.getBoolean("exactMatch")) {
+            if (json.optBoolean("exactMatch", false)) {
                 searchObject.setExactMatch(true);
             }
             searchObject.setSurname(DataParser.parseString(json, ContactFields.LAST_NAME));
