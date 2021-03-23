@@ -81,7 +81,6 @@ import com.openexchange.search.CompositeSearchTerm.CompositeOperation;
 import com.openexchange.search.Operand;
 import com.openexchange.search.SearchTerm;
 import com.openexchange.search.SingleSearchTerm;
-import com.openexchange.search.SingleSearchTerm.SingleOperation;
 import com.openexchange.search.internal.operands.ConstantOperand;
 
 /**
@@ -160,12 +159,12 @@ public final class IDMangler {
      *
      * @param contact The contact
      * @return The contact representation with relative identifiers
-     * @throws IllegalArgumentException If given contact contains neither a folde rnor a parent folder identifier
+     * @throws IllegalArgumentException If given contact contains neither a folder nor a parent folder identifier
      */
     public static Contact withRelativeID(Contact contact) throws OXException {
         String newFolderId = getRelativeFolderId(getEffectiveFolderId(contact));
         if (newFolderId == null) {
-            throw new IllegalArgumentException("Provided contact contains neither a folde rnor a parent folder identifier");
+            throw new IllegalArgumentException("Provided contact contains neither a folder nor a parent folder identifier");
         }
         return new IDManglingContact(contact, newFolderId);
     }
@@ -257,6 +256,7 @@ public final class IDMangler {
      * @param relativeResults The contacts from the account
      * @param accountId The identifier of the account
      * @return The contact representations with unique identifiers
+     * @throws IllegalArgumentException If a given contact contains neither a folder nor a parent folder identifier
      */
     public static List<Contact> withUniqueIDs(List<Contact> relativeResults, int accountId) {
         if (null == relativeResults || relativeResults.isEmpty()) {
@@ -267,7 +267,11 @@ public final class IDMangler {
         }
         List<Contact> contacts = new ArrayList<>(relativeResults.size());
         for (Contact contact : relativeResults) {
-            contacts.add(new IDManglingContact(contact, getUniqueFolderId(accountId, getEffectiveFolderId(contact))));
+            String effectiveFolderId = getEffectiveFolderId(contact);
+            if (effectiveFolderId == null) {
+                throw new IllegalArgumentException("Provided contact '" + contact.getId() + "' contains neither a folder nor a parent folder identifier");
+            }
+            contacts.add(new IDManglingContact(contact, getUniqueFolderId(accountId, effectiveFolderId)));
         }
         return contacts;
     }
