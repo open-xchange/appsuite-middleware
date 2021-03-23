@@ -51,6 +51,7 @@ package com.openexchange.ajax.framework;
 
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
+import com.openexchange.exception.Category;
 import com.openexchange.test.common.configuration.AJAXConfig;
 import com.openexchange.test.common.test.TestClassConfig;
 import com.openexchange.testing.httpclient.invoker.ApiClient;
@@ -94,7 +95,7 @@ public abstract class AbstractAPIClientSession extends AbstractClientSession {
     protected ApiClient getApiClient() throws ApiException {
         return testUser.getApiClient();
     }
-    
+
     /**
      * Returns the session id of the default session
      *
@@ -181,7 +182,7 @@ public abstract class AbstractAPIClientSession extends AbstractClientSession {
     }
 
     /**
-     * Checks if a response doesn't contain any errors
+     * Checks if a response doesn't contain any errors.
      *
      * @param error The error element of the response
      * @param errorDesc The error description element of the response
@@ -189,7 +190,36 @@ public abstract class AbstractAPIClientSession extends AbstractClientSession {
      * @return The data
      */
     protected static <T> T checkResponse(String error, String errorDesc, T data) {
-        assertNull(errorDesc, error);
+        return checkResponse(error, errorDesc, null, data);
+    }
+
+    /**
+     * Checks if a response doesn't contain any errors. Errors of category "WARNING" are ignored implicitly.
+     *
+     * @param error The error element of the response
+     * @param errorDesc The error description element of the response
+     * @param categories The error categories if the response
+     * @param data The data element of the response
+     * @return The data
+     */
+    protected static <T> T checkResponse(String error, String errorDesc, String categories, T data) {
+        return checkResponse(error, errorDesc, categories, true, data);
+    }
+
+    /**
+     * Checks if a response doesn't contain any errors
+     *
+     * @param error The error element of the response
+     * @param errorDesc The error description element of the response
+     * @param categories The error categories if the response
+     * @param ignoreWarnings <code>true</code> to ignore warnings (as indicated through the categories), <code>false</code>, otherwise
+     * @param data The data element of the response
+     * @return The data
+     */
+    protected static <T> T checkResponse(String error, String errorDesc, String categories, boolean ignoreWarnings, T data) {
+        if (false == ignoreWarnings || false == Category.EnumType.WARNING.name().equals(categories)) {
+            assertNull(errorDesc, error);
+        }
         assertNotNull(data);
         return data;
     }

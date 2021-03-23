@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH group of companies.
+ *    trademarks of the OX Software GmbH. group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -49,50 +49,57 @@
 
 package com.openexchange.ajax.chronos.bugs;
 
-import org.junit.runner.RunWith;
-import org.junit.runners.Suite;
-import com.openexchange.test.concurrent.ParallelSuite;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+import java.util.Collections;
+import java.util.Date;
+import java.util.Map;
+import org.junit.Test;
+import com.openexchange.ajax.chronos.AbstractChronosTest;
+import com.openexchange.ajax.chronos.util.DateTimeUtil;
+import com.openexchange.java.util.TimeZones;
+import com.openexchange.testing.httpclient.models.AlarmTriggerResponse;
+import com.openexchange.time.TimeTools;
 
 /**
- * {@link ChronosBugsTestSuite}
+ * {@link MWB1014Test}
  *
- * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
+ * UI Error When Birthdays Disabled
+ *
+ * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
+ * @since v8.0.0
  */
-@RunWith(ParallelSuite.class)
-@Suite.SuiteClasses({
-    // @formatter:off
-    Bug10154Test.class,
-    Bug10733Test.class,
-    Bug10836Test.class,
-    Bug11250Test.class,
-    Bug12099Test.class,
-    Bug12432Test.class,
-    Bug12444Test.class,
-    Bug12610Test.class,
-    Bug12842Test.class,
-    Bug13090Test.class,
-    Bug13214Test.class,
-    Bug13447Test.class,
-    Bug13501Test.class,
-    Bug13505Test.class,
-    Bug13625Test.class,
-    Bug13788Test.class,
-    Bug13942Test.class,
-    Bug14357Test.class,
-    Bug14679Test.class,
-    Bug15074Test.class,
-    Bug15585Test.class,
-    Bug58814Test.class,
-    Bug64836Test.class,
-    Bug66144Test.class,
-    Bug68699Test.class,
-    MWB2Test.class,
-    MWB104Test.class,
-    MWB864Test.class,
-    MWB999Test.class,
-    MWB1014Test.class,
-    // @formatter:on
-})
-public class ChronosBugsTestSuite {
+public class MWB1014Test extends AbstractChronosTest {
 
+    private Map<String, String> neededConfigurations;
+
+    @Override
+    protected Map<String, String> getNeededConfigurations() {
+        return neededConfigurations;
+    }
+
+    @Override
+    protected String getReloadables() {
+        return "CapabilityReloadable";
+    }
+
+    @Test
+    public void testGetTriggersWithDeactivatedBirthdaysCalendar() throws Exception {
+        /*
+         * lookup birthdays calendar once (to ensure birthdays calendar account gets auto-provisioned)
+         */
+        assertNotNull("no birthdays calendar folder found", optBirthdayCalendarFolder(foldersApi));
+        /*
+         * disable birthdays calendar provider for user & ensure that the folder is no longer listed
+         */
+        neededConfigurations = Collections.singletonMap("com.openexchange.calendar.birthdays.enabled", "false");
+        setUpConfiguration();
+        assertNull("birthdays calendar folder still found", optBirthdayCalendarFolder(foldersApi));
+        /*
+         * get alarm triggers & expect no error (but allow a warning)
+         */
+        Date rangeEnd = TimeTools.D("next week at midnight", TimeZones.UTC);
+        AlarmTriggerResponse alarmTriggerResponse = chronosApi.getAlarmTrigger(DateTimeUtil.getZuluDateTime(rangeEnd.getTime()).getValue(), null, null);
+        checkResponse(alarmTriggerResponse.getError(), alarmTriggerResponse.getErrorDesc(), alarmTriggerResponse.getCategories(), true, alarmTriggerResponse.getData());
+    }
 }

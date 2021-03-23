@@ -63,7 +63,6 @@ import com.openexchange.ajax.chronos.manager.CalendarFolderManager;
 import com.openexchange.ajax.chronos.manager.EventManager;
 import com.openexchange.chronos.common.CalendarUtils;
 import com.openexchange.chronos.provider.CalendarProviders;
-import com.openexchange.exception.OXException;
 import com.openexchange.folderstorage.type.PrivateType;
 import com.openexchange.test.common.asset.AssetManager;
 import com.openexchange.test.common.tools.client.EnhancedApiClient;
@@ -74,6 +73,7 @@ import com.openexchange.testing.httpclient.models.EventData;
 import com.openexchange.testing.httpclient.models.EventId;
 import com.openexchange.testing.httpclient.models.FolderPermission;
 import com.openexchange.testing.httpclient.models.FolderUpdateResponse;
+import com.openexchange.testing.httpclient.models.FoldersVisibilityData;
 import com.openexchange.testing.httpclient.models.FoldersVisibilityResponse;
 import com.openexchange.testing.httpclient.models.NewFolderBody;
 import com.openexchange.testing.httpclient.models.NewFolderBodyFolder;
@@ -239,19 +239,34 @@ public class AbstractChronosTest extends AbstractEnhancedApiClientSession {
     }
 
     /**
-     * Gets the birthday calendar folder
+     * Optionally gets the birthday calendar folder.
      *
      * @param foldersApi The folders API to use
-     * @throws Exception if the birthday calendar folder cannot be found
+     * @return The identifier of the birthday calendar folder, or <code>null</code> if not found
      */
-    protected String getBirthdayCalendarFolder(FoldersApi foldersApi) throws Exception {
+    protected String optBirthdayCalendarFolder(FoldersApi foldersApi) throws Exception {
         ArrayList<ArrayList<?>> folderArrays = getPrivateFolderList(foldersApi, EVENT_MODULE, "1,300,308,3203", "1");
         for (ArrayList<?> folderArray : folderArrays) {
             if (CalendarProviders.ID_BIRTHDAYS.equals(folderArray.get(3))) {
                 return String.valueOf(folderArray.get(0));
             }
         }
-        throw new Exception("Unable to find birthdays calendar folder");
+        return null;
+    }
+
+    /**
+     * Gets the birthday calendar folder
+     *
+     * @param foldersApi The folders API to use
+     * @return The identifier of the birthday calendar folder
+     * @throws Exception if the birthday calendar folder cannot be found
+     */
+    protected String getBirthdayCalendarFolder(FoldersApi foldersApi) throws Exception {
+        String folderId = optBirthdayCalendarFolder(foldersApi);
+        if (null == folderId) {
+            throw new Exception("Unable to find birthdays calendar folder");
+        }
+        return folderId;
     }
 
     /**
@@ -311,11 +326,9 @@ public class AbstractChronosTest extends AbstractEnhancedApiClientSession {
      */
     @SuppressWarnings({ "unchecked" })
     protected ArrayList<ArrayList<?>> getPrivateFolderList(FoldersApi foldersApi, String module, String columns, String tree) throws Exception {
-        FoldersVisibilityResponse visibleFolders = foldersApi.getVisibleFolders(module, columns, tree, null, Boolean.TRUE);
-        if (visibleFolders.getError() != null) {
-            throw new OXException(new Exception(visibleFolders.getErrorDesc()));
-        }
-        Object privateFolders = visibleFolders.getData().getPrivate();
+        FoldersVisibilityResponse resp = foldersApi.getVisibleFolders(module, columns, tree, null, Boolean.TRUE);
+        FoldersVisibilityData visibilityData = checkResponse(resp.getError(), resp.getErrorDesc(), resp.getCategories(), resp.getData());
+        Object privateFolders = visibilityData.getPrivate();
         return (ArrayList<ArrayList<?>>) privateFolders;
     }
 
