@@ -160,9 +160,13 @@ public final class IDMangler {
      *
      * @param contact The contact
      * @return The contact representation with relative identifiers
+     * @throws IllegalArgumentException If given contact contains neither a folde rnor a parent folder identifier
      */
     public static Contact withRelativeID(Contact contact) throws OXException {
         String newFolderId = getRelativeFolderId(getEffectiveFolderId(contact));
+        if (newFolderId == null) {
+            throw new IllegalArgumentException("Provided contact contains neither a folde rnor a parent folder identifier");
+        }
         return new IDManglingContact(contact, newFolderId);
     }
 
@@ -496,7 +500,7 @@ public final class IDMangler {
      */
     @SuppressWarnings("deprecation")
     private static SingleSearchTerm recreateTerm(SingleSearchTerm term) throws OXException {
-        SingleSearchTerm newTerm = new SingleSearchTerm((SingleOperation) term.getOperation());
+        SingleSearchTerm newTerm = new SingleSearchTerm(term.getOperation());
         Operand<?>[] operands = term.getOperands();
         for (int i = 0; i < operands.length; i++) {
             if (Operand.Type.COLUMN != operands[i].getType()) {
