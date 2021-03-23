@@ -1,3 +1,9 @@
+open-xchange-spamsettings-generic (7.10.5-8) stable; urgency=medium
+
+  * Build for patch 2021-03-29 (5976)
+
+ -- Carsten Hoeger <choeger@open-xchange.com>  Tue, 23 Mar 2021 13:14:59 +0000
+
 open-xchange-spamsettings-generic (7.10.5-7) stable; urgency=medium
 
   * Build for patch 2021-03-15 (5973)

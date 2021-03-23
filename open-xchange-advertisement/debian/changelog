@@ -1,3 +1,9 @@
+open-xchange-advertisement (7.10.5-8) stable; urgency=medium
+
+  * Build for patch 2021-03-29 (5976)
+
+ -- Kevin Ruthmann <kevin.ruthmann@open-xchange.com>  Tue, 23 Mar 2021 13:13:37 +0000
+
 open-xchange-advertisement (7.10.5-7) stable; urgency=medium
 
   * Build for patch 2021-03-15 (5973)
