@@ -201,6 +201,7 @@ public final class IDMangler {
      * @param contact The contact from the account, or <code>null</code> to pass through
      * @param accountId The identifier of the account
      * @return The contact representation with unique identifiers
+     * @throws IllegalArgumentException If given contact contains neither a folder nor a parent folder identifier
      */
     public static Contact withUniqueID(Contact contact, int accountId) {
         if (null == contact) {
@@ -210,7 +211,11 @@ public final class IDMangler {
             return contact;
         }
 
-        String newFolderId = getUniqueFolderId(accountId, getEffectiveFolderId(contact));
+        String effectiveFolderId = getEffectiveFolderId(contact);
+        if (effectiveFolderId == null) {
+            throw new IllegalArgumentException("Provided contact contains neither a folder nor a parent folder identifier");
+        }
+        String newFolderId = getUniqueFolderId(accountId, effectiveFolderId);
         return new IDManglingContact(contact, newFolderId);
     }
 
