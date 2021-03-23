@@ -185,9 +185,9 @@ public abstract class AbstractAlarmTriggerTest extends AbstractAlarmTest {
     //protected boolean containsAlarm(AlarmTriggerData data, String folder, String alarmId, String eventId) {
     protected boolean containsAlarm(List<AlarmTrigger> data, String folder, String alarmId, String eventId) {
         for (AlarmTrigger trigger : data) {
-            if ((folder == null || trigger.getFolder() == folder) &&
-                (alarmId == null || trigger.getAlarmId() == alarmId) &&
-                (eventId == null || trigger.getEventId() == eventId)) {
+            if ((folder == null || folder.equals(trigger.getFolder())) &&
+                (alarmId == null || alarmId.equals(trigger.getAlarmId())) &&
+                (eventId == null || eventId.equals(trigger.getEventId()))) {
                 return true;
             }
         }

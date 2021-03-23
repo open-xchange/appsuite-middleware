@@ -51,14 +51,22 @@ package com.openexchange.ajax.chronos.bugs;
 
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
+import java.util.Calendar;
 import java.util.Collections;
 import java.util.Date;
+import java.util.List;
 import java.util.Map;
 import org.junit.Test;
-import com.openexchange.ajax.chronos.AbstractChronosTest;
+import com.openexchange.ajax.chronos.AbstractAlarmTriggerTest;
+import com.openexchange.ajax.chronos.factory.AlarmFactory;
+import com.openexchange.ajax.chronos.factory.EventFactory;
 import com.openexchange.ajax.chronos.util.DateTimeUtil;
+import com.openexchange.chronos.common.CalendarUtils;
 import com.openexchange.java.util.TimeZones;
+import com.openexchange.testing.httpclient.models.AlarmTrigger;
 import com.openexchange.testing.httpclient.models.AlarmTriggerResponse;
+import com.openexchange.testing.httpclient.models.EventData;
 import com.openexchange.time.TimeTools;
 
 /**
@@ -69,7 +77,7 @@ import com.openexchange.time.TimeTools;
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  * @since v8.0.0
  */
-public class MWB1014Test extends AbstractChronosTest {
+public class MWB1014Test extends AbstractAlarmTriggerTest {
 
     private Map<String, String> neededConfigurations;
 
@@ -96,10 +104,19 @@ public class MWB1014Test extends AbstractChronosTest {
         setUpConfiguration();
         assertNull("birthdays calendar folder still found", optBirthdayCalendarFolder(foldersApi));
         /*
+         * create an event with trigger in the user's default account
+         */
+        Date startDate = TimeTools.D("tomorrow at noon", TimeZones.UTC);
+        Date endDate = CalendarUtils.add(startDate, Calendar.HOUR, 1);
+        EventData toCreate = EventFactory.createSingleEventWithSingleAlarm(getCalendaruser(), getClass().getName(),
+            DateTimeUtil.getDateTime(startDate.getTime()), DateTimeUtil.getDateTime(endDate.getTime()), AlarmFactory.createDisplayAlarm("-PT15M"), folderId);
+        EventData event = eventManager.createEvent(toCreate, true);
+        /*
          * get alarm triggers & expect no error (but allow a warning)
          */
         Date rangeEnd = TimeTools.D("next week at midnight", TimeZones.UTC);
         AlarmTriggerResponse alarmTriggerResponse = chronosApi.getAlarmTrigger(DateTimeUtil.getZuluDateTime(rangeEnd.getTime()).getValue(), null, null);
-        checkResponse(alarmTriggerResponse.getError(), alarmTriggerResponse.getErrorDesc(), alarmTriggerResponse.getCategories(), true, alarmTriggerResponse.getData());
+        List<AlarmTrigger> alarmTriggers = checkResponse(alarmTriggerResponse.getError(), alarmTriggerResponse.getErrorDesc(), alarmTriggerResponse.getCategories(), true, alarmTriggerResponse.getData());
+        assertTrue("alarm not found", containsAlarm(alarmTriggers, folderId, null, event.getId()));
     }
 }
