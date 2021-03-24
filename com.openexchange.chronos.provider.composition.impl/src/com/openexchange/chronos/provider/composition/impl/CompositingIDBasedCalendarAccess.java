@@ -381,7 +381,7 @@ public class CompositingIDBasedCalendarAccess extends AbstractCompositingIDBased
         }
         return getOrderedResults(eventsResults, folderIds);
     }
-    
+
     @Override
     public UpdatesResult getUpdatedEventsInFolder(String folderId, long updatedSince) throws OXException {
         CalendarAccount account = getAccount(getAccountId(folderId));
@@ -684,13 +684,16 @@ public class CompositingIDBasedCalendarAccess extends AbstractCompositingIDBased
     public List<AlarmTrigger> getAlarmTriggers(Set<String> actions) throws OXException {
         List<AlarmTrigger> result = new ArrayList<AlarmTrigger>();
         for (CalendarAccount account : getAccounts(CalendarCapability.ALARMS)) {
-            List<AlarmTrigger> alarmTriggers = getAccess(account, PersonalAlarmAware.class).getAlarmTriggers(actions);
-            for (AlarmTrigger trigger : alarmTriggers) {
-                trigger.setFolder(getUniqueFolderId(account.getAccountId(), trigger.getFolder()));
+            try {
+                for (AlarmTrigger trigger : getAccess(account, PersonalAlarmAware.class).getAlarmTriggers(actions)) {
+                    trigger.setFolder(getUniqueFolderId(account.getAccountId(), trigger.getFolder()));
+                    result.add(trigger);
+                }
+            } catch (OXException e) {
+                warnings.add(withUniqueIDs(e, account.getAccountId()));
             }
-            result.addAll(alarmTriggers);
         }
-        if (result.size() > 1) {
+        if (1 < result.size()) {
             Collections.sort(result);
         }
         return result;
