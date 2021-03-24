@@ -103,11 +103,12 @@ public class AttachmentStorages {
      *
      * @param mailPart The mail part
      * @param partNumber The part's (sequence) number
+     * @param size The size of the mail part or <code>-1</code> if unknown
      * @param compositionSpaceId The identifier of the composition space
      * @param session The session
      * @return The newly created attachment description
      */
-    public static AttachmentDescription createAttachmentDescriptionFor(MailPart mailPart, int partNumber, UUID compositionSpaceId, Session session) {
+    public static AttachmentDescription createAttachmentDescriptionFor(MailPart mailPart, int partNumber, long size, UUID compositionSpaceId, Session session) {
         AttachmentDescription attachment = new AttachmentDescription();
         String partId = mailPart.getFirstHeader(MessageHeaders.HDR_X_PART_ID);
         if (Strings.isNotEmpty(partId)) {
@@ -121,6 +122,7 @@ public class AttachmentStorages {
         attachment.setMimeType(mailPart.getContentType().getBaseType());
         String fileName = mailPart.getFileName();
         attachment.setName(Strings.isEmpty(fileName) ? MailMessageParser.generateFilename(Integer.toString(partNumber), mailPart.getContentType().getBaseType()) : fileName);
+        attachment.setSize(size < 0 ? -1L : size);
         attachment.setOrigin(CompositionSpaces.hasVCardMarker(mailPart, session) ? AttachmentOrigin.VCARD : AttachmentOrigin.MAIL);
         return attachment;
     }
@@ -130,7 +132,7 @@ public class AttachmentStorages {
      *
      * @param mailMessage The mail message
      * @param partNumber The (sequence) number
-     * @param size The size of the mail message
+     * @param size The size of the mail message or <code>-1</code> if unknown
      * @param compositionSpaceId The identifier of the composition space
      * @return The newly created attachment description
      */
@@ -148,7 +150,7 @@ public class AttachmentStorages {
         attachment.setMimeType(MimeTypes.MIME_MESSAGE_RFC822);
         String subject = mailMessage.getSubject();
         attachment.setName((Strings.isEmpty(subject) ? "mail" + (partNumber > 0 ? Integer.toString(partNumber) : "") : subject.replaceAll("\\p{Blank}+", "_")) + ".eml");
-        attachment.setSize(size);
+        attachment.setSize(size < 0 ? -1L : size);
         attachment.setOrigin(AttachmentOrigin.MAIL);
         return attachment;
     }

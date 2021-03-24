@@ -488,7 +488,7 @@ public class Reply extends AbstractOpener {
                 int i = state.attachments.size();
                 for (MailPart mailPart : nonInlineParts) {
                     // Compile & store attachment
-                    AttachmentDescription attachment = AttachmentStorages.createAttachmentDescriptionFor(mailPart, i + 1, state.compositionSpaceId, session);
+                    AttachmentDescription attachment = AttachmentStorages.createAttachmentDescriptionFor(mailPart, i + 1, -1L, state.compositionSpaceId, session);
                     Attachment partAttachment = AttachmentStorages.saveAttachment(mailPart.getInputStream(), attachment, optionalEncrypt, session, state.attachmentStorage);
                     state.attachments.add(partAttachment);
                     i++;

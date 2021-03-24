@@ -2287,7 +2287,7 @@ public class CompositionSpaceServiceImpl implements CompositionSpaceService {
             int i = 0;
             for (MailPart mailPart : nonInlineParts) {
                 // Compile & store attachment
-                AttachmentDescription attachment = AttachmentStorages.createAttachmentDescriptionFor(mailPart, i + 1, compositionSpaceId, session);
+                AttachmentDescription attachment = AttachmentStorages.createAttachmentDescriptionFor(mailPart, i + 1, -1L, compositionSpaceId, session);
                 Attachment partAttachment = AttachmentStorages.saveAttachment(mailPart.getInputStream(), attachment, session, attachmentStorage);
                 newAttachments.add(partAttachment);
                 i++;

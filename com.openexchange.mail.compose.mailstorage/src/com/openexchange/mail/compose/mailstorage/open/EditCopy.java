@@ -287,7 +287,7 @@ public class EditCopy extends AbstractOpener {
                             sink.write(mailPart.getInputStream());
 
                             // Compile attachment
-                            AttachmentDescription attachmentDesc = AttachmentStorages.createAttachmentDescriptionFor(mailPart, i + 1, state.compositionSpaceId, session);
+                            AttachmentDescription attachmentDesc = AttachmentStorages.createAttachmentDescriptionFor(mailPart, i + 1, sink.getLength(), state.compositionSpaceId, session);
                             DefaultAttachment.Builder attachment = DefaultAttachment.builder(attachmentDesc);
                             if (attachmentDesc.getId() == null) {
                                 attachment.withId(UUID.randomUUID());
