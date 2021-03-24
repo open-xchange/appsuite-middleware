@@ -351,11 +351,20 @@ public abstract class AbstractCompositingIDBasedCalendarAccess implements Transa
             return provider.connect(session, account, parameters);
         } catch (OXException e) {
             if (null != provider && FallbackAwareCalendarProvider.class.isInstance(provider)) {
+                /*
+                 * connect access from fallback-aware provider if possible
+                 */
+                LOG.debug("Unable to initialize access for {}, using fallback access for {}.", account, provider.getId(), e);
                 return ((FallbackAwareCalendarProvider) provider).connectFallback(session, account, parameters, e);
             }
             if (null != provider && AutoProvisioningCalendarProvider.class.isInstance(provider)) {
-                return new FallbackEmptyCalendarAccess(account, e);
+                /*
+                 * connect empty "no-op" access if account was auto-provisioned, w/o warning
+                 */
+                LOG.debug("Unable to initialize access for {}, using empty 'no-op' access for {}.", account, provider.getId(), e);
+                return new FallbackEmptyCalendarAccess(account, null);
             }
+            LOG.debug("Unable to initialize access for {}, using generic fallback access.", account, e);
             return new FallbackUnknownCalendarAccess(account, e);
         }
     }
@@ -673,7 +682,7 @@ public abstract class AbstractCompositingIDBasedCalendarAccess implements Transa
 
     /**
      * Checks if the {@link CalendarProvider} for the given account is a {@link FolderCalendarPrvider}.
-     * 
+     *
      * @param accountId
      * @return
      * @throws OXException
@@ -685,7 +694,7 @@ public abstract class AbstractCompositingIDBasedCalendarAccess implements Transa
 
     /**
      * Optionally gets the calendar provider responsible from the provider registry.
-     * 
+     *
      * @param providerId The identifier of the provider to get
      * @return The calendar provider, or <code>null</code> if not available
      */
