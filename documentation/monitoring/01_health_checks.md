@@ -133,7 +133,7 @@ The ``liveness``-check is available via
 ```
 GET hostname:8015/live
 ```
-This endpoint is available as soon as possible when the JVM is starting and will always respond with HTTP status ``200 OK``. The default port for this endpoint is ``8015`` but can changed via ``com.openexchange.connector.livenessPort`` property.
+This endpoint is available as soon as possible when the JVM is starting and will always respond with HTTP status ``200 OK``. The default port for this endpoint is ``8016`` but can changed via ``com.openexchange.connector.livenessPort`` property.
 
 ## Readiness check
 The ``readiness``-check is available via

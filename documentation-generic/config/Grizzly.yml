@@ -300,7 +300,7 @@ properties:
       description: |
         The port for the liveness end-point.
         
-      defaultValue: 8015
+      defaultValue: 8016
       version: 8.0.0
       reloadable: false
       configcascadeAware: false
