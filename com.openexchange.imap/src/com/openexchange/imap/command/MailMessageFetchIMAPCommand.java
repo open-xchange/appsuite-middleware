@@ -1046,8 +1046,17 @@ public final class MailMessageFetchIMAPCommand extends AbstractIMAPCommand<MailM
             msg.addReplyTo(wrap(env.replyTo));
             msg.setHeader("In-Reply-To", env.inReplyTo);
             msg.setHeader("Message-Id", env.messageId);
-            msg.setSubject(MimeMessageUtility.decodeEnvelopeSubject(env.subject), true);
+            msg.setSubject(decodeSubject(env.subject), true);
             msg.setSentDate(env.date);
+        }
+
+        private String decodeSubject(String envelopeSubject) {
+            try {
+                return MimeMessageUtility.decodeEnvelopeSubject(envelopeSubject);
+            } catch (Exception e) {
+                LOG.warn("Failed to decode subject from ENVELOPE fetch item: `{}\u00b4. Using raw one instead.", envelopeSubject, e);
+                return envelopeSubject;
+            }
         }
 
         private InternetAddress[] wrap(InternetAddress... addresses) {
