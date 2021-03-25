@@ -114,7 +114,7 @@ public class CreateDocumentAction extends AbstractDocumentListAction {
 
     @Override
     protected Object[] getAdditionals(final DocumentMetadata doc) {
-        return new Object[] { L(doc.getLastModified().getTime()), I(getContext().getContextId()) };
+        return new Object[] { L(getTimestamp()), I(getContext().getContextId()) };
     }
 
     public void setTimestamp(final long ts) {
