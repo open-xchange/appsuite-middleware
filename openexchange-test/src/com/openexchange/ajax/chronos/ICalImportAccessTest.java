@@ -90,8 +90,7 @@ public class ICalImportAccessTest extends AbstractImportExportTest {
     public void testImportCalendarAccess() throws Exception {
         String errorResponse = getImportResponse(ICalImportExportManager.SINGLE_IMPORT_ICS);
         assertNotNull(errorResponse);
-        assertTrue("Wrong error:" + errorResponse, errorResponse.contains("Missing capability [calendar_chronos]"));
-        assertTrue("Wrong error:" + errorResponse, errorResponse.contains("Categories=PERMISSION_DENIED"));
+        assertTrue("Wrong error:" + errorResponse, errorResponse.contains("CAL-4045"));
     }
 
     private void setModuleAccess(boolean hasAccess) throws Exception {
