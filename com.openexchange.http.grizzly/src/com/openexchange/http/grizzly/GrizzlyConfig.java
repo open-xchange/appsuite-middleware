@@ -84,7 +84,7 @@ public class GrizzlyConfig {
         private String httpHost = "0.0.0.0";
         private int httpPort = 8009;
         private int httpsPort = 8010;
-        private int livenessPort = 8015;
+        private int livenessPort = 8016;
         private boolean isJMXEnabled = false;
         private GrizzlyAccessLogConfig accessLogConfig = GrizzlyAccessLogConfig.NOT_ENABLED_CONFIG;
         private boolean isWebsocketsEnabled = false;
@@ -186,7 +186,7 @@ public class GrizzlyConfig {
             }
             this.httpPort = configService.getIntProperty("com.openexchange.connector.networkListenerPort", 8009);
             this.httpsPort = configService.getIntProperty("com.openexchange.connector.networkSslListenerPort", 8010);
-            this.livenessPort = configService.getIntProperty("com.openexchange.connector.livenessPort", 8015);
+            this.livenessPort = configService.getIntProperty("com.openexchange.connector.livenessPort", 8016);
             this.maxRequestParameters = configService.getIntProperty("com.openexchange.connector.maxRequestParameters", 1000);
             this.backendRoute = configService.getProperty("com.openexchange.server.backendRoute", "OX0");
             this.echoHeader = configService.getProperty("com.openexchange.servlet.echoHeaderName","X-Echo-Header");
