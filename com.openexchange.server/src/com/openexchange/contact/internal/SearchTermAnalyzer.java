@@ -115,7 +115,7 @@ public class SearchTermAnalyzer {
 				}
 				if (null != field && ContactField.FOLDER_ID.equals(field) && i + 1 < operands.length &&
 						null != operands[i + 1] && null != operands[i + 1].getValue()) {
-					this.folderIDs.add((String)operands[i + 1].getValue());
+                    this.folderIDs.add(String.valueOf(operands[i + 1].getValue()));
 					i++;
 				}
 			}
