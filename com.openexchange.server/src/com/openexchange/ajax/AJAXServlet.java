@@ -436,12 +436,12 @@ public abstract class AJAXServlet extends HttpServlet implements UploadRegistry 
     public static final String CONTENTTYPE_JAVASCRIPT = "text/javascript; charset=UTF-8";
 
     /**
-     * The default json content type
+     * The default content type indicating JSON content: <code>"application/json; charset=UTF-8"</code>.
      */
     public static final String CONTENTTYPE_JSON = "application/json; charset=UTF-8";
 
     /**
-     * The content type if the reponse body contains the html page include the response for uploads.
+     * The content type if the response body contains an HTML page include the response for uploads.
      */
     public static final String CONTENTTYPE_HTML = "text/html; charset=UTF-8";
 
@@ -1279,6 +1279,11 @@ public abstract class AJAXServlet extends HttpServlet implements UploadRegistry 
         return module;
     }
 
+    /**
+     * Sets the default MIME type <code>"application/json; charset=UTF-8"</code> to given HTTP Servlet response.
+     *
+     * @param resp The HTTP Servlet response to apply to
+     */
     public static void setDefaultContentType(HttpServletResponse resp) {
         resp.setContentType(CONTENTTYPE_JSON);
     }
