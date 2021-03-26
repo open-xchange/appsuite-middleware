@@ -69,6 +69,7 @@ import javax.mail.Store;
 import javax.mail.internet.AddressException;
 import javax.mail.internet.InternetAddress;
 import com.openexchange.exception.OXException;
+import com.openexchange.java.IOs;
 import com.openexchange.java.Strings;
 import com.openexchange.log.LogProperties;
 import com.openexchange.log.LogProperties.Name;
@@ -496,7 +497,12 @@ public class MimeMailException extends OXException {
                 return me;
             } else if (nextException.getClass().getName().endsWith(EXC_CONNECTION_RESET_EXCEPTION)) {
                 mailInterfaceMonitor.changeNumBrokenConnections(true);
-                return MimeMailExceptionCode.CONNECTION_RESET.create(e, new Object[0]);
+                if (null != mailConfig && null != session) {
+                    String server = mailConfig.getServer();
+                    String login = mailConfig.getLogin();
+                    return MimeMailExceptionCode.CONNECTION_RESET_EXT.create(e, server, login, I(session.getUserId()), I(session.getContextId()));
+                }
+                return MimeMailExceptionCode.CONNECTION_RESET.create(e, appendInfo(nextException.getMessage(), folder));
             } else if (nextException instanceof java.net.NoRouteToHostException) {
                 return MimeMailExceptionCode.NO_ROUTE_TO_HOST.create(e, mailConfig == null ? STR_EMPTY : mailConfig.getServer());
             } else if (nextException instanceof java.net.PortUnreachableException) {
@@ -813,6 +819,15 @@ public class MimeMailException extends OXException {
     }
 
     private static OXException handleIOException(IOException ioException, MailConfig mailConfig, Session session, Folder folder) {
+        if (IOs.isConnectionReset(ioException)) {
+            if (null != mailConfig && null != session) {
+                String server = mailConfig.getServer();
+                String login = mailConfig.getLogin();
+                return MimeMailExceptionCode.CONNECTION_RESET_EXT.create(ioException, server, login, I(session.getUserId()), I(session.getContextId()));
+            }
+            return MimeMailExceptionCode.CONNECTION_RESET.create(ioException, appendInfo(ioException.getMessage(), folder));
+        }
+
         if (null != mailConfig && null != session) {
             String server = mailConfig.getServer();
             String login = mailConfig.getLogin();

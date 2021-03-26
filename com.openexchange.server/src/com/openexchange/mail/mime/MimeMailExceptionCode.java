@@ -201,7 +201,11 @@ public enum MimeMailExceptionCode implements DisplayableOXExceptionCode {
     /**
      * Connection was reset
      */
-    CONNECTION_RESET("Connection was reset. Please try again.", CATEGORY_TRY_AGAIN, 1017),
+    CONNECTION_RESET("Connection was reset: %1$s. Please try again.", CATEGORY_TRY_AGAIN, 1017),
+    /**
+     * Connection was reset by "%1$s" for login %2$s (user=%3$s, context=%4$s).
+     */
+    CONNECTION_RESET_EXT("I/O error \"%1$s\" occurred in communication with \"%2$s\" mail server for login %3$s (user=%4$s, context=%5$s).", CATEGORY_TRY_AGAIN, 1017),
     /**
      * No route to host: mail server %1$s cannot be reached
      * <p>
