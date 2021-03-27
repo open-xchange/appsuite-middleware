@@ -9814,6 +9814,19 @@ msgstr ""
 msgid "Message could not be sent because it has been rejected (%1$s)."
 msgstr ""
 
+#. A remote end-point abruptly aborted the connection; e.g. SMTP server goes down while currently trying to send a message.
+#: com.openexchange.server/src/com/openexchange/mail/mime/MimeMailExceptionMessage.java:230
+msgid ""
+"Remote end-point abruptly aborted the connection. Please try again later."
+msgstr ""
+
+#. A remote end-point abruptly aborted the connection; e.g. SMTP server goes down while currently trying to send a message.
+#: com.openexchange.server/src/com/openexchange/mail/mime/MimeMailExceptionMessage.java:233
+msgid ""
+"Remote end-point \"%1$s\" abruptly aborted the connection. Please try again "
+"later."
+msgstr ""
+
 #. The message advertising that everything is fine with checked account
 #: com.openexchange.server/src/com/openexchange/mailaccount/KnownStatusMessage.java:71
 msgid "All fine"
