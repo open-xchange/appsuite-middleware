@@ -563,7 +563,7 @@ public final class MailMessageFetchIMAPCommand extends AbstractIMAPCommand<MailM
      * @param examineHasAttachmentUserFlags Whether has-attachment user flags should be considered
      * @return The resulting mail message
      * @throws MessagingException If a messaging error occurs
-     * @throws OXException If an OX error occurs
+     * @throws OXException If an Open-Xchange error occurs
      */
     public static MailMessage handleFetchRespone(FetchResponse fetchResponse, String fullName, int accountId, boolean examineHasAttachmentUserFlags) throws MessagingException, OXException {
         IDMailMessage mail = new IDMailMessage(null, fullName);
@@ -580,7 +580,7 @@ public final class MailMessageFetchIMAPCommand extends AbstractIMAPCommand<MailM
      * @param examineHasAttachmentUserFlags Whether has-attachment user flags should be considered
      * @return The resulting mail message
      * @throws MessagingException If a messaging error occurs
-     * @throws OXException If an OX error occurs
+     * @throws OXException If an Open-Xchange error occurs
      */
     public static MailMessage handleFetchRespone(IDMailMessage mail, FetchResponse fetchResponse, String fullName, boolean examineHasAttachmentUserFlags) throws MessagingException, OXException {
         return handleFetchRespone(mail, fetchResponse, fullName, null, false, false, false, false, examineHasAttachmentUserFlags);
@@ -593,6 +593,14 @@ public final class MailMessageFetchIMAPCommand extends AbstractIMAPCommand<MailM
     }
 
     private static MailMessage handleFetchRespone(IDMailMessage mail, FetchResponse fetchResponse, String fullName, Set<FetchItemHandler> lastHandlers, boolean determineAttachmentByHeader, boolean checkICal, boolean checkVCard, boolean treatEmbeddedAsAttachment, boolean examineHasAttachmentUserFlags) throws MessagingException, OXException {
+        try {
+            return doHandleFetchRespone(mail, fetchResponse, fullName, lastHandlers, determineAttachmentByHeader, checkICal, checkVCard, treatEmbeddedAsAttachment, examineHasAttachmentUserFlags);
+        } catch (RuntimeException e) {
+            throw MailExceptionCode.UNEXPECTED_ERROR.create(e, e.getMessage());
+        }
+    }
+
+    private static MailMessage doHandleFetchRespone(IDMailMessage mail, FetchResponse fetchResponse, String fullName, Set<FetchItemHandler> lastHandlers, boolean determineAttachmentByHeader, boolean checkICal, boolean checkVCard, boolean treatEmbeddedAsAttachment, boolean examineHasAttachmentUserFlags) throws MessagingException, OXException {
         IDMailMessage m;
         if (null == mail) {
             m = new IDMailMessage(null, fullName);
@@ -650,7 +658,7 @@ public final class MailMessageFetchIMAPCommand extends AbstractIMAPCommand<MailM
             }
         }
 
-        // Drop possible set "com.openexchange.mail.mailId" log property
+        // Drop possibly set "com.openexchange.mail.mailId" log property
         LogProperties.remove(LogProperties.Name.MAIL_MAIL_ID);
 
         return m;
