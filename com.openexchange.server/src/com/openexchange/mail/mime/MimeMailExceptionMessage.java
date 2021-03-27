@@ -226,4 +226,10 @@ public class MimeMailExceptionMessage implements LocalizableStrings {
     // Message was blocked by outgoing SMTP server; e.g. due to triggering a filter such as a URL in the message being found in a domain black list.
     public static final String MESSAGE_REJECTED_EXT_MSG_DISPLAY = "Message could not be sent because it has been rejected (%1$s).";
 
+    // A remote end-point abruptly aborted the connection; e.g. SMTP server goes down while currently trying to send a message.
+    public static final String CONNECTION_RESET_MSG_DISPLAY = "Remote end-point abruptly aborted the connection. Please try again later.";
+
+    // A remote end-point abruptly aborted the connection; e.g. SMTP server goes down while currently trying to send a message.
+    public static final String CONNECTION_RESET_EXT_MSG_DISPLAY = "Remote end-point \"%1$s\" abruptly aborted the connection. Please try again later.";
+
 }
