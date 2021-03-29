@@ -230,7 +230,8 @@ public class GetUserConfigurationSource extends AbstractRmiCLI<Void> {
             if (property.getName() != null && property.getName().indexOf("//") > 0) {
                 // Assume a UI property delivered via JSlob interface; e.g. "plugins/portal/myclient//linkTo/URL"
                 if (property.getMetadata() == null || property.getMetadata().containsKey(METADATA_PREFERENCE_PATH) == false) {
-                    builder.append("  (This configuration property has no effect when read from the App Suite UI, as there is no entry for it in `/opt/open-xchange/etc/settings/` directory.)").append(NEWLINE);
+                    builder.append("  Info: This configuration property has no effect since it appears to be an App Suite UI setting, but misses").append(NEWLINE);
+                    builder.append("        \"preferencePath\" in its meta-data (e.g. no entry for it in '/opt/open-xchange/etc/settings/' directory).").append(NEWLINE);
                 }
             }
         }
