@@ -152,7 +152,6 @@ public class ExceptionUtils {
                             System.getProperties().remove("__thread_dump_created");
                         }
                     }
-                    LOG.info(sb.toString());
                 }
             } else if ("Java heap space".equalsIgnoreCase(message)) {
                 try {

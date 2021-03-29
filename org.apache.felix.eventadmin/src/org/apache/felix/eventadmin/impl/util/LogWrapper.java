@@ -21,7 +21,6 @@ package org.apache.felix.eventadmin.impl.util;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Set;
-
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.BundleException;
 import org.osgi.framework.Constants;
@@ -85,7 +84,7 @@ public class LogWrapper
     public static final int LOG_DEBUG = 4;
 
     // A set containing the currently available LogServices. Furthermore used as lock
-    private final Set m_loggerRefs = new HashSet();
+    private final Set<ServiceReference> m_loggerRefs = new HashSet<ServiceReference>();
 
     // Only null while not set and m_loggerRefs is empty hence, only needs to be
     // checked in case m_loggerRefs is empty otherwise it will not be null.
@@ -158,6 +157,7 @@ public class LogWrapper
                 ServiceListener listener = new ServiceListener()
                 {
                     // Add a newly available LogService reference to the singleton.
+                    @Override
                     public void serviceChanged( final ServiceEvent event )
                     {
                         if ( ServiceEvent.REGISTERED == event.getType() )
@@ -254,9 +254,9 @@ public class LogWrapper
             {
                 // There is at least one LogService available hence, we can use the
                 // class as well.
-                for (Iterator iter = m_loggerRefs.iterator(); iter.hasNext();)
+                for (Iterator<ServiceReference> iter = m_loggerRefs.iterator(); iter.hasNext();)
                 {
-                    final ServiceReference next = (ServiceReference) iter.next();
+                    final ServiceReference next = iter.next();
 
                     org.osgi.service.log.LogService logger =
                         (org.osgi.service.log.LogService) m_context.getService(next);
@@ -306,9 +306,9 @@ public class LogWrapper
             {
                 // There is at least one LogService available hence, we can use the
                 // class as well.
-                for (Iterator iter = m_loggerRefs.iterator(); iter.hasNext();)
+                for (Iterator<ServiceReference> iter = m_loggerRefs.iterator(); iter.hasNext();)
                 {
-                    final ServiceReference next = (ServiceReference) iter.next();
+                    final ServiceReference next = iter.next();
 
                     org.osgi.service.log.LogService logger =
                         (org.osgi.service.log.LogService) m_context.getService(next);
@@ -358,9 +358,9 @@ public class LogWrapper
             {
                 // There is at least one LogService available hence, we can use the
                 // class as well.
-                for (Iterator iter = m_loggerRefs.iterator(); iter.hasNext();)
+                for (Iterator<ServiceReference> iter = m_loggerRefs.iterator(); iter.hasNext();)
                 {
-                    final ServiceReference next = (ServiceReference) iter.next();
+                    final ServiceReference next = iter.next();
 
                     org.osgi.service.log.LogService logger =
                         (org.osgi.service.log.LogService) m_context.getService(next);
@@ -405,16 +405,16 @@ public class LogWrapper
             {
                 return; // don't log
             }
-            
+
             final String logMsg = "EventAdmin: " + msg;
 
             if (!m_loggerRefs.isEmpty())
             {
                 // There is at least one LogService available hence, we can use the
                 // class as well.
-                for (Iterator iter = m_loggerRefs.iterator(); iter.hasNext();)
+                for (Iterator<ServiceReference> iter = m_loggerRefs.iterator(); iter.hasNext();)
                 {
-                       final ServiceReference next = (ServiceReference) iter.next();
+                       final ServiceReference next = iter.next();
 
                     org.osgi.service.log.LogService logger =
                         (org.osgi.service.log.LogService) m_context.getService(next);

@@ -70,4 +70,13 @@ public class ParsingException extends ProtocolException {
     public ParsingException(Response r) {
 	super(r);
     }
+
+    /**
+     * Constructs an ParsingException with the specified detail message.
+     * @param s     the detail message
+     * @param cause the cause
+     */
+    public ParsingException(String s, Throwable cause) {
+    super(s, cause);
+    }
 }

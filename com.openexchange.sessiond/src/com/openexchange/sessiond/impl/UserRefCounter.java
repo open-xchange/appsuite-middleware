@@ -52,6 +52,7 @@ package com.openexchange.sessiond.impl;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.atomic.AtomicInteger;
+import com.openexchange.session.UserAndContext;
 
 
 /**
@@ -62,90 +63,112 @@ import java.util.concurrent.atomic.AtomicInteger;
  */
 public class UserRefCounter {
 
-    private final ConcurrentMap<Integer, ConcurrentMap<Integer, AtomicInteger>> longTermUserGuardian;
+    private final ConcurrentMap<Integer, AtomicInteger> contextCounters;
+    private final ConcurrentMap<UserAndContext, AtomicInteger> userCounters;
 
     /**
      * Initializes a new {@link UserRefCounter}.
      */
     public UserRefCounter() {
         super();
-        longTermUserGuardian = new ConcurrentHashMap<Integer, ConcurrentMap<Integer, AtomicInteger>>(256, 0.9F, 1);
+        contextCounters = new ConcurrentHashMap<Integer, AtomicInteger>(256, 0.9F, 1);
+        userCounters = new ConcurrentHashMap<UserAndContext, AtomicInteger>(1024, 0.9F, 1);
     }
 
-    public void add(int userId, int contextId) {
-        Integer iContextId = Integer.valueOf(contextId);
-        ConcurrentMap<Integer, AtomicInteger> counters = longTermUserGuardian.get(iContextId);
-        if (null == counters) {
-            ConcurrentMap<Integer, AtomicInteger> newCounters = new ConcurrentHashMap<Integer, AtomicInteger>(16, 0.9F, 1);
-            counters = longTermUserGuardian.putIfAbsent(iContextId, newCounters);
-            if (null == counters) {
-                counters = newCounters;
+    /**
+     * Increments the counter for user-associated long-term sessions by one.
+     *
+     * @param userId The user identifier
+     * @param contextId The context identifier
+     */
+    public void incrementCounter(int userId, int contextId) {
+        incrementCounter(UserAndContext.newInstance(userId, contextId), userCounters);
+        incrementCounter(Integer.valueOf(contextId), contextCounters);
+    }
+
+    private static <K> void incrementCounter(K key, ConcurrentMap<K, AtomicInteger> counters) {
+        AtomicInteger counter = counters.get(key);
+        if (counter == null) {
+            AtomicInteger nuCounter = new AtomicInteger(0);
+            counter = counters.putIfAbsent(key, nuCounter);
+            if (counter == null) {
+                counter = nuCounter;
             }
         }
+        counter.incrementAndGet();
+    }
 
-        Integer iUserId = Integer.valueOf(userId);
+    /**
+     * Decrements the counter for user-associated long-term sessions by one.
+     *
+     * @param userId The user identifier
+     * @param contextId The context identifier
+     */
+    public void decrementCounter(int userId, int contextId) {
+        if (decrementCounter(UserAndContext.newInstance(userId, contextId), userCounters)) {
+            decrementCounter(Integer.valueOf(contextId), contextCounters);
+        }
+    }
+
+    private static <K> boolean decrementCounter(K key, ConcurrentMap<K, AtomicInteger> counters) {
         while (true) {
-            AtomicInteger counter = counters.get(iUserId);
-            if (null == counter) {
-                AtomicInteger nuCounter = new AtomicInteger(1);
-                counter = counters.putIfAbsent(iUserId, nuCounter);
-                if (null == counter) {
-                    // This thread was able to put the new counter with initial count of 1
-                    return;
+            AtomicInteger counter = counters.get(key);
+            if (counter == null) {
+                // No such counter
+                return false;
+            }
+
+            int current = counter.get();
+            if (current <= 0) {
+                // Current count is already less than or equal to 0 (zero). No negative counting allowed.
+                return false;
+            }
+
+            // Current count is greater than 0 (zero)
+            if (counter.compareAndSet(current, current - 1) == false) {
+                // This thread didn't make it to decrement counter --> Retry...
+            } else {
+                // This thread made it to decrement counter
+                if (current == 1) {
+                    // This thread set counter to 0 (zero)
+                    counters.remove(key);
                 }
-            }
-            if (counter.getAndIncrement() > 0) {
-                return;
-            }
-            // Became invalid in the meantime: Revert the increment & retry
-            counter.decrementAndGet();
-        }
-    }
-
-    public void remove(int userId, int contextId) {
-        ConcurrentMap<Integer, AtomicInteger> counters = longTermUserGuardian.get(Integer.valueOf(contextId));
-        if (null == counters) {
-            return;
-        }
-
-        Integer iUserId = Integer.valueOf(userId);
-        AtomicInteger counter = counters.get(iUserId);
-        if (null == counter) {
-            return;
-        }
-
-        if (counter.decrementAndGet() <= 0) {
-            // Remove counter
-            counters.remove(iUserId);
-        }
-    }
-
-    public boolean contains(int contextId) {
-        ConcurrentMap<Integer, AtomicInteger> counters = longTermUserGuardian.get(Integer.valueOf(contextId));
-        if (null == counters) {
-            return false;
-        }
-
-        for (AtomicInteger counter : counters.values()) {
-            if (counter.get() > 0) {
                 return true;
             }
         }
-        return false;
     }
 
+    /**
+     * Checks if there is at least one long-term session for specified context.
+     *
+     * @param contextId The context identifier
+     * @return <code>true</code> if a long-term session is existent for given context; otherwise <code>false</code>
+     */
+    public boolean contains(int contextId) {
+        return contains(Integer.valueOf(contextId), contextCounters);
+    }
+
+    /**
+     * Checks if there is at least one long-term session for specified user.
+     *
+     * @param userId The user identifier
+     * @param contextId The context identifier
+     * @return <code>true</code> if a long-term session is existent for given user; otherwise <code>false</code>
+     */
     public boolean contains(int userId, int contextId) {
-        ConcurrentMap<Integer, AtomicInteger> counters = longTermUserGuardian.get(Integer.valueOf(contextId));
-        if (null == counters) {
-            return false;
-        }
-
-        AtomicInteger counter = counters.get(Integer.valueOf(userId));
-        return null != counter && counter.get() > 0;
+        return contains(UserAndContext.newInstance(userId, contextId), userCounters);
     }
 
+    private static <K> boolean contains(K key, ConcurrentMap<K, AtomicInteger> counters) {
+        AtomicInteger counter = counters.get(key);
+        return counter != null && counter.get() > 0;
+    }
+
+    /**
+     * Clears this collection entirely.
+     */
     public void clear() {
-        longTermUserGuardian.clear();
+        userCounters.clear();
     }
 
 }

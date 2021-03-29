@@ -60,7 +60,8 @@ public class X_MAILBOX implements Item {
     public X_MAILBOX(FetchResponse r) throws ParsingException {
         seqnum = r.getNumber();
         r.skipSpaces();
-        mailbox = BASE64MailboxDecoder.decode(r.readAtomString());
+        String mailbox = BASE64MailboxDecoder.decode(r.readAtomString());
+        this.mailbox = javax.mail.util.Interners.internFullName(mailbox);
     }
 
 }

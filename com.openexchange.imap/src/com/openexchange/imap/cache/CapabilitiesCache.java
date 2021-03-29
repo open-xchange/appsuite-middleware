@@ -80,19 +80,24 @@ public final class CapabilitiesCache {
         super();
     }
 
+    /**
+     * The parsed/examined IMAP capabilities.
+     */
     public static final class CapabilitiesResponse {
 
         private final ACLExtension aclExtension;
-
         private final IMAPCapabilities imapCapabilities;
 
-        private final Map<String, String> map;
-
-        CapabilitiesResponse(final ACLExtension aclExtension, final IMAPCapabilities imapCapabilities, final Map<String, String> map) {
+        /**
+         * Initializes a new {@link CapabilitiesResponse}.
+         *
+         * @param aclExtension The ACL extension to use
+         * @param imapCapabilities The IMAP capabilities
+         */
+        CapabilitiesResponse(ACLExtension aclExtension, IMAPCapabilities imapCapabilities) {
             super();
             this.aclExtension = aclExtension;
             this.imapCapabilities = imapCapabilities;
-            this.map = map;
         }
 
         /**
@@ -112,16 +117,6 @@ public final class CapabilitiesCache {
         public IMAPCapabilities getImapCapabilities() {
             return imapCapabilities;
         }
-
-        /**
-         * Gets the map.
-         *
-         * @return The map
-         */
-        public Map<String, String> getMap() {
-            return map;
-        }
-
     }
 
     private static final class CapsCacheEntry implements SessionMailCacheEntry<CapabilitiesResponse> {
@@ -223,7 +218,7 @@ public final class CapabilitiesCache {
             /*
              * Set value
              */
-            entry.setValue(new CapabilitiesResponse(aclExtension, imapCaps, map));
+            entry.setValue(new CapabilitiesResponse(aclExtension, imapCaps));
             mailCache.put(entry);
         }
         return entry.getValue();

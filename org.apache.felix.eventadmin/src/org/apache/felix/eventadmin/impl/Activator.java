@@ -39,7 +39,7 @@ import org.osgi.framework.BundleContext;
 // Two places are affected by this namely, security/* and handler/*
 public class Activator implements BundleActivator
 {
-    private volatile Configuration m_config;
+    private Configuration m_config;
 
     /**
      * Called upon starting of the bundle. Constructs and registers the EventAdmin
@@ -52,7 +52,7 @@ public class Activator implements BundleActivator
      * @see org.osgi.framework.BundleActivator#start(org.osgi.framework.BundleContext)
      */
     @Override
-    public void start(final BundleContext context)
+    public synchronized void start(final BundleContext context)
     {
         // init the LogWrapper. Subsequently, the static methods of the LogWrapper
         // can be used to log messages similar to the LogService. The effect of a
@@ -82,6 +82,9 @@ public class Activator implements BundleActivator
         System.setProperty(Configuration.PROP_TIMEOUT, "0");
         System.setProperty(Configuration.PROP_REQUIRE_TOPIC, "true");
         System.setProperty(Configuration.PROP_IGNORE_TIMEOUT, "");
+        System.setProperty(Configuration.PROP_ASYNC_TO_SYNC_THREAD_RATIO, "0.5");
+        System.setProperty(Configuration.PROP_IGNORE_TOPIC, "");
+        System.setProperty(Configuration.PROP_MAX_NUM_EVENTS_PER_THREAD, "2048");
     }
 
     /**
@@ -96,7 +99,7 @@ public class Activator implements BundleActivator
      * @see org.osgi.framework.BundleActivator#stop(org.osgi.framework.BundleContext)
      */
     @Override
-    public void stop(final BundleContext context)
+    public synchronized void stop(final BundleContext context)
     {
         if ( m_config != null )
         {

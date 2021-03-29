@@ -54,7 +54,6 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.HashSet;
-import java.util.Set;
 import java.util.UUID;
 import com.openexchange.databaseold.Database;
 import com.openexchange.exception.OXException;
@@ -73,32 +72,30 @@ import com.openexchange.tools.update.Tools;
  */
 public class RdbAliasStorage implements UserAliasStorage {
 
-    private static final String CREATE_ALIAS = "INSERT INTO user_alias (cid, user, alias) VALUES(?,?,?)";
-
-    private static final String CREATE_ALIAS_WITH_UUID = "INSERT INTO user_alias (cid, user, alias, uuid) VALUES(?,?,?,?)";
-
-    private static final String READ_ALIASES = "SELECT alias FROM user_alias WHERE cid=? AND user=?";
-
-    private static final String UPDATE_ALIAS = "UPDATE user_alias SET alias=? WHERE cid=? AND user=? AND alias=?";
-
-    private static final String DELETE_ALIAS = "DELETE FROM user_alias WHERE cid=? AND user=? AND alias=?";
-
-    private static final String DELETE_ALL_ALIASES = "DELETE FROM user_alias WHERE cid=? AND user=?";
-
-    private static final String GET_USER_ID = "SELECT user FROM user_alias WHERE cid=? AND alias LIKE ?";
+    /**
+     * Initializes a new {@link RdbAliasStorage}.
+     */
+    public RdbAliasStorage() {
+        super();
+    }
 
     @Override
-    public Set<String> getAliases(int contextId, int userId) throws OXException {
+    public void invalidateAliases(int contextId, int userId) throws OXException {
+        // Nothing
+    }
+
+    @Override
+    public HashSet<String> getAliases(int contextId, int userId) throws OXException {
         final Connection con = Database.get(contextId, false);
         PreparedStatement stmt = null;
         ResultSet rs = null;
         try {
             int index = 0;
-            stmt = con.prepareStatement(READ_ALIASES);
+            stmt = con.prepareStatement("SELECT alias FROM user_alias WHERE cid=? AND user=?");
             stmt.setInt(++index, contextId);
             stmt.setInt(++index, userId);
             rs = stmt.executeQuery();
-            Set<String> aliases = new HashSet<String>(rs.getFetchSize());
+            HashSet<String> aliases = new HashSet<String>(6, 0.9F);
             while (rs.next()) {
                 aliases.add(rs.getString(1));
             }
@@ -118,7 +115,7 @@ public class RdbAliasStorage implements UserAliasStorage {
         ResultSet rs = null;
         try {
             int index = 0;
-            stmt = con.prepareStatement(GET_USER_ID);
+            stmt = con.prepareStatement("SELECT user FROM user_alias WHERE cid=? AND alias LIKE ?");
             stmt.setInt(++index, contextId);
             stmt.setString(++index, alias);
             rs = stmt.executeQuery();
@@ -145,11 +142,18 @@ public class RdbAliasStorage implements UserAliasStorage {
         try {
             int index = 0;
 
-            stmt = con.prepareStatement(CREATE_ALIAS_WITH_UUID);
+            // FIXME: Remove the if clauses from 7.8.1
+            boolean columnExists = Tools.columnExists(con, "user_alias", "uuid");
+
+            stmt = con.prepareStatement(columnExists ? "INSERT INTO user_alias (cid, user, alias, uuid) VALUES(?,?,?,?)" : "INSERT INTO user_alias (cid, user, alias) VALUES(?,?,?)");
             stmt.setInt(++index, contextId);
             stmt.setInt(++index, userId);
             stmt.setString(++index, alias);
-            stmt.setBytes(++index, UUIDs.toByteArray(UUID.randomUUID()));
+
+            // FIXME: Remove the if clause from 7.8.1
+            if (columnExists) {
+                stmt.setBytes(++index, UUIDs.toByteArray(UUID.randomUUID()));
+            }
 
             return stmt.execute();
         } catch (SQLException e) {
@@ -176,7 +180,7 @@ public class RdbAliasStorage implements UserAliasStorage {
 
             // FIXME: Remove the if clauses from 7.8.1
             boolean columnExists = Tools.columnExists(con, "user_alias", "uuid");
-            String statement = columnExists ? CREATE_ALIAS_WITH_UUID : CREATE_ALIAS;
+            String statement = columnExists ? "INSERT INTO user_alias (cid, user, alias, uuid) VALUES(?,?,?,?)" : "INSERT INTO user_alias (cid, user, alias) VALUES(?,?,?)";
 
             stmt = con.prepareStatement(statement);
             stmt.setInt(++index, contextId);
@@ -209,7 +213,7 @@ public class RdbAliasStorage implements UserAliasStorage {
         PreparedStatement stmt = null;
         try {
             int index = 0;
-            stmt = con.prepareStatement(UPDATE_ALIAS);
+            stmt = con.prepareStatement("UPDATE user_alias SET alias=? WHERE cid=? AND user=? AND alias=?");
             stmt.setString(++index, newAlias);
             stmt.setInt(++index, contextId);
             stmt.setInt(++index, userId);
@@ -236,7 +240,7 @@ public class RdbAliasStorage implements UserAliasStorage {
         PreparedStatement stmt = null;
         try {
             int index = 0;
-            stmt = con.prepareStatement(DELETE_ALIAS);
+            stmt = con.prepareStatement("DELETE FROM user_alias WHERE cid=? AND user=? AND alias=?");
             stmt.setInt(++index, contextId);
             stmt.setInt(++index, userId);
             stmt.setString(++index, alias);
@@ -262,7 +266,7 @@ public class RdbAliasStorage implements UserAliasStorage {
         PreparedStatement stmt = null;
         try {
             int index = 0;
-            stmt = con.prepareStatement(DELETE_ALL_ALIASES);
+            stmt = con.prepareStatement("DELETE FROM user_alias WHERE cid=? AND user=?");
             stmt.setInt(++index, contextId);
             stmt.setInt(++index, userId);
             return stmt.execute();

@@ -102,7 +102,6 @@ import com.openexchange.caching.CacheKey;
 import com.openexchange.caching.CacheService;
 import com.openexchange.database.Databases;
 import com.openexchange.exception.OXException;
-import com.openexchange.groupware.alias.UserAliasStorage;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.impl.ContextImpl;
@@ -132,6 +131,7 @@ import com.openexchange.tools.net.URIDefaults;
 import com.openexchange.tools.net.URIParser;
 import com.openexchange.tools.oxfolder.OXFolderAdminHelper;
 import com.openexchange.tools.sql.DBUtils;
+import com.openexchange.tools.update.Tools;
 
 /**
  * @author cutmasta
@@ -683,50 +683,23 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
             }
 
             // update user aliases
-            UserAliasStorage aliasStorage = AdminServiceRegistry.getInstance().getService(UserAliasStorage.class);
-            final HashSet<String> alias = usrdata.getAliases();
-            if(null != alias) {
-                //TODO: for compatibility reason also delete from / insert into user_attributes
-                Set<String> storedAliases = aliasStorage.getAliases(contextId, userId);
-                for (final String elem : alias) {
-                    if (elem != null && elem.trim().length() > 0) {
-                        if (!storedAliases.contains(elem)) {
-                            stmt = con.prepareStatement("INSERT INTO user_attribute (cid,id,name,value,uuid) VALUES (?,?,?,?,?)");
-                            byte[] uuidBinary = UUIDs.toByteArray(UUID.randomUUID());
-                            stmt.setInt(1, contextId);
-                            stmt.setInt(2, userId);
-                            stmt.setString(3, "alias");
-                            stmt.setString(4, elem);
-                            stmt.setBytes(5, uuidBinary);
-                            stmt.executeUpdate();
-                            stmt.close();
-
-                            aliasStorage.createAlias(con, contextId, userId, elem, uuidBinary);
-                        } else {
-                            stmt = con.prepareStatement("DELETE FROM user_attribute WHERE cid=? AND id=? AND name=? AND value=?");
-                            stmt.setInt(1, contextId);
-                            stmt.setInt(2, userId);
-                            stmt.setString(3, "alias");
-                            stmt.setString(4, elem);
-                            stmt.executeUpdate();
-                            stmt.close();
-
-                            storedAliases.remove(elem);
+            final HashSet<String> aliases = usrdata.getAliases();
+            {
+                if (null == aliases) {
+                    if (usrdata.isAliasesset()) {
+                        deleteAliases(con, contextId, userId);
+                    }
+                } else {
+                    Set<String> aliasesToSet = new java.util.LinkedHashSet<String>(aliases.size());
+                    for (String alias : aliases) {
+                        if (Strings.isNotEmpty(alias)) {
+                            alias = alias.trim();
+                            aliasesToSet.add(alias);
                         }
                     }
+                    deleteAliases(con, contextId, userId);
+                    setAliases(con, contextId, userId, aliasesToSet);
                 }
-                for (String storedAlias : storedAliases) {
-                    aliasStorage.deleteAlias(con, contextId, userId, storedAlias);
-                }
-            } else if (usrdata.isAliasesset()) {
-                stmt = con.prepareStatement("DELETE FROM user_attribute WHERE cid=? AND id=? AND name=?");
-                stmt.setInt(1, contextId);
-                stmt.setInt(2, userId);
-                stmt.setString(3, "alias");
-                stmt.executeUpdate();
-                stmt.close();
-
-                aliasStorage.deleteAliases(con, contextId, userId);
             }
 
             if(usrdata.isUserAttributesset()) {
@@ -1172,6 +1145,8 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
                         cache.remove(key);
                         cache = cacheService.getCache("UserSettingMail");
                         cache.remove(key);
+                        cache = cacheService.getCache("UserAlias");
+                        cache.remove(key);
                         cache = cacheService.getCache("Capabilities");
                         cache.removeFromGroup(Integer.valueOf(userId), ctx.getId().toString());
                         cache = cacheService.getCache("MailAccount");
@@ -1256,6 +1231,39 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
                     log.error("Pool Error pushing ox write connection to pool!", exp);
                 }
             }
+        }
+    }
+
+    private static int[] setAliases(Connection connection, int contextId, int userId, Set<String> aliases) throws SQLException {
+        if (null == aliases || aliases.isEmpty()) {
+            return new int[0];
+        }
+        PreparedStatement stmt = null;
+        try {
+            stmt = connection.prepareStatement("INSERT INTO user_alias (cid,user,alias,uuid) VALUES (?,?,?,?) ON DUPLICATE KEY UPDATE alias=?;");
+            for (String alias : aliases) {
+                stmt.setInt(1, contextId);
+                stmt.setInt(2, userId);
+                stmt.setString(3, alias);
+                stmt.setBytes(4, UUIDs.toByteArray(UUID.randomUUID()));
+                stmt.setString(5, alias);
+                stmt.addBatch();
+            }
+            return stmt.executeBatch();
+        } finally {
+            Databases.closeSQLStuff(stmt);
+        }
+    }
+
+    private static int deleteAliases(Connection connection, int contextId, int userId) throws SQLException {
+        PreparedStatement stmt = null;
+        try {
+            stmt = connection.prepareStatement("DELETE FROM user_alias WHERE cid=? AND user=?;");
+            stmt.setInt(1, contextId);
+            stmt.setInt(2, userId);
+            return stmt.executeUpdate();
+        } finally {
+            Databases.closeSQLStuff(stmt);
         }
     }
 
@@ -1362,6 +1370,8 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
 
     @Override
     public int create(final Context ctx, final User usrdata, final UserModuleAccess moduleAccess, final Connection con, final int userId, final int contactId, final int uid_number) throws StorageException {
+        int contextId = ctx.getId().intValue();
+
         PreparedStatement ps = null;
         final String LOGINSHELL = "/bin/bash";
 
@@ -1621,29 +1631,23 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
                     std_mail_folder_confirmed_ham = prop.getUserProp("CONFIRMED_HAM_MAILFOLDER_" + lang.toUpperCase(), "confirmed-ham");
                 }
 
-                // insert all multi valued attribs to the user_attribute table,
-                // here we fill the alias attribute in it
-                // TODO: for compatibility reason; also delete from / insert into user_attributes
-                UserAliasStorage userAlias = AdminServiceRegistry.getInstance().getService(UserAliasStorage.class, true);
+                // Insert aliases
                 if (usrdata.getAliases() != null && usrdata.getAliases().size() > 0) {
-                    final Iterator<String> itr = usrdata.getAliases().iterator();
-                    while (itr.hasNext()) {
-                        final String tmp_mail = itr.next().toString().trim();
-                        if (tmp_mail.length() > 0) {
-                            stmt = con.prepareStatement("INSERT INTO user_attribute (cid,id,name,value,uuid) VALUES (?,?,?,?,?)");
-                            UUID uuid = UUID.randomUUID();
-                            byte[] uuidBinary = UUIDs.toByteArray(uuid);
-                            stmt.setInt(1, ctx.getId());
-                            stmt.setInt(2, userId);
-                            stmt.setString(3, "alias");
-                            stmt.setString(4, tmp_mail);
-                            stmt.setBytes(5, uuidBinary);
+                    boolean columnExists = Tools.columnExists(con, "user_alias", "uuid");
+                    stmt = con.prepareStatement(columnExists ? "INSERT INTO user_alias (cid, user, alias, uuid) VALUES(?,?,?,?)" : "INSERT INTO user_alias (cid, user, alias) VALUES(?,?,?)");
+                    stmt.setInt(1, contextId);
+                    stmt.setInt(2, userId);
+                    for (String alias : usrdata.getAliases()) {
+                        alias = alias.trim();
+                        if (0 < alias.length()) {
+                            stmt.setString(3, alias);
+                            if (columnExists) {
+                                stmt.setBytes(4, UUIDs.toByteArray(UUID.randomUUID()));
+                            }
                             stmt.executeUpdate();
-                            stmt.close();
-
-                            userAlias.createAlias(con, ctx.getId(), userId, tmp_mail, uuidBinary);
                         }
                     }
+                    stmt.close();
                 }
 
                 // Fill in dynamic attributes
@@ -2248,6 +2252,7 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
         PreparedStatement stmtuserattributes = null;
         PreparedStatement stmtusm = null;
         PreparedStatement stmtacc = null;
+        PreparedStatement stmtuseraliases = null;
         List<User> userlist = new LinkedList<User>();
 
         try {
@@ -2265,8 +2270,9 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
             stmtusm.setInt(1, contextId);
             stmtacc = read_ox_con.prepareStatement("SELECT trash,sent,drafts,spam,confirmed_spam,confirmed_ham,archive_fullname FROM user_mail_account WHERE cid = ? and id = "+MailAccount.DEFAULT_ID+" and user = ?");
             stmtacc.setInt(1, contextId);
+            stmtuseraliases = read_ox_con.prepareStatement("SELECT alias FROM user_alias WHERE cid=? AND user=?;");
+            stmtuseraliases.setInt(1, contextId);
             ResultSet rs = null;
-            UserAliasStorage aliasStorage = AdminServiceRegistry.getInstance().getService(UserAliasStorage.class, true);
             for (final User user : users) {
                 int user_id = user.getId().intValue();
                 final User newuser = (User) user.clone();
@@ -2369,12 +2375,12 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
                 rs.close();
 
                 //
-                Set<String> aliases = aliasStorage.getAliases(contextId, user_id);
-                if(aliases != null && false == aliases.isEmpty()) {
-                    for(String alias : aliases) {
-                        newuser.addAlias(alias);
-                    }
+                stmtuseraliases.setInt(2, user_id);
+                rs = stmtuseraliases.executeQuery();
+                while (rs.next()) {
+                    newuser.addAlias(rs.getString(1));
                 }
+                rs.close();
 
                 stmtuserattributes.setInt(2, user_id);
                 rs = stmtuserattributes.executeQuery();
@@ -2446,7 +2452,7 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
             log.error("GUI setting Error", e);
             throw new StorageException(e.toString());
         } finally {
-            Databases.closeSQLStuff(stmtuid, stmt2, stmtid, stmtuserattributes, stmtusm, stmtacc);
+            Databases.closeSQLStuff(stmtuid, stmt2, stmtid, stmtuserattributes, stmtusm, stmtacc, stmtuseraliases);
             if (read_ox_con != null) {
                 try {
                         cache.pushConnectionForContextAfterReading(contextId, read_ox_con);
@@ -2492,6 +2498,7 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
         PreparedStatement stmt = null;
         try {
             // delete all users
+            int contextId = ctx.getId().intValue();
             for (final User user : users) {
                 final int user_id = user.getId();
 
@@ -2533,6 +2540,12 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
                     stmt.close();
                     is_admin = true;
                 }
+
+                stmt = write_ox_con.prepareStatement("DELETE FROM user_alias WHERE cid=? AND user=?;");
+                stmt.setInt(1, contextId);
+                stmt.setInt(2, user_id);
+                stmt.executeUpdate();
+                stmt.close();
 
                 stmt = write_ox_con.prepareStatement("DELETE FROM user_setting WHERE cid = ? AND user_id = ?");
                 stmt.setInt(1, ctx.getId());
@@ -2577,7 +2590,6 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
                     final CacheService cacheService = AdminServiceRegistry.getInstance().getService(CacheService.class);;
                     if (null != cacheService) {
                         try {
-                            final int contextId = ctx.getId().intValue();
                             final CacheKey key = cacheService.newCacheKey(contextId, user.getId());
                             Cache cache = cacheService.getCache("User");
                             cache.remove(key);
@@ -2587,6 +2599,8 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
                             cache.remove(key);
                             cache = cacheService.getCache("UserSettingMail");
                             cache.remove(key);
+                            cache = cacheService.getCache("UserAlias");
+                            cache.remove(key);
                             cache = cacheService.getCache("Capabilities");
                             cache.removeFromGroup(user.getId(), ctx.getId().toString());
                         } catch (final OXException e) {
@@ -2595,12 +2609,6 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
                     }
                 }
                 // End of JCS
-
-                log.info("Deleted user {}({}) ...", user_id, ctx.getId());
-
-                //Delete aliases
-                UserAliasStorage aliasStorage = AdminServiceRegistry.getInstance().getService(UserAliasStorage.class);
-                aliasStorage.deleteAliases(write_ox_con, ctx.getId(), user_id);
 
                 log.info("Deleted user {}({}) ...", user_id, ctx.getId());
 

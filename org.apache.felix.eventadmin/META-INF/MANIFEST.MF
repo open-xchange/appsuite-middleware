@@ -14,7 +14,8 @@ Import-Package: javax.management,
  org.osgi.service.event,
  org.osgi.service.log,
  org.osgi.service.metatype;resolution:=optional,
- org.osgi.util.tracker
+ org.osgi.util.tracker,
+ org.slf4j
 Bundle-Activator: org.apache.felix.eventadmin.impl.Activator
 Bundle-ClassPath: .,
  lib/concurrent-1.3.4.jar

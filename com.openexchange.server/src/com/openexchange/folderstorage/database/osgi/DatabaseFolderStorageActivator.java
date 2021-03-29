@@ -51,14 +51,17 @@ package com.openexchange.folderstorage.database.osgi;
 
 import java.util.Dictionary;
 import java.util.Hashtable;
-import org.osgi.framework.BundleActivator;
+import org.osgi.service.event.Event;
+import org.osgi.service.event.EventConstants;
+import org.osgi.service.event.EventHandler;
 import com.openexchange.database.DatabaseService;
 import com.openexchange.folderstorage.FolderStorage;
 import com.openexchange.folderstorage.database.DatabaseFolderStorage;
 import com.openexchange.osgi.HousekeepingActivator;
+import com.openexchange.sessiond.SessiondEventConstants;
 
 /**
- * {@link DatabaseFolderStorageActivator} - {@link BundleActivator Activator} for database folder storage.
+ * {@link DatabaseFolderStorageActivator} - The activator for database folder storage.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
@@ -78,15 +81,27 @@ public final class DatabaseFolderStorageActivator extends HousekeepingActivator 
 
     @Override
     protected void startBundle() throws Exception {
-        try {
-            // Register folder storage
-            final Dictionary<String, String> dictionary = new Hashtable<String, String>(2);
-            dictionary.put("tree", FolderStorage.REAL_TREE_ID);
-            registerService(FolderStorage.class, new DatabaseFolderStorage(this), dictionary);
-        } catch (final Exception e) {
-            org.slf4j.LoggerFactory.getLogger(DatabaseFolderStorageActivator.class).error("", e);
-            throw e;
-        }
+        // Register folder storage
+        Dictionary<String, Object> dictionary = new Hashtable<String, Object>(2);
+        dictionary.put("tree", FolderStorage.REAL_TREE_ID);
+        registerService(FolderStorage.class, new DatabaseFolderStorage(this), dictionary);
+
+        // Register event handler
+        EventHandler eventHandler = new EventHandler() {
+
+            @Override
+            public void handleEvent(Event event) {
+                if (SessiondEventConstants.TOPIC_LAST_SESSION_CONTEXT.equals(event.getTopic())) {
+                    Integer contextId = (Integer) event.getProperty(SessiondEventConstants.PROP_CONTEXT_ID);
+                    if (null != contextId) {
+                        DatabaseFolderStorage.clearStampsFor(contextId.intValue());
+                    }
+                }
+            }
+        };
+        dictionary = new Hashtable<String, Object>(2);
+        dictionary.put(EventConstants.EVENT_TOPIC, new String[] { SessiondEventConstants.TOPIC_LAST_SESSION_CONTEXT });
+        registerService(EventHandler.class, eventHandler, dictionary);
     }
 
 }

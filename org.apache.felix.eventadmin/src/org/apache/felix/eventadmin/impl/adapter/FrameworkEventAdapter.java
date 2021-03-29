@@ -20,7 +20,6 @@ package org.apache.felix.eventadmin.impl.adapter;
 
 import java.util.Dictionary;
 import java.util.Hashtable;
-
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.FrameworkEvent;
@@ -52,6 +51,7 @@ public class FrameworkEventAdapter extends AbstractAdapter implements FrameworkL
         context.addFrameworkListener(this);
     }
 
+    @Override
     public void destroy(BundleContext context) {
         context.removeFrameworkListener(this);
     }
@@ -62,6 +62,7 @@ public class FrameworkEventAdapter extends AbstractAdapter implements FrameworkL
      *
      * @param event The event to adapt.
      */
+    @Override
     public void frameworkEvent(final FrameworkEvent event)
     {
         final Dictionary properties = new Hashtable();

@@ -20,11 +20,10 @@ package org.apache.felix.eventadmin.impl.tasks;
 
 import java.util.Collection;
 import java.util.Iterator;
-
+import java.util.concurrent.TimeoutException;
 import org.apache.felix.eventadmin.impl.handler.EventHandlerProxy;
 import org.osgi.service.event.Event;
 
-import EDU.oswego.cs.dl.util.concurrent.TimeoutException;
 
 /**
  * This class does the actual work of the synchronous event delivery.
@@ -99,11 +98,15 @@ public class SyncDeliverTasks
      * event is send (or a timeout occurs).
      *
      * @param tasks The event handler dispatch tasks to execute
-     * @param event The event
-     * @param filterAsyncUnordered Signals unordered asynchronous execution
+     *
      */
     public void execute(final Collection<EventHandlerProxy> tasks, final Event event, final boolean filterAsyncUnordered)
     {
+        if (null == tasks || tasks.isEmpty()) {
+            // Nothing to do... No one interested in given event
+            return;
+        }
+
         final Thread sleepingThread = Thread.currentThread();
         final SyncThread syncThread = sleepingThread instanceof SyncThread ? (SyncThread)sleepingThread : null;
 
@@ -147,7 +150,7 @@ public class SyncDeliverTasks
                                 // stop the timer
                                 timerBarrier.waitForRendezvous();
                             }
-                            catch (final IllegalStateException ise)
+                            catch (IllegalStateException ise)
                             {
                                 // this can happen on shutdown, so we ignore it
                             }
@@ -163,7 +166,7 @@ public class SyncDeliverTasks
                     {
                         timerBarrier.waitAttemptForRendezvous(this.timeout);
                     }
-                    catch (final TimeoutException ie)
+                    catch (TimeoutException ie)
                     {
                         // if we timed out, we have to blacklist the handler
                         task.blackListHandler();

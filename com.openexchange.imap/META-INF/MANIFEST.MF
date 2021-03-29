@@ -5,6 +5,7 @@ Bundle-SymbolicName: com.openexchange.imap
 Bundle-Version: 7.6.3
 Bundle-Vendor: OX Software GmbH
 Import-Package: com.google.common.cache,
+ com.google.common.collect,
  com.googlecode.concurrentlinkedhashmap,
  com.javacodegeeks.concurrent,
  com.openexchange.ajax.customizer.folder,
@@ -100,6 +101,7 @@ Import-Package: com.google.common.cache,
  javax.mail.internet,
  javax.mail.internet.idn,
  javax.mail.search,
+ javax.mail.util,
  javax.net,
  javax.net.ssl,
  javax.security.auth,
