@@ -6,7 +6,11 @@ This Helm Chart deploys middleware core in a kubernetes cluster.
 
 This Chart includes the following components:
 
-* Deployment, jobs, config map, service and secrets to deploy a middleware core component in a kubernetes cluster.
+* Deployment with application container and a sidecar for logging purposes, init jobs, config map, service, ingress and secrets to deploy a middleware core component in a kubernetes cluster.       
+
+## Requirements
+
+Requires Kubernetes v1.19+
 
 ## Dependencies
 
@@ -18,6 +22,7 @@ To run a test against a cluster deployment run
 
 ```shell
 helm repo add middleware cm://registry.open-xchange.com/chartrepo/middleware
+helm repo update
 helm install --dry-run --debug --generate-name --version [VERSION] middleware/core-mw
 ```
 
@@ -27,7 +32,8 @@ To install the Chart with the release name “alice” run:
 
 ```shell
 helm repo add middleware cm://registry.open-xchange.com/chartrepo/middleware
-helm install alice --version [VERSION] middleware/core -f path/to/values.yaml
+helm repo update
+helm install alice --version [VERSION] middleware/core -f path/to/values_with_credentials.yaml
 ```
 
 ### Configuration
@@ -39,7 +45,16 @@ helm install alice --version [VERSION] middleware/core -f path/to/values.yaml
 | `image.repository`                  | The image repository                                | `sre/appsuite-in-a-box/as-mw`                   |
 | `image.pullPolicy`                  | The imagePullPolicy for the deployment              | `IfNotPresent`                                  |
 | `imagePullSecrets`                  | Some references to secrets for image registries     | `[]`                                            |
-
+| `masterAdmin`                       | Base64 encoded                                      | `nn`                                            |
+| `masterPassword`                    | Base64 encoded                                      | `nn`                                            |
+| `hzGroupName`                       | Base64 encoded                                      | `nn`                                            |
+| `hzGroupPassword`                   | Base64 encoded                                      | `nn`                                            |
+| `basicAuthLogin`                    | Base64 encoded                                      | `nn`                                            |
+| `basicAuthPassword`                 | Base64 encoded                                      | `nn`                                            |
+| `jolokiaLogin`                      | Base64 encoded                                      | `nn`                                            |
+| `jolokiaPassword`                   | Base64 encoded                                      | `nn`                                            |
+| `credstoragePasscrypt`              | Base64 encoded                                      | `nn`                                            |
+| `doveAdmAPIKey`                     | Base64 encoded                                      | `nn`                                            |
 
 ## Init Configuration
 | Parameter                 | Description                                         | Default                                         |

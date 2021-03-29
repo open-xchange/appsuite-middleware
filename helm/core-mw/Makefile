@@ -1,6 +1,7 @@
 ###
 # In order to use the make file run 'source <projectDir>/env/env.zsh' or 'source <projectDir>/env/env.bash'
 # Make sure to set environment variables HELM_REPO_USERNAME and HELM_REPO_PASSWORD
+# To use make push a local chartmuseum/helm-push installation is required (https://github.com/chartmuseum/helm-push)
 ###
 
 ### Chart Repository
