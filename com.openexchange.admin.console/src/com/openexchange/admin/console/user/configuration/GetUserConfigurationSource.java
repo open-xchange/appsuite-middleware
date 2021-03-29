@@ -201,8 +201,13 @@ public class GetUserConfigurationSource extends AbstractRmiCLI<Void> {
     ///////////////////////////////////////////////// HELPERS //////////////////////////////////////////////////
 
     /**
+     * <code>"preferencePath"</code>
+     */
+    private static final String METADATA_PREFERENCE_PATH = "preferencePath";
+
+    /**
      * Handles the <code>user-configuration</code> option
-     * 
+     *
      * @param oxUserInterface The {@link OXUserInterface}
      * @param ctx The context
      * @param user The user
@@ -222,13 +227,19 @@ public class GetUserConfigurationSource extends AbstractRmiCLI<Void> {
         builder.append("Configuration found: ").append(NEWLINE);
         for (UserProperty property : userConfigurationSource) {
             builder.append(property.toString()).append(NEWLINE);
+            if (property.getName() != null && property.getName().indexOf("//") > 0) {
+                // Assume a UI property delivered via JSlob interface; e.g. "plugins/portal/myclient//linkTo/URL"
+                if (property.getMetadata() == null || property.getMetadata().containsKey(METADATA_PREFERENCE_PATH) == false) {
+                    builder.append("  (This configuration property has no effect when read from the App Suite UI, as there is no entry for it in `/opt/open-xchange/etc/settings/` directory.)").append(NEWLINE);
+                }
+            }
         }
         System.out.println(builder.toString());
     }
 
     /**
      * Handles the <code>user-capabilities</code> option
-     * 
+     *
      * @param oxUserInterface The {@link OXUserInterface}
      * @param ctx The context
      * @param user The user
