@@ -216,26 +216,32 @@ public class GetUserConfigurationSource extends AbstractRmiCLI<Void> {
      * @throws Exception if an error is occurred
      */
     private void handleConfigurationOption(OXUserInterface oxUserInterface, Context ctx, User user, Credentials credentials, String searchPattern) throws Exception {
-        List<UserProperty> userConfigurationSource = oxUserInterface.getUserConfigurationSource(ctx, user, searchPattern, credentials);
-        if (userConfigurationSource.size() <= 0) {
+        List<UserProperty> userProperties = oxUserInterface.getUserConfigurationSource(ctx, user, searchPattern, credentials);
+        if (userProperties.isEmpty()) {
             System.out.println("No property with pattern '" + searchPattern + "' found!");
-            System.out.println();
-            return;
-        }
-
-        StringBuilder builder = new StringBuilder(128);
-        builder.append("Configuration found: ").append(NEWLINE);
-        for (UserProperty property : userConfigurationSource) {
-            builder.append(property.toString()).append(NEWLINE);
-            if (property.getName() != null && property.getName().indexOf("//") > 0) {
-                // Assume a UI property delivered via JSlob interface; e.g. "plugins/portal/myclient//linkTo/URL"
-                if (property.getMetadata() == null || property.getMetadata().containsKey(METADATA_PREFERENCE_PATH) == false) {
-                    builder.append("  Info: This configuration property has no effect since it appears to be an App Suite UI setting, but misses").append(NEWLINE);
-                    builder.append("        \"preferencePath\" in its meta-data (e.g. no entry for it in '/opt/open-xchange/etc/settings/' directory).").append(NEWLINE);
+        } else {
+            System.out.println("Configuration found: ");
+            for (UserProperty userProperty : userProperties) {
+                System.out.println(userProperty.toString());
+                if (seemsAppSuiteUIPropertyWithoutPreferencePath(userProperty)) {
+                    System.out.println("  Info: This configuration property has no effect since it appears to be an App Suite UI setting, but misses");
+                    System.out.println("        \"preferencePath\" in its meta-data (e.g. no entry for it in '/opt/open-xchange/etc/settings/' directory).");
                 }
             }
         }
-        System.out.println(builder.toString());
+        System.out.println();
+    }
+
+    private static final String APP_SUITE_UI_PROP_DELIMITER = "//";
+
+    private boolean seemsAppSuiteUIPropertyWithoutPreferencePath(UserProperty userProperty) {
+        String propName = userProperty.getName();
+        if (propName != null && propName.indexOf(APP_SUITE_UI_PROP_DELIMITER) > 0) {
+            // Assume a UI property delivered via JSlob interface; e.g. "plugins/portal/myclient//linkTo/URL"
+            Map<String, String> metadata = userProperty.getMetadata();
+            return metadata == null || false == metadata.containsKey(METADATA_PREFERENCE_PATH);
+        }
+        return false;
     }
 
     /**
