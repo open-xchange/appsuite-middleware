@@ -123,7 +123,7 @@ public final class ConfigJSlobService implements JSlobService {
     /**
      * <code>"preferencePath"</code>
      */
-    private static final String METADATA_PREFERENCE_PATH = "preferencePath".intern();
+    private static final String METADATA_PREFERENCE_PATH = "preferencePath";
 
     /**
      * <code>"protected"</code>
