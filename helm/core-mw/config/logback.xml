@@ -1,0 +1,121 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<configuration debug={{ .Values.logging.debug | quote }}>
+
+  <property scope="context" name="com.openexchange.logging.filter.loggerWhitelist" value="com.openexchange" />
+  <contextListener class="ch.qos.logback.classic.jul.LevelChangePropagator"/>
+  <define name="syslogPatternLayoutActivator" class="com.openexchange.logback.extensions.SyslogPatternLayoutActivator" />
+
+  <!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
+  <!--                              File Appender                              -->
+  <!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
+  {{- if .Values.logging.root.file }}
+  <appender name="FILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
+    <file>{{ .Values.logging.logDir }}/{{ .Values.logging.logFile }}.0</file>
+    <rollingPolicy class="com.openexchange.logback.extensions.policies.FixedWindowRollingPolicy">
+      <fileNamePattern>{{ .Values.logging.logDir }}/{{ .Values.logging.logFile }}.%i</fileNamePattern>
+      <minIndex>1</minIndex>
+      <maxIndex>{{ .Values.logging.maxIndex }}</maxIndex>
+    </rollingPolicy>
+    <triggeringPolicy class="ch.qos.logback.core.rolling.SizeBasedTriggeringPolicy">
+      <maxFileSize>{{ .Values.logging.maxFileSize }}</maxFileSize>
+    </triggeringPolicy>
+    <encoder class="com.openexchange.logback.extensions.encoders.ExtendedPatternLayoutEncoder">
+      <pattern>%date{"yyyy-MM-dd'T'HH:mm:ss,SSSZ"} %-5level [%thread] %class.%method\(%class{0}.java:%line\)%n%sanitisedMessage%n%lmdc%exception{full}</pattern>
+    </encoder>
+  </appender>
+
+  <appender name="ASYNC" class="ch.qos.logback.classic.AsyncAppender">
+    <queueSize>{{ .Values.logging.queueSize }}</queueSize>
+    <discardingThreshold>0</discardingThreshold>
+    <includeCallerData>true</includeCallerData>
+    <appender-ref ref="FILE"/>
+  </appender>
+  {{ end }}
+
+  <!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
+  <!--                             Syslog Appender                             -->
+  <!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
+  {{- if .Values.logging.root.syslog }}
+  <appender name="SYSLOG" class="ch.qos.logback.classic.net.SyslogAppender">
+    <syslogHost>{{ .Values.logging.syslog.host }}</syslogHost>
+    <port>{{ .Values.logging.syslog.port }}</port>
+    <facility>{{ .Values.logging.syslog.facility }}</facility>
+    <suffixPattern>%date open-xchange %-5level [%logger][%thread]: %class.%method\(%class{0}.java:%line\)%n%lmdc %n %sanitisedMessage%n</suffixPattern>
+  </appender>
+  {{ end }}
+
+  <!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
+  <!--                            Console Appender                             -->
+  <!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
+  {{- if .Values.logging.root.console }}
+  <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
+    <encoder class="com.openexchange.logback.extensions.encoders.ExtendedPatternLayoutEncoder">
+      <pattern>%date{"yyyy-MM-dd'T'HH:mm:ss,SSSZ"} %-5level [%thread] %class.%method\(%class{0}.java:%line\)%n%sanitisedMessage%n%lmdc%exception{full}</pattern>
+    </encoder>
+  </appender>
+  {{ end }}
+
+  <!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
+  <!--                            Logstash Appender                            -->
+  <!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
+  {{- if .Values.logging.root.logstash }}
+  <property scope="context" name="com.openexchange.logback.extensions.logstash.enabled" value="true" />
+  <property scope="context" name="com.openexchange.logback.extensions.logstash.alwaysPersistEvents" value="true" />
+  <property scope="context" name="com.openexchange.logback.extensions.logstash.loadFactor" value="0.67" />
+  <appender name="LOGSTASH" class="com.openexchange.logback.extensions.logstash.LogstashSocketAppender">
+    <remoteHost>{{ .Values.logging.logstash.host }}</remoteHost>
+    <port>{{ .Values.logging.logstash.port }}</port>
+    <reconnectionDelay>10000</reconnectionDelay>
+    <eventDelayLimit>30000</eventDelayLimit>
+    <encoder class="com.openexchange.logback.extensions.logstash.LogstashEncoder" />
+    <queueSize>{{ .Values.logging.queueSize }}</queueSize>
+  </appender>
+  {{ end }}
+
+  <!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
+  <!--                               Root Logger                               -->
+  <!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
+  <root level={{ .Values.logging.root.level | quote }}>
+  {{- if .Values.logging.root.console }}
+    <appender-ref ref="STDOUT" />
+  {{- end }}
+  {{- if .Values.logging.root.logstash }}
+    <appender-ref ref="LOGSTASH" />
+  {{- end }}
+  {{- if .Values.logging.root.syslog }}
+    <appender-ref ref="SYSLOG" />
+  {{- end }}
+  {{- if .Values.logging.root.file }}
+    <appender-ref ref="ASYNC" />
+  {{- end }}
+  </root>
+
+  <logger name="com.openexchange.login.internal.LoginPerformer" level="INFO"/>
+  <logger name="com.openexchange.sessiond.impl.SessionHandler" level="INFO"/>
+
+  <logger name="sun.rmi" level="INFO"/>
+  <logger name="org.apache" level="WARN"/>
+  <logger name="com.sun" level="INFO"/>
+  <logger name="javax.management" level="INFO"/>
+  <logger name="javax.jmdns" level="WARN"/>
+  <logger name="org.glassfish.grizzly" level="WARN"/>
+  <logger name="liquibase.ext.logging.slf4j.Slf4jLogger" level="WARN"/>
+
+  <logger name="org.jaudiotagger" level="ERROR"/>
+  <logger name="com.openexchange.documentconverter.impl.Manager" level="WARN"/>
+  <logger name="com.gargoylesoftware.htmlunit" level="WARN"/>
+
+  <logger name="org.docx4j" level="WARN"/>
+  <logger name="org.xlsx4j" level="WARN"/>
+  <logger name="org.pptx4j" level="WARN"/>
+
+  <logger name="com.openexchange.ajax.requesthandler.DispatcherServlet" level="INFO"/>
+
+  <!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
+  <!--                                 Logger                                  -->
+  <!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
+  {{- range .Values.logging.logger }}
+  <logger name={{ .name | quote }} level={{ .level | quote }}/>
+  {{- end }}
+
+</configuration>

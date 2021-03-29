@@ -1,0 +1,282 @@
+# global
+global:
+  # image
+  image:
+    # registry
+    registry: gitlab.open-xchange.com:4567
+
+# hostname
+hostname: ""
+# shareHostname
+shareHostname: "" # optional
+
+# caldavUrl
+caldavUrl: "" # optional
+# carddavUrl
+carddavUrl: "" # optional
+
+# image
+image:
+  # registry: gitlab.open-xchange.com:4567
+  repository: sre/appsuite-in-a-box/as-mw
+  # pullPolicy
+  pullPolicy: IfNotPresent
+
+# init  
+init:
+  # image
+  image:
+    # repository
+    repository: sre/appsuite-in-a-box/as-admin
+
+#imagePullSecrets
+imagePullSecrets: []
+
+# overrides
+overrides:
+  # name
+  name: ""
+  # fullname
+  fullname: ""
+  # serviceAccountName
+  serviceAccountName: ""
+  # serviceAccountName
+  imageConverterConfigMap: ""
+
+# enabled 
+enabled:
+  # appsuiteSecret
+  appsuiteSecret: true
+  # dovecotSecret
+  dovecotSecret: false
+  # initGuard
+  initGuard: true
+  # createIConvFilestore
+  createIConvFilestore: true
+  # antivir
+  antivir: true
+
+# masterAdmin
+masterAdmin: "nn" # base64 encoded
+# masterPassword
+masterPassword: "nn" # base64 encoded
+# hzGroupName
+hzGroupName: "nn" # base64 encoded
+# hzGroupPassword
+hzGroupPassword: "nn" # base64 encoded
+# basicAuthLogin
+basicAuthLogin: "nn" # base64 encoded
+# basicAuthPassword
+basicAuthPassword: "nn" # base64 encoded
+# jolokiaLogin
+jolokiaLogin: "nn" # base64 encoded
+# jolokiaPassword
+jolokiaPassword: "nn" # base64 encoded
+# credstoragePasscrypt
+credstoragePasscrypt: "nn" # base64 encoded
+
+# doveAdmAPIKey
+doveAdmAPIKey: "nn" # base64 encoded
+
+# resources
+resources: {}
+  # limits:
+  #   cpu: 100m
+  #   memory: 128Mi
+  # requests:
+  #   cpu: 100m
+  #   memory: 128Mi
+
+# jvm
+jvm:
+  # opts
+  opts:
+    # other
+    other: ""
+    # server
+    server: ""
+  # memory
+  memory:
+    # maxHeapSize
+    maxHeapSize: ""
+    # maxPermSize
+    maxPermSize: ""
+
+# noreply
+noreply:
+  # address
+  address: "No Reply <noreply@box.ox.io>"
+  # login
+  login: "noreply@box.ox.io"
+  # password
+  password: "irrelevant"
+
+# probe
+probe:
+  # liveness
+  liveness:
+    # enabled
+    enabled: true
+    # periodSeconds
+    periodSeconds: 10
+    # failureThreshold
+    failureThreshold: 15
+  # readiness
+  readiness:
+    # enabled
+    enabled: true
+    # initialDelaySeconds
+    initialDelaySeconds: 30
+    # periodSeconds
+    periodSeconds: 5
+    # failureThreshold
+    failureThreshold: 2
+    # timeoutSeconds
+    timeoutSeconds: 5
+  # startup
+  startup:
+    # enabled
+    enabled: true
+    # initialDelaySeconds
+    initialDelaySeconds: 30
+    # periodSeconds
+    periodSeconds: 10
+    # failureThreshold
+    failureThreshold: 30
+
+# logging
+logging:
+  # debug
+  debug: true
+  # logDir
+  logDir: /var/log/open-xchange
+  # logFile
+  logFile: open-xchange.log
+  # maxFileSize
+  maxFileSize: 2MB
+  # maxIndex
+  maxIndex: 5
+  # queueSize
+  queueSize: 2048
+
+  # syslog
+  syslog:
+    # host
+    host: localhost
+    # port
+    port: 514
+    # facility
+    facility: USER
+
+  # logstash
+  logstash:
+    # host
+    host: elk.open-xchange.com
+    # port
+    port: 31337
+
+  # root
+  root:
+    # level
+    level: INFO
+    # console
+    console: false
+    # file
+    file: true
+    # syslog
+    syslog: false
+    # logstash
+    logstash: false
+
+  # logger
+  logger:
+      # name org.apache.cxf
+    - name: org.apache.cxf
+      # level WARN
+      level: WARN
+      # name com.openexchange.soap.cxf.logger
+    - name: com.openexchange.soap.cxf.logger
+      # level WARN
+      level: WARN
+
+# persistence 
+persistence:
+  ## If true, use a Persistent Volume Claim, If false, use emptyDir
+  ##
+  # enabled
+  enabled: false
+  ## Name of existing PVC to hold MySQL Primary data
+  ## NOTE: When it's set the rest of persistence parameters are ignored
+  ##
+  # existingClaim:
+  ## Persistent Volume Storage Class
+  ## If defined, storageClassName: <storageClass>
+  ## If set to "-", storageClassName: "", which disables dynamic provisioning
+  ## If undefined (the default) or set to null, no storageClassName spec is
+  ##   set, choosing the default provisioner.  (gp2 on AWS, standard on
+  ##   GKE, AWS & OpenStack)
+  ##
+  # storageClass: "-"
+  # annotations
+  annotations: {}
+  # accessModes
+  accessModes:
+    - ReadWriteOnce
+  # size
+  size: 8Gi
+
+##
+## External database configuration
+##
+# externalDatabase
+externalDatabase:
+  # enabled
+  enabled: false
+
+  # host
+  host: ""
+  # user
+  user: ""
+  # password
+  password: "nn"
+  # rootPassword 
+  rootPassword: "nn"
+
+  # existingSecret
+  existingSecret:
+    # secretName
+    secretName: ""
+    # passwordKey
+    passwordKey: ""
+    # rootPasswordKey
+    rootPasswordKey: ""
+
+##
+## MySQL chart configuration
+##
+# mysql
+mysql:
+  # enabled
+  enabled: true
+  # image
+  image:
+    # tags
+    tag: 5.7
+  # auth
+  auth:
+    # existingSecret
+    existingSecret: ""
+    # username
+    username: "nn"
+    # password
+    password: "nn"
+    # rootPassword
+    rootPassword: "nn"
+  # nameOverride
+  nameOverride: mysql
+  # primary
+  primary:
+    # persistence
+    persistence:
+      # enabled
+      enabled: false

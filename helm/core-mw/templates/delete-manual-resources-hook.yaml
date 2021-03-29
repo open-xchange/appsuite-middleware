@@ -1,0 +1,21 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: {{ include "core-mw.fullname" . }}-delete-hook
+  labels:
+    {{- include "core-mw.labels" . | nindent 4 }}
+  annotations:
+    "helm.sh/hook": pre-delete
+    "helm.sh/hook-delete-policy": hook-succeeded
+spec:
+  template:
+    spec:
+      serviceAccountName: {{ include "core-mw.serviceAccount" . }}
+      restartPolicy: Never
+      containers:
+      - name: delete-resource-job
+        image: {{ include "core-mw.initImage" . }}
+        env:
+          {{- include "core-mw.env-variables" . | nindent 10 }}
+        command: ["kubectl"]
+        args: ["delete", "configmaps", "-n", "$(POD_NAMESPACE)", "-l", "ox-resource=manually"]

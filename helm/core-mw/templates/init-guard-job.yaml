@@ -1,0 +1,23 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: {{ include "core-mw.fullname" . }}-guard-init
+  labels:
+    {{- include "core-mw.labels" . | nindent 4 }}
+spec:
+  template:
+    spec:
+      serviceAccountName: {{ include "core-mw.serviceAccount" . }}
+      restartPolicy: Never
+       {{- with .Values.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end}}
+      containers:
+        - name: init
+          image: {{ include "core-mw.initImage" . }}
+          command: ["/guard-init.sh"]
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          env: 
+            - name: OX_GUARD_SECRET_NAME
+              value: {{ include "core-mw.guardSecret" . }}

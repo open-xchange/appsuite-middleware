@@ -1,0 +1,295 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "core-mw.fullname" . }}
+  labels:
+    {{- include "core-mw.labels" . | nindent 4 }}
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      {{- include "core-mw.selectorLabels" . | nindent 6 }}
+  template:
+    metadata:
+      annotations:
+        prometheus.io/scrape: 'true'
+        prometheus.io/port: '8009'
+      labels:
+        {{- include "core-mw.selectorLabels" . | nindent 8 }}
+    spec:
+      {{- with .Values.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      containers:
+        - name: {{ .Chart.Name }}
+          image:  {{ include "core-mw.image" . }}
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          ports:
+            - containerPort: 8009
+              name: http
+          {{- if .Values.probe.liveness.enabled }}
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: 8009
+            {{- omit .Values.probe.liveness "enabled" | toYaml | nindent 12 }}
+          {{- end }}
+          {{- if .Values.probe.startup.enabled }}
+          startupProbe:
+            httpGet:
+              path: /health
+              port: 8009
+            {{- omit .Values.probe.startup "enabled" | toYaml | nindent 12 }}
+          {{- end }}
+          {{- if .Values.probe.readiness.enabled }}
+          readinessProbe:
+            httpGet:
+                path: /health
+                port: 8009
+            {{- omit .Values.probe.readiness "enabled" | toYaml | nindent 12 }}
+          {{- end }}
+          env: &as-mw-env
+            - name: OX_DISABLED_BUNDLES
+              value: '/disabled.bundles'
+            - name: OX_HOSTNAME
+              value: {{ .Values.hostname }}
+            - name: OX_DISABLE_DOCUMENTS
+              value: 'NO'
+            - name: OX_DISABLE_GUARD
+              value: 'NO'
+              {{- if .Values.shareHostname }}
+            - name: OX_SHARE_HOSTNAME
+              value: {{ .Values.shareHostname }}
+              {{- end }}
+            {{- if .Values.mysql.enabled }}
+              {{- if not (empty .Values.mysql.auth.existingSecret) }}
+            - name: CONFIG_DB_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                    name: {{ .Values.mysql.auth.existingSecret | default (printf "%s-%s" .Release.Name "mysql") }}
+                    key: "mysql-password"
+            - name: MYSQL_ROOT_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                    name: {{ .Values.mysql.auth.existingSecret | default (printf "%s-%s" .Release.Name "mysql") }}
+                    key: "mysql-root-password"
+              {{- else }}
+            - name: CONFIG_DB_PASSWORD
+              value: {{ required "A MySQL Database Password is required!" .Values.mysql.auth.password | quote }}
+            - name: MYSQL_ROOT_PASSWORD
+              value: {{ required "A MySQL Root Password is required!" .Values.mysql.auth.rootPassword | quote }}
+              {{- end }}
+            - name: CONFIG_DB_HOST
+              value: {{ include "asbox.mysql.fullname" . | quote }}
+            - name: CONFIG_DB_USER
+              value: {{ .Values.mysql.auth.username | default "open-xchange" | quote }}
+            {{- else }}
+              {{- if .Values.externalDatabase.enabled }}
+                {{- if not (empty .Values.externalDatabase.existingSecret.secretName) }}
+            - name: CONFIG_DB_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                    name: {{ .Values.externalDatabase.existingSecret.secretName | default (printf "%s-%s" .Release.Name "mysql") }}
+                    key: {{ .Values.externalDatabase.existingSecret.passwordKey | default "mysql-password" | quote }}
+            - name: MYSQL_ROOT_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                    name: {{ .Values.externalDatabase.existingSecret.secretName | default (printf "%s-%s" .Release.Name "mysql") }}
+                    key: {{ .Values.externalDatabase.existingSecret.rootPasswordKey | default "mysql-root-password" | quote }}
+                {{- else }}
+            - name: CONFIG_DB_PASSWORD
+              value: {{ required "A MySQL Database Password is required!" .Values.externalDatabase.password | quote }}
+            - name: MYSQL_ROOT_PASSWORD
+              value: {{ required "A MySQL Root Password is required!" .Values.externalDatabase.rootPassword | quote }}
+                {{- end }}
+            - name: CONFIG_DB_HOST
+              value: {{ required "A MySQL endpoint is required!" .Values.externalDatabase.host | quote }}
+            - name: CONFIG_DB_USER
+              value: {{ .Values.externalDatabase.user | default "open-xchange" | quote }}
+              {{- end }}
+            {{- end }}
+            - name: MASTER_ADMIN_USER
+              valueFrom:
+                secretKeyRef:
+                    name: {{ include "core-mw.appsuiteSecret" . }}
+                    key: master-admin
+            - name: MASTER_ADMIN_PW
+              valueFrom:
+                secretKeyRef:
+                    name:  {{ include "core-mw.appsuiteSecret" . }}
+                    key: master-pw
+            - name: SERVER_NAME
+              value: oxserver
+            - name: HZ_GROUP_NAME
+              valueFrom:
+                secretKeyRef:
+                    name:  {{ include "core-mw.appsuiteSecret" . }}
+                    key: hz-group-name
+            - name: HZ_GROUP_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                    name:  {{ include "core-mw.appsuiteSecret" . }}
+                    key: hz-group-pw
+            - name: HZ_SERVICE_NAME
+              value: "{{ include "core-mw.fullname" . }}-hazelcast"
+            - name: POD_IP
+              valueFrom:
+                fieldRef:
+                    fieldPath: status.podIP
+            - name: OX_GUARD_SPOOL_DIR
+              value: /shared/appsuite/guard
+            - name: MAIL_SERVER
+              value: {{ include "core-mw.imapHost" . }}
+            - name: TRANSPORT_SERVER
+              value: smtp://{{ include "core-mw.smtpHost" . }}:587
+            - name: OX_DOCUMENTCONVERTER_URL
+              value: http://{{ include "core-mw.dconvHost" . }}/documentconverterws
+            - name: OX_IMAGECONVERTER_URL
+              value: http://{{ include "core-mw.iconvHost" . }}/imageconverter
+            - name: OX_SPELLCHECK_URL
+              value: http://{{ include "core-mw.spellcheckHost" . }}:8003
+              {{- if .Values.enabled.antivir }}
+            - name: OX_ANTIVIR_HOST
+              value: {{ include "core-mw.antivirHost" . }}
+              {{- end}}
+              {{- if .Values.caldavUrl }}
+            - name: CALDAV_URL
+              value: {{ .Values.caldavUrl }}
+              {{- end }}
+              {{- if .Values.carddavUrl }}
+            - name: CARDDAV_URL
+              value: {{ .Values.carddavUrl }}
+              {{- end }}
+            - name: OX_BASIC_AUTH_LOGIN
+              valueFrom:
+                secretKeyRef:
+                    name: {{ include "core-mw.appsuiteSecret" . }}
+                    key: basic-auth-login
+            - name: OX_BASIC_AUTH_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                    name: {{ include "core-mw.appsuiteSecret" . }}
+                    key: basic-auth-password
+            - name: DOVEADM_ENDPOINTS
+              value: http://{{ include "core-mw.imapHost" . }}:8080/doveadm/v1
+            - name: DOVEADM_API_SECRET
+              valueFrom:
+                secretKeyRef:
+                    name: {{ include "core-mw.dovecotSecret" . }}
+                    key: doveadm-api-key
+            - name: JOLOKIA_LOGIN
+              valueFrom:
+                secretKeyRef:
+                    name: {{ include "core-mw.appsuiteSecret" . }}
+                    key: jolokia-login
+            - name: JOLOKIA_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                    name: {{ include "core-mw.appsuiteSecret" . }}
+                    key: jolokia-password
+            - name: CREDSTORAGE_PASSCRYPT
+              valueFrom:
+                secretKeyRef:
+                    name: {{ include "core-mw.appsuiteSecret" . }}
+                    key: credstorage-passcrypt
+            - name: OX_GUARDPASS_FILE
+              value: /secrets/guard/oxguardpass
+              #FIXME: configmaps per node
+
+            {{- if .Values.mysql.enabled }}
+              {{- if not (empty .Values.mysql.auth.existingSecret) }}
+            - name: DCS_DB_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                    name: {{ .Values.mysql.auth.existingSecret | default (printf "%s-%s" .Release.Name "mysql") }}
+                    key: "mysql-password"
+              {{- else }}
+            - name: DCS_DB_PASSWORD
+              value: {{ required "A MySQL Database Password is required!" .Values.mysql.auth.password | quote }}
+              {{- end }}
+            - name: DCS_DB_HOST
+              value: {{ include "asbox.mysql.fullname" . | quote }}
+            - name: DCS_DB_USER
+              value: {{ .Values.mysql.auth.username | default "open-xchange" | quote }}
+            {{- else }}
+              {{- if .Values.externalDatabase.enabled }}
+                {{- if not (empty .Values.externalDatabase.existingSecret.secretName) }}
+            - name: DCS_DB_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                    name: {{ .Values.externalDatabase.existingSecret.secretName | default (printf "%s-%s" .Release.Name "mysql") }}
+                    key: {{ .Values.externalDatabase.existingSecret.passwordKey | default "mysql-password" | quote }}
+                {{- else }}
+            - name: DCS_DB_PASSWORD
+              value: {{ required "A MySQL Database Password is required!" .Values.externalDatabase.password | quote }}
+                {{- end }}
+            - name: DCS_DB_HOST
+              value: {{ required "A MySQL endpoint is required!" .Values.externalDatabase.host | quote }}
+            - name: DCS_DB_USER
+              value: {{ .Values.externalDatabase.user | default "open-xchange" | quote }}
+              {{- end }}
+            {{- end }}
+            - name: DCS_DB_SCHEMA
+              value: {{ include "core-mw.collabMysqlSchema" . }}
+            - name: GDPR_FS_ID
+              valueFrom:
+                configMapKeyRef:
+                  name: {{ include "core-mw.filestoresConfigMap" . }}
+                  key: gdprstore
+            - name: GLOBAL_DB_ID
+              valueFrom:
+                configMapKeyRef:
+                  name: {{ include "core-mw.dbsConfigMap" . }}
+                  key: globaldb
+            - name: NOREPLY_ADDRESS
+              value: "{{ .Values.noreply.address }}"
+            - name: NOREPLY_LOGIN
+              value: "{{ .Values.noreply.login }}"
+            - name: NOREPLY_PASSWORD
+              value: {{ .Values.noreply.password }}
+            - name: NOREPLY_SERVER
+              value: {{ include "core-mw.smtpHost"  . }}
+          resources:
+            {{- toYaml .Values.resources | nindent 12 }}
+          volumeMounts:
+            - name: shared
+              mountPath: /shared
+            - name: guard-secret
+              mountPath: /secrets/guard/
+              readOnly: true
+            - name: {{ include "core-mw.fullname" . }}-configmap
+              mountPath: /opt/open-xchange/etc/ox-scriptconf.sh
+              subPath: ox-scriptconf.sh
+            - name: {{ include "core-mw.fullname" . }}-configmap
+              mountPath: /opt/open-xchange/etc/logback.xml
+              subPath: logback.xml
+            - name: disabled-bundles
+              mountPath: /disabled.bundles
+              readOnly: true
+            - name: logs
+              mountPath: /var/log/open-xchange
+        - name: {{ .Chart.Name }}-sidecar
+          image: busybox
+          args: [ /bin/sh, -c, 'tail -n+1 -f /var/log/open-xchange/open-xchange.log.0 -F /var/log/open-xchange/open-xchange-*.log' ]
+          volumeMounts:
+            - name: logs
+              mountPath: /var/log/open-xchange
+      volumes:
+        - name: guard-secret
+          secret:
+            secretName: {{ include "core-mw.guardSecret" . }}
+        - name: shared
+          emptyDir: {}
+        - name: {{ include "core-mw.fullname" . }}-configmap
+          configMap:
+              name: {{ include "core-mw.fullname" . }}-configmap
+              items:
+                - key: ox-scriptconf.sh
+                  path: ox-scriptconf.sh
+                - key: logback.xml
+                  path: logback.xml
+        - name: disabled-bundles
+          emptyDir: {}
+        - name: logs
+          emptyDir: {}

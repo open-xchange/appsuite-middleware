@@ -1,2 +1,2 @@
 #! /bin/fish
-set -x OX_PROJECT_NAME "middleware-core"
+set -x OX_PROJECT_NAME "core"

@@ -1,6 +1,29 @@
 stages:
+  - verify
   - build
   - deploy
+
+###### HELM #############
+# Config
+.helm:
+  image: 
+    name: alpine/helm:3.5.3
+    entrypoint: ["/bin/sh", "-c"]
+  variables:
+    HELM_CHART_DIR: helm/core-mw
+
+helm-chart-verify:
+  stage: verify
+  extends: .helm
+  script:
+    - echo "Lint helm chart"
+    - helm lint $CI_PROJECT_DIR/$HELM_CHART_DIR
+    - echo "Try to package and check if dependecies are fullfilled"
+    - helm package ${CI_PROJECT_DIR}/$HELM_CHART_DIR
+  only:
+    changes:
+      - ${CI_PROJECT_DIR}/$HELM_CHART_DIR/**/*
+      - .gitlab-ci.yml
 
 build documentation:
   image: gitlab.open-xchange.com:4567/engineering/documentation:latest
@@ -65,3 +88,4 @@ deploy documentation:
     - master
     - /^master-.*$/
     - /^release-.*$/
+ 

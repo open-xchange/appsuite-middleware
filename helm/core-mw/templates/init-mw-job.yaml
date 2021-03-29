@@ -1,0 +1,105 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: {{ include "core-mw.fullname" . }}-init
+  labels:
+    {{- include "core-mw.labels" . | nindent 4 }}
+spec:
+  template:
+    spec:
+      serviceAccountName: {{ include "core-mw.serviceAccount" . }}
+      restartPolicy: Never
+       {{- with .Values.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end}}
+
+      containers:
+        - name: init
+          image: {{ include "core-mw.initImage" . }}
+          command: ["/mw-init.sh"]
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          env:
+            {{- if .Values.mysql.enabled }}
+              {{- if not (empty .Values.mysql.auth.existingSecret) }}
+            - name: CONFIG_DB_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                    name: {{ .Values.mysql.auth.existingSecret | default (printf "%s-%s" .Release.Name "asbox-mysql") }}
+                    key: "mysql-password"
+            - name: MYSQL_ROOT_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                    name: {{ .Values.mysql.auth.existingSecret | default (printf "%s-%s" .Release.Name "asbox-mysql") }}
+                    key: "mysql-root-password"
+              {{- else }}
+            - name: CONFIG_DB_PASSWORD
+              value: {{ required "A MySQL Database Password is required!" .Values.mysql.auth.password | quote }}
+            - name: MYSQL_ROOT_PASSWORD
+              value: {{ required "A MySQL Root Password is required!" .Values.mysql.auth.rootPassword | quote }}
+              {{- end }}
+            - name: CONFIG_DB_HOST
+              value: {{ include "asbox.mysql.fullname" . | quote }}
+            - name: CONFIG_DB_USER
+              value: {{ .Values.mysql.auth.username | default "open-xchange" | quote }}
+            {{- else }}
+              {{- if .Values.externalDatabase.enabled }}
+                {{- if not (empty .Values.externalDatabase.existingSecret.secretName) }}
+            - name: CONFIG_DB_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                    name: {{ .Values.externalDatabase.existingSecret.secretName | default (printf "%s-%s" .Release.Name "asbox-mysql") }}
+                    key: {{ .Values.externalDatabase.existingSecret.passwordKey | default "mysql-password" | quote }}
+            - name: MYSQL_ROOT_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                    name: {{ .Values.externalDatabase.existingSecret.secretName | default (printf "%s-%s" .Release.Name "asbox-mysql") }}
+                    key: {{ .Values.externalDatabase.existingSecret.rootPasswordKey | default "mysql-root-password" | quote }}
+                {{- else }}
+            - name: CONFIG_DB_PASSWORD
+              value: {{ required "A MySQL Database Password is required!" .Values.externalDatabase.password | quote }}
+            - name: MYSQL_ROOT_PASSWORD
+              value: {{ required "A MySQL Root Password is required!" .Values.externalDatabase.rootPassword | quote }}
+                {{- end }}
+            - name: CONFIG_DB_HOST
+              value: {{ required "A MySQL endpoint is required!" .Values.externalDatabase.host | quote }}
+            - name: CONFIG_DB_USER
+              value: {{ .Values.externalDatabase.user | default "open-xchange" | quote }}
+              {{- end }}
+            {{- end }}
+            - name: SERVER_NAME
+              value: oxserver
+            - name: MASTER_ADMIN_USER
+              valueFrom:
+                secretKeyRef:
+                    name: {{ include "core-mw.appsuiteSecret" . }}
+                    key: master-admin
+            - name: MASTER_ADMIN_PW
+              valueFrom:
+                secretKeyRef:
+                    name:  {{ include "core-mw.appsuiteSecret" . }}
+                    key: master-pw
+            - name: HZ_GROUP_NAME
+              valueFrom:
+                secretKeyRef:
+                    name:  {{ include "core-mw.appsuiteSecret" . }}
+                    key: hz-group-name
+            - name: HZ_GROUP_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                    name:  {{ include "core-mw.appsuiteSecret" . }}
+                    key: hz-group-pw
+            - name: POD_IP
+              valueFrom:
+                fieldRef:
+                    fieldPath: status.podIP
+            - name: OX_FILESTORES_CONFIGMAP_NAME
+              value: {{ include "core-mw.filestoresConfigMap" . }}
+            - name: OX_DBS_CONFIGMAP_NAME
+              value: {{ include "core-mw.dbsConfigMap" . }}
+          volumeMounts:
+            - name: shared
+              mountPath: /shared
+      volumes:
+        - name: shared
+          emptyDir: {}

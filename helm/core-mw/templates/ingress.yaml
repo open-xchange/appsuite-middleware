@@ -1,0 +1,59 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: {{ include "core-mw.fullname" . }}-ingress
+  annotations:
+    nginx.ingress.kubernetes.io/affinity: "cookie"
+    nginx.ingress.kubernetes.io/session-cookie-name: "MYJSESSIONID"
+    nginx.ingress.kubernetes.io/session-cookie-change-on-failure: "true"
+    nginx.ingress.kubernetes.io/affinity-mode: "persistent"
+    nginx.ingress.kubernetes.io/use-regex: "true"
+    nginx.ingress.kubernetes.io/rewrite-target: /appsuite/api/$2
+  labels:
+    {{- include "core-mw.labels" . | nindent 4 }}
+spec:
+  rules:
+  - http:
+      paths:
+      - path: /appsuite/api(/|$)(.*)
+        pathType: Prefix
+        backend:
+          service: 
+            name: {{ include "core-mw.fullname" . }}
+            port:
+              name: http
+      - path: /ajax(/|$)(.*)
+        pathType: Prefix
+        backend:
+          service:
+            name: {{ include "core-mw.fullname" . }}
+            port: 
+              name: http
+      - path: /servlet
+        pathType: Prefix
+        backend:
+          service:
+            name: {{ include "core-mw.fullname" . }}
+            port: 
+              name: http
+      - path: /realtime
+        pathType: Prefix
+        backend:
+          service:
+            name: {{ include "core-mw.fullname" . }}
+            port:
+              name: http
+      - path: /infostore
+        pathType: Prefix
+        backend:
+          service:
+            name: {{ include "core-mw.fullname" . }}
+            port: 
+              name: http
+      - path: /socket.io
+        pathType: Prefix
+        backend:
+          service:
+            name: {{ include "core-mw.fullname" . }}
+            port: 
+              name: http
