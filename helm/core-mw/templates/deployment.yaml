@@ -31,8 +31,8 @@ spec:
           {{- if .Values.probe.liveness.enabled }}
           livenessProbe:
             httpGet:
-              path: /health
-              port: 8009
+              path: /live
+              port: 8016
             {{- omit .Values.probe.liveness "enabled" | toYaml | nindent 12 }}
           {{- end }}
           {{- if .Values.probe.startup.enabled }}
@@ -45,7 +45,7 @@ spec:
           {{- if .Values.probe.readiness.enabled }}
           readinessProbe:
             httpGet:
-                path: /health
+                path: /ready
                 port: 8009
             {{- omit .Values.probe.readiness "enabled" | toYaml | nindent 12 }}
           {{- end }}
