@@ -50,7 +50,6 @@
 package com.openexchange.chronos.alarm.message.impl;
 
 import static com.openexchange.java.Autoboxing.I;
-import static com.openexchange.java.Autoboxing.b;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.ArrayList;
@@ -152,14 +151,14 @@ public class MessageAlarmDeliveryWorker implements CleanUpExecution {
         this.lookAhead = lookAhead;
         this.overdueWaitTime = overdueWaitTime;
     }
-    
+
     @Override
     public boolean isApplicableFor(String schema, int representativeContextId, int databasePoolId, CleanUpExecutionConnectionProvider connectionProvider) throws OXException {
         try {
-            return b(Databases.executeQuery(connectionProvider.getConnection(),
+            return Databases.executeQuery(connectionProvider.getConnection(),
                 (rs) -> Boolean.TRUE, // We have a result, so we are fine
                 "SELECT 1 FROM updateTask WHERE taskName=?",
-                (s) -> s.setString(1, MessageAlarmDeliveryWorkerUpdateTask.TASK_NAME)));
+                (s) -> s.setString(1, MessageAlarmDeliveryWorkerUpdateTask.TASK_NAME)).booleanValue();
         } catch (SQLException e) {
             throw DatabaseCleanUpExceptionCode.SQL_ERROR.create(e.getMessage(), e);
         }
@@ -205,8 +204,8 @@ public class MessageAlarmDeliveryWorker implements CleanUpExecution {
 
     /**
      * Spawns an delivery worker for the given triggers
-     * 
-     * @param connection The connection to use 
+     *
+     * @param connection The connection to use
      * @param lockedTriggers The triggers to spawn a delivery task for
      * @param currentUTCTime The current UTC time
      * @throws OXException
