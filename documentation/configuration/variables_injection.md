@@ -10,7 +10,10 @@ With version v8.0.0 the Open-Xchange Middleware allows injecting variables into 
 
 # Injecting through tokens
 
-It is possible to specify tokens or placeholders directly in .properties, .yml and .yaml configuration files nested in the `/opt/open-xchange/etc` directory (and sub-directories respectively); except file `/opt/open-xchange/etc/external-domains.properties`.
+It is possible to specify tokens or placeholders directly in .properties, .yml and .yaml configuration files nested in the `/opt/open-xchange/etc` directory (and sub-directories respectively); except files:
+
+* `/opt/open-xchange/etc/external-domains.properties`
+* `/opt/open-xchange/etc/HTMLEntities.properties`
 
 A placeholder begins with the character sequence `"{{"` and it ends with character sequence `"}}"`.
 
@@ -85,7 +88,10 @@ com.openexchange.test.token6=foobar
 
 # Injecting through system environment through fall-back names
 
-In addition to the token injection approach, system environment variables can be set named according to a deducible identifier from a property name. This approach only works for settings available in .properties files; except file `/opt/open-xchange/etc/external-domains.properties`.
+In addition to the token injection approach, system environment variables can be set named according to a deducible identifier from a property name. This approach only works for settings available in .properties files; except files:
+
+* `/opt/open-xchange/etc/external-domains.properties`
+* `/opt/open-xchange/etc/HTMLEntities.properties`
 
 The deducible fully-qualifying identifier for a property name is:
 

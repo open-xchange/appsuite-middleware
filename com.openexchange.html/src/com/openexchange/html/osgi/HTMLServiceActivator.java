@@ -62,6 +62,7 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.Properties;
 import com.openexchange.config.ConfigurationService;
+import com.openexchange.config.ConfigurationServices;
 import com.openexchange.dispatcher.DispatcherPrefixService;
 import com.openexchange.html.HtmlService;
 import com.openexchange.html.internal.HtmlServiceImpl;
@@ -160,7 +161,7 @@ public class HTMLServiceActivator extends HousekeepingActivator {
     }
 
     @SuppressWarnings("unchecked")
-    private void apply(final ConfigurationService configurationService) {
+    private void apply(ConfigurationService configurationService) {
         ServiceRegistry.getInstance().addService(ConfigurationService.class, configurationService);
         /*
          * Initialize maps
@@ -168,7 +169,7 @@ public class HTMLServiceActivator extends HousekeepingActivator {
         final Map<Character, String> htmlCharMap;
         final Map<String, Character> htmlEntityMap;
         {
-            final Object[] maps = getHTMLEntityMaps(configurationService.getFile("HTMLEntities.properties"));
+            Object[] maps = loadHTMLEntityMaps(configurationService);
             htmlCharMap = (Map<Character, String>) maps[0];
             htmlEntityMap = (Map<String, Character>) maps[1];
             /*
@@ -183,6 +184,17 @@ public class HTMLServiceActivator extends HousekeepingActivator {
         HtmlServiceImpl htmlService = new HtmlServiceImpl(htmlCharMap, htmlEntityMap);
         this.htmlService = htmlService;
         registerService(HtmlService.class, htmlService, null);
+    }
+
+    private Object[] loadHTMLEntityMaps(ConfigurationService configurationService) {
+        try {
+            File htmlEntitiesFile = configurationService.getFileByName("HTMLEntities.properties");
+            Properties htmlEntities = ConfigurationServices.loadPropertiesFrom(htmlEntitiesFile);
+            return getHTMLEntityMaps(htmlEntities);
+        } catch (IOException e) {
+            LOG.error("Failed to read file \"{}\". Using default HTML entities instead.", "HTMLEntities.properties", e);
+            return getDefaultHTMLEntityMaps();
+        }
     }
 
     public static Object[] getHTMLEntityMaps(File htmlEntityFile) {
@@ -211,9 +223,13 @@ public class HTMLServiceActivator extends HousekeepingActivator {
         int size = htmlEntities.size();
         for (int i = 0; i < size; i++) {
             Map.Entry<Object, Object> entry = iter.next();
-            Character c = Character.valueOf((char) Integer.parseInt((String) entry.getValue()));
-            htmlEntityMap.put((String) entry.getKey(), c);
-            htmlCharMap.put(c, (String) entry.getKey());
+            try {
+                Character c = Character.valueOf((char) Integer.parseInt((String) entry.getValue()));
+                htmlEntityMap.put((String) entry.getKey(), c);
+                htmlCharMap.put(c, (String) entry.getKey());
+            } catch (NumberFormatException e) {
+                LOG.warn("Ignoring invalid HTML entity entry: {}={}", entry.getKey(), entry.getValue(), e);
+            }
         }
         return new Object[] { htmlCharMap, htmlEntityMap };
     }
