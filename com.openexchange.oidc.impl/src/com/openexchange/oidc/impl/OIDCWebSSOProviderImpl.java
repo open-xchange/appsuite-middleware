@@ -48,6 +48,7 @@
  */
 package com.openexchange.oidc.impl;
 
+import static com.openexchange.oidc.tools.OIDCTools.tokeRequestInfo;
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -339,7 +340,7 @@ public class OIDCWebSSOProviderImpl implements OIDCWebSSOProvider {
     }
 
     private OIDCTokenResponse getTokenResponse(TokenRequest tokenReq) throws OXException {
-        LOG.trace("OIDCTokenResponse getTokenResponse(TokenRequest tokenReq {})", tokenReq);
+        LOG.trace("OIDCTokenResponse getTokenResponse(TokenRequest tokenReq {})", tokeRequestInfo(tokenReq));
         HTTPRequest httpRequest = this.backend.getHttpRequest(tokenReq.toHTTPRequest());
         HTTPResponse httpResponse = null;
         try {

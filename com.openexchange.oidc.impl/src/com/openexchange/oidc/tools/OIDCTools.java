@@ -66,6 +66,9 @@ import javax.servlet.http.HttpServletResponse;
 import org.apache.http.client.utils.URIBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import com.nimbusds.oauth2.sdk.AuthorizationGrant;
+import com.nimbusds.oauth2.sdk.TokenRequest;
+import com.nimbusds.oauth2.sdk.auth.ClientAuthentication;
 import com.nimbusds.oauth2.sdk.token.AccessToken;
 import com.nimbusds.oauth2.sdk.token.RefreshToken;
 import com.nimbusds.oauth2.sdk.token.Tokens;
@@ -637,5 +640,64 @@ public class OIDCTools {
 
         return uriFragment;
     }
+
+    // -------------------------------------------------------------------------------------------------------------------------------------
+
+    /**
+     * Create a <code>toString()</code> representation for given token request.
+     *
+     * @param tokenReq The token request
+     * @return The object providing proper <code>toString()</code> method
+     */
+    public static Object tokeRequestInfo(TokenRequest tokenReq) {
+        if (tokenReq == null) {
+            return "null";
+        }
+
+        return new TokenRequestToString(tokenReq);
+    }
+
+    private static final class TokenRequestToString {
+
+        private final TokenRequest tokenReq;
+
+        TokenRequestToString(TokenRequest tokenReq) {
+            this.tokenReq = tokenReq;
+        }
+
+        @Override
+        public String toString() {
+            return new StringBuilder(512).append('{')
+                .append("uri=").append(tokenReq.getEndpointURI())
+                .append(", clientAuth=").append(toString(tokenReq.getClientAuthentication()))
+                .append(", authzGrant=").append(toString(tokenReq.getAuthorizationGrant()))
+                .append(", scope=").append(tokenReq.getScope())
+                .append(", customParams=").append(tokenReq.getCustomParameters())
+                .append('}').toString();
+        }
+
+        private static String toString(ClientAuthentication clientAuthentication) {
+            if (clientAuthentication == null) {
+                return "null";
+            }
+
+            return new StringBuilder(128).append('{')
+                .append("method=").append(clientAuthentication.getMethod())
+                .append(", clientID=").append(clientAuthentication.getClientID())
+                .append('}').toString();
+        }
+
+        private static String toString(AuthorizationGrant authorizationGrant) {
+            if (authorizationGrant == null) {
+                return "null";
+            }
+
+            return new StringBuilder(64).append('{')
+                .append("type=").append(authorizationGrant.getType())
+                .append('}').toString();
+        }
+    }
+
+    // -------------------------------------------------------------------------------------------------------------------------------------
 
 }
