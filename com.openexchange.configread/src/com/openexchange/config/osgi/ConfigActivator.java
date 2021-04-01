@@ -154,7 +154,7 @@ public final class ConfigActivator extends HousekeepingActivator {
             track(ConfigProviderService.class, configProviderServiceTracker);
             openTrackers();
         } catch (Exception e) {
-            logger.error("", e);
+            logger.error("failed starting bundle: com.openexchange.configread", e);
             throw e;
         }
     }
@@ -175,7 +175,7 @@ public final class ConfigActivator extends HousekeepingActivator {
             ConfigurationImpl.setConfigReference(null);
             com.openexchange.config.utils.TokenReplacingReader.setVariablesProviderListing(null);
         } catch (Exception e) {
-            logger.error("", e);
+            logger.error("failed stopping bundle: com.openexchange.configread", e);
             throw e;
         }
     }
