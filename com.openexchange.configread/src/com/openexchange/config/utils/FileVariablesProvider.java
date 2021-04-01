@@ -56,12 +56,16 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.Properties;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentMap;
+import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutionException;
 import org.slf4j.Logger;
+import com.google.common.cache.Cache;
+import com.google.common.cache.CacheBuilder;
+import com.google.common.util.concurrent.UncheckedExecutionException;
 import com.openexchange.config.VariablesProvider;
 import com.openexchange.config.internal.ConfigurationImpl;
 import com.openexchange.java.Charsets;
+import com.openexchange.java.ImmutableReference;
 import com.openexchange.java.Streams;
 
 /**
@@ -77,13 +81,13 @@ public class FileVariablesProvider implements VariablesProvider {
         static final Logger LOG = org.slf4j.LoggerFactory.getLogger(TokenReplacingReader.class);
     }
 
-    private static final ConcurrentMap<String, FileVariablesProvider> INSTANCES = new ConcurrentHashMap<>(4, 0.9F);
+    private static final Cache<String, ImmutableReference<FileVariablesProvider>> INSTANCES = CacheBuilder.newBuilder().concurrencyLevel(1).initialCapacity(4).build();
 
     /**
      * Clears cached instances from previous {@link #getInstanceFor(String)} invocations.
      */
     public static void clearInstances() {
-        INSTANCES.clear();
+        INSTANCES.invalidateAll();
     }
 
     /**
@@ -98,30 +102,73 @@ public class FileVariablesProvider implements VariablesProvider {
             return null;
         }
         String fileNameToUse = fileName.trim();
-        FileVariablesProvider variablesProvider = INSTANCES.get(fileNameToUse);
-        if (variablesProvider == null) {
-            synchronized (INSTANCES) {
-                variablesProvider = INSTANCES.get(fileNameToUse);
-                if (variablesProvider == null) {
-                    try {
-                        File file = ConfigurationImpl.doGetFileByName(fileNameToUse);
-                        if (file == null) {
-                            return null;
-                        }
-                        Properties properties = loadPropertiesFrom(file);
-                        variablesProvider = new FileVariablesProvider(properties);
-                        INSTANCES.put(fileNameToUse, variablesProvider);
-                    } catch (Exception e) {
-                        LoggerHolder.LOG.error("Failed to read properties from file: {}", fileNameToUse, e);
-                        return null;
-                    }
-                }
+        ImmutableReference<FileVariablesProvider> variablesProviderRef = INSTANCES.getIfPresent(fileNameToUse);
+        if (variablesProviderRef == null) {
+            try {
+                variablesProviderRef = INSTANCES.get(fileNameToUse, new FileVariablesProviderLoader(fileNameToUse));
+            } catch (ExecutionException | UncheckedExecutionException e) {
+                Throwable cause = e.getCause();
+                LoggerHolder.LOG.error("Failed to read properties from file: {}", fileNameToUse, cause == null ? e : cause);
+                return null;
             }
         }
-        return variablesProvider;
+        return variablesProviderRef.getValue();
     }
 
-    private static Properties loadPropertiesFrom(File file) throws IOException {
+    // -------------------------------------------------------------------------------------------------------------------------------------
+
+    private final Properties properties;
+
+    /**
+     * Initializes a new {@link FileVariablesProvider}.
+     *
+     * @param properties The properties providing values to replace with
+     */
+    FileVariablesProvider(Properties properties) {
+        super();
+        this.properties = properties;
+    }
+
+    @Override
+    public String getForKey(String variableKey) {
+        return variableKey == null ? null : properties.getProperty(variableKey);
+    }
+
+    @Override
+    public String getName() {
+        return "file";
+    }
+
+    // -------------------------------------------------------------------------------------------------------------------------------------
+
+    private static class FileVariablesProviderLoader implements Callable<ImmutableReference<FileVariablesProvider>> {
+
+        private final String fileName;
+
+        FileVariablesProviderLoader(String fileName) {
+            super();
+            this.fileName = fileName;
+        }
+
+        @Override
+        public ImmutableReference<FileVariablesProvider> call() throws Exception {
+            File file = ConfigurationImpl.doGetFileByName(fileName);
+            if (file == null) {
+                return new ImmutableReference<FileVariablesProvider>(null);
+            }
+            Properties properties = loadPropertiesFrom(file);
+            return new ImmutableReference<FileVariablesProvider>(new FileVariablesProvider(properties));
+        }
+    }
+
+    /**
+     * Loads the properties from given file.
+     *
+     * @param file The file
+     * @return The loaded properties
+     * @throws IOException If loading properties fails
+     */
+    static Properties loadPropertiesFrom(File file) throws IOException {
         if (null == file) {
             return null;
         }
@@ -141,30 +188,6 @@ public class FileVariablesProvider implements VariablesProvider {
         } finally {
             Streams.close(br, fr, fis);
         }
-    }
-
-    // -------------------------------------------------------------------------------------------------------------------------------------
-
-    private final Properties properties;
-
-    /**
-     * Initializes a new {@link FileVariablesProvider}.
-     *
-     * @param properties The properties providing values to replace with
-     */
-    private FileVariablesProvider(Properties properties) {
-        super();
-        this.properties = properties;
-    }
-
-    @Override
-    public String getForKey(String variableKey) {
-        return variableKey == null ? null : properties.getProperty(variableKey);
-    }
-
-    @Override
-    public String getName() {
-        return "file";
     }
 
 }
