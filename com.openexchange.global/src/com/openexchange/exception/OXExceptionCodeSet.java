@@ -51,56 +51,72 @@ package com.openexchange.exception;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.HashSet;
+import java.util.Iterator;
+import java.util.List;
 import java.util.Set;
+import com.google.common.collect.ImmutableSet;
 
 /**
- * {@link OXExceptionCodeSet} - A set for exception codes.
+ * {@link OXExceptionCodeSet} - An immutable set for exception codes and/or prefixes.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since v7.10.5
  */
 public class OXExceptionCodeSet {
 
-    private final Set<Code> codes;
+    private final Set<InternalCode> codes;
+    private final Set<String> prefixes;
 
     /**
      * Initializes a new {@link OXExceptionCodeSet}.
-     */
-    public OXExceptionCodeSet() {
-        super();
-        codes = new HashSet<>();
-    }
-
-    /**
-     * Initializes a new {@link OXExceptionCodeSet}.
-     */
-    public OXExceptionCodeSet(OXExceptionCode... codes) {
-        super();
-        this.codes = new HashSet<>(codes.length);
-        for (OXExceptionCode code : codes) {
-            this.codes.add(Code.codeFor(code));
-        }
-    }
-
-    /**
-     * Initializes a new {@link OXExceptionCodeSet}.
-     */
-    public OXExceptionCodeSet(Collection<? extends OXExceptionCode> codes) {
-        super();
-        this.codes = new HashSet<>(codes.size());
-        for (OXExceptionCode code : codes) {
-            this.codes.add(Code.codeFor(code));
-        }
-    }
-
-    /**
-     * Gets the number of codes contained in this set.
      *
-     * @return The number of codes
+     * @param prefixes The prefixes/codes to add
      */
-    public int size() {
-        return codes.size();
+    public OXExceptionCodeSet(Prefix... prefixes) {
+        super();
+        ImmutableSet.Builder<InternalCode> thisCodes = null;
+        ImmutableSet.Builder<String> thisPrefixes = null;
+        for (Prefix prefix : prefixes) {
+            if (prefix instanceof Code) {
+                if (thisCodes == null) {
+                    thisCodes = ImmutableSet.builder();
+                }
+                thisCodes.add(InternalCode.codeFor((Code) prefix));
+            } else {
+                if (thisPrefixes == null) {
+                    thisPrefixes = ImmutableSet.builder();
+                }
+                thisPrefixes.add(prefix.getPrefix());
+            }
+        }
+        this.codes = thisCodes == null ? ImmutableSet.of() : thisCodes.build();
+        this.prefixes = thisPrefixes == null ? ImmutableSet.of() : thisPrefixes.build();
+    }
+
+    /**
+     * Initializes a new {@link OXExceptionCodeSet}.
+     *
+     * @param prefixes The prefixes/codes to add
+     */
+    public OXExceptionCodeSet(Collection<? extends Prefix> prefixes) {
+        super();
+        ImmutableSet.Builder<InternalCode> thisCodes = null;
+        ImmutableSet.Builder<String> thisPrefixes = null;
+        for (Prefix prefix : prefixes) {
+            if (prefix instanceof Code) {
+                if (thisCodes == null) {
+                    thisCodes = ImmutableSet.builder();
+                }
+                thisCodes.add(InternalCode.codeFor((Code) prefix));
+            } else {
+                if (thisPrefixes == null) {
+                    thisPrefixes = ImmutableSet.builder();
+                }
+                thisPrefixes.add(prefix.getPrefix());
+            }
+        }
+        this.codes = thisCodes == null ? ImmutableSet.of() : thisCodes.build();
+        this.prefixes = thisPrefixes == null ? ImmutableSet.of() : thisPrefixes.build();
     }
 
     /**
@@ -109,7 +125,7 @@ public class OXExceptionCodeSet {
      * @return <code>true</code> if empty
      */
     public boolean isEmpty() {
-        return codes.isEmpty();
+        return prefixes.isEmpty() && codes.isEmpty();
     }
 
     /**
@@ -119,27 +135,17 @@ public class OXExceptionCodeSet {
      * @return <code>true</code> if contained; otherwise <code>false</code>
      */
     public boolean contains(OXException exception) {
-        return codes.contains(Code.codeFor(exception));
+        return exception != null && (prefixes.contains(exception.getPrefix()) || codes.contains(InternalCode.codeFor(exception)));
     }
 
     /**
-     * Adds the specified code to this set if it is not already present
+     * Checks if this set does <b>not</b> contain the given exception.
      *
-     * @param code The code to add
-     * @return <code>true</code> if this set did not already contain the specified code; otherwise <code>false</code>
+     * @param exception The exception
+     * @return <code>true</code> if <b>not</b> contained; otherwise <code>false</code> (if contained)
      */
-    public boolean add(OXExceptionCode code) {
-        return codes.add(Code.codeFor(code));
-    }
-
-    /**
-     * Removes the specified code from this set if it is present.
-     *
-     * @param o The code to remove
-     * @return <code>true</code> if this set contained the specified code; otherwise <code>false</code>
-     */
-    public boolean remove(OXExceptionCode code) {
-        return codes.remove(Code.codeFor(code));
+    public boolean notContains(OXException exception) {
+        return contains(exception) == false;
     }
 
     /**
@@ -149,65 +155,170 @@ public class OXExceptionCodeSet {
      * @return <code>true</code> if this set contains all of the exceptions of the specified collection; otherwise <code>false</code>
      */
     public boolean containsAll(Collection<? extends OXException> exceptions) {
-        Collection<Code> codes = new ArrayList<>(exceptions.size());
-        for (OXException e : exceptions) {
-            codes.add(Code.codeFor(e));
+        if (exceptions == null || exceptions.isEmpty()) {
+            return false;
         }
-        return this.codes.containsAll(codes);
+
+        List<OXException> l = new ArrayList<>(exceptions);
+        for (Iterator<OXException> it = l.iterator(); it.hasNext();) {
+            OXException exception = it.next();
+            if (prefixes.contains(exception.getPrefix())) {
+                it.remove();
+            }
+        }
+
+        if (l.isEmpty()) {
+            return true;
+        }
+
+        for (Iterator<OXException> it = l.iterator(); it.hasNext();) {
+            OXException exception = it.next();
+            if (codes.contains(InternalCode.codeFor(exception))) {
+                it.remove();
+            }
+        }
+
+        return l.isEmpty();
     }
 
-    /**
-     * Adds all of the codes in the specified collection to this set if they're not already present
-     *
-     * @param codes The collection
-     * @return <code>true</code> if this set changed as a result of the call; otherwise <code>false</code>
-     */
-    public boolean addAll(Collection<? extends OXExceptionCode> codes) {
-        Collection<Code> codez = new ArrayList<>(codes.size());
-        for (OXExceptionCode code : codes) {
-            codez.add(Code.codeFor(code));
-        }
-        return this.codes.addAll(codez);
-    }
+    // ----------------------------------------------------- Modifying stuff ---------------------------------------------------------------
 
-    /**
-     * Removes from this set all of its codes that are contained in the specified collection.
-     *
-     * @param codes The collection
-     * @return <code>true</code> if this set changed as a result of the call; otherwise <code>false</code>
-     */
-    public boolean removeAll(Collection<? extends OXExceptionCode> codes) {
-        Collection<Code> codez = new ArrayList<>(codes.size());
-        for (OXExceptionCode code : codes) {
-            codez.add(Code.codeFor(code));
-        }
-        return this.codes.removeAll(codez);
-    }
-
-    /**
-     * Clears this set.
-     */
-    public void clear() {
-        codes.clear();
-    }
+//    /**
+//     * Adds the specified code to this set if it is not already present
+//     *
+//     * @param code The code to add
+//     * @return <code>true</code> if this set did not already contain the specified code; otherwise <code>false</code>
+//     */
+//    public boolean add(Code code) {
+//        return code != null && codes.add(InternalCode.codeFor(code));
+//    }
+//
+//    /**
+//     * Removes the specified code from this set if it is present.
+//     *
+//     * @param code The code to remove
+//     * @return <code>true</code> if this set contained the specified code; otherwise <code>false</code>
+//     */
+//    public boolean remove(Code code) {
+//        return code != null && codes.remove(InternalCode.codeFor(code));
+//    }
+//
+//    /**
+//     * Adds the specified prefix to this set if it is not already present
+//     *
+//     * @param prefix The prefix to add
+//     * @return <code>true</code> if this set did not already contain the specified prefix; otherwise <code>false</code>
+//     */
+//    public boolean add(Prefix prefix) {
+//        return prefix != null && prefixes.add(prefix.getPrefix());
+//    }
+//
+//    /**
+//     * Removes the specified prefix from this set if it is present.
+//     *
+//     * @param prefix The prefix to remove
+//     * @return <code>true</code> if this set contained the specified prefix; otherwise <code>false</code>
+//     */
+//    public boolean remove(Prefix prefix) {
+//        return prefix != null && prefixes.remove(prefix.getPrefix());
+//    }
+//
+//    /**
+//     * Adds all of the codes in the specified collection to this set if they're not already present
+//     *
+//     * @param codes The collection
+//     * @return <code>true</code> if this set changed as a result of the call; otherwise <code>false</code>
+//     */
+//    public boolean addAll(Collection<? extends Code> codes) {
+//        if (codes == null || codes.isEmpty()) {
+//            return false;
+//        }
+//
+//        boolean added = false;
+//        for (Code code : codes) {
+//            added |= this.codes.add(InternalCode.codeFor(code));
+//        }
+//        return added;
+//    }
+//
+//    /**
+//     * Removes from this set all of its codes that are contained in the specified collection.
+//     *
+//     * @param codes The collection
+//     * @return <code>true</code> if this set changed as a result of the call; otherwise <code>false</code>
+//     */
+//    public boolean removeAll(Collection<? extends Code> codes) {
+//        if (codes == null || codes.isEmpty()) {
+//            return false;
+//        }
+//
+//        boolean removed = false;
+//        for (Code code : codes) {
+//            removed |= this.codes.remove(InternalCode.codeFor(code));
+//        }
+//        return removed;
+//    }
+//
+//    /**
+//     * Adds all of the prefixes in the specified collection to this set if they're not already present
+//     *
+//     * @param prefixes The collection
+//     * @return <code>true</code> if this set changed as a result of the call; otherwise <code>false</code>
+//     */
+//    public boolean addAllPrefixes(Collection<? extends String> prefixes) {
+//        if (prefixes == null || prefixes.isEmpty()) {
+//            return false;
+//        }
+//
+//        boolean added = false;
+//        for (String prefix : prefixes) {
+//            added |= this.prefixes.add(prefix);
+//        }
+//        return added;
+//    }
+//
+//    /**
+//     * Removes from this set all of its prefixes that are contained in the specified collection.
+//     *
+//     * @param prefixes The collection
+//     * @return <code>true</code> if this set changed as a result of the call; otherwise <code>false</code>
+//     */
+//    public boolean removeAllPrefixes(Collection<? extends String> prefixes) {
+//        if (prefixes == null || prefixes.isEmpty()) {
+//            return false;
+//        }
+//
+//        boolean removed = false;
+//        for (String prefix : prefixes) {
+//            removed |= this.prefixes.remove(prefix);
+//        }
+//        return removed;
+//    }
+//
+//    /**
+//     * Clears this set.
+//     */
+//    public void clear() {
+//        codes.clear();
+//    }
 
     // -------------------------------------------------------------------------------------------------------------------------------------
 
-    private static class Code {
+    private static class InternalCode {
 
-        static Code codeFor(OXException e) {
-            return new Code(e.getCode(), e.getPrefix());
+        static InternalCode codeFor(OXException e) {
+            return new InternalCode(e.getCode(), e.getPrefix());
         }
 
-        static Code codeFor(OXExceptionCode c) {
-            return new Code(c.getNumber(), c.getPrefix());
+        static InternalCode codeFor(Code c) {
+            return new InternalCode(c.getNumber(), c.getPrefix());
         }
 
         private final int number;
         private final String prefix;
         private final int hash;
 
-        private Code(int number, String prefix) {
+        private InternalCode(int number, String prefix) {
             super();
             this.number = number;
             this.prefix = prefix;
@@ -232,10 +343,10 @@ public class OXExceptionCodeSet {
             if (this == obj) {
                 return true;
             }
-            if (obj.getClass() != Code.class) {
+            if (obj.getClass() != InternalCode.class) {
                 return false;
             }
-            Code other = (Code) obj;
+            InternalCode other = (InternalCode) obj;
             if (number != other.number) {
                 return false;
             }

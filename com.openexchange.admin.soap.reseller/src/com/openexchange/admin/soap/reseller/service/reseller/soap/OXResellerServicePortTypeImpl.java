@@ -9,8 +9,6 @@ package com.openexchange.admin.soap.reseller.service.reseller.soap;
 import java.rmi.RemoteException;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.HashSet;
-import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -115,9 +113,9 @@ public class OXResellerServicePortTypeImpl implements OXResellerServicePortType 
             throw new InvalidDataException_Exception(e.getMessage(), faultDetail, e);
         }
     }
-    
+
     @Override
-    public void changeSelf(final Change parameters) throws InvalidCredentialsException_Exception, StorageException_Exception, RemoteException_Exception, OXResellerException_Exception, InvalidDataException_Exception {
+    public void changeSelf(final ChangeSelf parameters) throws InvalidCredentialsException_Exception, StorageException_Exception, RemoteException_Exception, OXResellerException_Exception, InvalidDataException_Exception {
         final OXResellerInterface resellerInterface = getResellerInterface();
         try {
             resellerInterface.changeSelf(soap2ResellerAdmin(parameters.adm), soap2Credentials(parameters.creds));
@@ -868,68 +866,6 @@ public class OXResellerServicePortTypeImpl implements OXResellerServicePortType 
         return map;
     }
 
-    private static Context context2Soap(final com.openexchange.admin.rmi.dataobjects.Context context) {
-        if (null == context) {
-            return null;
-        }
-        final Context soapContext = new Context();
-        soapContext.setAverageSize(context.getAverage_size());
-        soapContext.setEnabled(context.getEnabled());
-        soapContext.setFilestoreId(context.getFilestoreId());
-        soapContext.setFilestoreName(context.getFilestore_name());
-        final HashSet<String> lmappings = context.getLoginMappings();
-        if (null != lmappings && !lmappings.isEmpty()) {
-            soapContext.setLoginMappings(new ArrayList<String>(lmappings));
-        }
-        soapContext.setId(context.getId());
-        soapContext.setMaxQuota(context.getMaxQuota());
-        soapContext.setName(context.getName());
-        soapContext.setReadDatabase(database2Soap(context.getReadDatabase()));
-        soapContext.setUsedQuota(context.getUsedQuota());
-        soapContext.setUserAttributes(mapmap2Soap(context.getUserAttributes()));
-        soapContext.setWriteDatabase(database2Soap(context.getWriteDatabase()));
-        return soapContext;
-    }
-
-    private static Database database2Soap(final com.openexchange.admin.rmi.dataobjects.Database database) {
-        if (null == database) {
-            return null;
-        }
-        final Database soapDatabase = new Database();
-        soapDatabase.setCurrentUnits(database.getCurrentUnits());
-        soapDatabase.setDriver(database.getDriver());
-        soapDatabase.setId(database.getId());
-        soapDatabase.setLogin(database.getLogin());
-        soapDatabase.setMaster(database.getMaster());
-        soapDatabase.setMasterId(database.getMasterId());
-        soapDatabase.setMaxUnits(database.getMaxUnits());
-        soapDatabase.setName(database.getName());
-        soapDatabase.setPassword(database.getPassword());
-        soapDatabase.setPoolHardLimit(database.getPoolHardLimit());
-        soapDatabase.setPoolInitial(database.getPoolInitial());
-        soapDatabase.setPoolMax(database.getPoolMax());
-        soapDatabase.setReadId(database.getRead_id());
-        soapDatabase.setScheme(database.getScheme());
-        soapDatabase.setUrl(database.getUrl());
-        return soapDatabase;
-    }
-
-    private static SOAPStringMapMap mapmap2Soap(final Map<String, Map<String, String>> mapmap) {
-        if (null == mapmap) {
-            return null;
-        }
-        final SOAPStringMapMap soapMapMap = new SOAPStringMapMap();
-        final java.util.List<SOAPMapEntry> entries = new ArrayList<SOAPMapEntry>(mapmap.size());
-        for (final Map.Entry<String, Map<String, String>> mapmapEntry : mapmap.entrySet()) {
-            final SOAPMapEntry mapEntry = new SOAPMapEntry();
-            mapEntry.setKey(mapmapEntry.getKey());
-            mapEntry.setValue(map2Soap(mapmapEntry.getValue()));
-            entries.add(mapEntry);
-        }
-        soapMapMap.setEntries(entries);
-        return soapMapMap;
-    }
-    
     private static SOAPStringMap map2Soap(final Map<String, String> map) {
         if (null == map) {
             return null;

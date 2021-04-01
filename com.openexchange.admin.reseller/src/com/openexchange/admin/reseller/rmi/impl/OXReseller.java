@@ -122,12 +122,7 @@ public class OXReseller extends OXCommonImpl implements OXResellerInterface {
     @Override
     public void change(final ResellerAdmin adm, final Credentials creds) throws RemoteException, InvalidDataException, StorageException, OXResellerException, InvalidCredentialsException {
         try {
-            try {
-                doNullCheck(adm);
-            } catch (InvalidDataException e) {
-                log(LogLevel.ERROR, LOGGER, creds, e, "Invalid data sent by client!");
-                throw e;
-            }
+            doNullCheck(LOGGER, creds, adm);
             ResellerAdmin parent = null;
             final Credentials masterCredentials = cache.getMasterCredentials();
             if (null != masterCredentials && masterCredentials.getLogin().equals(creds.getLogin())) {
@@ -241,8 +236,22 @@ public class OXReseller extends OXCommonImpl implements OXResellerInterface {
                 throw new OXResellerException(Code.RESELLER_ADMIN_NOT_EXIST, admin.getName());
             }
 
-            resellerauth.doAuthentication(credentials);
-            checkResellerChangeSelfData(admin);
+            ResellerAdmin dbAdmin = oxresell.getData(new ResellerAdmin[] { admin })[0];
+            Credentials masterCredentials = cache.getMasterCredentials();
+            if (null != masterCredentials && masterCredentials.getLogin().equals(credentials.getLogin())) {
+                basicauth.doAuthentication(credentials);
+            } else {
+                if (!dbAdmin.getName().equalsIgnoreCase(credentials.getLogin())) {
+                    InvalidCredentialsException invalidCredentialsException = new InvalidCredentialsException("Authentication failed");
+                    log(LogLevel.ERROR, LOGGER, credentials, invalidCredentialsException, "changeSelf can only be applied to own data");
+                    throw invalidCredentialsException;
+                }
+                resellerauth.doAuthentication(credentials);
+                if (admin.getParentId() != null) {
+                    throw new OXResellerException(Code.SUBAMIN_NOT_ALLOWED_TO_CHANGE_PARENTID);
+                }
+            }
+            checkResellerChangeSelfData(admin, dbAdmin);
             oxresell.change(admin);
         } catch (Throwable e) {
             enhanceAndLogException(e, credentials);
@@ -253,12 +262,7 @@ public class OXReseller extends OXCommonImpl implements OXResellerInterface {
     @Override
     public ResellerAdmin create(final ResellerAdmin adm, final Credentials creds) throws RemoteException, InvalidDataException, StorageException, InvalidCredentialsException, OXResellerException {
         try {
-            try {
-                doNullCheck(adm);
-            } catch (InvalidDataException e) {
-                log(LogLevel.ERROR, LOGGER, creds, e, "Invalid data sent by client!");
-                throw e;
-            }
+            doNullCheck(LOGGER, creds, adm);
             ResellerAdmin parent = null;
 
             final Credentials masterCredentials = cache.getMasterCredentials();
@@ -344,12 +348,7 @@ public class OXReseller extends OXCommonImpl implements OXResellerInterface {
     @Override
     public void delete(final ResellerAdmin adm, final Credentials creds) throws RemoteException, InvalidDataException, StorageException, OXResellerException, InvalidCredentialsException {
         try {
-            try {
-                doNullCheck(adm);
-            } catch (InvalidDataException e) {
-                log(LogLevel.ERROR, LOGGER, creds, e, "Invalid data sent by client!");
-                throw e;
-            }
+            doNullCheck(LOGGER, creds, adm);
             boolean isMaster = false;
             final Credentials masterCredentials = cache.getMasterCredentials();
             if (null != masterCredentials && masterCredentials.getLogin().equals(creds.getLogin())) {
@@ -455,15 +454,7 @@ public class OXReseller extends OXCommonImpl implements OXResellerInterface {
     @Override
     public ResellerAdmin[] getMultipleData(final ResellerAdmin[] admins, final Credentials creds) throws RemoteException, InvalidDataException, InvalidCredentialsException, StorageException, OXResellerException {
         try {
-            try {
-                doNullCheck((Object[]) admins);
-                if (admins.length <= 0) {
-                    throw new InvalidDataException();
-                }
-            } catch (InvalidDataException e) {
-                log(LogLevel.ERROR, LOGGER, creds, e, "Invalid data sent by client!");
-                throw e;
-            }
+            doNullCheck(LOGGER, creds, (Object[]) admins);
             int pid = 0;
             final Credentials masterCredentials = cache.getMasterCredentials();
             if (null != masterCredentials && masterCredentials.getLogin().equals(creds.getLogin())) {
@@ -660,9 +651,12 @@ public class OXReseller extends OXCommonImpl implements OXResellerInterface {
      * @param admin The admin that issued the self-change
      * @throws InvalidDataException If invalid data is set
      */
-    private void checkResellerChangeSelfData(ResellerAdmin admin) throws InvalidDataException {
+    private void checkResellerChangeSelfData(ResellerAdmin admin, ResellerAdmin dbAdmin) throws InvalidDataException {
         // @formatter:off
-        if (admin.isNameset() || admin.isDisplaynameset() || admin.isParentIdset() || admin.isParentNameset() || admin.isPasswordMechset() 
+        if (admin.isNameset() && false == admin.getName().equals(dbAdmin.getName())) {
+            throw new InvalidDataException("Invalid data sent by client!");
+        }
+        if ( admin.isDisplaynameset() || admin.isParentIdset() || admin.isParentNameset() || admin.isPasswordMechset() 
             || admin.isPasswordset() || admin.isRestrictionsset() || admin.isSaltSet()) {
             throw new InvalidDataException("Invalid data sent by client!");
         }

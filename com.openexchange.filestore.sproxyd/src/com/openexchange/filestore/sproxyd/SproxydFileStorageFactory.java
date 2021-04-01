@@ -277,17 +277,17 @@ public class SproxydFileStorageFactory implements FileStorageProvider, Interests
      * @return The client
      */
     private SproxydClient initClient(String filestoreID, String prefix) throws OXException {
-        return new SproxydClient(services, initSproxydConfig(filestoreID), prefix, filestoreID);
+        return new SproxydClient(services, getEndpointPoolFor(filestoreID), prefix, filestoreID);
     }
 
     /**
-     * Gets the HTTP client and endpoint pool for a configured denoted sproxyd filestore.
+     * Gets the end-point pool for specified Sproxyd filestore.
      *
-     * @param filestoreID The filestore ID
-     * @return The endpoint pool
-     * @throws OXException If endpoint pool cannot be initialized
+     * @param filestoreID The filestore identifier
+     * @return The end-point pool
+     * @throws OXException If end-point pool cannot be initialized
      */
-    private EndpointPool initSproxydConfig(String filestoreID) throws OXException {
+    private EndpointPool getEndpointPoolFor(String filestoreID) throws OXException {
         EndpointPool endpointPool = endpointPoolCache.getIfPresent(filestoreID);
         if (endpointPool == null) {
             try {
@@ -297,20 +297,20 @@ public class SproxydFileStorageFactory implements FileStorageProvider, Interests
                 if (cause instanceof OXException) {
                     throw (OXException) cause;
                 }
-                throw OXException.general("Failed initializing S3 client.", cause);
+                throw OXException.general("Failed initializing Sproxyd end-point pool.", cause);
             }
         }
         return endpointPool;
     }
 
     /**
-     * Initializes a new HTTP client and endpoint pool for a configured sproxyd filestore.
+     * Initializes a end-point pool for specified Sproxyd filestore.
      *
-     * @param filestoreID The filestore ID
-     * @return The new endpoint pool
-     * @throws OXException If endpoint pool cannot be initialized
+     * @param filestoreID The filestore identifier
+     * @return The new end-point pool
+     * @throws OXException If end-point pool cannot be initialized
      */
-    EndpointPool doInitSproxydConfig(String filestoreID) throws OXException {
+    EndpointPool initEndpointPoolFor(String filestoreID) throws OXException {
         ConfigurationService configService = services.getService(ConfigurationService.class);
         PropertyNameBuilder nameBuilder = new PropertyNameBuilder("com.openexchange.filestore.sproxyd.");
         // End-point configuration
@@ -391,7 +391,7 @@ public class SproxydFileStorageFactory implements FileStorageProvider, Interests
 
         @Override
         public EndpointPool call() throws Exception {
-            return factory.doInitSproxydConfig(filestoreID);
+            return factory.initEndpointPoolFor(filestoreID);
         }
     }
 

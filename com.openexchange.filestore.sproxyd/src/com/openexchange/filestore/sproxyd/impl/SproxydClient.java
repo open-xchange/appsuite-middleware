@@ -52,6 +52,7 @@ package com.openexchange.filestore.sproxyd.impl;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Collection;
+import java.util.Optional;
 import java.util.UUID;
 import java.util.concurrent.Callable;
 import java.util.concurrent.TimeUnit;
@@ -193,8 +194,9 @@ public class SproxydClient {
                     response = getHttpClient().execute(get);
                     int status = response.getStatusLine().getStatusCode();
                     if (HttpServletResponse.SC_OK == status || HttpServletResponse.SC_PARTIAL_CONTENT == status) {
-                        InputStream content = HttpClients.createHttpResponseStreamFor(response);
+                        InputStream content = HttpClients.createHttpResponseStreamFor(response, Optional.of(get));
                         response = null;
+                        get = null;
                         return content;
                     }
                     if (HttpServletResponse.SC_NOT_FOUND == status) {

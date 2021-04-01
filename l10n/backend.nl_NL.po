@@ -7,7 +7,7 @@ msgstr ""
 "Project-Id-Version: backend\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: \n"
-"PO-Revision-Date: 2021-01-22 10:49+0100\n"
+"PO-Revision-Date: 2021-03-19 10:14+0100\n"
 "Last-Translator: Tim <tim@workshop-chapina.com>\n"
 "Language-Team: Dutch <kde-i18n-nl@kde.org>\n"
 "Language: nl_NL\n"
@@ -15,7 +15,7 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
-"X-Generator: Lokalize 20.04.2\n"
+"X-Generator: Poedit 2.4.2\n"
 
 #. The verb "accepted", like "User A has accepted an appointment."
 #: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/ContextSensitiveMessages.java:84
@@ -3064,6 +3064,10 @@ msgstr ""
 "Push notificaties via long polling is uitgeschakeld voor gebruiker \"%1$s\" "
 "in context \"%1$s\""
 
+#: com.openexchange.drive/src/com/openexchange/drive/DriveExceptionMessages.java:100
+msgid "The directory is no longer accessible. Please select another directory."
+msgstr ""
+
 #: com.openexchange.external.account/src/com/openexchange/external/account/ExternalAccountExceptionMessages.java:62
 msgid "No external account provider found for module '%1$s'."
 msgstr "Geen externe accountprovider gevonden voor module '%1$s'."
@@ -3310,14 +3314,12 @@ msgstr "De map \"%1$s\" kan niet verplaatst worden naar \"%2$s\"."
 msgid "The file \"%1$s\" cannot be moved to \"%2$s\"."
 msgstr "Het bestand \"%1$s\" kan niet verplaatst worden naar \"%2$s\"."
 
-#. The notes of the file \"%1$s\" in folder \"%2$s\" are lost when moving it into the account \"%3$s\".
+#. The description of the file \"%1$s\" in folder \"%2$s\" are lost when moving it into the account \"%3$s\".
 #: com.openexchange.file.storage/src/com/openexchange/file/storage/FileStorageExceptionMessages.java:101
 msgid ""
-"The notes of the file \"%1$s\" in folder \"%2$s\" are lost when moving it "
-"into the account \"%3$s\"."
+"The description of the file \"%1$s\" in folder \"%2$s\" are lost when moving "
+"it into the account \"%3$s\"."
 msgstr ""
-"De notities van het bestand \"%1$s\" in de map \"%2$s\" zijn verloren gegaan "
-"bij het verplaatsen naar het account \"%3$s\"."
 
 #. All previous versions of the file \"%1$s\" in folder \"%2$s\" are lost when moving it into the account \"%3$s\".
 #: com.openexchange.file.storage/src/com/openexchange/file/storage/FileStorageExceptionMessages.java:104
@@ -3434,12 +3436,11 @@ msgstr "Het gekoppelde %2$s account bestaat niet meer."
 msgid "Individual permissions are not supported in account \"%1$s\"."
 msgstr "Individuele rechten worden niet ondersteund in het account \"%1$s\"."
 
-#. Saving notes for file \"%1$s\" is not supported in account \"%2$s\".
+#. Saving description for file \"%1$s\" is not supported in account \"%2$s\".
 #: com.openexchange.file.storage/src/com/openexchange/file/storage/FileStorageExceptionMessages.java:157
-msgid "Saving notes for file \"%1$s\" is not supported in account \"%2$s\"."
+msgid ""
+"Saving description for file \"%1$s\" is not supported in account \"%2$s\"."
 msgstr ""
-"Notities opslaan voor bestand  \"%1$s\" wordt niet ondersteund in het "
-"account \"%2$s\"."
 
 #. Assigning categories to file \"%1$s\" is not supported in account \"%2$s\".
 #: com.openexchange.file.storage/src/com/openexchange/file/storage/FileStorageExceptionMessages.java:160
@@ -11815,8 +11816,8 @@ msgid ""
 "%1$s has shared the folder \"%2$s\" with you. Please enter the share "
 "password to view it."
 msgstr ""
-"%1$s heeft de map \"%2$s\" met u gedeeld. Voer het gedeelde wachtwoord in om"
-" het te bekijken."
+"%1$s heeft de map \"%2$s\" met u gedeeld. Voer het gedeelde wachtwoord in om "
+"het te bekijken."
 
 #. John Doe has shared the file "document.pdf" with you. Please enter the share password to view it.
 #: com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:68
@@ -11824,8 +11825,8 @@ msgid ""
 "%1$s has shared the file \"%2$s\" with you. Please enter the share password "
 "to view it."
 msgstr ""
-"%1$s heeft het bestand \"%2$s\" met u gedeeld. Voer het gedeelde wachtwoord"
-" in om het te bekijken."
+"%1$s heeft het bestand \"%2$s\" met u gedeeld. Voer het gedeelde wachtwoord "
+"in om het te bekijken."
 
 #. John Doe has shared the folder "Photos" with you. Please enter your password to view it.
 #: com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:71
@@ -11833,8 +11834,8 @@ msgid ""
 "%1$s has shared the folder \"%2$s\" with you. Please enter your password to "
 "view it."
 msgstr ""
-"%1$s heeft de map \"%2$s\" met u gedeeld. Voer uw wachtwoord in om het te"
-" bekijken."
+"%1$s heeft de map \"%2$s\" met u gedeeld. Voer uw wachtwoord in om het te "
+"bekijken."
 
 #. John Doe has shared the file "document.pdf" with you. Please enter your password to view it.
 #: com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:74
@@ -11842,8 +11843,8 @@ msgid ""
 "%1$s has shared the file \"%2$s\" with you. Please enter your password to "
 "view it."
 msgstr ""
-"%1$s heeft het bestand \"%2$s\" met u gedeeld. Voer uw wachtwoord in om het"
-" te bekijken."
+"%1$s heeft het bestand \"%2$s\" met u gedeeld. Voer uw wachtwoord in om het "
+"te bekijken."
 
 #. The folder "Photos" is shared with you. Please enter the share password to view it.
 #: com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:77
@@ -11851,8 +11852,8 @@ msgid ""
 "The folder \"%1$s\" is shared with you. Please enter the share password to "
 "view it."
 msgstr ""
-"De map \"%1$s\" wordt met u gedeeld. Voer het gedeelde wachtwoord in om het"
-" te bekijken."
+"De map \"%1$s\" wordt met u gedeeld. Voer het gedeelde wachtwoord in om het "
+"te bekijken."
 
 #. The file "document.pdf" is shared with you. Please enter the share password to view it.
 #: com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:80
@@ -11860,8 +11861,8 @@ msgid ""
 "The file \"%1$s\" is shared with you. Please enter the share password to "
 "view it."
 msgstr ""
-"Het bestand \"%1$s\" wordt met u gedeeld. Voer het gedeelde wachtwoord in om"
-" het te bekijken."
+"Het bestand \"%1$s\" wordt met u gedeeld. Voer het gedeelde wachtwoord in om "
+"het te bekijken."
 
 #. The folder "Photos" is shared with you. Please enter your password to view it.
 #: com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:83
@@ -11869,15 +11870,16 @@ msgid ""
 "The folder \"%1$s\" is shared with you. Please enter your password to view "
 "it."
 msgstr ""
-"De map \"%1$s\" wordt met u gedeeld. Voer uw wachtwoord in om het te bekijken."
+"De map \"%1$s\" wordt met u gedeeld. Voer uw wachtwoord in om het te "
+"bekijken."
 
 #. The file "document.pdf" is shared with you. Please enter your password to view it.
 #: com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:86
 msgid ""
 "The file \"%1$s\" is shared with you. Please enter your password to view it."
 msgstr ""
-"Het bestand \"%1$s\" wordt met u gedeeld. Voer uw wachtwoord in om het te"
-" bekijken."
+"Het bestand \"%1$s\" wordt met u gedeeld. Voer uw wachtwoord in om het te "
+"bekijken."
 
 #. Login when opening a share protected with a password
 #: com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:89
@@ -15486,6 +15488,18 @@ msgstr "UTC"
 #: TimeZones.java:533
 msgid "Zulu"
 msgstr "Zoeloe"
+
+#~ msgid ""
+#~ "The notes of the file \"%1$s\" in folder \"%2$s\" are lost when moving it "
+#~ "into the account \"%3$s\"."
+#~ msgstr ""
+#~ "De notities van het bestand \"%1$s\" in de map \"%2$s\" zijn verloren "
+#~ "gegaan bij het verplaatsen naar het account \"%3$s\"."
+
+#~ msgid "Saving notes for file \"%1$s\" is not supported in account \"%2$s\"."
+#~ msgstr ""
+#~ "Notities opslaan voor bestand  \"%1$s\" wordt niet ondersteund in het "
+#~ "account \"%2$s\"."
 
 #~ msgid ""
 #~ "%1$s has shared the %2$s \"%3$s\" with you. Please enter the share "

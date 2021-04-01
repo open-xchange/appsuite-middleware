@@ -55,9 +55,10 @@ import java.util.Map;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.ExecutionException;
-import java.util.concurrent.TimeUnit;
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
+import com.google.common.cache.RemovalListener;
+import com.google.common.cache.RemovalNotification;
 import com.google.common.util.concurrent.UncheckedExecutionException;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.config.DefaultInterests;
@@ -97,7 +98,16 @@ public class S3ClientRegistry implements Reloadable {
         super();
         this.clientFactory = clientFactory;
         this.services = services;
-        clients = CacheBuilder.newBuilder().expireAfterAccess(30, TimeUnit.MINUTES).build();
+        clients = CacheBuilder.newBuilder()
+            .weakValues()
+            .removalListener(new RemovalListener<String, S3FileStorageClient>() {
+
+                @Override
+                public void onRemoval(RemovalNotification<String, S3FileStorageClient> notification) {
+                    notification.getValue().getSdkClient().shutdown();
+                }
+            })
+            .build();
     }
 
     /**

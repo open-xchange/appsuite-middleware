@@ -6,7 +6,7 @@ msgstr ""
 "Project-Id-Version: backend\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: \n"
-"PO-Revision-Date: 2021-01-15 16:28+0000\n"
+"PO-Revision-Date: 2021-03-19 10:14+0100\n"
 "Last-Translator: \n"
 "Language-Team: Russian <>\n"
 "Language: ru_RU\n"
@@ -2976,6 +2976,10 @@ msgstr ""
 "Для пользователя \"%1$s\" в контексте \"%1$s\" push-функция через long "
 "polling отключена."
 
+#: com.openexchange.drive/src/com/openexchange/drive/DriveExceptionMessages.java:100
+msgid "The directory is no longer accessible. Please select another directory."
+msgstr ""
+
 #: com.openexchange.external.account/src/com/openexchange/external/account/ExternalAccountExceptionMessages.java:62
 msgid "No external account provider found for module '%1$s'."
 msgstr "Для модуля «%1$s« » не найден поставщик внешних аккаунтов."
@@ -3213,14 +3217,12 @@ msgstr "Папка «%1$s» не может быть перемещена в «%
 msgid "The file \"%1$s\" cannot be moved to \"%2$s\"."
 msgstr "Файл «%1$s» не может быть перемещен в «%2$s»."
 
-#. The notes of the file \"%1$s\" in folder \"%2$s\" are lost when moving it into the account \"%3$s\".
+#. The description of the file \"%1$s\" in folder \"%2$s\" are lost when moving it into the account \"%3$s\".
 #: com.openexchange.file.storage/src/com/openexchange/file/storage/FileStorageExceptionMessages.java:101
 msgid ""
-"The notes of the file \"%1$s\" in folder \"%2$s\" are lost when moving it "
-"into the account \"%3$s\"."
+"The description of the file \"%1$s\" in folder \"%2$s\" are lost when moving "
+"it into the account \"%3$s\"."
 msgstr ""
-"При переносе файла «%1$s» из папки «%2$s» в учетную запись «%3$s» его "
-"примечания будут утеряны."
 
 #. All previous versions of the file \"%1$s\" in folder \"%2$s\" are lost when moving it into the account \"%3$s\".
 #: com.openexchange.file.storage/src/com/openexchange/file/storage/FileStorageExceptionMessages.java:104
@@ -3336,11 +3338,11 @@ msgstr "Связанный аккаунт %2$s не существует."
 msgid "Individual permissions are not supported in account \"%1$s\"."
 msgstr "Индивидуальные разрешения для учетной записи «%1$s» не поддерживаются."
 
-#. Saving notes for file \"%1$s\" is not supported in account \"%2$s\".
+#. Saving description for file \"%1$s\" is not supported in account \"%2$s\".
 #: com.openexchange.file.storage/src/com/openexchange/file/storage/FileStorageExceptionMessages.java:157
-msgid "Saving notes for file \"%1$s\" is not supported in account \"%2$s\"."
+msgid ""
+"Saving description for file \"%1$s\" is not supported in account \"%2$s\"."
 msgstr ""
-"Учетная запись «%2$s» не поддерживает сохранение примечаний к файлу «%1$s»."
 
 #. Assigning categories to file \"%1$s\" is not supported in account \"%2$s\".
 #: com.openexchange.file.storage/src/com/openexchange/file/storage/FileStorageExceptionMessages.java:160
@@ -14987,6 +14989,18 @@ msgstr "UTC"
 #: TimeZones.java:533
 msgid "Zulu"
 msgstr "Зулу"
+
+#~ msgid ""
+#~ "The notes of the file \"%1$s\" in folder \"%2$s\" are lost when moving it "
+#~ "into the account \"%3$s\"."
+#~ msgstr ""
+#~ "При переносе файла «%1$s» из папки «%2$s» в учетную запись «%3$s» его "
+#~ "примечания будут утеряны."
+
+#~ msgid "Saving notes for file \"%1$s\" is not supported in account \"%2$s\"."
+#~ msgstr ""
+#~ "Учетная запись «%2$s» не поддерживает сохранение примечаний к файлу "
+#~ "«%1$s»."
 
 #~ msgid ""
 #~ "%1$s has shared the %2$s \"%3$s\" with you. Please enter the share "

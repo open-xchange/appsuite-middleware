@@ -6,7 +6,7 @@ BuildRequires: ant
 BuildRequires: java-1.8.0-openjdk-devel
 BuildRequires: open-xchange-osgi >= @OXVERSION@
 Version:       @OXVERSION@
-%define        ox_release 7
+%define        ox_release 8
 Release:       %{ox_release}_<CI_CNT>.<B_CNT>
 Group:         Applications/Productivity
 License:       GPL-2.0
@@ -55,6 +55,8 @@ ant -lib build/lib -Dbasedir=build -DdestDir=%{buildroot} -DpackageName=%{name} 
 /opt/open-xchange/osgi/bundle.d/com.hazelcast.kubernetes.ini
 
 %changelog
+* Tue Mar 23 2021 Martin Schneider <martin.schneider@open-xchange.com>
+Build for patch 2021-03-29 (5976)
 * Tue Mar 09 2021 Martin Schneider <martin.schneider@open-xchange.com>
 Build for patch 2021-03-15 (5973)
 * Mon Feb 22 2021 Martin Schneider <martin.schneider@open-xchange.com>
