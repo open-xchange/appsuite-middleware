@@ -10,7 +10,7 @@ maintainers:
 type: application
 
 # This is the chart version
-version: 8.0.0
+version: 1.0.0
 
 # This is the version of the appsuite middleware
 appVersion: 8.0.0
