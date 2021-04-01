@@ -155,10 +155,11 @@ public class MessageAlarmDeliveryWorker implements CleanUpExecution {
     @Override
     public boolean isApplicableFor(String schema, int representativeContextId, int databasePoolId, CleanUpExecutionConnectionProvider connectionProvider) throws OXException {
         try {
-            return Databases.executeQuery(connectionProvider.getConnection(),
+            Boolean result = Databases.executeQuery(connectionProvider.getConnection(),
                 (rs) -> Boolean.TRUE, // We have a result, so we are fine
                 "SELECT 1 FROM updateTask WHERE taskName=?",
-                (s) -> s.setString(1, MessageAlarmDeliveryWorkerUpdateTask.TASK_NAME)).booleanValue();
+                (s) -> s.setString(1, MessageAlarmDeliveryWorkerUpdateTask.TASK_NAME));
+            return result != null && result.booleanValue();
         } catch (SQLException e) {
             throw DatabaseCleanUpExceptionCode.SQL_ERROR.create(e.getMessage(), e);
         }

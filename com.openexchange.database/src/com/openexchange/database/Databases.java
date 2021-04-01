@@ -1132,7 +1132,7 @@ public final class Databases {
     }
 
     /**
-     * Executes an SQL query
+     * Executes an SQL query and passes the data produced by the query to given result consumer.
      *
      * @param connection The connection to use
      * @param rc The consumer of the result to use transform into a concrete java object
@@ -1156,16 +1156,20 @@ public final class Databases {
     }
 
     /**
-     * Executes an SQL query
+     * Executes an SQL query and returns
+     * <ul>
+     * <li>either producer's result</li>
+     * <li>or <code>null</code> if given statement yields no resulting rows</li>
+     * </ul>
      *
      * @param <T> The class of the response object
      * @param connection The connection to use
      * @param producer The producer for the result object
      * @param statement The statement to execute
      * @param valueSetters The valueSetters to fill the statement with variables
-     * @return The result instance of given type or <code>null</code>
-     * @throws SQLException In case of an SQL error
-     * @throws OXException In case result can't be produced
+     * @return Either the producer's result of given type or <code>null</code>
+     * @throws SQLException If an SQL error occurs
+     * @throws OXException If result cannot be produced when calling {@link ResultProduccer#produce(ResultSet)}
      */
     public static <T> T executeQuery(Connection connection, ResultProduccer<T> producer, String statement, PreparedStatementValueSetter... valueSetters) throws SQLException, OXException {
         PreparedStatement stmt = null;
@@ -1180,12 +1184,17 @@ public final class Databases {
     }
 
     /**
-     * Executes an SQL update.
+     * Executes an SQL update and returns
+     * <ul>
+     * <li>either (1) the row count for SQL Data Manipulation Language (DML) statements</li>
+     * <li>or (2) <code>0</code> for SQL statements that return nothing</li>
+     * </ul>
      *
      * @param connection The connection to use
      * @param statement The statement to execute
      * @param valueSetters The valueSetters to fill the statement with variables
-     * @return See {@link PreparedStatement#executeUpdate()}
+     * @return Either (1) the row count for SQL Data Manipulation Language (DML) statements
+     *         or (2) <code>0</code> for SQL statements that return nothing
      * @throws SQLException In case of an SQL error
      */
     public static int executeUpdate(Connection connection, String statement, PreparedStatementValueSetter... valueSetters) throws SQLException {
@@ -1199,11 +1208,11 @@ public final class Databases {
     }
 
     /**
-     * Executes an SQL query
+     * Executes an SQL query and returns a <code>ResultSet</code> object that contains the data produced by the query.
      *
      * @param stmt The statement to execute
      * @param valueSetters The valueSetters to fill the statement with variables
-     * @return See {@link PreparedStatement#executeQuery()}
+     * @return A <code>ResultSet</code> object that contains the data produced by the query; never <code>null</code>
      * @throws SQLException In case of error
      */
     public static ResultSet executeQuery(PreparedStatement stmt, PreparedStatementValueSetter... valueSetters) throws SQLException {
@@ -1211,11 +1220,16 @@ public final class Databases {
     }
 
     /**
-     * Executes an SQL update
+     * Executes an SQL update and returns
+     * <ul>
+     * <li>either (1) the row count for SQL Data Manipulation Language (DML) statements</li>
+     * <li>or (2) <code>0</code> for SQL statements that return nothing</li>
+     * </ul>
      *
      * @param stmt The statement to execute
      * @param valueSetters The valueSetters to fill the statement with variables
-     * @return See {@link PreparedStatement#executeUpdate()}
+     * @return Either (1) the row count for SQL Data Manipulation Language (DML) statements
+     *         or (2) <code>0</code> for SQL statements that return nothing
      * @throws SQLException In case of error
      */
     public static int executeUpdate(PreparedStatement stmt, PreparedStatementValueSetter... valueSetters) throws SQLException {
@@ -1223,13 +1237,13 @@ public final class Databases {
     }
 
     /**
-     * Executes the given statement with the given execute function
+     * Executes the given statement with the given execute function.
      *
      * @param <T> The result to return
      * @param stmt The statement to execute
      * @param executionFunction The executing function
      * @param valueSetters The valueSetters to fill the statement with variables
-     * @return A dedicated value
+     * @return The value returned by {@link SQLExecutorFunction#execute(PreparedStatement)}
      * @throws SQLException In case of error
      */
     public static <T> T execute(PreparedStatement stmt, SQLExecutorFunction<T> executionFunction, PreparedStatementValueSetter... valueSetters) throws SQLException {
