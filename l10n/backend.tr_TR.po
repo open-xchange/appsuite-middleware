@@ -7,7 +7,7 @@ msgstr ""
 "Project-Id-Version: \n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: \n"
-"PO-Revision-Date: 2020-07-09 16:33+0300\n"
+"PO-Revision-Date: 2021-03-12 11:45+0100\n"
 "Last-Translator: \n"
 "Language-Team: \n"
 "Language: tr\n"
@@ -15,7 +15,7 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n > 1);\n"
-"X-Generator: Poedit 2.3.1\n"
+"X-Generator: Poedit 2.4.2\n"
 
 #. The verb "accepted", like "User A has accepted an appointment."
 #: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/ContextSensitiveMessages.java:84
@@ -2891,6 +2891,10 @@ msgstr ""
 "\"%1$s\" kullanıcısı için \"%1$s\" bağlamında long polling yoluyla push "
 "devre dışı"
 
+#: com.openexchange.drive/src/com/openexchange/drive/DriveExceptionMessages.java:100
+msgid "The directory is no longer accessible. Please select another directory."
+msgstr ""
+
 #: com.openexchange.external.account/src/com/openexchange/external/account/ExternalAccountExceptionMessages.java:62
 msgid "No external account provider found for module '%1$s'."
 msgstr "'%1$s' modülü için harici hesap sağlayıcısı bulunamadı."
@@ -3305,6 +3309,13 @@ msgstr "Bu adla bir dosya zaten var."
 #: com.openexchange.server/src/com/openexchange/folderstorage/FolderExceptionMessages.java:107
 msgid "Restore from trash is not supported"
 msgstr "Çöp kutusundan geri yükleme desteklenmiyor"
+
+#. The account name is too long. Please limit the account name to a maximum of %1$s characters.
+#: com.openexchange.file.storage/src/com/openexchange/file/storage/FileStorageExceptionMessages.java:193
+msgid ""
+"The account name is too long. Please limit the account name to a maximum of "
+"%1$s characters."
+msgstr "Hesap adı çok uzun. Lütfen hesap adını en fazla %1$s karakter yapın."
 
 #. Access denied.
 #: com.openexchange.filestore.s3/src/com/openexchange/filestore/s3/internal/S3ExceptionMessages.java:65
@@ -4457,22 +4468,26 @@ msgstr ""
 "oldu."
 
 #. *
-#. * Invalid password length. The password must be of minimum length %1$d.
+#. * Invalid password length. The password must have a minimum length of %1$d characters.
 #.
 #: com.openexchange.global/src/com/openexchange/user/UserExceptionMessage.java:133
 msgid ""
-"Invalid password length. The password must have a minimum length of %1$d."
+"Invalid password length. The password must have a minimum length of %1$d "
+"characters."
 msgstr ""
-"Geçersiz parola uzunluğu. Parolanın en az %1$d karakter olması gerekir."
+"Geçersiz parola uzunluğu. Parolanın en az %1$d karakter uzunluğunda olması "
+"gerekir."
 
 #. *
-#. * Invalid password length. The password must be of maximum length %1$d.
+#. * Invalid password length. The password must have a maximum length of %1$d characters.
 #.
 #: com.openexchange.global/src/com/openexchange/user/UserExceptionMessage.java:138
 msgid ""
-"Invalid password length. The password must have a maximum length of %1$d."
+"Invalid password length. The password must have a maximum length of %1$d "
+"characters."
 msgstr ""
-"Geçersiz parola uzunluğu. Parolanın en fazla %1$d karakter olması gerekir."
+"Geçersiz parola uzunluğu. Parolanın en çok %1$d karakter uzunluğunda olması "
+"gerekir."
 
 #. *
 #. * The parameter %s for this user is missing.
@@ -5891,20 +5906,21 @@ msgstr ""
 "'%s' tanımlayıcısı için kullanılabilir parola mekanizması yok. Parola "
 "işlenemiyor."
 
-#. *
-#. * New password too short.
-#.
-#: com.openexchange.passwordchange.script/src/com/openexchange/passwordchange/script/impl/PasswordExceptionMessage.java:64
+#. Failed to change password for any reason. E.g. the script used to change a user's password advertised an error (return code)
+#: com.openexchange.passwordchange.script/src/com/openexchange/passwordchange/script/impl/PasswordExceptionMessage.java:62
+msgid "Failed to change password for any reason."
+msgstr "Parola değiştirilemedi."
+
+#. New password too short.
+#: com.openexchange.passwordchange.script/src/com/openexchange/passwordchange/script/impl/PasswordExceptionMessage.java:65
 msgid ""
 "The entered password is too short. Please try again using a longer password."
 msgstr ""
 "Girilen parola çok kısa. Lütfen daha uzun bir parola kullanarak yeniden "
 "deneyin."
 
-#. *
-#. * New password too weak.
-#.
-#: com.openexchange.passwordchange.script/src/com/openexchange/passwordchange/script/impl/PasswordExceptionMessage.java:69
+#. New password too weak.
+#: com.openexchange.passwordchange.script/src/com/openexchange/passwordchange/script/impl/PasswordExceptionMessage.java:68
 msgid ""
 "The entered password is too weak. Please try again using a more complex "
 "password."
@@ -12193,14 +12209,19 @@ msgstr "Geçersiz veya zararlı resim verileri algılandı"
 msgid "The signature image exceeds the maximum allowed size of '%1$s'."
 msgstr "İmza resmi, izin verilen maksimum '%1$s' boyutunu aşıyor."
 
-#. Thrown if a user tries to create a snippet/signature containing more than max. number of allowed images
+#. The signature size exceeds the maximum allowed size of '%1$s'.
 #: com.openexchange.snippet/src/com/openexchange/snippet/SnippetStrings.java:77
+msgid "The signature size exceeds the maximum allowed size of '%1$s'."
+msgstr "İmza boyutu izin verilen maksimum '%1$s' boyutunu aşıyor."
+
+#. Thrown if a user tries to create a snippet/signature containing more than max. number of allowed images
+#: com.openexchange.snippet/src/com/openexchange/snippet/SnippetStrings.java:80
 msgid ""
 "The maximum allowed number of '%1$s' images in the signature is reached."
 msgstr "İmzada izin verilen en fazla '%1$s' resim sayısına ulaştınız."
 
 #. Thrown if a user must not modify a snippet/signature. Neither shared nor owned by that user.
-#: com.openexchange.snippet/src/com/openexchange/snippet/SnippetStrings.java:80
+#: com.openexchange.snippet/src/com/openexchange/snippet/SnippetStrings.java:83
 msgid "You are not allowed to modify the signature"
 msgstr "İmzayı değiştirmenize izin verilmiyor"
 
@@ -12288,6 +12309,40 @@ msgstr ""
 #: com.openexchange.subscribe/src/com/openexchange/subscribe/SubscriptionErrorStrings.java:92
 msgid "You already have such a subscription."
 msgstr "Zaten böyle bir aboneliğiniz var."
+
+#: com.openexchange.switchboard/src/com/openexchange/switchboard/exception/ZoomExceptionMessages.java:62
+msgid ""
+"Zoom meetings cannot be used in all-day appointments. Please use a fixed "
+"start- and end-time and try again."
+msgstr ""
+"Zoom toplantıları tam günlük randevularda kullanılamaz. Lütfen sabit "
+"başlangıç ve bitiş saatleri kullanarak yeniden deneyin."
+
+#: com.openexchange.switchboard/src/com/openexchange/switchboard/exception/ZoomExceptionMessages.java:64
+msgid ""
+"Zoom meetings cannot be used in appointments with floating start- or end-"
+"times. Please use a fixed start- and end-time and try again."
+msgstr ""
+"Zoom toplantıları saat dilimi belirsiz randevularda kullanılamaz. Lütfen "
+"sabit başlangıç ve bitiş saatleri kullanarak yeniden deneyin."
+
+#: com.openexchange.switchboard/src/com/openexchange/switchboard/exception/ZoomExceptionMessages.java:66
+msgid ""
+"Zoom meetings cannot be used in recurring appointment series spanning over "
+"more than one year. Please shorten the recurrence rule and try again."
+msgstr ""
+"Zoom toplantıları, bir yıldan uzun süreli yinelenen randevu dizilerinde "
+"kullanılamaz. Lütfen yineleme kuralını kısaltıp yeniden deneyin."
+
+#: com.openexchange.switchboard/src/com/openexchange/switchboard/exception/ZoomExceptionMessages.java:68
+msgid ""
+"The same Zoom meeting can't be re-used when switching from recurring to "
+"single appointments and vice versa. Please generate a new Zoom meeting and "
+"try again."
+msgstr ""
+"Yinelenen randevudan tek randevuya veya tek randevudan yinelenen randevuya "
+"geçerken aynı Zoom toplantısı kullanılamaz. Lütfen yeni bir Zoom toplantısı "
+"oluşturup yeniden deneyin."
 
 #. Application 'xyz' requires following permissions:
 #. - Read all your tasks.
@@ -14730,6 +14785,16 @@ msgstr "UTC"
 #: TimeZones.java:534
 msgid "Zulu"
 msgstr "Zulu"
+
+#~ msgid ""
+#~ "Invalid password length. The password must have a minimum length of %1$d."
+#~ msgstr ""
+#~ "Geçersiz parola uzunluğu. Parolanın en az %1$d karakter olması gerekir."
+
+#~ msgid ""
+#~ "Invalid password length. The password must have a maximum length of %1$d."
+#~ msgstr ""
+#~ "Geçersiz parola uzunluğu. Parolanın en fazla %1$d karakter olması gerekir."
 
 #~ msgid "The group %1$s has been invited to the appointment"
 #~ msgstr "%1$s grubu randevuya davet edildi"

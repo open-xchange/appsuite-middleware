@@ -98,9 +98,10 @@ import com.openexchange.config.Reloadable;
 import com.openexchange.config.Reloadables;
 import com.openexchange.conversion.ConversionService;
 import com.openexchange.conversion.Data;
-import com.openexchange.conversion.DataExceptionCodes;
 import com.openexchange.conversion.DataProperties;
 import com.openexchange.exception.OXException;
+import com.openexchange.exception.OXExceptionCodeSet;
+import com.openexchange.exception.OXExceptions;
 import com.openexchange.filemanagement.ManagedFile;
 import com.openexchange.filemanagement.ManagedFileManagement;
 import com.openexchange.groupware.contexts.Context;
@@ -148,10 +149,12 @@ import com.openexchange.mail.utils.IpAddressRenderer;
 import com.openexchange.mail.utils.MessageUtility;
 import com.openexchange.mail.utils.MsisdnUtility;
 import com.openexchange.mailaccount.MailAccount;
+import com.openexchange.mailaccount.MailAccountExceptionCodes;
 import com.openexchange.mailaccount.MailAccountStorageService;
 import com.openexchange.mailaccount.TransportAccount;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.session.Session;
+import com.openexchange.snippet.SnippetExceptionCodes;
 import com.openexchange.tools.regex.MatcherReplacer;
 import com.openexchange.tools.session.ServerSession;
 import com.openexchange.user.User;
@@ -1973,11 +1976,18 @@ public class MimeMessageFiller {
         return sb.toString();
     }
 
+    private static final OXExceptionCodeSet IGNORABLE_CODES = new OXExceptionCodeSet(
+        MimeMailExceptionCode.IMAGE_ATTACHMENTS_UNSUPPORTED,
+        MailExceptionCode.IMAGE_ATTACHMENT_NOT_FOUND,
+        MailExceptionCode.MAIL_NOT_FOUND,
+        MailExceptionCode.ATTACHMENT_NOT_FOUND,
+        SnippetExceptionCodes.SNIPPET_NOT_FOUND,
+        SnippetExceptionCodes.ATTACHMENT_NOT_FOUND,
+        MailAccountExceptionCodes.NOT_FOUND,
+        OXExceptions.prefixFor("CNV"));
+
     private static boolean isIgnorableException(OXException e) {
-        if (MimeMailExceptionCode.IMAGE_ATTACHMENTS_UNSUPPORTED.equals(e) || MailExceptionCode.IMAGE_ATTACHMENT_NOT_FOUND.equals(e) || DataExceptionCodes.ERROR.equals(e) || MailExceptionCode.MAIL_NOT_FOUND.equals(e) || MailExceptionCode.ATTACHMENT_NOT_FOUND.equals(e) || isFolderNotFound(e)) {
-            return true;
-        }
-        return false;
+        return IGNORABLE_CODES.contains(e) || isFolderNotFound(e);
     }
 
     private static String urlDecode(String s) {

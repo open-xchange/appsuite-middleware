@@ -292,7 +292,7 @@ public class DataExportServiceImpl implements DataExportService {
     }
 
     private List<DataExportTask> checkTasksValidity(List<DataExportTask> dataExportTasks, UserService userService, ContextService contextService) {
-        List<UUID> tasksToDelete = null;
+        List<DataExportTask> tasksToDelete = null;
 
         TIntObjectMap<Boolean> visitedContexts = new TIntObjectHashMap<>();
         for (Iterator<DataExportTask> it = dataExportTasks.iterator(); it.hasNext();) {
@@ -312,7 +312,7 @@ public class DataExportServiceImpl implements DataExportService {
                     if (tasksToDelete == null) {
                         tasksToDelete = new ArrayList<>();
                     }
-                    tasksToDelete.add(dataExportTask.getId());
+                    tasksToDelete.add(dataExportTask);
                 }
             } else {
                 // Remove task
@@ -320,19 +320,20 @@ public class DataExportServiceImpl implements DataExportService {
                 if (tasksToDelete == null) {
                     tasksToDelete = new ArrayList<>();
                 }
-                tasksToDelete.add(dataExportTask.getId());
+                tasksToDelete.add(dataExportTask);
             }
         }
 
         if (tasksToDelete != null) {
-            List<UUID> taskIds = tasksToDelete;
+            List<DataExportTask> tasks = tasksToDelete;
             DataExportStorageService storageService = this.storageService;
             AbstractTask<Void> deleteTask = new AbstractTask<Void>() {
 
                 @Override
                 public Void call() throws Exception {
-                    for (UUID taskId : taskIds) {
-                        storageService.deleteDataExportTask(taskId);
+                    for (DataExportTask task : tasks) {
+                        storageService.deleteDataExportTask(task.getId());
+                        LOG.info("Deleted data export task {} of user {} in context {} since associated user does not exist.", DataExportUtility.stringFor(task.getId()), I(task.getUserId()), I(task.getContextId()));
                     }
                     return null;
                 }

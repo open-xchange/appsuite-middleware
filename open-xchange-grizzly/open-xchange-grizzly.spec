@@ -6,7 +6,7 @@ BuildRequires: ant
 BuildRequires: open-xchange-core
 BuildRequires: java-1.8.0-openjdk-devel
 Version:       @OXVERSION@
-%define        ox_release 20
+%define        ox_release 21
 Release:       %{ox_release}_<CI_CNT>.<B_CNT>
 Group:         Applications/Productivity
 License:       GPL-2.0
@@ -89,6 +89,8 @@ fi
 %config(noreplace) %attr(640,root,open-xchange) /opt/open-xchange/etc/grizzly.properties
 
 %changelog
+* Tue Mar 23 2021 Marc Arens <marc.arens@open-xchange.com>
+Build for patch 2021-03-29 (5975)
 * Wed Mar 10 2021 Marc Arens <marc.arens@open-xchange.com>
 Build for patch 2021-03-15 (5972)
 * Mon Feb 22 2021 Marc Arens <marc.arens@open-xchange.com>

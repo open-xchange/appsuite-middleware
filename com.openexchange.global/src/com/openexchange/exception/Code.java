@@ -56,7 +56,7 @@ package com.openexchange.exception;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since v8.0.0
  */
-public interface Code {
+public interface Code extends Prefix {
 
     /**
      * Gets the {@link OXException}'s code number.
@@ -64,12 +64,5 @@ public interface Code {
      * @return The code number
      */
     int getNumber();
-
-    /**
-     * Gets the prefix which is part of the compound error code: &lt;prefix&gt; + "-" + &lt;code&gt;
-     *
-     * @return The prefix
-     */
-    String getPrefix();
 
 }

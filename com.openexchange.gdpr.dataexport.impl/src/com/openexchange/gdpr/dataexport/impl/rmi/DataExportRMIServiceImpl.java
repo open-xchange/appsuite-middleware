@@ -186,7 +186,7 @@ public class DataExportRMIServiceImpl implements DataExportRMIService {
     @Override
     public List<Map<String, Object>> getDataExportTasks() throws RemoteException {
         try {
-            List<DataExportTask> tasks = service.getDataExportTasks(true);
+            List<DataExportTask> tasks = service.getDataExportTasks(false);
 
             List<Map<String, Object>> retval = new ArrayList<>(tasks.size());
             for (DataExportTask task : tasks) {
