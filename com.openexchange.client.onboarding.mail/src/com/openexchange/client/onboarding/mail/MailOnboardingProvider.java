@@ -457,12 +457,11 @@ public class MailOnboardingProvider implements OnboardingPlistProvider {
         boolean needsAuthentication = configurations.smtpConfig.needsAuthentication;
         if (needsAuthentication) {
             configuration.put(SMTP_LOGIN_FIELD, configurations.smtpConfig.login);
-            configuration.put(SMTP_SERVER_FIELD, configurations.smtpConfig.host);
         } else {
             String none = StringHelper.valueOf(getUser(session).getLocale()).getString("None");
             configuration.put(SMTP_LOGIN_FIELD, none);
-            configuration.put(SMTP_SERVER_FIELD, none);
         }
+        configuration.put(SMTP_SERVER_FIELD, configurations.smtpConfig.host);
         configuration.put(SMTP_PORT_FIELD, new Integer(configurations.smtpConfig.port));
         configuration.put(SMTP_SECURE_FIELD, new Boolean(configurations.smtpConfig.secure));
 
