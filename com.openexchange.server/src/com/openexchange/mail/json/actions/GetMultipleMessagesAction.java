@@ -208,7 +208,7 @@ public final class GetMultipleMessagesAction extends AbstractMailAction {
                     // Initialize ZIP output stream (if not already done)
                     if (zipOutput == null) {
                         zipOutput = new ZipArchiveOutputStream(stream);
-                        zipOutput.setEncoding("UTF-8");
+                        zipOutput.setEncoding("UTF8");
                         zipOutput.setUseLanguageEncodingFlag(true);
                     }
 

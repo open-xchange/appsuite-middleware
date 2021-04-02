@@ -71,7 +71,7 @@ public abstract class ZippedFileStorageOutputStream extends OutputStream {
      */
     protected ZipArchiveOutputStream initZipArchiveOutputStream(OutputStream out, int compressionLevel) {
         ZipArchiveOutputStream zipOutput = new ZipArchiveOutputStream(out);
-        zipOutput.setEncoding("UTF-8");
+        zipOutput.setEncoding("UTF8");
         zipOutput.setUseLanguageEncodingFlag(true);
         zipOutput.setLevel(compressionLevel);
         return zipOutput;

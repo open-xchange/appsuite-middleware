@@ -145,11 +145,13 @@ public class MailDataExportProvider extends AbstractDataExportProvider<MailDataE
 
         // Store extended properties (if any) to access mail system later on
         Map<String, Object> properties;
-        Optional<Map<String, Object>> optionalProperties = mailModule.getProperties();
-        if (optionalProperties.isPresent()) {
-            properties = new LinkedHashMap<String, Object>(optionalProperties.get());
-        } else {
-            properties = new LinkedHashMap<String, Object>(extendedProperties.size() + 2);
+        {
+            Optional<Map<String, Object>> optionalProperties = mailModule.getProperties();
+            if (optionalProperties.isPresent()) {
+                properties = new LinkedHashMap<String, Object>(optionalProperties.get());
+            } else {
+                properties = new LinkedHashMap<String, Object>(extendedProperties.size() + 2);
+            }
         }
         properties.put(MailDataExportPropertyNames.PROP_SESSION_GENERATOR, generator.getId());
         if (!extendedProperties.isEmpty()) {

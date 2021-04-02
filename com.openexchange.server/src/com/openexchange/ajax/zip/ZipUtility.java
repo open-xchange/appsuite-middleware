@@ -286,7 +286,7 @@ public class ZipUtility {
     static ZipArchiveOutputStream createZipArchiveOutputStream(OutputStream out, int optCompressionLevel) {
         ZipArchiveOutputStream zipOutput;
         zipOutput = new ZipArchiveOutputStream(out);
-        zipOutput.setEncoding("UTF-8");
+        zipOutput.setEncoding("UTF8");
         zipOutput.setUseLanguageEncodingFlag(true);
         if (optCompressionLevel > 0) {
             zipOutput.setLevel(optCompressionLevel);

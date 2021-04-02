@@ -124,7 +124,7 @@ public class ZipMaker {
         try {
             // Initialize ZIP output stream
             zipOutput = new ZipArchiveOutputStream(out);
-            zipOutput.setEncoding("UTF-8");
+            zipOutput.setEncoding("UTF8");
             zipOutput.setUseLanguageEncodingFlag(true);
             zipOutput.setLevel(getZipDocumentsCompressionLevel());
 

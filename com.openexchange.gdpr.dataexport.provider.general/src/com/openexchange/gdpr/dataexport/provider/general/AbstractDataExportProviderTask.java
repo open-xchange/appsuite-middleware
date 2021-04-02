@@ -136,7 +136,7 @@ public abstract class AbstractDataExportProviderTask {
      * Sanitizes the name, which is supposed to be used for a ZIP entry.
      * <p>
      * This method ensures that neither default name-separator character (<code>'/'</code> or <code>'\\'</code>) nor path-separator
-     * character (<code>':'</code> or <code>';'</code>) are contained in ZP entry name.
+     * character (<code>':'</code> or <code>';'</code>) are contained in ZIP entry name.
      *
      * @param name The name for a ZIP entry
      * @return The sanitized name

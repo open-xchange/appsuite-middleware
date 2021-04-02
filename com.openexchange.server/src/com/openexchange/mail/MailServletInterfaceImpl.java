@@ -1703,7 +1703,7 @@ final class MailServletInterfaceImpl extends MailServletInterface {
                     try {
                         File tempFile = mfm.newTempFile();
                         ZipArchiveOutputStream zipOutput = new ZipArchiveOutputStream(new FileOutputStream(tempFile));
-                        zipOutput.setEncoding("UTF-8");
+                        zipOutput.setEncoding("UTF8");
                         zipOutput.setUseLanguageEncodingFlag(true);
                         try {
                             byte[] buf = new byte[8192];
@@ -1851,7 +1851,7 @@ final class MailServletInterfaceImpl extends MailServletInterface {
                     try {
                         File tempFile = mfm.newTempFile();
                         ZipArchiveOutputStream zipOutput = new ZipArchiveOutputStream(new FileOutputStream(tempFile));
-                        zipOutput.setEncoding("UTF-8");
+                        zipOutput.setEncoding("UTF8");
                         zipOutput.setUseLanguageEncodingFlag(true);
                         try {
                             byte[] buf = new byte[8192];
