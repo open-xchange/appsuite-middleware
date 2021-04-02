@@ -163,7 +163,7 @@ public class DataExportSinkImpl implements DataExportSink {
                         ZipArchiveInputStream zipIn = null;
                         try {
                             in = optionalStream.get();
-                            zipIn = new ZipArchiveInputStream(in, "UTF-8");
+                            zipIn = new ZipArchiveInputStream(in, "UTF8");
                             for (ZipArchiveEntry entry; (entry = zipIn.getNextZipEntry()) != null;) {
                                 out.putArchiveEntry(entry);
                                 IOUtils.copy(zipIn, out, BUFFER_SIZE);

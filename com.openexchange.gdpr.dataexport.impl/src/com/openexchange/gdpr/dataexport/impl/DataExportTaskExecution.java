@@ -606,7 +606,7 @@ public class DataExportTaskExecution extends AbstractTask<Void> {
                     ZipArchiveInputStream zipIn = null;
                     try {
                         in = fileStorage.getFile(fileStorageLocation);
-                        zipIn = new ZipArchiveInputStream(in, "UTF-8");
+                        zipIn = new ZipArchiveInputStream(in, "UTF8");
                         zipOut.addEntriesFrom(zipIn);
                     } finally {
                         Streams.close(zipIn, in);
