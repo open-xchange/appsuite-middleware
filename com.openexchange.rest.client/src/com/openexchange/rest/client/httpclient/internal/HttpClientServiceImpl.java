@@ -443,7 +443,7 @@ public class HttpClientServiceImpl implements HttpClientService, ServiceTrackerC
     }
 
     HttpBasicConfigImpl createNewDefaultConfig(LeanConfigurationService leanConfigurationService) {
-        return new HttpBasicConfigImpl(Optional.ofNullable(leanConfigurationService));
+        return HttpBasicConfigImpl.createInstance(Optional.ofNullable(leanConfigurationService));
     }
 
     /**
@@ -459,11 +459,12 @@ public class HttpClientServiceImpl implements HttpClientService, ServiceTrackerC
      */
     HttpBasicConfig adjustConfig(String clientId, HttpBasicConfig httpBasicConfig) {
         ConfigurationService configService = serviceLookup.getOptionalService(ConfigurationService.class);
-        if (null != configService) {
-            Map<String, String> optionals = Collections.singletonMap(HttpClientProperty.SERVICE_IDENTIFIER, clientId);
-            for (HttpClientProperty property : HttpClientProperty.values()) {
-                adjustConfig(property, httpBasicConfig, optionals, configService);
-            }
+        if (null == configService) {
+            return httpBasicConfig;
+        }
+        Map<String, String> specificReplacment = Collections.singletonMap(HttpClientProperty.SERVICE_IDENTIFIER, clientId);
+        for (HttpClientProperty property : HttpClientProperty.values()) {
+            adjustConfig(property, httpBasicConfig, specificReplacment, configService);
         }
         return httpBasicConfig;
     }
