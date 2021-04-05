@@ -50,14 +50,11 @@
 package com.openexchange.mail.autoconfig.sources;
 
 import static com.openexchange.mail.autoconfig.tools.Utils.getHttpProxyIfEnabled;
-import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.concurrent.TimeUnit;
-import javax.net.ssl.SSLHandshakeException;
 import org.apache.http.HttpHost;
 import org.apache.http.HttpResponse;
-import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpGet;
 import com.google.common.cache.Cache;
@@ -182,13 +179,7 @@ public class ISPDB extends AbstractProxyAwareConfigSource {
             }
 
             return generateIndividualAutoconfig(emailLocalPart, emailDomain, autoconfig, forceSecure);
-        } catch (SSLHandshakeException e) {
-            LOG.info("Could not retrieve config XML.", e);
-            return null;
-        } catch (ClientProtocolException e) {
-            LOG.warn("Could not retrieve config XML.", e);
-            return null;
-        } catch (IOException e) {
+        } catch (Exception e) {
             LOG.warn("Could not retrieve config XML.", e);
             return null;
         } finally {

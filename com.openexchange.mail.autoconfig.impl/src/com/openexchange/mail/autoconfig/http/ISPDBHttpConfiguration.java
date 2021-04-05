@@ -52,6 +52,7 @@ package com.openexchange.mail.autoconfig.http;
 import static com.openexchange.mail.autoconfig.http.UserAwareRoutePlanner.USER_PLANNER_INSTANCE;
 import org.apache.http.impl.client.HttpClientBuilder;
 import com.openexchange.rest.client.httpclient.DefaultHttpClientConfigProvider;
+import com.openexchange.rest.client.httpclient.HttpBasicConfig;
 
 /**
  * {@link ISPDBHttpConfiguration}
@@ -67,6 +68,15 @@ public class ISPDBHttpConfiguration extends DefaultHttpClientConfigProvider {
      */
     public ISPDBHttpConfiguration() {
         super("autoconfig-ispdb", "Open-Xchange ISPDB Client");
+    }
+
+    @Override
+    public HttpBasicConfig configureHttpBasicConfig(HttpBasicConfig config) {
+        return config
+            .setConnectTimeout(3000)
+            .setSocketReadTimeout(10000)
+            .setMaxTotalConnections(100)
+            .setMaxConnectionsPerRoute(100);
     }
 
     @Override

@@ -67,6 +67,32 @@ import com.openexchange.rest.client.httpclient.HttpClientProperty;
 @NotThreadSafe
 public class HttpBasicConfigImpl implements HttpBasicConfig {
 
+    /**
+     * Creates a new instance of {@link HttpBasicConfigImpl}.
+     *
+     * @param optionalLeanService The optional service to obtain the default configuration from
+     * @return The {@code HttpBasicConfigImpl} instance
+     */
+    public static HttpBasicConfigImpl createInstance(Optional<LeanConfigurationService> optionalLeanService) {
+        HttpBasicConfigImpl instance = new HttpBasicConfigImpl();
+        if (optionalLeanService.isPresent()) {
+            // Use passed service
+            LeanConfigurationService service = optionalLeanService.get();
+            for (HttpClientProperty property : HttpClientProperty.values()) {
+                // Read from default configuration
+                property.setInConfig(instance, I(service.getIntProperty(property.getProperty())));
+            }
+        } else {
+            for (HttpClientProperty property : HttpClientProperty.values()) {
+                // Apply defaults
+                property.setInConfig(instance, null);
+            }
+        }
+        return instance;
+    }
+
+    // -------------------------------------------------------------------------------------------------------------------------------------
+
     private int socketReadTimeout;
     private int connectTimeout;
     private int connectionRequestTimeout;
@@ -78,23 +104,9 @@ public class HttpBasicConfigImpl implements HttpBasicConfig {
 
     /**
      * Initializes a new {@link HttpBasicConfigImpl}.
-     *
-     * @param optionalLeanService The optional {@link LeanConfigurationService} to obtain the default configuration from
      */
-    public HttpBasicConfigImpl(Optional<LeanConfigurationService> optionalLeanService) {
+    private HttpBasicConfigImpl() {
         super();
-        if (optionalLeanService.isPresent()) {
-            // Use passed service
-            for (HttpClientProperty property : HttpClientProperty.values()) {
-                // Read from default configuration
-                property.setInConfig(this, I(optionalLeanService.get().getIntProperty(property.getProperty())));
-            }
-        } else {
-            for (HttpClientProperty property : HttpClientProperty.values()) {
-                // Apply defaults
-                property.setInConfig(this, null);
-            }
-        }
     }
 
     @Override
