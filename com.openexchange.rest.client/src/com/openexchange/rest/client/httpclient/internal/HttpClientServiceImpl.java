@@ -447,8 +447,7 @@ public class HttpClientServiceImpl implements HttpClientService, ServiceTrackerC
     }
 
     /**
-     * Adjusts configuration based on properties that start with
-     * {@value HttpClientProperty#PREFIX} and the given identifier.
+     * Adjusts configuration based on properties that start with <code>"com.openexchange.httpclient."</code> prefix and the given identifier.
      * <p>
      * If a value for a specified property is set, this will overwrite
      * the set value in the configuration.
