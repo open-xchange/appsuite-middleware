@@ -21,18 +21,18 @@ The first level is introduced with this feature
 ## Level 1 - General configuration
 
 To be able to configure all HTTP clients without a specific namespace, general properties were introduced. 
-Those general properties will begin with `com.openenexchange.httpclient` and can be extended with the property to set. 
+Those general properties will begin with `com.openexchange.httpclient` and can be extended with the property to set. 
 Following list covers all properties that can be set, with their default values:
 
 ```
-com.openenexchange.httpclient.readTimeout=30000
-com.openenexchange.httpclient.connectTimeout=30000
-com.openenexchange.httpclient.requestTimeout=30000
-com.openenexchange.httpclient.keepAlive.duration=20
-com.openenexchange.httpclient.keepAlive.monitorInterval=5
-com.openenexchange.httpclient.totalConnections=20
-com.openenexchange.httpclient.connectionPerRoute=10
-com.openenexchange.httpclient.socketBufferSize=8192
+com.openexchange.httpclient.readTimeout=30000
+com.openexchange.httpclient.connectTimeout=30000
+com.openexchange.httpclient.requestTimeout=30000
+com.openexchange.httpclient.keepAlive.duration=20
+com.openexchange.httpclient.keepAlive.monitorInterval=5
+com.openexchange.httpclient.totalConnections=20
+com.openexchange.httpclient.connectionPerRoute=10
+com.openexchange.httpclient.socketBufferSize=8192
 ```
  
 Properties defined with this manner will be applied to all HTTP clients configuration.
@@ -41,18 +41,18 @@ Properties defined with this manner will be applied to all HTTP clients configur
 ## Level 2 - Legacy properties
 
 Previous versions of the Open Xchange Server had problematically defaults for HTTP clients. 
-These defaults will still be applied on top of the default configuration, efficiently overwrite the defaults set with `com.openenexchange.httpclient.*`.
+These defaults will still be applied on top of the default configuration, efficiently overwrite the defaults set with `com.openexchange.httpclient.*`.
 This will avoid that HTTP clients will change their behavior when updating from a version 7.10.3 or earlier.
 To make those problematically defaults visible, they got documented [here](https://documentation.open-xchange.com/components/middleware/config/latest/#mode=features&feature=HTTP%20Client%20Configuration%20legacy%20values)
 
 Further previous version of the Open Xchange Server have already properties configuring HTTP clients. 
 Just to given an example, the configuration for the iCAL feed feature can be found [here](https://documentation.open-xchange.com/components/middleware/config/latest/#mode=tags&tag=ICal%20Calendar%20Provider). 
-These properties will stay untouched and will overwrite the defaults set with `com.openenexchange.httpclient.*`, like described above, too.
+These properties will stay untouched and will overwrite the defaults set with `com.openexchange.httpclient.*`, like described above, too.
 
 ## Level 3 - Client specific configuration
 
-To be able to configure special clients, it possible to add a client identifier to `com.openenexchange.httpclient.*`. 
-Frankly speaking, it is possible to configure clients with e.g. `com.openenexchange.httpclient.icalfeed.*`, overwriting the default configuration. 
+To be able to configure special clients, it possible to add a client identifier to `com.openexchange.httpclient.*`. 
+Frankly speaking, it is possible to configure clients with e.g. `com.openexchange.httpclient.icalfeed.*`, overwriting the default configuration. 
 This specialized configuration always "wins". It will be applied on top of all other configuration.
 The list of all available client identifier can be found below.
 
@@ -101,14 +101,14 @@ To adjust configuration for all clients, expect with the draw backs from above, 
 
 
 ```
-com.openenexchange.httpclient.readTimeout=30000
-com.openenexchange.httpclient.connectTimeout=30000
-com.openenexchange.httpclient.requestTimeout=30000
-com.openenexchange.httpclient.keepAlive.duration=20
-com.openenexchange.httpclient.keepAlive.monitorInterval=5
-com.openenexchange.httpclient.totalConnections=20
-com.openenexchange.httpclient.connectionPerRoute=10
-com.openenexchange.httpclient.socketBufferSize=8192
+com.openexchange.httpclient.readTimeout=30000
+com.openexchange.httpclient.connectTimeout=30000
+com.openexchange.httpclient.requestTimeout=30000
+com.openexchange.httpclient.keepAlive.duration=20
+com.openexchange.httpclient.keepAlive.monitorInterval=5
+com.openexchange.httpclient.totalConnections=20
+com.openexchange.httpclient.connectionPerRoute=10
+com.openexchange.httpclient.socketBufferSize=8192
 ```
 
 
@@ -119,23 +119,23 @@ To adjust configuration for example the HTTP client for iCAL feeds on top of the
 >Note: The following example still uses the default values for the iCAL feed HTTP client. 
 
 ```
-com.openenexchange.httpclient.readTimeout=30000
-com.openenexchange.httpclient.connectTimeout=30000
-com.openenexchange.httpclient.requestTimeout=30000
-com.openenexchange.httpclient.keepAlive.duration=20
-com.openenexchange.httpclient.keepAlive.monitorInterval=5
-com.openenexchange.httpclient.totalConnections=20
-com.openenexchange.httpclient.connectionPerRoute=10
-com.openenexchange.httpclient.socketBufferSize=8192
+com.openexchange.httpclient.readTimeout=30000
+com.openexchange.httpclient.connectTimeout=30000
+com.openexchange.httpclient.requestTimeout=30000
+com.openexchange.httpclient.keepAlive.duration=20
+com.openexchange.httpclient.keepAlive.monitorInterval=5
+com.openexchange.httpclient.totalConnections=20
+com.openexchange.httpclient.connectionPerRoute=10
+com.openexchange.httpclient.socketBufferSize=8192
 
-com.openenexchange.httpclient.icalfeed.readTimeout=30000
-com.openenexchange.httpclient.icalfeed.connectTimeout=30000
-com.openenexchange.httpclient.icalfeed.requestTimeout=30000
-com.openenexchange.httpclient.icalfeed.keepAlive.duration=20
-com.openenexchange.httpclient.icalfeed.keepAlive.monitorInterval=5
-com.openenexchange.httpclient.icalfeed.totalConnections=20
-com.openenexchange.httpclient.icalfeed.connectionPerRoute=10
-com.openenexchange.httpclient.icalfeed.socketBufferSize=8192
+com.openexchange.httpclient.icalfeed.readTimeout=30000
+com.openexchange.httpclient.icalfeed.connectTimeout=30000
+com.openexchange.httpclient.icalfeed.requestTimeout=30000
+com.openexchange.httpclient.icalfeed.keepAlive.duration=20
+com.openexchange.httpclient.icalfeed.keepAlive.monitorInterval=5
+com.openexchange.httpclient.icalfeed.totalConnections=20
+com.openexchange.httpclient.icalfeed.connectionPerRoute=10
+com.openexchange.httpclient.icalfeed.socketBufferSize=8192
 ```
 
 
@@ -152,34 +152,34 @@ com.openexchange.calendar.ical.connectTimeout=50000
 com.openexchange.calendar.ical.socketReadTimeout=50000
 
 # New configuration for iCAL feeds
-com.openenexchange.httpclient.icalfeed.readTimeout=30000
-com.openenexchange.httpclient.icalfeed.requestTimeout=30000
-com.openenexchange.httpclient.icalfeed.keepAlive.duration=20
-com.openenexchange.httpclient.icalfeed.keepAlive.monitorInterval=5
-com.openenexchange.httpclient.icalfeed.totalConnections=20
-com.openenexchange.httpclient.icalfeed.socketBufferSize=8192
+com.openexchange.httpclient.icalfeed.readTimeout=30000
+com.openexchange.httpclient.icalfeed.requestTimeout=30000
+com.openexchange.httpclient.icalfeed.keepAlive.duration=20
+com.openexchange.httpclient.icalfeed.keepAlive.monitorInterval=5
+com.openexchange.httpclient.icalfeed.totalConnections=20
+com.openexchange.httpclient.icalfeed.socketBufferSize=8192
 
 ```
 
-As you may have already noticed, `com.openenexchange.httpclient.icalfeed.connectTimeout` and 
-`com.openenexchange.httpclient.icalfeed.connectionPerRoute` have not been set. 
+As you may have already noticed, `com.openexchange.httpclient.icalfeed.connectTimeout` and 
+`com.openexchange.httpclient.icalfeed.connectionPerRoute` have not been set. 
 Instead of falling back to the default values, the values from `com.openexchange.calendar.ical.connectTimeout` and 
 `com.openexchange.calendar.ical.maxConnectionsPerRoute` will be used for the client configuration. 
 Further the values for the legacy properties `com.openexchange.calendar.ical.maxConnections` and 
 `com.openexchange.calendar.ical.socketReadTimeout` will **be overwritten**  by the new properties 
-`com.openenexchange.httpclient.icalfeed.totalConnections` and `com.openenexchange.httpclient.icalfeed.readTimeout`.
+`com.openexchange.httpclient.icalfeed.totalConnections` and `com.openexchange.httpclient.icalfeed.readTimeout`.
 
 Efficiently the configuration from above can be written like this
 
 ```
-com.openenexchange.httpclient.icalfeed.readTimeout=30000
-com.openenexchange.httpclient.icalfeed.connectTimeout=50000
-com.openenexchange.httpclient.icalfeed.requestTimeout=30000
-com.openenexchange.httpclient.icalfeed.keepAlive.duration=20
-com.openenexchange.httpclient.icalfeed.keepAlive.monitorInterval=5
-com.openenexchange.httpclient.icalfeed.totalConnections=20
-com.openenexchange.httpclient.icalfeed.connectionPerRoute=5
-com.openenexchange.httpclient.icalfeed.socketBufferSize=8192
+com.openexchange.httpclient.icalfeed.readTimeout=30000
+com.openexchange.httpclient.icalfeed.connectTimeout=50000
+com.openexchange.httpclient.icalfeed.requestTimeout=30000
+com.openexchange.httpclient.icalfeed.keepAlive.duration=20
+com.openexchange.httpclient.icalfeed.keepAlive.monitorInterval=5
+com.openexchange.httpclient.icalfeed.totalConnections=20
+com.openexchange.httpclient.icalfeed.connectionPerRoute=5
+com.openexchange.httpclient.icalfeed.socketBufferSize=8192
 ```
 
 It is *not recommended* to use this mixed configuration setup.
@@ -189,15 +189,15 @@ It is *not recommended* to use this mixed configuration setup.
 As mentioned above it is also possible to configure complete groups of HTTP clients. For `SProxyD` this can looks like this
 
 ```
-com.openenexchange.httpclient.sproxyd.totalConnections=50
-com.openenexchange.httpclient.sproxyd.connectionPerRoute=10
+com.openexchange.httpclient.sproxyd.totalConnections=50
+com.openexchange.httpclient.sproxyd.connectionPerRoute=10
 ```
 
 With this configuration all HTTP clients that are generated to communicate to `SProxyD` will have a maximum of 50 connections with a maximum of 10 connections per route. 
 Let's say you noticed for the filestore with the ID 5 that request need more time to be successfully answered. Therefore you want to increase the request timeout. This can be done like followed:
 
 ```
-com.openenexchange.httpclient.sproxyd-5.requestTimeout=100000
+com.openexchange.httpclient.sproxyd-5.requestTimeout=100000
 ```
 
 Please note that the configuration for the basic HTTP clients will still be applied. Therefore the maximum connections and the connections per route are also increased for the HTTP client communicating with the filestore 5.
@@ -205,7 +205,7 @@ Please note that the configuration for the basic HTTP clients will still be appl
 # Legacy properties
 
 Following features did already provide a possibility to configure HTTP clients. 
-These legacy properties will be *preferred* over common properties starting with `com.openenexchange.httpclient.*`
+These legacy properties will be *preferred* over common properties starting with `com.openexchange.httpclient.*`
 
 | Service name | Identifier | Legacy property name | 
 |--------------|:-----------|:--------------------:|
