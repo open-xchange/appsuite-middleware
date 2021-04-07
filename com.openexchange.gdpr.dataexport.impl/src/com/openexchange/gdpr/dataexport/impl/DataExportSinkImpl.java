@@ -253,7 +253,7 @@ public class DataExportSinkImpl implements DataExportSink {
 
                     // Assumes the entry represents a directory if and only if the name ends with a forward slash "/".
                     path = pathPrefix + entryName + "/";
-                    entry = new ZipArchiveEntry(path);
+                    entry = new ZipArchiveEntry(DataExportUtility.prepareEntryName(path, storageService.getConfig()));
                     zipOutput.putArchiveEntry(entry);
                     break;
                 } catch (java.util.zip.ZipException e) {
@@ -319,7 +319,7 @@ public class DataExportSinkImpl implements DataExportSink {
                             entryName = name.substring(0, pos) + (num > 1 ? "_(" + num + ")" : "") + name.substring(pos);
                         }
                     }
-                    entry = new ZipArchiveEntry(pathPrefix + entryName);
+                    entry = new ZipArchiveEntry(DataExportUtility.prepareEntryName(pathPrefix + entryName, storageService.getConfig()));
                     {
                         Optional<Date> date = item.getOptionalDate();
                         if (date.isPresent()) {
