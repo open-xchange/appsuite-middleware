@@ -50,14 +50,11 @@
 package com.openexchange.mail.autoconfig.sources;
 
 import static com.openexchange.mail.autoconfig.tools.Utils.getHttpProxyIfEnabled;
-import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.concurrent.TimeUnit;
-import javax.net.ssl.SSLHandshakeException;
 import org.apache.http.HttpHost;
 import org.apache.http.HttpResponse;
-import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpGet;
 import com.google.common.cache.Cache;
@@ -72,6 +69,7 @@ import com.openexchange.mail.autoconfig.tools.ProxyInfo;
 import com.openexchange.mail.autoconfig.xmlparser.AutoconfigParser;
 import com.openexchange.mail.autoconfig.xmlparser.ClientConfig;
 import com.openexchange.rest.client.httpclient.HttpClientService;
+import com.openexchange.rest.client.httpclient.HttpClients;
 import com.openexchange.server.ServiceLookup;
 
 /**
@@ -143,6 +141,8 @@ public class ISPDB extends AbstractProxyAwareConfigSource {
 
         ProxyInfo proxy = getHttpProxyIfEnabled(view);
         HttpClient httpclient = services.getServiceSafe(HttpClientService.class).getHttpClient("autoconfig-ispdb");
+        HttpGet req = null;
+        HttpResponse rsp = null;
         try {
             int port = url.getPort();
             if (port < 0) {
@@ -153,10 +153,10 @@ public class ISPDB extends AbstractProxyAwareConfigSource {
             }
 
             HttpHost target = new HttpHost(url.getHost(), port, url.getProtocol());
-            HttpGet req = new HttpGet(url.getPath());
+            req = new HttpGet(url.getPath());
 
             LOG.info("Executing request to retrieve config XML via {} using {}", target, null == proxy ? "no proxy" : proxy);
-            HttpResponse rsp = httpclient.execute(target, req, httpContextFor(contextId, userId));
+            rsp = httpclient.execute(target, req, httpContextFor(contextId, userId));
 
             int httpCode = rsp.getStatusLine().getStatusCode();
             if (httpCode != 200) {
@@ -179,15 +179,11 @@ public class ISPDB extends AbstractProxyAwareConfigSource {
             }
 
             return generateIndividualAutoconfig(emailLocalPart, emailDomain, autoconfig, forceSecure);
-        } catch (SSLHandshakeException e) {
-            LOG.info("Could not retrieve config XML.", e);
-            return null;
-        } catch (ClientProtocolException e) {
+        } catch (Exception e) {
             LOG.warn("Could not retrieve config XML.", e);
             return null;
-        } catch (IOException e) {
-            LOG.warn("Could not retrieve config XML.", e);
-            return null;
+        } finally {
+            HttpClients.close(req, rsp);
         }
     }
 
