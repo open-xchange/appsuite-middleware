@@ -108,6 +108,7 @@ public interface IncomingSchedulingMessage {
      * @param key The key for the value
      * @param clazz The class the value has
      * @return An Optional holding the value casted to the given class
+     * @param <T> The class of the returned object
      */
     <T> Optional<T> getAdditional(String key, Class<T> clazz);
 

@@ -55,21 +55,18 @@ import static com.openexchange.folderstorage.Permission.NO_PERMISSIONS;
 import static com.openexchange.folderstorage.Permission.WRITE_OWN_OBJECTS;
 import java.util.Collection;
 import java.util.List;
-import java.util.Map;
-import com.openexchange.chronos.Alarm;
 import com.openexchange.chronos.CalendarUser;
 import com.openexchange.chronos.Event;
 import com.openexchange.chronos.EventField;
 import com.openexchange.chronos.RecurrenceId;
 import com.openexchange.chronos.common.CalendarUtils;
-import com.openexchange.chronos.common.mapping.EventMapper;
 import com.openexchange.chronos.exception.CalendarExceptionCodes;
 import com.openexchange.chronos.impl.CalendarFolder;
 import com.openexchange.chronos.impl.Check;
-import com.openexchange.chronos.impl.InternalAttendeeUpdates;
 import com.openexchange.chronos.impl.InternalCalendarResult;
 import com.openexchange.chronos.impl.Utils;
 import com.openexchange.chronos.impl.performer.AbstractUpdatePerformer;
+import com.openexchange.chronos.impl.performer.CreatePerformer;
 import com.openexchange.chronos.scheduling.IncomingSchedulingMessage;
 import com.openexchange.chronos.scheduling.SchedulingMethod;
 import com.openexchange.chronos.service.CalendarSession;
@@ -83,10 +80,7 @@ import com.openexchange.exception.OXException;
  * @author <a href="mailto:daniel.becker@open-xchange.com">Daniel Becker</a>
  * @since v8.0.0
  */
-public class AddProcessor extends AbstractUpdatePerformer {
-
-    /** Flag to add attendee instead of throwing an error. For internal code re-usage. */
-    private final boolean addUserAttendee;
+public class AddProcessor extends CreatePerformer {
 
     /**
      * Initializes a new {@link RequestProcessor}.
@@ -98,7 +92,6 @@ public class AddProcessor extends AbstractUpdatePerformer {
      */
     public AddProcessor(CalendarStorage storage, CalendarSession session, CalendarFolder folder) throws OXException {
         super(storage, session, folder);
-        this.addUserAttendee = false;
     }
 
     /**
@@ -111,9 +104,8 @@ public class AddProcessor extends AbstractUpdatePerformer {
      * @param addUserAttendee <code>true</code> to indicate that the calendar user shall be added to the list of attendees if she is missing.
      *            Set to <code>false</code> to throw an appropriated exception, which is default for the normal process of the {@link SchedulingMethod#ADD}.
      */
-    protected AddProcessor(AbstractUpdatePerformer performer, boolean addUserAttendee) {
+    protected AddProcessor(AbstractUpdatePerformer performer) {
         super(performer);
-        this.addUserAttendee = addUserAttendee;
     }
 
     /**
@@ -160,6 +152,7 @@ public class AddProcessor extends AbstractUpdatePerformer {
         requireCalendarPermission(folder, CREATE_OBJECTS_IN_FOLDER, NO_PERMISSIONS, WRITE_OWN_OBJECTS, NO_PERMISSIONS);
         Check.eventIsVisible(folder, originalMasterEvent);
         Check.eventIsInFolder(originalMasterEvent, folder);
+        Check.uidMatches(changeExceptions);
         requireWritePermissions(originalMasterEvent, true);
 
         List<Event> originalChangeExceptions = loadExceptionData(originalMasterEvent);
@@ -172,7 +165,7 @@ public class AddProcessor extends AbstractUpdatePerformer {
             /*
              * Create new exception for existing series
              */
-            createNewChangeException(message, originalMasterEvent, exception);
+            createEvent(exception, originalChangeExceptions);
         }
 
         return resultTracker.getResult();
@@ -201,90 +194,6 @@ public class AddProcessor extends AbstractUpdatePerformer {
             }
         }
         return null;
-    }
-
-    /**
-     * Creates a new change exception for the given series and adds the given attendee to the attendee list
-     *
-     * @param originalSeriesMaster The series master
-     * @param recurrenceId The {@link RecurrenceId} to create the exception on
-     * @param attendee The attendee to add
-     * @return The created change exception
-     * @throws OXException
-     */
-    private Event createNewChangeException(IncomingSchedulingMessage message, Event originalSeriesMaster, Event transmittedExceptionEvent) throws OXException {
-        /*
-         * Check transmitted and new change exception before inserting
-         */
-        getSelfProtection().checkEvent(transmittedExceptionEvent);
-        Check.organizerMatches(originalSeriesMaster, transmittedExceptionEvent);
-        /*
-         * Prepare new change exceptions
-         */
-        Map<Integer, List<Alarm>> seriesMasterAlarms = storage.getAlarmStorage().loadAlarms(originalSeriesMaster);
-        Event newExceptionEvent = prepareException(originalSeriesMaster, transmittedExceptionEvent.getRecurrenceId());
-        Check.quotaNotExceeded(storage, session);
-        newExceptionEvent = prepareChangeException(message, newExceptionEvent, transmittedExceptionEvent);
-        newExceptionEvent.setSeriesId(originalSeriesMaster.getId());
-
-        /*
-         * Create exception
-         */
-        interceptorRegistry.triggerInterceptorsOnBeforeCreate(newExceptionEvent);
-        storage.getEventStorage().insertEvent(newExceptionEvent);
-
-        storage.getAttendeeStorage().insertAttendees(newExceptionEvent.getId(), newExceptionEvent.getAttendees());
-        storage.getAttachmentStorage().insertAttachments(session.getSession(), folder.getId(), newExceptionEvent.getId(), newExceptionEvent.getAttachments());
-        storage.getConferenceStorage().insertConferences(newExceptionEvent.getId(), newExceptionEvent.getConferences());
-        insertAlarms(newExceptionEvent, prepareExceptionAlarms(seriesMasterAlarms), true);
-        newExceptionEvent = loadEventData(newExceptionEvent.getId());
-
-        newExceptionEvent = loadEventData(newExceptionEvent.getId());
-        resultTracker.trackCreation(newExceptionEvent, originalSeriesMaster);
-        /*
-         * Add change exception date to series master & track results
-         */
-        resultTracker.rememberOriginalEvent(originalSeriesMaster);
-        addChangeExceptionDate(originalSeriesMaster, newExceptionEvent.getRecurrenceId(), false);
-        touch(originalSeriesMaster.getId());
-        Event updatedMasterEvent = loadEventData(originalSeriesMaster.getId());
-        resultTracker.trackUpdate(originalSeriesMaster, updatedMasterEvent);
-        /*
-         * Reset alarm triggers for series master event and new change exception
-         */
-        storage.getAlarmTriggerStorage().deleteTriggers(updatedMasterEvent.getId());
-        storage.getAlarmTriggerStorage().insertTriggers(updatedMasterEvent, seriesMasterAlarms);
-        storage.getAlarmTriggerStorage().deleteTriggers(newExceptionEvent.getId());
-        storage.getAlarmTriggerStorage().insertTriggers(newExceptionEvent, storage.getAlarmStorage().loadAlarms(newExceptionEvent));
-        return newExceptionEvent;
-    }
-
-    /**
-     * Prepares a new change exception before it is inserted into the storage
-     *
-     * @param newExceptionEvent The new change exception to insert
-     * @param transmittedExceptionEvent The transmitted change exception by the organizer
-     * @param message The message to get optional new attachments from
-     * @return The prepared exception
-     * @throws OXException
-     */
-    private Event prepareChangeException(IncomingSchedulingMessage message, Event newExceptionEvent, Event transmittedExceptionEvent) throws OXException {
-        /*
-         * Filter for attachments belonging to one special occurrence and add their binary representation
-         */
-        newExceptionEvent.setAttachments(SchedulingUtils.filterAttachments(newExceptionEvent.getAttachments(), transmittedExceptionEvent.getAttachments(), message));
-        SchedulingUtils.prepareAttendees(session, null, newExceptionEvent, calendarUser, addUserAttendee);
-        newExceptionEvent.setAttendees(Check.maxAttendees(getSelfProtection(), InternalAttendeeUpdates.onNewEvent(session, folder, transmittedExceptionEvent, timestamp).getAddedItems()));
-        newExceptionEvent.setConferences(prepareConferences(Check.maxConferences(getSelfProtection(), transmittedExceptionEvent.getConferences())));
-        /*
-         * Take over fields from transmitted event as-is
-         */
-        return EventMapper.getInstance().copy(transmittedExceptionEvent, newExceptionEvent, //@formatter:off
-            new EventField[] { 
-                    EventField.DESCRIPTION, EventField.END_DATE, EventField.EXTENDED_PROPERTIES, 
-                    EventField.GEO, EventField.LOCATION, EventField.RELATED_TO, 
-                    EventField.SEQUENCE, EventField.START_DATE, EventField.SUMMARY, EventField.URL
-                });//@formatter:on
     }
 
 }

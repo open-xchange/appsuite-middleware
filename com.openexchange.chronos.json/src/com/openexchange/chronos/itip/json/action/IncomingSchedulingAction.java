@@ -69,7 +69,6 @@ import com.openexchange.chronos.exception.CalendarExceptionCodes;
 import com.openexchange.chronos.ical.ImportedCalendar;
 import com.openexchange.chronos.scheduling.SchedulingBroker;
 import com.openexchange.chronos.scheduling.SchedulingMethod;
-import com.openexchange.chronos.scheduling.SchedulingProperties;
 import com.openexchange.chronos.scheduling.SchedulingSource;
 import com.openexchange.chronos.service.CalendarParameters;
 import com.openexchange.chronos.service.CalendarResult;
@@ -165,13 +164,12 @@ public class IncomingSchedulingAction {
          * Build message and send to scheduling broker for processing
          */
         setCalendarParameters(request, session);
+        IncomingSchedulingMail schedulingMail = new IncomingSchedulingMail(services, request, session.getSession());
         IncomingSchedulingMessageBuilder builder = IncomingSchedulingMessageBuilder.newBuilder();
         builder.setMethod(method);
         builder.setTargetUser(session.getUserId());
-        builder.setResource(new IncomingCalendarObjectResource(purifyEvents(calendar)));
-        builder.setSchedulingObject(new IncomingSchedulingMail(services, request, session.getSession()));
-        builder.addAdditionals(SchedulingProperties.ACTION, request.getAction());
-        builder.addAdditionals(SchedulingProperties.COMMENT, getComment(request));
+        builder.setSchedulingObject(schedulingMail);
+        builder.setResource(new IncomingCalendarObjectResource(purifyEvents(calendar), schedulingMail));
         
         SchedulingBroker schedulingBroker = services.getServiceSafe(SchedulingBroker.class);
         return schedulingBroker.handleIncomingScheduling(session, SchedulingSource.API, builder.build());
@@ -272,21 +270,6 @@ public class IncomingSchedulingAction {
         if ("accept_and_ignore_conflicts".equalsIgnoreCase(request.getAction())) {
             session.set(CalendarParameters.PARAMETER_CHECK_CONFLICTS, Boolean.FALSE);
         }
-    }
-
-    /**
-     * Get the optional comment from the request
-     *
-     * @param request The request to get the comment from
-     * @return The comment
-     */
-    private String getComment(AJAXRequestData request) {
-        try {
-            return request.getParameter("message", String.class);
-        } catch (OXException e) {
-            // Ignore
-        }
-        return null;
     }
 
 }

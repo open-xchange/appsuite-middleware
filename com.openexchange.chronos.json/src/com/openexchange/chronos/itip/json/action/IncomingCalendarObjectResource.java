@@ -51,9 +51,16 @@ package com.openexchange.chronos.itip.json.action;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.ListIterator;
+import java.util.Optional;
+import com.openexchange.chronos.Attachment;
 import com.openexchange.chronos.Event;
+import com.openexchange.chronos.EventField;
 import com.openexchange.chronos.common.DefaultCalendarObjectResource;
+import com.openexchange.chronos.common.mapping.EventMapper;
+import com.openexchange.exception.OXException;
 import com.openexchange.java.Strings;
+import com.openexchange.tools.arrays.Collections;
 
 /**
  * 
@@ -64,13 +71,18 @@ import com.openexchange.java.Strings;
  */
 public class IncomingCalendarObjectResource extends DefaultCalendarObjectResource {
 
+    private final IncomingSchedulingMail mail;
+
     /**
      * Initializes a new {@link IncomingCalendarObjectResource} for a single event.
      * 
      * @param event The event of the calendar object resource
+     * @param mail The mail to load attacments from
      */
-    public IncomingCalendarObjectResource(Event event) {
+    public IncomingCalendarObjectResource(Event event, IncomingSchedulingMail mail) {
         super(event);
+        this.mail = mail;
+        loadAttachments();
     }
 
     /**
@@ -78,21 +90,66 @@ public class IncomingCalendarObjectResource extends DefaultCalendarObjectResourc
      * 
      * @param event One event of the calendar object resource
      * @param events Further events of the calendar object resource
+     * @param mail The mail to load attacments from
      * 
      * @throws IllegalArgumentException If passed events do not represent a valid calendar object resource
      */
-    public IncomingCalendarObjectResource(Event event, List<Event> events) {
+    public IncomingCalendarObjectResource(Event event, List<Event> events, IncomingSchedulingMail mail) {
         super(event, events);
+        this.mail = mail;
+        loadAttachments();
     }
 
     /**
      * Initializes a new {@link IncomingCalendarObjectResource}.
      * 
      * @param events The events of the calendar object resource
+     * @param mail The mail to load attacments from
      * @throws IllegalArgumentException If passed events do not represent a valid calendar object resource
      */
-    public IncomingCalendarObjectResource(List<Event> events) {
+    public IncomingCalendarObjectResource(List<Event> events, IncomingSchedulingMail mail) {
         super(events);
+        this.mail = mail;
+        loadAttachments();
+    }
+
+    /**
+     * loadAttachments
+     *
+     */
+    private void loadAttachments() {
+        for (ListIterator<Event> iterator = events.listIterator(); iterator.hasNext();) {
+            Event event = iterator.next();
+            if (false == Collections.isNullOrEmpty(event.getAttachments())) {
+                try {
+                    Event copy = EventMapper.getInstance().copy(event, null, (EventField[]) null);
+                    copy.setAttachments(prepareBinaryAttachments(copy.getAttachments()));
+                    iterator.set(copy);
+                } catch (OXException e) {
+                    // Ignore
+                }
+            }
+        }
+    }
+
+    /**
+     * Prepares attachments transmitted with the incoming message
+     *
+     * @param originalAttachments The attachments to find
+     * @param in The object to get the (binary) attachments from
+     * @return The filtered and existing attachments
+     */
+    private List<Attachment> prepareBinaryAttachments(List<Attachment> originalAttachments) {
+        List<Attachment> attachments = new ArrayList<>(originalAttachments.size());
+        for (Attachment attachment : originalAttachments) {
+            Optional<Attachment> binaryAttachment = mail.getAttachment(attachment.getUri());
+            if (binaryAttachment.isPresent()) {
+                attachments.add(binaryAttachment.get());
+            } else {
+                attachments.add(attachment);
+            }
+        }
+        return attachments;
     }
 
     @Override
@@ -110,11 +167,6 @@ public class IncomingCalendarObjectResource extends DefaultCalendarObjectResourc
             }
         }
         return changeExceptions;
-    }
-
-    @Override
-    public Event getFirstEvent() {
-        return events.get(0);
     }
 
 }

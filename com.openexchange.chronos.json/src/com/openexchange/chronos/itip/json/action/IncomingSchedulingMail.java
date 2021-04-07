@@ -61,6 +61,7 @@ import org.slf4j.LoggerFactory;
 import com.openexchange.ajax.container.ThresholdFileHolder;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.annotation.NonNull;
+import com.openexchange.annotation.Nullable;
 import com.openexchange.chronos.Attachment;
 import com.openexchange.chronos.CalendarUser;
 import com.openexchange.chronos.common.CalendarUtils;
@@ -88,7 +89,6 @@ import com.openexchange.tools.servlet.AjaxExceptionCodes;
  * @since v7.10.4
  */
 public class IncomingSchedulingMail implements IncomingSchedulingObject {
-
 
     private static final Logger LOGGER = LoggerFactory.getLogger(IncomingSchedulingMail.class);
 
@@ -154,6 +154,30 @@ public class IncomingSchedulingMail implements IncomingSchedulingObject {
     }
 
     @Override
+    @Nullable
+    public String getAction() {
+        return request.getAction();
+    }
+
+    @Override
+    @Nullable
+    public String getComment() {
+        try {
+            return request.getParameter("message", String.class);
+        } catch (OXException e) {
+            LOGGER.debug("Unable to get comment", e);
+        }
+        return null;
+    }
+
+    /**
+     * Get an attachment for the supplied identifier that was received
+     * along the incoming mail
+     * 
+     * @param uri The attachment identifier. Can be e.g.
+     *            the URL of the attachment in the corresponding mail
+     * @return An optional that may contain the parsed attachment
+     */
     public Optional<Attachment> getAttachment(String uri) {
         if (Strings.isEmpty(uri)) {
             return Optional.empty();
@@ -184,6 +208,7 @@ public class IncomingSchedulingMail implements IncomingSchedulingObject {
             if (Strings.isNotEmpty(attachmentData.getContentType())) {
                 attachment.setFormatType(attachmentData.getContentType());
             }
+            attachment.setUri(uri);
             rollback = false;
             return Optional.of(attachment);
         } catch (OXException e) {

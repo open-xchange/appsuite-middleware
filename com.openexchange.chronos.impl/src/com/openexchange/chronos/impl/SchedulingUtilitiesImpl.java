@@ -53,14 +53,13 @@ import static com.openexchange.chronos.impl.Utils.getCalendarFolder;
 import static com.openexchange.chronos.impl.Utils.postProcess;
 import com.openexchange.chronos.Event;
 import com.openexchange.chronos.exception.CalendarExceptionCodes;
+import com.openexchange.chronos.impl.performer.PutPerformer;
 import com.openexchange.chronos.impl.scheduling.AddProcessor;
 import com.openexchange.chronos.impl.scheduling.CancelProcessor;
 import com.openexchange.chronos.impl.scheduling.PostProcessor;
 import com.openexchange.chronos.impl.scheduling.ReplyProcessor;
-import com.openexchange.chronos.impl.scheduling.RequestProcessor;
 import com.openexchange.chronos.scheduling.IncomingSchedulingMessage;
 import com.openexchange.chronos.scheduling.SchedulingMethod;
-import com.openexchange.chronos.scheduling.SchedulingProperties;
 import com.openexchange.chronos.scheduling.SchedulingSource;
 import com.openexchange.chronos.service.CalendarResult;
 import com.openexchange.chronos.service.CalendarSession;
@@ -151,7 +150,7 @@ public class SchedulingUtilitiesImpl implements SchedulingUtilities {
                     LOG.debug("Unable to find event. Using default calendar folder");
                     calendarFolder = Utils.getFolder(session, getPrivateCalendarFolderId(session.getContextId(), session.getUserId()));
                 }
-                return new RequestProcessor(storage, session, calendarFolder).process(message);
+                return new PutPerformer(storage, session, calendarFolder).perform(message.getResource());
             }
         }.executeUpdate());
         return postProcessScheduling(session, source, message, result);
@@ -160,18 +159,6 @@ public class SchedulingUtilitiesImpl implements SchedulingUtilities {
     /*
      * ============================== HELPERS ==============================
      */
-
-    /**
-     * Get an additional property from the message
-     *
-     * @param message The message
-     * @param key The key
-     * @param defaultValue The default value to return if no value is present
-     * @return
-     */
-    private String getProperty(IncomingSchedulingMessage message, String key, String defaultValue) {
-        return message.getAdditional(key, String.class).orElse(defaultValue);
-    }
 
     /**
      * Get the private default calendar folder of the acting user
@@ -187,6 +174,7 @@ public class SchedulingUtilitiesImpl implements SchedulingUtilities {
         final OXFolderAccess acc = new OXFolderAccess(ctx);
         return String.valueOf(acc.getDefaultFolderID(userId, FolderObject.CALENDAR));
     }
+
 
     /**
      * Post processes a scheduling action to e.g. adjust attendee status to transmitted data and returns
@@ -204,7 +192,7 @@ public class SchedulingUtilitiesImpl implements SchedulingUtilities {
             /*
              * Post process data, e.g. set correct attendee status
              */
-            return postProcessScheduling(session, result, SchedulingMethod.REQUEST, getProperty(message, SchedulingProperties.ACTION, null), getProperty(message, SchedulingProperties.COMMENT, null)).getUserizedResult();
+            return postProcessScheduling(session, result, SchedulingMethod.REQUEST, message.getSchedulingObject().getAction(), message.getSchedulingObject().getComment()).getUserizedResult();
         }
         return result.getUserizedResult();
     }
@@ -232,4 +220,5 @@ public class SchedulingUtilitiesImpl implements SchedulingUtilities {
             }
         }.executeUpdate());
     }
+
 }
