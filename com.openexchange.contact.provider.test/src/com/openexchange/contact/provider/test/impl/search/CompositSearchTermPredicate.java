@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH group of companies.
+ *    trademarks of the OX Software GmbH. group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -47,54 +47,63 @@
  *
  */
 
-package com.openexchange.ajax.contact;
+package com.openexchange.contact.provider.test.impl.search;
 
-import org.junit.runner.RunWith;
-import org.junit.runners.Suite;
-import com.openexchange.ajax.contact.action.ExemplaryContactTestManagerTest;
-import com.openexchange.test.concurrent.ParallelSuite;
+import java.util.List;
+import java.util.function.Predicate;
+import com.openexchange.search.CompositeSearchTerm;
+import com.openexchange.search.CompositeSearchTerm.CompositeOperation;
+import com.openexchange.search.Operation;
 
-@RunWith(ParallelSuite.class)
-@Suite.SuiteClasses({
-    AllTest.class,
-    CopyTest.class,
-    DeleteTest.class,
-    ListTest.class,
-    MoveTest.class,
-    NewTest.class,
-    SearchTest.class,
-    UpdateTest.class,
-    UpdatesTest.class,
-    ContactImageApiClientScaleTest.class,
-    ContactPictureTest.class,
-    ContactPictureProviderTest.class,
-    DistributionListMemberSortingTest.class,
-    MultipleTest.class,
-    NewListTest.class,
-    SearchInAllContactFoldersTest.class,
-    BasicManagedContactTests.class,
-    ExemplaryContactTestManagerTest.class,
-    ContactAttachmentTests.class,
-    AllAliasTest.class,
-    ListAliasTest.class,
-    DeleteMultipleContactsTest.class,
+/**
+ * {@link CompositSearchTermPredicate} - Wraps a {@link CompositeSearchTerm} as {@link Predicate}
+ *
+ * @author <a href="mailto:benjamin.gruedelbach@open-xchange.com">Benjamin Gruedelbach</a>
+ * @since v8.0.0
+ * @param <T> The type of objects to search
+ */
+class CompositSearchTermPredicate<T> implements Predicate<T> {
 
-    YomiTest.class,
-    YomiContactSearchTests.class,
-    ContactSearchTests.class,
-    Bug18608Test_SpecialCharsInEmailTest.class,
-    DistListTest.class,
-    DistListMemberUpdateTest.class,
-    DistListPermissionsTest.class,
-    BirthdayAndAnniversaryTest.class,
-    UpdateNotAllowedFieldsTest.class,
-    SortingInJapanTest.class,
-    AutocompleteTest.class,
-    UseCountTest.class,
+    private final CompositeSearchTerm term;
+    private final List<Predicate<T>> predicates;
 
-    ContactBugTestSuite.class,
+    /**
+     * Initializes a new {@link CompositSearchTermPredicate}.
+     *
+     * @param term The {@link CompositeSearchTerm} to represent
+     * @param predicates A list of {@link Predicate}s to wrap
+     */
+    public CompositSearchTermPredicate(CompositeSearchTerm term, List<Predicate<T>> predicates) {
+        this.term = term;
+        this.predicates = predicates;
+    }
 
-})
-public class ContactAJAXSuite  {
-    // empty
+    @Override
+    public boolean test(T t) {
+        Operation operation = term.getOperation();
+        if (operation == CompositeOperation.AND) {
+            for (Predicate<T> p : predicates) {
+                if (!p.test(t)) {
+                    return false;
+                }
+            }
+            return true;
+        } else if (operation == CompositeOperation.OR) {
+            for (Predicate<T> p : predicates) {
+                if (p.test(t)) {
+                    return true;
+                }
+            }
+            return false;
+        } else if (operation == CompositeOperation.NOT) {
+            Predicate<T> p = predicates.get(0);
+            return p.negate().test(t);
+        }
+        return false;
+    }
+
+    @Override
+    public String toString() {
+        return term.toString();
+    }
 }

@@ -116,7 +116,7 @@ public class UserPictureFinder implements ContactPictureFinder {
                             set.add(string);
                         }
                     }
-                    return new PictureResult(new PictureSearchData(null, null, user.isGuest() ? I(FolderObject.VIRTUAL_GUEST_CONTACT_FOLDER_ID) : I(FolderObject.SYSTEM_LDAP_FOLDER_ID), I(user.getContactId()), set));
+                    return new PictureResult(new PictureSearchData(null, null, user.isGuest() ? Integer.toString(FolderObject.VIRTUAL_GUEST_CONTACT_FOLDER_ID) : Integer.toString(FolderObject.SYSTEM_LDAP_FOLDER_ID), Integer.toString(user.getContactId()), set));
                 }
             } catch (OXException e) {
                 LOGGER.debug("Unable to find user with identifier {} in context {}", data.getUserId(), I(session.getContextId()), e);

@@ -49,7 +49,6 @@
 
 package com.openexchange.contact.picture.impl.finder;
 
-import static com.openexchange.java.Autoboxing.I;
 import com.openexchange.contact.ContactService;
 import com.openexchange.contact.picture.PictureSearchData;
 import com.openexchange.exception.OXException;
@@ -65,13 +64,16 @@ import com.openexchange.session.Session;
  */
 public class ContactUserFinder extends AbstractContactFinder {
 
+    private final ContactService contactService;
+
     /**
      * Initializes a new {@link ContactUserFinder}.
      *
      * @param contactService The {@link ContactService}
      */
     public ContactUserFinder(ContactService contactService) {
-        super(contactService);
+        super(null);
+        this.contactService = contactService;
     }
 
     @Override
@@ -84,7 +86,7 @@ public class ContactUserFinder extends AbstractContactFinder {
 
     @Override
     public PictureSearchData modfiyResult(Contact contact) {
-        return new PictureSearchData(null, null, I(contact.getParentFolderID()), I(contact.getObjectID()), null);
+        return new PictureSearchData(null, null, contact.getFolderId(true), contact.getId(true), null);
     }
 
     @Override

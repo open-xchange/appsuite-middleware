@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH group of companies.
+ *    trademarks of the OX Software GmbH. group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -47,54 +47,39 @@
  *
  */
 
-package com.openexchange.ajax.contact;
+package com.openexchange.contact.provider.test.osgi;
 
-import org.junit.runner.RunWith;
-import org.junit.runners.Suite;
-import com.openexchange.ajax.contact.action.ExemplaryContactTestManagerTest;
-import com.openexchange.test.concurrent.ParallelSuite;
+import org.osgi.framework.BundleContext;
+import org.slf4j.Logger;
+import com.openexchange.contact.provider.ContactsProvider;
+import com.openexchange.contact.provider.test.impl.TestContactsProvider;
+import com.openexchange.osgi.HousekeepingActivator;
 
-@RunWith(ParallelSuite.class)
-@Suite.SuiteClasses({
-    AllTest.class,
-    CopyTest.class,
-    DeleteTest.class,
-    ListTest.class,
-    MoveTest.class,
-    NewTest.class,
-    SearchTest.class,
-    UpdateTest.class,
-    UpdatesTest.class,
-    ContactImageApiClientScaleTest.class,
-    ContactPictureTest.class,
-    ContactPictureProviderTest.class,
-    DistributionListMemberSortingTest.class,
-    MultipleTest.class,
-    NewListTest.class,
-    SearchInAllContactFoldersTest.class,
-    BasicManagedContactTests.class,
-    ExemplaryContactTestManagerTest.class,
-    ContactAttachmentTests.class,
-    AllAliasTest.class,
-    ListAliasTest.class,
-    DeleteMultipleContactsTest.class,
+/**
+ * {@link ContactTestActivator} - Activator for the the contact test provider
+ *
+ * @author <a href="mailto:benjamin.gruedelbach@open-xchange.com">Benjamin Gruedelbach</a>
+ * @since v8.0.0
+ */
+public class ContactTestActivator extends HousekeepingActivator {
 
-    YomiTest.class,
-    YomiContactSearchTests.class,
-    ContactSearchTests.class,
-    Bug18608Test_SpecialCharsInEmailTest.class,
-    DistListTest.class,
-    DistListMemberUpdateTest.class,
-    DistListPermissionsTest.class,
-    BirthdayAndAnniversaryTest.class,
-    UpdateNotAllowedFieldsTest.class,
-    SortingInJapanTest.class,
-    AutocompleteTest.class,
-    UseCountTest.class,
+    private static final Logger logger = org.slf4j.LoggerFactory.getLogger(ContactTestActivator.class);
 
-    ContactBugTestSuite.class,
+    @Override
+    protected Class<?>[] getNeededServices() {
+        return EMPTY_CLASSES;
+    }
 
-})
-public class ContactAJAXSuite  {
-    // empty
+    @Override
+    protected void startBundle() throws Exception {
+        final BundleContext context = super.context;
+        logger.info("Starting bundle {}", context.getBundle().getSymbolicName());
+        registerService(ContactsProvider.class, new TestContactsProvider());
+    }
+
+    @Override
+    protected void stopBundle() throws Exception {
+        logger.info("Stopping bundle {}", context.getBundle().getSymbolicName());
+        super.stopBundle();
+    }
 }

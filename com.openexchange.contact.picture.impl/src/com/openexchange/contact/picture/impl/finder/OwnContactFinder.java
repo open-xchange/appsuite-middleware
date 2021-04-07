@@ -51,6 +51,7 @@ package com.openexchange.contact.picture.impl.finder;
 
 import com.openexchange.contact.ContactService;
 import com.openexchange.contact.picture.PictureSearchData;
+import com.openexchange.contact.provider.composition.IDBasedContactsAccessFactory;
 import com.openexchange.contact.storage.ContactUserStorage;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contact.helpers.ContactField;
@@ -70,16 +71,19 @@ public class OwnContactFinder extends AbstractContactFinder {
 
     private final UserService userService;
     private final ContactUserStorage contactUserStorage;
+    private final ContactService contactService;
 
     /**
      * Initializes a new {@link OwnContactFinder}.
-     * 
+     *
      * @param contactService The {@link ContactService}
+     * @param idBasedContactsAccessFactory The {@link IDBasedContactsAccessFactory}
      * @param userService The {@link UserService}
      * @param contactUserStorage The {@link ContactUserStorage}
      */
-    public OwnContactFinder(ContactService contactService, UserService userService, ContactUserStorage contactUserStorage) {
-        super(contactService);
+    public OwnContactFinder(ContactService contactService, IDBasedContactsAccessFactory idBasedContactsAccessFactory, UserService userService, ContactUserStorage contactUserStorage) {
+        super(idBasedContactsAccessFactory);
+        this.contactService = contactService;
         this.userService = userService;
         this.contactUserStorage = contactUserStorage;
     }
@@ -101,7 +105,7 @@ public class OwnContactFinder extends AbstractContactFinder {
 
     /**
      * Checks if the own contact is a valid option for the search
-     * 
+     *
      * @param user The current user
      * @param data The search data
      * @return true if it is applicable, false otherwise

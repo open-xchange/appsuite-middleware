@@ -254,6 +254,19 @@ public class ContactsSearchObject {
     }
 
     /**
+     * Convenience method to set all E-Mail fields to specified value.
+     * <p>
+     * Simply a short-hand for calling {@link #setEmail1(String) setEmail1}, {@link #setEmail2(String) setEmail2} and {@link #setEmail3(String) setEmail3} for the same value.
+     *
+     * @param email The E-Mail address to set
+     */
+    public void setAllEmail(final String email) {
+        this.email1 = email;
+        this.email2 = email;
+        this.email3 = email;
+    }
+
+    /**
      * Gets the startLetter
      *
      * @return The startLetter

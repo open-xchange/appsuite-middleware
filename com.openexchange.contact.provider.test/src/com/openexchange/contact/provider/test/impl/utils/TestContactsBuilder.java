@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH group of companies.
+ *    trademarks of the OX Software GmbH. group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -47,54 +47,40 @@
  *
  */
 
-package com.openexchange.ajax.contact;
+package com.openexchange.contact.provider.test.impl.utils;
 
-import org.junit.runner.RunWith;
-import org.junit.runners.Suite;
-import com.openexchange.ajax.contact.action.ExemplaryContactTestManagerTest;
-import com.openexchange.test.concurrent.ParallelSuite;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.stream.Collectors;
+import com.openexchange.groupware.container.Contact;
 
-@RunWith(ParallelSuite.class)
-@Suite.SuiteClasses({
-    AllTest.class,
-    CopyTest.class,
-    DeleteTest.class,
-    ListTest.class,
-    MoveTest.class,
-    NewTest.class,
-    SearchTest.class,
-    UpdateTest.class,
-    UpdatesTest.class,
-    ContactImageApiClientScaleTest.class,
-    ContactPictureTest.class,
-    ContactPictureProviderTest.class,
-    DistributionListMemberSortingTest.class,
-    MultipleTest.class,
-    NewListTest.class,
-    SearchInAllContactFoldersTest.class,
-    BasicManagedContactTests.class,
-    ExemplaryContactTestManagerTest.class,
-    ContactAttachmentTests.class,
-    AllAliasTest.class,
-    ListAliasTest.class,
-    DeleteMultipleContactsTest.class,
+/**
+ * {@link TestContactsBuilder} helper class to build test contacts
+ *
+ * @author <a href="mailto:benjamin.gruedelbach@open-xchange.com">Benjamin Gruedelbach</a>
+ * @since v8.0.0
+ */
+public class TestContactsBuilder {
 
-    YomiTest.class,
-    YomiContactSearchTests.class,
-    ContactSearchTests.class,
-    Bug18608Test_SpecialCharsInEmailTest.class,
-    DistListTest.class,
-    DistListMemberUpdateTest.class,
-    DistListPermissionsTest.class,
-    BirthdayAndAnniversaryTest.class,
-    UpdateNotAllowedFieldsTest.class,
-    SortingInJapanTest.class,
-    AutocompleteTest.class,
-    UseCountTest.class,
+    private final List<TestContactBuilder> contacts = new ArrayList<TestContactBuilder>();
 
-    ContactBugTestSuite.class,
+    /**
+     * Gets the test contacts
+     *
+     * @return A list of contacts
+     */
+    public List<Contact> getContacts() {
+        return contacts.stream().map(c -> c.getContact()).collect(Collectors.toList());
+    }
 
-})
-public class ContactAJAXSuite  {
-    // empty
+    /**
+     * Adds a {@link TestContactBuilder} which will be mapped to a {@link Contact}
+     *
+     * @param contact The contact
+     * @return this
+     */
+    public TestContactsBuilder add(TestContactBuilder contact) {
+        contacts.add(contact);
+        return this;
+    }
 }

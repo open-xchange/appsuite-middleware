@@ -106,7 +106,7 @@ public class ContactDataSource implements HaloContactDataSource, HaloContactImag
     public ContactPicture getPicture(HaloContactQuery contactQuery, ServerSession session) throws OXException {
         final ContactPicture picture = getPicture0(contactQuery, session, true);
         if (null == picture) {
-            return services.getServiceSafe(ContactPictureService.class).getPicture(session, new PictureSearchData(null == contactQuery.getUser() ? null : I(contactQuery.getUser().getId()), null, null, I(contactQuery.getContact().getObjectID()), null));
+            return services.getServiceSafe(ContactPictureService.class).getPicture(session, getPictureSearchData(contactQuery));
         }
         return picture;
     }
@@ -115,7 +115,7 @@ public class ContactDataSource implements HaloContactDataSource, HaloContactImag
     public String getPictureETag(HaloContactQuery contactQuery, ServerSession session) throws OXException {
         final ContactPicture picture = getPicture0(contactQuery, session, true);
         if (null == picture) {
-            return services.getServiceSafe(ContactPictureService.class).getETag(session, new PictureSearchData(null == contactQuery.getUser() ? null : I(contactQuery.getUser().getId()), null, null, I(contactQuery.getContact().getObjectID()), null));
+            return services.getServiceSafe(ContactPictureService.class).getETag(session, getPictureSearchData(contactQuery));
         }
         return picture.getETag();
     }
@@ -198,6 +198,15 @@ public class ContactDataSource implements HaloContactDataSource, HaloContactImag
             }
             return lastModified2.compareTo(lastModified1);
         }
+    }
+
+    private static PictureSearchData getPictureSearchData(HaloContactQuery contactQuery) {
+        Integer userId = null != contactQuery.getUser() ? I(contactQuery.getUser().getId()) : null;
+        Contact contact = contactQuery.getContact();
+        if (null == contact) {
+            return new PictureSearchData(userId, null, null, null);
+        }
+        return new PictureSearchData(userId, contact.getFolderId(true), contact.getId(true), null);
     }
 
 }

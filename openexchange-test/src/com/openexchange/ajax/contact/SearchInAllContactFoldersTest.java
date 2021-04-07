@@ -51,6 +51,7 @@ package com.openexchange.ajax.contact;
 
 import static org.junit.Assert.assertTrue;
 import java.util.Date;
+import java.util.Objects;
 import org.junit.Before;
 import org.junit.Test;
 import com.openexchange.ajax.contact.action.InsertRequest;
@@ -66,7 +67,7 @@ import com.openexchange.groupware.search.ContactSearchObject;
 /**
  * This test creates one folder and two users (one user in the new folder and one user in the private contacts folder). Then a search is performed for their common first name.
  * The search is asserted to return both contacts.
- * 
+ *
  * @author <a href="mailto:karsten.will@open-xchange.org">Karsten Will</a>
  */
 public class SearchInAllContactFoldersTest extends AbstractAJAXSession {
@@ -145,10 +146,10 @@ public class SearchInAllContactFoldersTest extends AbstractAJAXSession {
         boolean foundSecond = false;
         final int idPos = response.getColumnPos(Contact.OBJECT_ID);
         for (Object[] obj : response) {
-            if (contact1.getObjectID() == Integer.parseInt(String.class.cast(obj[idPos]))) {
+            if (Objects.equals(contact1.getId(true), obj[idPos])) {
                 foundFirst = true;
             }
-            if (contact2.getObjectID() == Integer.parseInt(String.class.cast(obj[idPos]))) {
+            if (Objects.equals(contact2.getId(true), obj[idPos])) {
                 foundSecond = true;
             }
         }
