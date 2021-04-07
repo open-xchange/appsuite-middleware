@@ -62,7 +62,6 @@ import java.util.Collection;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Objects;
 import java.util.Set;
 import org.dmfs.rfc5545.DateTime;
 import com.openexchange.chronos.Alarm;
@@ -417,27 +416,6 @@ public class Check extends com.openexchange.chronos.common.Check {
         String existingId = new ResolvePerformer(session, storage).resolveByUid(uid);
         if (null != existingId) {
             throw CalendarExceptionCodes.UID_CONFLICT.create(uid, existingId);
-        }
-        return uid;
-    }
-
-    /**
-     * Checks that the unique identifier (UID) matches in all events from a calendar object resource, i.e. it is either undefined, or
-     * equal in all events.
-     *
-     * @param event The primary event to check the UID in, or <code>null</code> to just check the further events
-     * @param events Further events to check the UID for equality, or <code>null</code> to just check the first event
-     * @return The event's common unique identifier, after it was checked to be equal in all events, or <code>null</code> if not assigned
-     * @throws OXException {@link CalendarExceptionCodes#INVALID_DATA}
-     */
-    public static String uidMatches(Event event, Event... events) throws OXException {
-        String uid = null != event ? event.getUid() : null != events && 0 < events.length ? events[0].getUid() : null;
-        if (null != events) {
-            for (Event e : events) {
-                if (false == Objects.equals(uid, e.getUid())) {
-                    throw CalendarExceptionCodes.INVALID_DATA.create(EventField.UID, "UID mismatch");
-                }
-            }
         }
         return uid;
     }
