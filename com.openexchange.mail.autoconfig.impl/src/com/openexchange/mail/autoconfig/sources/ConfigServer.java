@@ -129,6 +129,9 @@ public class ConfigServer extends AbstractProxyAwareConfigSource {
             rsp = httpclient.execute(target, req, httpContext);
             int statusCode = rsp.getStatusLine().getStatusCode();
             if (statusCode != 200) {
+                HttpClients.close(req, rsp);
+                req = null;
+                rsp = null;
                 LOG.info("Could not retrieve config XML from autoconfig server. Return code was: {}", Autoboxing.I(statusCode));
 
                 // Try 2nd URL
