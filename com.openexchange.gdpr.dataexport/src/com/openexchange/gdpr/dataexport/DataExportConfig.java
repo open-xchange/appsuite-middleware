@@ -91,6 +91,7 @@ public class DataExportConfig {
         private long maxTimeToLiveMillis;
         private long expirationTimeMillis;
         private long defaultMaxFileSize;
+        private boolean replaceUnicodeWithAscii;
 
         /**
          * Initializes a new {@link DataExportConfig.Builder}.
@@ -233,6 +234,17 @@ public class DataExportConfig {
         }
 
         /**
+         * Sets whether to replace Unicode characters of ZIP archive entry names with somewhat reasonable ASCII7-only characters.
+         *
+         * @param replaceUnicodeWithAscii <code>true</code> to replace Unicode with somewhat reasonable ASCII7-only; otherwise <code>false</code>
+         * @return This builder
+         */
+        public Builder withReplaceUnicodeWithAscii(boolean replaceUnicodeWithAscii) {
+            this.replaceUnicodeWithAscii = replaceUnicodeWithAscii;
+            return this;
+        }
+
+        /**
          * Parses the given configuration; e.g. <code>"Mon 0:12-6:45; Tue-Thu 0-7:15; Fri 0-6,22:30-24; Sat,Sun 0-8"</code>.
          *
          * @param config The configuration to parse
@@ -357,7 +369,7 @@ public class DataExportConfig {
          * @return The <code>DataExportConfig</code> instance
          */
         public DataExportConfig build() {
-            return new DataExportConfig(active, rangesOfTheWeek, defaultMaxFileSize, numberOfConcurrentTasks, checkForTasksFrequency, checkForAbortedTasksFrequency, maxProcessingTimeMillis, maxTimeToLiveMillis, expirationTimeMillis, maxFailCountForWorkItem);
+            return new DataExportConfig(active, rangesOfTheWeek, defaultMaxFileSize, numberOfConcurrentTasks, checkForTasksFrequency, checkForAbortedTasksFrequency, maxProcessingTimeMillis, maxTimeToLiveMillis, expirationTimeMillis, maxFailCountForWorkItem, replaceUnicodeWithAscii);
         }
 
     } // End of Builder class
@@ -374,11 +386,12 @@ public class DataExportConfig {
     private final long expirationTimeMillis;
     private final long defaultMaxFileSize;
     private final int maxFailCountForWorkItem;
+    private final boolean replaceUnicodeWithAscii;
 
     /**
      * Initializes a new {@link DataExportConfig}.
      */
-    DataExportConfig(boolean active, Map<DayOfWeek, DayOfWeekTimeRanges> rangesOfTheWeek, long defaultMaxFileSize, int numberOfConcurrentTasks, long checkForTasksFrequency, long checkForAbortedTasksFrequency, long maxProcessingTimeMillis, long maxTimeToLiveMillis, long expirationTimeMillis, int maxFailCountForWorkItem) {
+    DataExportConfig(boolean active, Map<DayOfWeek, DayOfWeekTimeRanges> rangesOfTheWeek, long defaultMaxFileSize, int numberOfConcurrentTasks, long checkForTasksFrequency, long checkForAbortedTasksFrequency, long maxProcessingTimeMillis, long maxTimeToLiveMillis, long expirationTimeMillis, int maxFailCountForWorkItem, boolean replaceUnicodeWithAscii) {
         super();
         this.active = active;
         this.defaultMaxFileSize = defaultMaxFileSize;
@@ -387,9 +400,21 @@ public class DataExportConfig {
         this.maxTimeToLiveMillis = maxTimeToLiveMillis;
         this.expirationTimeMillis = expirationTimeMillis;
         this.maxFailCountForWorkItem = maxFailCountForWorkItem;
+        this.replaceUnicodeWithAscii = replaceUnicodeWithAscii;
         this.rangesOfTheWeek = ImmutableMap.copyOf(rangesOfTheWeek);
         this.checkForTasksFrequency = checkForTasksFrequency;
         this.checkForAbortedTasksFrequency = checkForAbortedTasksFrequency;
+    }
+
+    /**
+     * Checks whether to replace Unicode characters of ZIP archive entry names with somewhat reasonable ASCII7-only characters.
+     * <p>
+     * For instance, the string <code>"r&eacute;sum&eacute;"</code> is converted to <code>"resume"</code>.
+     *
+     * @return <code>true</code> to replace Unicode with somewhat reasonable ASCII7-only; otherwise <code>false</code>
+     */
+    public boolean isReplaceUnicodeWithAscii() {
+        return replaceUnicodeWithAscii;
     }
 
     /**
