@@ -4,7 +4,7 @@ Bundle-Name: Open-Xchange Database Clean-Up Implementation Bundle
 Bundle-SymbolicName: com.openexchange.database.cleanup.impl
 Bundle-Version: 7.10.5
 Bundle-Vendor: OX Software GmbH
-Automatic-Module-Name: com.openexchange.tidy
+Automatic-Module-Name: com.openexchange.database.cleanup.impl
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Import-Package: com.eaio.util.text,
  com.google.common.annotations,
