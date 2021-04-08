@@ -94,7 +94,7 @@ public class SchedulingBrokerImpl extends RankingAwareNearRegistryServiceTracker
 
     /**
      * Initializes a new {@link SchedulingBrokerImpl}.
-     * 
+     *
      * @param context The {@link BundleContext}
      * @param services The {@link ServiceLookup}
      */
@@ -110,11 +110,11 @@ public class SchedulingBrokerImpl extends RankingAwareNearRegistryServiceTracker
             try {
                 ScheduleStatus status = handle(session, message);
                 if (LOGGER.isTraceEnabled()) {
-                    LOGGER.trace("An message for {} sent by {} has been handeled with the status {}.", message.getRecipient(), message.getOriginator(), status);
+                    LOGGER.trace("A {} message for {} sent by {} has been handeled with the status {}.", message.getMethod(), message.getRecipient(), message.getOriginator(), status);
                 }
                 result.add(status);
-            } catch (Throwable t) {
-                LOGGER.debug("Unable to send message", t);
+            } catch (Exception e) {
+                LOGGER.warn("Unexpected error handling {} message for {} sent by {}: {}", message.getMethod(), message.getRecipient(), message.getOriginator(), e.getMessage(), e);
             }
         }
         return result;
@@ -143,11 +143,11 @@ public class SchedulingBrokerImpl extends RankingAwareNearRegistryServiceTracker
             try {
                 ScheduleStatus status = handleNotification(session, message);
                 if (LOGGER.isTraceEnabled()) {
-                    LOGGER.trace("An message for {} sent by {} has been handeled with the status {}.", message.getRecipient(), message.getOriginator(), status);
+                    LOGGER.trace("A {} message for {} sent by {} has been handeled with the status {}.", message.getAction(), message.getRecipient(), message.getOriginator(), status);
                 }
                 result.add(status);
-            } catch (Throwable t) {
-                LOGGER.debug("Unable to send message", t);
+            } catch (Exception e) {
+                LOGGER.warn("Unexpected error handling {} message for {} sent by {}: {}", message.getAction(), message.getRecipient(), message.getOriginator(), e.getMessage(), e);
             }
         }
         return result;
