@@ -76,11 +76,11 @@ public class HTMLWrapper extends PassthroughWrapper {
     }
 
     private String getName(ParticipationStatus status) {
-        if (status.equals(ParticipationStatus.ACCEPTED)) {
+        if (ParticipationStatus.ACCEPTED.matches(status)) {
             return "accepted";
-        } else if (status.equals(ParticipationStatus.DECLINED)) {
+        } else if (ParticipationStatus.DECLINED.matches(status)) {
             return "declined";
-        } else if (status.equals(ParticipationStatus.TENTATIVE)) {
+        } else if (ParticipationStatus.TENTATIVE.matches(status)) {
             return "tentative";
         } else {
             return "none";
@@ -106,6 +106,9 @@ public class HTMLWrapper extends PassthroughWrapper {
     }
 
     private String shownAsCssClass(ShownAsTransparency shownAs) {
+        if (null == shownAs) {
+            return "unknown";
+        }
         switch (shownAs) {
             case RESERVED:
                 return "reserved";
@@ -147,7 +150,7 @@ public class HTMLWrapper extends PassthroughWrapper {
         }
         return "<i>" + escapeHtml(argument.toString()) + "</i>";
     }
-    
+
     @Override
     public String getFormat() {
         return "html";
