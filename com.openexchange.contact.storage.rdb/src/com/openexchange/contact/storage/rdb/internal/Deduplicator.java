@@ -338,7 +338,7 @@ public class Deduplicator {
         ContactField[] syntheticFields =  {
             ContactField.CREATION_DATE, ContactField.CREATED_BY, ContactField.LAST_MODIFIED, ContactField.LAST_MODIFIED_UTC,
             ContactField.MODIFIED_BY, ContactField.FOLDER_ID, ContactField.CONTEXTID, //ContactField.INTERNAL_USERID,
-            ContactField.OBJECT_ID, ContactField.UID, ContactField.FILENAME,
+            ContactField.OBJECT_ID, ContactField.UID, ContactField.FILENAME, ContactField.VCARD_ID, ContactField.USE_COUNT, 
             ContactField.LAST_MODIFIED_OF_NEWEST_ATTACHMENT, ContactField.IMAGE_LAST_MODIFIED, ContactField.IMAGE1_URL
         };
         EnumSet<ContactField> contentFields = EnumSet.allOf(ContactField.class);
