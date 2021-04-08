@@ -121,12 +121,12 @@ public class DefaultAttachmentStoragePeriodicCleaner implements CleanUpExecution
     }
 
     @Override
-    public boolean isApplicableFor(String schema, int representativeContextId, int databasePoolId, CleanUpExecutionConnectionProvider connectionProvider) throws OXException {
+    public boolean isApplicableFor(String schema, int representativeContextId, int databasePoolId, Map<String, Object> state, CleanUpExecutionConnectionProvider connectionProvider) throws OXException {
         return active.get();
     }
 
     @Override
-    public void executeFor(String schema, int representativeContextId, int databasePoolId, CleanUpExecutionConnectionProvider connectionProvider) throws OXException {
+    public void executeFor(String schema, int representativeContextId, int databasePoolId, Map<String, Object> state, CleanUpExecutionConnectionProvider connectionProvider) throws OXException {
         long start = System.currentTimeMillis();
         try {
             LOG.info("Periodic cleanup task for shared mail attachments starts for schema {}", schema);

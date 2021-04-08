@@ -105,6 +105,10 @@ public class DataExportCleanUpTask implements CleanUpExecution {
 
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(DataExportCleanUpTask.class);
 
+    private static final String PROP_CLEANUP_ENABLED = "com.openexchange.gdpr.dataexport.cleanup.enabled";
+    private static final String PROP_CLEANUP_PROCESSED_FILESTORE_IDS = "com.openexchange.gdpr.dataexport.cleanup.processedFilestoreIds";
+    private static final String PROP_CLEANUP_GENERIC_FILESTORE_IDS = "com.openexchange.gdpr.dataexport.cleanup.genericFilestoreIds";
+
     /** The decimal format to use when printing milliseconds */
     private static final NumberFormat MILLIS_FORMAT = newNumberFormat();
 
@@ -159,60 +163,84 @@ public class DataExportCleanUpTask implements CleanUpExecution {
         this.services = services;
     }
 
-    private static final String PROP_CLEANUP_ENABLED = "com.openexchange.gdpr.dataexport.cleanup.enabled";
-
     @Override
-    public boolean isApplicableFor(String schema, int representativeContextId, int databasePoolId, CleanUpExecutionConnectionProvider connectionProvider) throws OXException {
-        boolean defaultValue = true;
-        ConfigurationService configService = services.getOptionalService(ConfigurationService.class);
-        return configService == null ? defaultValue : configService.getBoolProperty(PROP_CLEANUP_ENABLED, defaultValue);
+    public boolean isApplicableFor(String schema, int representativeContextId, int databasePoolId, Map<String, Object> state, CleanUpExecutionConnectionProvider connectionProvider) throws OXException {
+        Boolean enabled = (Boolean) state.get(PROP_CLEANUP_ENABLED);
+        if (enabled == null) {
+            boolean defaultValue = true;
+            ConfigurationService configService = services.getOptionalService(ConfigurationService.class);
+            enabled = Boolean.valueOf(configService == null ? defaultValue : configService.getBoolProperty(PROP_CLEANUP_ENABLED, defaultValue));
+            state.put(PROP_CLEANUP_ENABLED, enabled);
+        }
+        return enabled.booleanValue();
     }
 
+    @SuppressWarnings("unchecked")
     @Override
-    public void executeFor(String schema, int representativeContextId, int databasePoolId, CleanUpExecutionConnectionProvider connectionProvider) throws OXException {
+    public void executeFor(String schema, int representativeContextId, int databasePoolId, Map<String, Object> state, CleanUpExecutionConnectionProvider connectionProvider) {
         // Ignore connection from provider, lock needs to be inserted on its own connection, so manage connections ourselves
         DatabaseService databaseService = services.getOptionalService(DatabaseService.class);
         if (databaseService == null) {
             // Missing database service
-            LOG.warn("Failed to acquire database service, which is needed to clean-up data export files. Aborting clean-up run...");
+            LOG.warn("Failed to acquire database service, which is needed to clean-up data export files. Aborting clean-up run for schema {}", schema);
             return;
         }
 
+        // Check for possibly currently runninf data export tasks
         Boolean hasRunningTasks = checkForRunningDataExportTasks();
         if (hasRunningTasks == null) {
             // Check failed and has already been logged
             return;
         } else if (hasRunningTasks.booleanValue()) {
-            LOG.info("Detected currently running data export tasks. Aborting clean-up run...");
+            LOG.info("Detected currently running data export tasks. Aborting clean-up run for schema {}", schema);
             return;
         }
 
+        // Determine the file storage identifiers to process for this execution's invocation
+        Set<Integer> fileStoreIdsToProcess;
+        try {
+            Set<Integer> fileStoreIdsWoSchema = (Set<Integer>) state.get(PROP_CLEANUP_GENERIC_FILESTORE_IDS);
+            if (fileStoreIdsWoSchema == null) {
+                fileStoreIdsWoSchema = determineFileStorageIdsFromAllScopesButSchema(databaseService);
+                state.put(PROP_CLEANUP_GENERIC_FILESTORE_IDS, fileStoreIdsWoSchema);
+            }
+            fileStoreIdsToProcess = new HashSet<>(fileStoreIdsWoSchema);
+            fileStoreIdsToProcess.addAll(determineFileStorageIdsFromSchema(databaseService, schema, representativeContextId));
+            Set<Integer> processedFileStoreIds = (Set<Integer>) state.get(PROP_CLEANUP_PROCESSED_FILESTORE_IDS);
+            if (processedFileStoreIds != null) {
+                fileStoreIdsToProcess.removeAll(processedFileStoreIds);
+            }
+            if (fileStoreIdsToProcess.isEmpty()) {
+                LOG.info("Found no file storage(s) to process for data export files. Aborting clean-up run for schema {}", schema);
+                return;
+            }
+        } catch (Throwable t) {
+            ExceptionUtils.handleThrowable(t);
+            LOG.warn("Unable to determine the file storage identifiers to process. Aborting clean-up run for schema {}", schema, t);
+            return;
+        }
+
+        // Process determined file storage identifiers
         DataExportLock lock = DataExportLock.getInstance();
         DataExportLock.LockAcquisition acquisition = null;
         try {
             acquisition = lock.acquireCleanUpTaskLock(true, databaseService);
             if (acquisition.isNotAcquired()) {
                 // Failed to acquire clean-up lock
-                LOG.info("Failed to acquire clean-up lock for data export files since another process is currently running. Aborting clean-up run...");
+                LOG.info("Failed to acquire clean-up lock for data export files since another process is currently running. Aborting clean-up run for schema {}", schema);
                 return;
             }
 
+            // Fix for file storage identifiers
+            LOG.info("Going to check {} file storage(s) for orphaned data export files", I(fileStoreIdsToProcess.size()));
             long start = System.currentTimeMillis();
-
-            Set<Integer> fileStoreIds = determineFileStorageIdsFromAllScopes(databaseService, schema, representativeContextId);
-            if (fileStoreIds == null || fileStoreIds.isEmpty() != false) {
-                LOG.info("Found no file storage(s) for data export files. Aborting clean-up run...");
-                return;
-            }
-
-            LOG.info("Going to check {} file storage(s) for orphaned data export files", I(fileStoreIds.size()));
-            fixOrphanedEntries(fileStoreIds);
-
+            fixOrphanedEntries(fileStoreIdsToProcess);
             long duration = System.currentTimeMillis() - start;
-            LOG.info("Data export clean-up task took {}ms ({})", formatDuration(duration), exactly(duration, true));
+            LOG.info("Data export clean-up task took {}ms ({}) for {} file storage(s)", formatDuration(duration), exactly(duration, true), I(fileStoreIdsToProcess.size()));
         } catch (Throwable t) {
             ExceptionUtils.handleThrowable(t);
-            LOG.warn("Failed clean-up run for data exports", t);
+            LOG.warn("Failed clean-up run for schema {}", schema, t);
+            return;
         } finally {
             if (acquisition != null) {
                 try {
@@ -222,6 +250,9 @@ public class DataExportCleanUpTask implements CleanUpExecution {
                 }
             }
         }
+
+        // Remember already processed file storage identifiers
+        state.put(PROP_CLEANUP_PROCESSED_FILESTORE_IDS, fileStoreIdsToProcess);
     }
 
     private Boolean checkForRunningDataExportTasks() {
@@ -367,7 +398,7 @@ public class DataExportCleanUpTask implements CleanUpExecution {
 
     // ----------------------------------- Retrieval of file storage identifiers -----------------------------------------------------------
 
-    private Set<Integer> determineFileStorageIdsFromAllScopes(DatabaseService databaseService, String schema, int representativeContextId) {
+    private Set<Integer> determineFileStorageIdsFromAllScopesButSchema(DatabaseService databaseService) {
         Set<Integer> fileStoreIds = null;
 
         // Check for possible configured file storage identifiers for context-sets scope
@@ -413,31 +444,21 @@ public class DataExportCleanUpTask implements CleanUpExecution {
         } catch (Exception e) {
             LOG.warn("Failed to retrieve possible identifiers of data export file storage from server scope", e);
         }
-
-        // Check for possible configured file storage identifiers for context and user scope
-        try {
-            fileStoreIds = addFileStoreIdsForSchema(schema, representativeContextId, fileStoreIds, databaseService);
-        } catch (Exception e) {
-            LOG.warn("Failed to retrieve possible identifiers of data export file storage from context and user scope", e);
-        }
         return fileStoreIds == null ? Collections.emptySet() : fileStoreIds;
     }
 
-    private Set<Integer> addFileStoreIdsForSchema(String schema, int representativeContextId, Set<Integer> fileStoreIds, DatabaseService databaseService) {
-        Set<Integer> fids = fileStoreIds;
-
+    private Set<Integer> determineFileStorageIdsFromSchema(DatabaseService databaseService, String schema, int representativeContextId) {
+        // Check for possible configured file storage identifiers for schema
+        Set<Integer> fileStoreIds = null;
         try {
             Set<Integer> fileStoreIdsForSchema = determineFileStoreIdsFor(representativeContextId, databaseService);
             if (fileStoreIdsForSchema.isEmpty() == false) {
-                if (fids == null) {
-                    fids = new HashSet<>();
-                }
-                fids.addAll(fileStoreIdsForSchema);
+                fileStoreIds = fileStoreIdsForSchema;
             }
         } catch (Exception e) {
             LOG.warn("Failed to retrieve possible identifiers of data export file storage for schema {}", schema, e);
         }
-        return fids;
+        return fileStoreIds == null ? Collections.emptySet() : fileStoreIds;
     }
 
     private Set<Integer> determineContextSetsFileStoreIds(ConfigurationService configurationService) {

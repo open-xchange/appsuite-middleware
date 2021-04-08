@@ -153,7 +153,7 @@ public class MessageAlarmDeliveryWorker implements CleanUpExecution {
     }
 
     @Override
-    public boolean isApplicableFor(String schema, int representativeContextId, int databasePoolId, CleanUpExecutionConnectionProvider connectionProvider) throws OXException {
+    public boolean isApplicableFor(String schema, int representativeContextId, int databasePoolId, Map<String, Object> state, CleanUpExecutionConnectionProvider connectionProvider) throws OXException {
         try {
             Boolean result = Databases.executeQuery(connectionProvider.getConnection(),
                 (rs) -> Boolean.TRUE, // We have a result, so we are fine
@@ -166,7 +166,7 @@ public class MessageAlarmDeliveryWorker implements CleanUpExecution {
     }
 
     @Override
-    public void executeFor(String schema, int representativeContextId, int databasePoolId, CleanUpExecutionConnectionProvider connectionProvider) throws OXException {
+    public void executeFor(String schema, int representativeContextId, int databasePoolId, Map<String, Object> state, CleanUpExecutionConnectionProvider connectionProvider) throws OXException {
         LOG.info("Started alarm delivery worker...");
         Calendar until = Calendar.getInstance(UTC);
         until.add(Calendar.MINUTE, lookAhead);

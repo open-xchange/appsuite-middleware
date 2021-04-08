@@ -104,7 +104,7 @@ public class PeriodicChecksumCleaner implements CleanUpExecution {
     }
 
     @Override
-    public boolean isApplicableFor(String schema, int representativeContextId, int databasePoolId, CleanUpExecutionConnectionProvider connectionProvider) throws OXException {
+    public boolean isApplicableFor(String schema, int representativeContextId, int databasePoolId, Map<String, Object> state, CleanUpExecutionConnectionProvider connectionProvider) throws OXException {
         try {
             return Databases.tableExists(connectionProvider.getConnection(), "directorychecksums") && Databases.tableExists(connectionProvider.getConnection(), "filechecksums");
         } catch (SQLException e) {
@@ -114,7 +114,7 @@ public class PeriodicChecksumCleaner implements CleanUpExecution {
     }
 
     @Override
-    public void executeFor(String schema, int representativeContextId, int databasePoolId, CleanUpExecutionConnectionProvider connectionProvider) throws OXException {
+    public void executeFor(String schema, int representativeContextId, int databasePoolId, Map<String, Object> state, CleanUpExecutionConnectionProvider connectionProvider) throws OXException {
         long start = System.currentTimeMillis();
         LOG.info("Periodic checksum cleanup task starting, going to check all contexts...");
         EligibleContextsResult eligibleContextsResult = getEligibleContextIDs(schema, databasePoolId);

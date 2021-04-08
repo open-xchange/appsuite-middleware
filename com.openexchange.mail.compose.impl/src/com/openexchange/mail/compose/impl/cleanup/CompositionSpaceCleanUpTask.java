@@ -61,6 +61,7 @@ import java.text.NumberFormat;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Locale;
+import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
@@ -136,7 +137,7 @@ public class CompositionSpaceCleanUpTask implements CleanUpExecution {
     }
 
     @Override
-    public boolean isApplicableFor(String schema, int representativeContextId, int databasePoolId, CleanUpExecutionConnectionProvider connectionProvider) throws OXException {
+    public boolean isApplicableFor(String schema, int representativeContextId, int databasePoolId, Map<String, Object> state, CleanUpExecutionConnectionProvider connectionProvider) throws OXException {
         try {
             return Databases.tableExists(connectionProvider.getConnection(), "compositionSpace");
         } catch (SQLException e) {
@@ -146,9 +147,9 @@ public class CompositionSpaceCleanUpTask implements CleanUpExecution {
     }
 
     @Override
-    public void executeFor(String schema, int representativeContextId, int databasePoolId, CleanUpExecutionConnectionProvider connectionProvider) throws OXException {
+    public void executeFor(String schema, int representativeContextId, int databasePoolId, Map<String, Object> state, CleanUpExecutionConnectionProvider connectionProvider) throws OXException {
         long start = System.currentTimeMillis();
-        
+
         try {
             cleanUpForSchema(connectionProvider.getConnection(), schema);
         } catch (Exception e) {

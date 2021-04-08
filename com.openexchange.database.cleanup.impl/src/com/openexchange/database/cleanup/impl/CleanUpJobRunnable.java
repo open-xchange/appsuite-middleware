@@ -57,6 +57,7 @@ import java.sql.SQLException;
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
@@ -162,6 +163,7 @@ public class CleanUpJobRunnable implements Runnable {
                 PoolAndSchema poolAndSchema = getSchema(representativeContextId, contextService);
                 if (checkSchemaStatus(poolAndSchema, updater)) {
                     // No update running or pending. Continue clean-up run for that schema...
+                    Map<String, Object> state = new HashMap<>(4);
                     int retryCount = 3;
                     for (int retry = retryCount; retry-- > 0;) {
                         // Check again if thread has been interrupted meanwhile
@@ -179,7 +181,7 @@ public class CleanUpJobRunnable implements Runnable {
 
                         // Perform clean-up
                         try {
-                            cleanUpForSchema(representativeContextId.intValue(), poolAndSchema.getSchema(), poolAndSchema.getPoolId(), timerService);
+                            cleanUpForSchema(representativeContextId.intValue(), poolAndSchema.getSchema(), poolAndSchema.getPoolId(), state, timerService);
                             retry = 0;
                         } catch (OXException e) {
                             if (retry > 0 && Category.CATEGORY_TRY_AGAIN.equals(e.getCategory())) {
@@ -233,8 +235,8 @@ public class CleanUpJobRunnable implements Runnable {
         return true;
     }
 
-    private void cleanUpForSchema(int representativeContextId, String schema, int poolId, TimerService timerService) throws OXException {
-        if (isNotApplicableFor(representativeContextId, schema, poolId)) {
+    private void cleanUpForSchema(int representativeContextId, String schema, int poolId, Map<String, Object> state, TimerService timerService) throws OXException {
+        if (isNotApplicableFor(representativeContextId, schema, poolId, state)) {
             // Not applicable for current schema
             return;
         }
@@ -252,7 +254,7 @@ public class CleanUpJobRunnable implements Runnable {
                     timerTask = timerService.scheduleWithFixedDelay(newRefreshTask(schema, representativeContextId), refreshIntervalMillis, refreshIntervalMillis);
 
                     // Execute job
-                    executeJobFor(representativeContextId, schema, poolId);
+                    executeJobFor(representativeContextId, schema, poolId, state);
                 } finally {
                     // Stop timer task
                     stopTimerTaskSafe(timerTask, schema, timerService);
@@ -264,7 +266,7 @@ public class CleanUpJobRunnable implements Runnable {
             }
         } else {
             // May run at any time on any node, thus just execute it
-            executeJobFor(representativeContextId, schema, poolId);
+            executeJobFor(representativeContextId, schema, poolId, state);
         }
 
         LOG.debug("Successfully executed clean-up job '{}' against schema {}", job.getId(), schema);
@@ -285,25 +287,25 @@ public class CleanUpJobRunnable implements Runnable {
         }
     }
 
-    private boolean isNotApplicableFor(int representativeContextId, String schema, int poolId) throws OXException {
-        return isApplicableFor(representativeContextId, schema, poolId) == false;
+    private boolean isNotApplicableFor(int representativeContextId, String schema, int poolId, Map<String, Object> state) throws OXException {
+        return isApplicableFor(representativeContextId, schema, poolId, state) == false;
     }
 
-    private boolean isApplicableFor(int representativeContextId, String schema, int poolId) throws OXException {
+    private boolean isApplicableFor(int representativeContextId, String schema, int poolId, Map<String, Object> state) throws OXException {
         ReadOnlyCleanUpExecutionConnectionProvider connectionProvider = new ReadOnlyCleanUpExecutionConnectionProvider(representativeContextId, services);
         try {
-            return job.getExecution().isApplicableFor(schema, representativeContextId, poolId, connectionProvider);
+            return job.getExecution().isApplicableFor(schema, representativeContextId, poolId, state, connectionProvider);
         } finally {
             connectionProvider.close();
         }
     }
 
-    private void executeJobFor(int representativeContextId, String schema, int poolId) throws OXException {
+    private void executeJobFor(int representativeContextId, String schema, int poolId, Map<String, Object> state) throws OXException {
         // Create connection provider
         ReadWriteCleanUpExecutionConnectionProvider connectionProvider = new ReadWriteCleanUpExecutionConnectionProvider(representativeContextId, job.isPreferNoConnectionTimeout(), services);
         try {
             // Execute job
-            job.getExecution().executeFor(schema, representativeContextId, poolId, connectionProvider);
+            job.getExecution().executeFor(schema, representativeContextId, poolId, state, connectionProvider);
 
             // Commit optional connection
             connectionProvider.commitAfterSuccess();

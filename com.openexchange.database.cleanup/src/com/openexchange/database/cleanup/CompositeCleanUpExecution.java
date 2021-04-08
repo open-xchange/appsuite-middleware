@@ -50,6 +50,7 @@
 package com.openexchange.database.cleanup;
 
 import java.util.Collection;
+import java.util.Map;
 import com.google.common.collect.ImmutableList;
 import com.openexchange.exception.OXException;
 
@@ -111,9 +112,9 @@ public class CompositeCleanUpExecution implements CleanUpExecution {
     }
 
     @Override
-    public boolean isApplicableFor(String schema, int representativeContextId, int databasePoolId, CleanUpExecutionConnectionProvider connectionProvider) throws OXException {
+    public boolean isApplicableFor(String schema, int representativeContextId, int databasePoolId, Map<String, Object> state, CleanUpExecutionConnectionProvider connectionProvider) throws OXException {
         for (CleanUpExecution execution : executions) {
-            if (execution.isApplicableFor(schema, representativeContextId, databasePoolId, connectionProvider) == false) {
+            if (execution.isApplicableFor(schema, representativeContextId, databasePoolId, state, connectionProvider) == false) {
                 return false;
             }
         }
@@ -121,9 +122,9 @@ public class CompositeCleanUpExecution implements CleanUpExecution {
     }
 
     @Override
-    public void executeFor(String schema, int representativeContextId, int databasePoolId, CleanUpExecutionConnectionProvider connectionProvider) throws OXException {
+    public void executeFor(String schema, int representativeContextId, int databasePoolId, Map<String, Object> state, CleanUpExecutionConnectionProvider connectionProvider) throws OXException {
         for (CleanUpExecution execution : executions) {
-            execution.executeFor(schema, representativeContextId, databasePoolId, connectionProvider);
+            execution.executeFor(schema, representativeContextId, databasePoolId, state, connectionProvider);
         }
     }
 

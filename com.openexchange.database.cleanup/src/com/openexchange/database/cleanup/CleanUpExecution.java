@@ -49,6 +49,7 @@
 
 package com.openexchange.database.cleanup;
 
+import java.util.Map;
 import com.openexchange.exception.OXException;
 
 /**
@@ -65,11 +66,12 @@ public interface CleanUpExecution {
      * @param schema The database schema name
      * @param representativeContextId The identifier of a representative context in that schema
      * @param databasePoolId The identifier of the associated database pool
+     * @param state The cross-schema state for this execution, which allows to store arbitrary data that is kept for each schema-wise invocation
      * @param connectionProvider The connection provider instance that can be used to obtain a <b>read-only</b> connection for given database schema
      * @return <code>true</code> if applicable; otherwise <code>false</code>
      * @throws OXException If check for applicability fails
      */
-    boolean isApplicableFor(String schema, int representativeContextId, int databasePoolId, CleanUpExecutionConnectionProvider connectionProvider) throws OXException;
+    boolean isApplicableFor(String schema, int representativeContextId, int databasePoolId, Map<String, Object> state, CleanUpExecutionConnectionProvider connectionProvider) throws OXException;
 
     /**
      * Executes this clean-up execution against given database schema.
@@ -77,9 +79,10 @@ public interface CleanUpExecution {
      * @param schema The database schema name
      * @param representativeContextId The identifier of a representative context in that schema
      * @param databasePoolId The identifier of the associated database pool
+     * @param state The cross-schema state for this execution, which allows to store arbitrary data that is kept for each schema-wise invocation
      * @param connectionProvider The connection provider instance that can be used to obtain a <b>read-write</b> connection for given database schema
      * @throws OXException If execution fails
      */
-    void executeFor(String schema, int representativeContextId, int databasePoolId, CleanUpExecutionConnectionProvider connectionProvider) throws OXException;
+    void executeFor(String schema, int representativeContextId, int databasePoolId, Map<String, Object> state, CleanUpExecutionConnectionProvider connectionProvider) throws OXException;
 
 }

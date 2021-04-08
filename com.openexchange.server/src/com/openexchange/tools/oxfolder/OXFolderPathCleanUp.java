@@ -51,6 +51,7 @@ package com.openexchange.tools.oxfolder;
 
 import static com.openexchange.database.Databases.executeUpdate;
 import java.sql.SQLException;
+import java.util.Map;
 import java.util.concurrent.TimeUnit;
 import com.openexchange.database.Databases;
 import com.openexchange.database.cleanup.CleanUpExecution;
@@ -73,7 +74,7 @@ public final class OXFolderPathCleanUp implements CleanUpExecution {
     }
 
     @Override
-    public boolean isApplicableFor(String schema, int representativeContextId, int databasePoolId, CleanUpExecutionConnectionProvider connectionProvider) throws OXException {
+    public boolean isApplicableFor(String schema, int representativeContextId, int databasePoolId, Map<String, Object> state, CleanUpExecutionConnectionProvider connectionProvider) throws OXException {
         try {
             /*
              * Check if UpdateTask has run by checking that the table exists in this schema
@@ -86,7 +87,7 @@ public final class OXFolderPathCleanUp implements CleanUpExecution {
     }
 
     @Override
-    public void executeFor(String schema, int representativeContextId, int databasePoolId, CleanUpExecutionConnectionProvider connectionProvider) throws OXException {
+    public void executeFor(String schema, int representativeContextId, int databasePoolId, Map<String, Object> state, CleanUpExecutionConnectionProvider connectionProvider) throws OXException {
         /*
          * Delete expired entries
          */

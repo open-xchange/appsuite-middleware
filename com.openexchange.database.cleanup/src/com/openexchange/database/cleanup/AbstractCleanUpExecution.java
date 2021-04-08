@@ -49,6 +49,7 @@
 
 package com.openexchange.database.cleanup;
 
+import java.util.Map;
 import com.openexchange.exception.OXException;
 
 
@@ -69,7 +70,7 @@ public abstract class AbstractCleanUpExecution implements CleanUpExecution {
     }
 
     @Override
-    public boolean isApplicableFor(String schema, int representativeContextId, int databasePoolId, CleanUpExecutionConnectionProvider connectionProvider) throws OXException {
+    public boolean isApplicableFor(String schema, int representativeContextId, int databasePoolId, Map<String, Object> state, CleanUpExecutionConnectionProvider connectionProvider) throws OXException {
         return true;
     }
 

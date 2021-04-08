@@ -103,7 +103,7 @@ public abstract class AbstractTombstoneTableCleaner implements CleanUpExecution 
     }
 
     @Override
-    public void executeFor(String schema, int representativeContextId, int databasePoolId, CleanUpExecutionConnectionProvider connectionProvider) throws OXException {
+    public void executeFor(String schema, int representativeContextId, int databasePoolId, Map<String, Object> state, CleanUpExecutionConnectionProvider connectionProvider) throws OXException {
         try {
             cleanupSafe(connectionProvider.getConnection(), getTimestamp());
         } catch (SQLException e) {
@@ -112,7 +112,7 @@ public abstract class AbstractTombstoneTableCleaner implements CleanUpExecution 
     }
 
     @Override
-    public boolean isApplicableFor(String schema, int representativeContextId, int databasePoolId, CleanUpExecutionConnectionProvider connectionProvider) throws OXException {
+    public boolean isApplicableFor(String schema, int representativeContextId, int databasePoolId, Map<String, Object> state, CleanUpExecutionConnectionProvider connectionProvider) throws OXException {
         try {
             checkTables(connectionProvider.getConnection());
         } catch (@SuppressWarnings("unused") OXException e) {
@@ -125,7 +125,7 @@ public abstract class AbstractTombstoneTableCleaner implements CleanUpExecution 
 
     /**
      *
-     * Sets the timespan for cleaning tombstone tables. The setting of timespan is mandatory for using {@link #executeFor(String, int, int, CleanUpExecutionConnectionProvider)}.
+     * Sets the timespan for cleaning tombstone tables. The setting of timespan is mandatory for using {@link #executeFor(String, int, int, Map, CleanUpExecutionConnectionProvider)}.
      *
      * @param timespan The timespan in millis
      */
