@@ -55,6 +55,7 @@ import java.util.List;
 import com.openexchange.chronos.Attachment;
 import com.openexchange.chronos.Attendee;
 import com.openexchange.chronos.Event;
+import com.openexchange.chronos.RecurrenceId;
 import com.openexchange.chronos.common.CalendarUtils;
 import com.openexchange.chronos.exception.CalendarExceptionCodes;
 import com.openexchange.chronos.itip.osgi.Services;
@@ -74,6 +75,7 @@ import com.openexchange.folderstorage.Type;
 import com.openexchange.folderstorage.UserizedFolder;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
+import com.openexchange.java.Strings;
 import com.openexchange.session.Session;
 import com.openexchange.tools.oxfolder.OXFolderAccess;
 import com.openexchange.user.User;
@@ -118,6 +120,15 @@ public class CalendarITipIntegrationUtility implements ITipIntegrationUtility {
     public Event resolveUid(final String uid, final CalendarSession session) throws OXException {
         String id = session.getCalendarService().getUtilities().resolveByUID(session, uid, session.getUserId());
         if (id == null) {
+            return null;
+        }
+        return load(session, id);
+    }
+
+    @Override
+    public Event resolveUid(final String uid, RecurrenceId recurrenceId, final CalendarSession session) throws OXException {
+        String id = session.getCalendarService().getUtilities().resolveByUID(session, uid, recurrenceId, session.getUserId());
+        if (Strings.isEmpty(id)) {
             return null;
         }
         return load(session, id);

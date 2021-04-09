@@ -70,6 +70,7 @@ import com.openexchange.chronos.service.CalendarSession;
 import com.openexchange.chronos.service.EventConflict;
 import com.openexchange.exception.OXException;
 import com.openexchange.server.ServiceLookup;
+import com.openexchange.tools.arrays.Collections;
 import com.openexchange.tools.session.ServerSessionAdapter;
 
 /**
@@ -257,7 +258,13 @@ public class ITipAnalysisWriter {
     }
 
     private void writeAnnotation(final ITipAnnotation annotation, final JSONObject annotationObject) throws JSONException, OXException {
-        annotationObject.put("message", annotation.getMessage());
+        String message = annotation.getMessage();
+        List<Object> args = annotation.getArgs();
+        if (Collections.isNullOrEmpty(args)) {
+            annotationObject.put("message", message);
+        } else {
+            annotationObject.put("message", String.format(message, args.toArray(new Object[args.size()])));
+        }
         // TODO: i18n and message args
         final Event event = annotation.getEvent();
         if (event != null) {

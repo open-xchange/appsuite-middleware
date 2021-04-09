@@ -169,7 +169,7 @@ public class IncomingSchedulingAction {
         builder.setMethod(method);
         builder.setTargetUser(session.getUserId());
         builder.setSchedulingObject(schedulingMail);
-        builder.setResource(new IncomingCalendarObjectResource(purifyEvents(calendar), schedulingMail));
+        builder.setResource(new IncomingMailResource(purifyEvents(calendar), schedulingMail));
         
         SchedulingBroker schedulingBroker = services.getServiceSafe(SchedulingBroker.class);
         return schedulingBroker.handleIncomingScheduling(session, SchedulingSource.API, builder.build());

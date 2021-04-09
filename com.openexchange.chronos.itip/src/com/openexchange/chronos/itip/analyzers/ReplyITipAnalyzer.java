@@ -75,6 +75,7 @@ import com.openexchange.chronos.itip.ITipExceptions;
 import com.openexchange.chronos.itip.ITipIntegrationUtility;
 import com.openexchange.chronos.itip.ITipMessage;
 import com.openexchange.chronos.itip.ITipMethod;
+import com.openexchange.chronos.itip.LegacyAnalyzing;
 import com.openexchange.chronos.itip.Messages;
 import com.openexchange.chronos.itip.generators.Sentence;
 import com.openexchange.chronos.itip.generators.TypeWrapper;
@@ -93,7 +94,7 @@ import com.openexchange.user.User;
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  * @author <a href="mailto:daniel.becker@open-xchange.com">Daniel Becker</a>
  */
-public class ReplyITipAnalyzer extends AbstractITipAnalyzer {
+public class ReplyITipAnalyzer extends AbstractITipAnalyzer implements LegacyAnalyzing {
 
     private final static Logger LOGGER = LoggerFactory.getLogger(ReplyITipAnalyzer.class);
 

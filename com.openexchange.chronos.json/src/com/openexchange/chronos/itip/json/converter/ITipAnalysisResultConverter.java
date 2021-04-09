@@ -72,6 +72,7 @@ import com.openexchange.chronos.json.fields.ChronosEventConflictJsonFields;
 import com.openexchange.chronos.json.fields.ChronosGeneralJsonFields;
 import com.openexchange.chronos.service.EventConflict;
 import com.openexchange.exception.OXException;
+import com.openexchange.tools.arrays.Collections;
 import com.openexchange.tools.servlet.OXJSONExceptionCodes;
 import com.openexchange.tools.session.ServerSession;
 
@@ -258,7 +259,13 @@ public class ITipAnalysisResultConverter implements ResultConverter {
         JSONArray array = new JSONArray();
         for (ITipAnnotation annotation : annotations) {
             JSONObject annotationObject = new JSONObject();
-            annotationObject.put("message", annotation.getMessage());
+            String message = annotation.getMessage();
+            List<Object> args = annotation.getArgs();
+            if (Collections.isNullOrEmpty(args)) {
+                annotationObject.put("message", message);
+            } else {
+                annotationObject.put("message", String.format(message, args.toArray(new Object[args.size()])));
+            }
             Event event = annotation.getEvent();
             if (event != null) {
                 annotationObject.put("event", EventMapper.getInstance().serialize(event, EventMapper.getInstance().getAssignedFields(event), tz, session));
