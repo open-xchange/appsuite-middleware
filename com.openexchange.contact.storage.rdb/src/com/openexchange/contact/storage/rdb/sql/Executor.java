@@ -320,14 +320,19 @@ public class Executor {
         /*
          * construct query string
          */
+        boolean needsUseCount = Table.CONTACTS.equals(table) && needsUseCount(fields, sortOptions);
     	SearchTermAdapter adapter = null != term ? new SearchTermAdapter(term, getCharset(sortOptions)) : null;
         StringBuilder stmtBuilder = new StringBuilder(1024);
-        stmtBuilder.append("SELECT ").append(Mappers.CONTACT.getColumns(fields, table.getName() + ".")).append(",object_use_count.value").append(" FROM ").append(table)
-            .append(" LEFT JOIN ").append(Table.OBJECT_USE_COUNT).append(" ON ").append(table.getName()).append(".cid=").append(Table.OBJECT_USE_COUNT)
-            .append(".cid AND ").append(forUser).append("=").append(Table.OBJECT_USE_COUNT).append(".user AND ")
-            .append(table.getName()).append(".fid=").append(Table.OBJECT_USE_COUNT).append(".folder AND ")
-            .append(table).append(".intfield01=").append(Table.OBJECT_USE_COUNT).append(".object ")
-            .append(" WHERE ").append(table.getName()).append(".").append(Mappers.CONTACT.get(ContactField.CONTEXTID).getColumnLabel()).append("=?");
+        if (needsUseCount) {
+            stmtBuilder.append("SELECT ").append(Mappers.CONTACT.getColumns(fields, table.getName() + ".")).append(",object_use_count.value").append(" FROM ").append(table)
+                .append(" LEFT JOIN ").append(Table.OBJECT_USE_COUNT).append(" ON ").append(table.getName()).append(".cid=").append(Table.OBJECT_USE_COUNT)
+                .append(".cid AND ").append(forUser).append("=").append(Table.OBJECT_USE_COUNT).append(".user AND ")
+                .append(table.getName()).append(".fid=").append(Table.OBJECT_USE_COUNT).append(".folder AND ")
+                .append(table).append(".intfield01=").append(Table.OBJECT_USE_COUNT).append(".object ");
+        } else {
+            stmtBuilder.append("SELECT ").append(Mappers.CONTACT.getColumns(fields, table.getName() + ".")).append(" FROM ").append(table);
+        }
+        stmtBuilder.append(" WHERE ").append(table.getName()).append(".").append(Mappers.CONTACT.get(ContactField.CONTEXTID).getColumnLabel()).append("=?");
         if (Integer.MIN_VALUE != folderID) {
         	stmtBuilder.append(" AND ").append(Mappers.CONTACT.get(ContactField.FOLDER_ID).getColumnLabel()).append("=?");
         }
@@ -374,7 +379,7 @@ public class Executor {
              * execute and read out results
              */
             resultSet = logExecuteQuery(stmt);
-            return new ContactReader(contextID, connection, resultSet).readContacts(fields, Arrays.asList(fields).contains(ContactField.USE_COUNT));
+            return new ContactReader(contextID, connection, resultSet).readContacts(fields, needsUseCount);
         } finally {
             Databases.closeSQLStuff(resultSet, stmt);
         }
@@ -1274,7 +1279,7 @@ public class Executor {
     public int delete(Connection connection, Table table, int contextID, int folderID, int[] objectIDs) throws SQLException, OXException {
         return delete(connection, table, contextID, folderID, objectIDs, Long.MIN_VALUE);
     }
-    
+
     public void deleteByUuid(Connection connection, int contextID, List<DistListMember> members) throws SQLException, OXException {
         if (null == members || members.isEmpty()) {
             return;
@@ -1371,6 +1376,31 @@ public class Executor {
             LOG.debug("Error executing \"{}\": {}", stmt.toString(), e.getMessage());
             throw e;
         }
+    }
+
+    /**
+     * Gets a value indicating whether a JOIN to the object_use_count table is required, either for sorting, or to retrieve the actual
+     * value for a contact.
+     *
+     * @param fields The requested fields to query, or <code>null</code> if all fields are requested
+     * @param sortOptions The requested sort options, or <code>null</code> if not defined
+     * @return <code>true</code> if the use count table needs to be joined, <code>false</code>, otherwise
+     */
+    private static boolean needsUseCount(ContactField[] fields, SortOptions sortOptions) {
+        if (null == fields) {
+            return true; // all fields
+        }
+        if (com.openexchange.tools.arrays.Arrays.contains(fields, ContactField.USE_COUNT)) {
+            return true; // requested as contact property
+        }
+        if (null != sortOptions && null != sortOptions.getOrder()) {
+            for (SortOrder sortOrder : sortOptions.getOrder()) {
+                if (ContactField.USE_COUNT.equals(sortOrder.getBy())) {
+                    return true;
+                }
+            }
+        }
+        return false; // not needed, otherwise
     }
 
 }
