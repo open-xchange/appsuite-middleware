@@ -488,15 +488,6 @@ For the GUI preferences please also see http://www.open-xchange.com/wiki/index.p
 **--convert-drive-user-folders**
 : 	Convert drive user folders into normal folders.
 
-# Importing CSV Files
-With the `--csv-import <CSV file>` option a full path to a CSV file with user data to import can be specified. This option makes mandatory command line options obsolete, except credential options (if needed). But they have to be set in the CSV file.
-
-With this option you can specify a csv file (a full pathname must be given) with the data which should be imported. The columnnames in the CSV file must be the same as the long-options of the command line tools, without the prefix "--".
-
-This option will normally be used to fill new large installations with the new data. So instead of calling the command line tools in a shell script every time, just a csv file needs to be created, containing the whole data.
-
-Note that the credentials of the masteradmin in the createcontext call must be given on the command line with the -A and -P options nevertheless - if authentication is enabled. If the changeuser command line tool is used, the credentials are part of the csv file, and cannot be set as options on the command line itself. The reason for this different behavior is that different contexts have different credentials for the admin user, so they must be set in every line of the csv file. Opposed to this the credentials of the masteradmin are always the same. 
-
 # MODULE ACCESS
 
 With Open-Xchange it is possible to limit the access to the available modules per context i. e., all users in one context per default get the same access rights. The rights though can be changed per user. Currently, following modules are implemented: access-calendar, access-contacts, access-delegate-tasks, access-edit-public-folder, access-ical, access-infostore, access-read-create-shared-Folders, access-tasks, access-vcard, access-webdav, access-syncml and access-webmail. There are several combinations possible and four are supported (not mentioned modules need to be disabled). This limitation is needed because some modules depend on access to others. There are different Open-Xchange packages available for the customer: Webmail+, PIM+, Groupware+, Premium. These packages have to be configured per context i. e., all users in a context need to use the same package. Each package consists of a combination of modules that has to be set up appropriately. The following sections quickly introduce the packages and their module configuration. Open-Xchange also provides the possibility to use "access combination names" when creating and changing contexts/users. If you want to change the package acess rights for a context, you can simply add the "access-combination-name" switch to the appropriate tool (createcontext,changeuser,changecontext etc.). 
