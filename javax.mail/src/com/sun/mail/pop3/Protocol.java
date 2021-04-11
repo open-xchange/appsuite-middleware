@@ -465,6 +465,25 @@ class Protocol {
     }
 
     /**
+     * Run authentication query based on command and initial response
+     *
+     * @param command - command passed to server
+     * @param ir - initial response, part of the query
+     * @throws IOException
+     */
+    protected void runAuthenticationCommand(String command, String ir) throws IOException {
+        if (logger.isLoggable(Level.FINE)) {
+            logger.fine(command + " using one line authentication format");
+        }
+
+        if (ir != null) {
+            resp = simpleCommand(command + " " + (ir.length() == 0 ? "=" : ir));
+        } else {
+            resp = simpleCommand(command);
+        }
+    }
+
+    /**
      * Start the authentication handshake by issuing the AUTH command.
      * Delegate to the doAuth method to do the mechanism-specific
      * part of the handshake.
@@ -479,11 +498,8 @@ class Protocol {
             logger.fine("AUTH " + mech + " command trace suppressed");
             suspendTracing();
         }
-        if (ir != null)
-            resp = simpleCommand("AUTH " + mech + " " +
-                        (ir.length() == 0 ? "=" : ir));
-        else
-            resp = simpleCommand("AUTH " + mech);
+
+        runAuthenticationCommand("AUTH " + mech, ir);
 
         if (resp.cont)
             doAuth(host, authzid, user, passwd);
@@ -697,6 +713,26 @@ class Protocol {
         byte[] b = BASE64EncoderStream.encode(
                     resp.getBytes(StandardCharsets.UTF_8));
         return ASCIIUtility.toString(b);
+    }
+
+    @Override
+    protected void runAuthenticationCommand(String command, String ir) throws IOException {
+        Boolean isTwoLineAuthenticationFormat = getBoolProp(
+                props,
+                prefix + ".xoauth.two.line.authentication.format");
+
+        if (isTwoLineAuthenticationFormat) {
+            if (logger.isLoggable(Level.FINE)) {
+                logger.fine(command + " using two line authentication format");
+            }
+
+            resp = twoLinesCommand(
+                    command,
+                    (ir.length() == 0 ? "=" : ir)
+            );
+        } else {
+            super.runAuthenticationCommand(command, ir);
+        }
     }
 
     @Override
@@ -1136,6 +1172,29 @@ class Protocol {
 	Response r = readResponse();
 	simpleCommandEnd();
 	return r;
+    }
+
+    /**
+     * Issue a two line POP3 command and return the response
+     * Refer to {@link #simpleCommand(String)} for a single line command
+     *
+     * @param firstCommand first command we want to pass to server e.g AUTH XOAUTH2
+     * @param secondCommand second command e.g Base64 encoded authorization string
+     * @return Response
+     * @throws IOException
+     */
+    private Response twoLinesCommand(String firstCommand, String secondCommand) throws IOException {
+        String cmd = firstCommand + " " + secondCommand;
+
+        batchCommandStart(cmd);
+        simpleCommand(firstCommand);
+        batchCommandContinue(cmd);
+
+        Response r = simpleCommand(secondCommand);
+
+        batchCommandEnd();
+
+        return r;
     }
 
     /**
