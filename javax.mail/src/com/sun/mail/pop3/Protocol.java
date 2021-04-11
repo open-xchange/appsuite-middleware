@@ -719,7 +719,7 @@ class Protocol {
     protected void runAuthenticationCommand(String command, String ir) throws IOException {
         Boolean isTwoLineAuthenticationFormat = getBoolProp(
                 props,
-                prefix + ".xoauth.two.line.authentication.format");
+                prefix + ".auth.xoauth2.two.line.authentication.format");
 
         if (isTwoLineAuthenticationFormat) {
             if (logger.isLoggable(Level.FINE)) {
