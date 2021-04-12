@@ -1128,6 +1128,105 @@
         } ]
       }
     },
+    "/drive?action=unsubscribe" : {
+      "get" : {
+        "operationId" : "unsubscribePushEvents_get_req",
+        "tags" : [ "Drive" ],
+        "summary" : "Unsubscribes from push events.",
+        "description" : "Unregisters a previously registered client device to stop receiving push notifications from the server. The\nsame parameters that were used to perform the subscription need to be passed again, which includes the root\nfolder ID, the device token and the service name.\n",
+        "parameters" : [ {
+          "$ref" : "#/components/parameters/gblQueryParamSession"
+        }, {
+          "$ref" : "#/components/parameters/gblQueryParamRoot"
+        }, {
+          "in" : "query",
+          "name" : "service",
+          "description" : "The name of the underlying push service to use, currently one of gcm, apn, or apn.macos.",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        }, {
+          "in" : "query",
+          "name" : "token",
+          "description" : "The device's registration token as assigned by the service.",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "An empty JSON result. In case of errors the responsible fields in the response are filled.\n",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/CommonResponse"
+                }
+              }
+            }
+          }
+        },
+        "x-ox-examples" : [ {
+          "Example1" : null,
+          "description" : "Basic example",
+          "example" : "==> GET http://192.168.32.191/ajax/drive?action=unsubscribe&root=65841&session=51378e29f82042b4afe4af1c034c6d68&service=apn&token=28919862989a1b5ba59c11d5f7cb7ba2b9678be9dd18b033184d04f682013677\n\n<== HTTP 200 OK (26.0015 ms elapsed, 11 bytes received)\n<   Content: \n    {\n      \"data\" : {\n      }\n    }\n"
+        } ]
+      },
+      "put" : {
+        "operationId" : "unsubscribePushEvents_put_req",
+        "tags" : [ "Drive" ],
+        "summary" : "Unsubscribes from push events.",
+        "description" : "Unregisters a previously registered client device to stop receiving push notifications from the server.\n",
+        "parameters" : [ {
+          "$ref" : "#/components/parameters/gblQueryParamSession"
+        }, {
+          "in" : "query",
+          "name" : "service",
+          "description" : "The name of the underlying push service to use, currently one of gcm, apn, or apn.macos.",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        }, {
+          "in" : "query",
+          "name" : "token",
+          "description" : "The device's registration token as assigned by the service.",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "An empty JSON result. In case of errors the responsible fields in the response are filled.\n",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/CommonResponse"
+                }
+              }
+            }
+          }
+        },
+        "x-ox-examples" : [ {
+          "Example1" : null,
+          "description" : "Basic example",
+          "example" : "==> PUT http://192.168.32.191/ajax/drive?action=unsubscribe&session=51378e29f82042b4afe4af1c034c6d68&service=apn&token=28919862989a1b5ba59c11d5f7cb7ba2b9678be9dd18b033184d04f682013677\n> Content:\n  {\n    \"root\": [ \"129136\", \"129137\" ]\n  },\n\n<== HTTP 200 OK (132.7421 ms elapsed, 11 bytes received)\n<   Content: \n    {\n      \"data\": {}\n    }\n"
+        } ],
+        "requestBody" : {
+          "content" : {
+            "application/x-www-form-urlencoded" : {
+              "schema" : {
+                "type" : "string"
+              }
+            }
+          },
+          "description" : "A JSON object named root holding a JSON array of those root folder identifiers to unsubscribe from.",
+          "required" : true
+        }
+      }
+    },
     "/drive?action=subfolders" : {
       "get" : {
         "operationId" : "getSynchronizableFolders",
@@ -1274,105 +1373,6 @@
         }
       }
     },
-    "/drive?action=unsubscribe" : {
-      "get" : {
-        "operationId" : "unsubscribePushEvents_get_req",
-        "tags" : [ "Drive" ],
-        "summary" : "Unsubscribes from push events.",
-        "description" : "Unregisters a previously registered client device to stop receiving push notifications from the server. The\nsame parameters that were used to perform the subscription need to be passed again, which includes the root\nfolder ID, the device token and the service name.\n",
-        "parameters" : [ {
-          "$ref" : "#/components/parameters/gblQueryParamSession"
-        }, {
-          "$ref" : "#/components/parameters/gblQueryParamRoot"
-        }, {
-          "in" : "query",
-          "name" : "service",
-          "description" : "The name of the underlying push service to use, currently one of gcm, apn, or apn.macos.",
-          "required" : true,
-          "schema" : {
-            "type" : "string"
-          }
-        }, {
-          "in" : "query",
-          "name" : "token",
-          "description" : "The device's registration token as assigned by the service.",
-          "required" : true,
-          "schema" : {
-            "type" : "string"
-          }
-        } ],
-        "responses" : {
-          "200" : {
-            "description" : "An empty JSON result. In case of errors the responsible fields in the response are filled.\n",
-            "content" : {
-              "application/json" : {
-                "schema" : {
-                  "$ref" : "#/components/schemas/CommonResponse"
-                }
-              }
-            }
-          }
-        },
-        "x-ox-examples" : [ {
-          "Example1" : null,
-          "description" : "Basic example",
-          "example" : "==> GET http://192.168.32.191/ajax/drive?action=unsubscribe&root=65841&session=51378e29f82042b4afe4af1c034c6d68&service=apn&token=28919862989a1b5ba59c11d5f7cb7ba2b9678be9dd18b033184d04f682013677\n\n<== HTTP 200 OK (26.0015 ms elapsed, 11 bytes received)\n<   Content: \n    {\n      \"data\" : {\n      }\n    }\n"
-        } ]
-      },
-      "put" : {
-        "operationId" : "unsubscribePushEvents_put_req",
-        "tags" : [ "Drive" ],
-        "summary" : "Unsubscribes from push events.",
-        "description" : "Unregisters a previously registered client device to stop receiving push notifications from the server.\n",
-        "parameters" : [ {
-          "$ref" : "#/components/parameters/gblQueryParamSession"
-        }, {
-          "in" : "query",
-          "name" : "service",
-          "description" : "The name of the underlying push service to use, currently one of gcm, apn, or apn.macos.",
-          "required" : true,
-          "schema" : {
-            "type" : "string"
-          }
-        }, {
-          "in" : "query",
-          "name" : "token",
-          "description" : "The device's registration token as assigned by the service.",
-          "required" : true,
-          "schema" : {
-            "type" : "string"
-          }
-        } ],
-        "responses" : {
-          "200" : {
-            "description" : "An empty JSON result. In case of errors the responsible fields in the response are filled.\n",
-            "content" : {
-              "application/json" : {
-                "schema" : {
-                  "$ref" : "#/components/schemas/CommonResponse"
-                }
-              }
-            }
-          }
-        },
-        "x-ox-examples" : [ {
-          "Example1" : null,
-          "description" : "Basic example",
-          "example" : "==> PUT http://192.168.32.191/ajax/drive?action=unsubscribe&session=51378e29f82042b4afe4af1c034c6d68&service=apn&token=28919862989a1b5ba59c11d5f7cb7ba2b9678be9dd18b033184d04f682013677\n> Content:\n  {\n    \"root\": [ \"129136\", \"129137\" ]\n  },\n\n<== HTTP 200 OK (132.7421 ms elapsed, 11 bytes received)\n<   Content: \n    {\n      \"data\": {}\n    }\n"
-        } ],
-        "requestBody" : {
-          "content" : {
-            "application/x-www-form-urlencoded" : {
-              "schema" : {
-                "type" : "string"
-              }
-            }
-          },
-          "description" : "A JSON object named root holding a JSON array of those root folder identifiers to unsubscribe from.",
-          "required" : true
-        }
-      }
-    },
     "/drive?action=notify" : {
       "put" : {
         "operationId" : "notifyAboutSharedItem",
@@ -1459,97 +1459,6 @@
         }
       }
     },
-    "/drive?action=trashContents" : {
-      "get" : {
-        "operationId" : "getTrashContent",
-        "tags" : [ "Drive" ],
-        "summary" : "Retrieves the content of the trash folder",
-        "description" : "Retrieves the files and folders of the root level of the users trash folder.\n",
-        "parameters" : [ {
-          "$ref" : "#/components/parameters/gblQueryParamSession"
-        }, {
-          "$ref" : "#/components/parameters/gblQueryParamRoot"
-        } ],
-        "responses" : {
-          "200" : {
-            "description" : "A JSON object holding the files and folders of the trash folder.\nIf no trash folder is available, an empty response is returned.\n",
-            "content" : {
-              "application/json" : {
-                "schema" : {
-                  "$ref" : "#/components/schemas/TrashFolderResponse"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/drive?action=jump" : {
-      "get" : {
-        "operationId" : "generateDirectLink",
-        "tags" : [ "Drive" ],
-        "summary" : "Gets a direct link for a folder or a file into AppSuite.",
-        "description" : "Generates a direct link into the AppSuite UI for a synchronized file or a synchronized folder and a\ntoken for token-based login.\n\n#### Use direct link and token with token-based login\n`GET [redirectUrl]`\n\nLogin to AppSuite UI with token-based login via the link created with this request. Don't forget to append the `clientToken`\nparameter with the value used to retrieve the redirect URL! Example: `GET http://localhost/appsuite#app=io.ox/editor&folder=273264&id=273264/307438&serverToken=7b90972628e34e89bb9a3946d1372c68&clientToken=47d74b1c-81df-11e4-b116-123b93f75cba`.\n",
-        "parameters" : [ {
-          "$ref" : "#/components/parameters/gblQueryParamSession"
-        }, {
-          "$ref" : "#/components/parameters/gblQueryParamRoot"
-        }, {
-          "$ref" : "#/components/parameters/gblQueryParamPath"
-        }, {
-          "in" : "query",
-          "name" : "authId",
-          "description" : "Identifier for tracing every single login request passed between different systems in a cluster. The value should be some token that is unique for every login request.",
-          "required" : true,
-          "schema" : {
-            "type" : "string"
-          }
-        }, {
-          "in" : "query",
-          "name" : "clientToken",
-          "description" : "Client-side identifier for accessing the session later. The value should be some token that is unique for every login request.",
-          "required" : true,
-          "schema" : {
-            "type" : "string"
-          }
-        }, {
-          "in" : "query",
-          "name" : "name",
-          "description" : "The name of the file in the synchronized folder given in `path` parameter.",
-          "required" : false,
-          "schema" : {
-            "type" : "string"
-          }
-        }, {
-          "in" : "query",
-          "name" : "method",
-          "description" : "The method of the jump. Available are: edit (opens the file in AppSuite editor or in text/spreadsheet if available), permissions (opens the file's/folder's change-permission dialog), version_history (opens the file's version history summary), preview (opens the file's/folder's preview). Defaults to preview.",
-          "required" : false,
-          "schema" : {
-            "type" : "string",
-            "enum" : [ "edit", "permissions", "version_history", "preview" ],
-            "default" : "preview"
-          }
-        } ],
-        "responses" : {
-          "200" : {
-            "description" : "A JSON object containing the direct link to the file/folder including a server token for token based login.\nIn case of errors the responsible fields in the response are filled.\n",
-            "content" : {
-              "application/json" : {
-                "schema" : {
-                  "$ref" : "#/components/schemas/DriveJumpResponse"
-                }
-              }
-            }
-          }
-        },
-        "x-ox-examples" : [ {
-          "Example1" : null,
-          "description" : "Basic example",
-          "example" : "==> POST http://localhost/ajax/drive?action=jump&session=48a289898ad949faaa46c04e7fb422f5&root=9547&path=/path/to/file&name=file_to_edit.txt&method=edit&authId=41763584-8460-11e4-b116-123b93f75dba\n> Content: clientToken=47d74b1c-81df-11e4-b116-123b93f75cba\n\n<== HTTP 200 OK\n<   Content: \n    {\n      \"data\": {\n        \"redirectUrl\": \"http://localhost/appsuite#app=io.ox/editor&folder=273264&id=273264/307438&serverToken=7b90972628e34e89bb9a3946d1372c68\"\n      }\n    }\n"
-        } ]
-      }
-    },
     "/drive?action=updateToken" : {
       "get" : {
         "operationId" : "updateSubscriptionToken",
@@ -1599,6 +1508,105 @@
           "Example1" : null,
           "description" : "Basic example",
           "example" : "==> GET http://192.168.32.191/ajax/drive?action=updateToken&service=apn&session=51378e29f82042b4afe4af1c034c6d68&token=28919862989a1b5ba59c11d5f7cb7ba2b9678be9dd18b033184d04f682013677&newToken=38919862989a1b5ba59c11d5f7cb7ba2b9678be9dd18b033184d04f682013677\n\n<== HTTP 200 OK (15.6653 ms elapsed, 11 bytes received)\n<   Content: \n    {\n      \"data\" : {\n      }\n    }\n"
+        } ]
+      }
+    },
+    "/drive?action=trashContents" : {
+      "get" : {
+        "operationId" : "getTrashContent",
+        "tags" : [ "Drive" ],
+        "summary" : "Retrieves the content of the trash folder",
+        "description" : "Retrieves the files and folders of the root level of the users trash folder.\n",
+        "parameters" : [ {
+          "$ref" : "#/components/parameters/gblQueryParamSession"
+        }, {
+          "$ref" : "#/components/parameters/gblQueryParamRoot"
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "A JSON object holding the files and folders of the trash folder.\nIf no trash folder is available, an empty response is returned.\n",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/TrashFolderResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/drive?action=jump" : {
+      "post" : {
+        "operationId" : "generateDirectLink",
+        "tags" : [ "Drive" ],
+        "summary" : "Gets a direct link for a folder or a file into AppSuite.",
+        "description" : "Generates a direct link into the AppSuite UI for a synchronized file or a synchronized folder and a token for token-based login. The acquired link can then be used  by appending the used client token as parameter in a different client, e.g. a web browser. \n",
+        "parameters" : [ {
+          "$ref" : "#/components/parameters/gblQueryParamSession"
+        }, {
+          "$ref" : "#/components/parameters/gblQueryParamRoot"
+        }, {
+          "$ref" : "#/components/parameters/gblQueryParamPath"
+        }, {
+          "in" : "query",
+          "name" : "authId",
+          "description" : "Identifier for tracing every single login request passed between different systems in a cluster. The value should be some token that is unique for every jump request.",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        }, {
+          "in" : "query",
+          "name" : "name",
+          "description" : "The name of the file in the synchronized folder given in `path` parameter.",
+          "required" : false,
+          "schema" : {
+            "type" : "string"
+          }
+        }, {
+          "in" : "query",
+          "name" : "method",
+          "description" : "The method of the jump. Available are: edit (opens the file in AppSuite editor or in text/spreadsheet if available), permissions (opens the file's/folder's change-permission dialog), version_history (opens the file's version history summary), preview (opens the file's/folder's preview). Defaults to preview.",
+          "required" : false,
+          "schema" : {
+            "type" : "string",
+            "enum" : [ "edit", "permissions", "version_history", "preview" ],
+            "default" : "preview"
+          }
+        } ],
+        "requestBody" : {
+          "content" : {
+            "application/x-www-form-urlencoded" : {
+              "schema" : {
+                "type" : "object",
+                "title" : "driveJumpBody",
+                "properties" : {
+                  "clientToken" : {
+                    "description" : "Client side identifier for accessing the session later. The value should be some token that is unique for every jump request.",
+                    "type" : "string"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses" : {
+          "200" : {
+            "description" : "A JSON object containing the direct link to the file/folder including a server token for token based login.\nIn case of errors the responsible fields in the response are filled.\n",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/DriveJumpResponse"
+                }
+              }
+            }
+          }
+        },
+        "x-ox-examples" : [ {
+          "Example1" : null,
+          "description" : "Basic example",
+          "example" : "==> POST http://localhost/ajax/drive?action=jump&session=48a289898ad949faaa46c04e7fb422f5&root=9547&path=/path/to/file&name=file_to_edit.txt&method=edit&authId=41763584-8460-11e4-b116-123b93f75dba\n> Content: clientToken=47d74b1c-81df-11e4-b116-123b93f75cba\n\n<== HTTP 200 OK\n<   Content: \n    {\n      \"data\": {\n        \"redirectUrl\": \"http://localhost/appsuite#app=io.ox/editor&folder=273264&id=273264/307438&serverToken=7b90972628e34e89bb9a3946d1372c68\"\n      }\n    }\n"
         } ]
       }
     },
