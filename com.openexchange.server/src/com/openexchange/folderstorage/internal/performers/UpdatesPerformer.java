@@ -77,6 +77,7 @@ import com.openexchange.folderstorage.type.PublicType;
 import com.openexchange.folderstorage.type.SharedType;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
+import com.openexchange.groupware.modules.Module;
 import com.openexchange.groupware.userconfiguration.UserPermissionBits;
 import com.openexchange.groupware.userconfiguration.UserPermissionBitsStorage;
 import com.openexchange.session.Session;
@@ -293,7 +294,7 @@ public final class UpdatesPerformer extends AbstractUserizedFolderPerformer {
                                     }
                                 }
                             }
-                        } else if (isPublic(f)) {
+                        } else if (isPublicOrInfostore(f)) {
                             /*
                              * Public
                              */
@@ -311,7 +312,7 @@ public final class UpdatesPerformer extends AbstractUserizedFolderPerformer {
                                 /*
                                  * Parent is visible
                                  */
-                                if (treeChecker.containsVirtualFolder(parentFolder.getID(), treeId, StorageType.WORKING)) {
+                                if (treeChecker.containsVirtualFolder(parentFolder.getID(), treeId, StorageType.WORKING) && listContainsFolder(updatedList, parentFolder) == false) {
                                     updatedList.add(parentFolder);
                                 }
                             } else {
@@ -441,6 +442,7 @@ public final class UpdatesPerformer extends AbstractUserizedFolderPerformer {
                         getUserizedFolder(folder, getEffectivePermission(folder), treeId, true, true, storageParameters, realFolderStorages);
                 }
             }
+           
             /*
              * Commit
              */
@@ -535,8 +537,18 @@ public final class UpdatesPerformer extends AbstractUserizedFolderPerformer {
         return SharedType.getInstance().equals(type) || PrivateType.getInstance().equals(type) && f.getCreatedBy() != userId;
     }
 
-    private static boolean isPublic(final Folder f) {
-        return PublicType.getInstance().equals(f.getType());
+    private static boolean isPublicOrInfostore(final Folder f) {
+        return PublicType.getInstance().equals(f.getType()) || Module.INFOSTORE.getFolderConstant() == f.getContentType().getModule();
     }
+
+    private static boolean listContainsFolder(List<Folder> folderList, Folder folder) {
+        for (Folder f : folderList) {
+            if (f.getID().equals(folder.getID())) {
+                return true;
+            }
+        }
+        return false;
+    }
+
 
 }

@@ -66,6 +66,7 @@ import com.openexchange.ajax.folder.api2.ChangePermissionsTest;
 import com.openexchange.ajax.folder.api2.ClearTest;
 import com.openexchange.ajax.folder.api2.CreateTest;
 import com.openexchange.ajax.folder.api2.GetTest;
+import com.openexchange.ajax.folder.api2.MWB1030Test;
 import com.openexchange.ajax.folder.api2.MoveTest;
 import com.openexchange.ajax.folder.api2.PathTest;
 import com.openexchange.ajax.folder.api2.SubscribeTest;
@@ -155,6 +156,7 @@ import com.openexchange.test.concurrent.ParallelSuite;
 
     MWB682Test.class,
     MWB905Test.class,
+    MWB1030Test.class
 
 })
 public final class FolderTestSuite {
