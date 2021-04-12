@@ -75,8 +75,8 @@ public class ICalParametersImpl implements ICalParameters {
      */
     public static final String TIMEZONE_REGISTRY = TimeZoneRegistry.class.getName();
 
-    /** The default timezone registry to use */
-    private static final TimeZoneRegistry DEFAULT_TIMEZONE_REGISTRY = new TimeZoneRegistryImpl("zoneinfo-outlook/");
+    /** The default prefiy to use for when initializing the timezone registries */
+    private static final String DEFAULT_TIMEZONE_RESOURCE_PREFIX = "zoneinfo-outlook/";
 
     private final Map<String, Object> parameters;
 
@@ -90,7 +90,7 @@ public class ICalParametersImpl implements ICalParameters {
     }
 
     private void applyDefaults() {
-        set(TIMEZONE_REGISTRY, DEFAULT_TIMEZONE_REGISTRY);
+        set(TIMEZONE_REGISTRY, new TimeZoneRegistryImpl(DEFAULT_TIMEZONE_RESOURCE_PREFIX));
         ConfigurationService configService = Services.optService(ConfigurationService.class);
         if (null != configService) {
             set(IMPORT_LIMIT, I(configService.getIntProperty("com.openexchange.import.ical.limit", -1)));
