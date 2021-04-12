@@ -118,7 +118,7 @@ public interface SnippetManagement {
     String updateSnippet(String id, Snippet snippet, Set<Property> properties, Collection<Attachment> addAttachments, Collection<Attachment> removeAttachments) throws OXException;
 
     /**
-     * Updates specified snippet.
+     * Deletes specified snippet.
      *
      * @param id The identifier of the snippet to delete
      * @throws OXException If delete operation fails
