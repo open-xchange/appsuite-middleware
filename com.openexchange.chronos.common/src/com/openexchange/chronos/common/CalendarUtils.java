@@ -2640,7 +2640,7 @@ public class CalendarUtils {
      * @param eventUpdates The event updates to build the calendar object resource from
      * @return The calendar object resource
      */
-    public static CalendarObjectResource getUpdatedResource(List<EventUpdate> eventUpdates) {
+    public static CalendarObjectResource getUpdatedResource(List<? extends EventUpdate> eventUpdates) {
         List<Event> events = new ArrayList<Event>();
         for (EventUpdate eventUpdate : eventUpdates) {
             events.add(eventUpdate.getUpdate());
