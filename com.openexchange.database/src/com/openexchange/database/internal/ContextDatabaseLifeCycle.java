@@ -76,7 +76,7 @@ import com.openexchange.pooling.PoolConfig;
 public class ContextDatabaseLifeCycle implements PoolLifeCycle {
 
     private static final String SELECT = "SELECT p.url,p.driver,p.login,p.password,p.hardlimit,p.max,p.initial,c.write_db_pool_id "
-                                       + "FROM db_pool AS p join db_cluster as c on p.db_pool_id = c.read_db_pool_id or p.db_pool_id = c.write_db_pool_id "
+                                       + "FROM db_pool AS p JOIN db_cluster AS c ON p.db_pool_id = c.read_db_pool_id OR p.db_pool_id = c.write_db_pool_id "
                                        + "WHERE p.db_pool_id=?";
 
     private final Management management;
