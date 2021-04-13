@@ -6,7 +6,7 @@ BuildRequires: ant
 BuildRequires:  open-xchange-core
 BuildRequires: java-1.8.0-openjdk-devel
 Version:        @OXVERSION@
-%define         ox_release 8
+%define         ox_release 9
 Release:        %{ox_release}_<CI_CNT>.<B_CNT>
 Group:          Applications/Productivity
 License:        GPL-2.0
@@ -44,6 +44,8 @@ ant -lib build/lib -Dbasedir=build -DdestDir=%{buildroot} -DpackageName=%{name} 
 /opt/open-xchange/osgi/bundle.d/*
 
 %changelog
+* Tue Apr 13 2021 Thorben Betten <thorben.betten@open-xchange.com>
+Build for patch 2021-04-19 (5982)
 * Tue Mar 23 2021 Thorben Betten <thorben.betten@open-xchange.com>
 Build for patch 2021-03-29 (5976)
 * Tue Mar 09 2021 Thorben Betten <thorben.betten@open-xchange.com>
