@@ -53,6 +53,7 @@ import static com.openexchange.chronos.impl.Utils.getCalendarFolder;
 import static com.openexchange.chronos.impl.Utils.postProcess;
 import com.openexchange.chronos.Event;
 import com.openexchange.chronos.exception.CalendarExceptionCodes;
+import com.openexchange.chronos.impl.performer.ResolvePerformer;
 import com.openexchange.chronos.impl.scheduling.AddProcessor;
 import com.openexchange.chronos.impl.scheduling.AttendeeUpdateProcessor;
 import com.openexchange.chronos.impl.scheduling.CancelProcessor;
@@ -111,8 +112,7 @@ public class SchedulingUtilitiesImpl implements SchedulingUtilities {
 
             @Override
             protected InternalCalendarResult execute(CalendarSession session, CalendarStorage storage) throws OXException {
-                Event event = message.getResource().getFirstEvent();
-                return new CancelProcessor(storage, session, getCalendarFolder(session, storage, event.getUid(), event.getRecurrenceId(), message.getTargetUser())).process(message);
+                return new CancelProcessor(storage, session, getTargetFolder(session, storage, message)).process(message);
             }
         }.executeUpdate()).getUserizedResult();
     }
@@ -144,6 +144,17 @@ public class SchedulingUtilitiesImpl implements SchedulingUtilities {
     /*
      * ============================== HELPERS ==============================
      */
+
+    static CalendarFolder getTargetFolder(CalendarSession session, CalendarStorage storage, IncomingSchedulingMessage message) throws OXException {
+        String uid = message.getResource().getUid();
+        int calendarUserId = message.getTargetUser();
+        boolean fallbackToDefault = SchedulingMethod.REQUEST.equals(message.getMethod());
+        String folderId = new ResolvePerformer(session, storage).resolveFolderIdByUID(uid, calendarUserId, fallbackToDefault);
+        if (null == folderId) {
+            throw CalendarExceptionCodes.EVENT_NOT_FOUND.create(uid);
+        }
+        return Utils.getFolder(session, folderId);
+    }
 
     /**
      * Post processes a scheduling action to e.g. adjust attendee status to transmitted data and returns

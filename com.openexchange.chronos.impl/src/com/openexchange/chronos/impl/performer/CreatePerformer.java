@@ -54,6 +54,7 @@ import static com.openexchange.chronos.common.CalendarUtils.getUserIDs;
 import static com.openexchange.chronos.common.CalendarUtils.isAllDay;
 import static com.openexchange.chronos.common.CalendarUtils.isInternal;
 import static com.openexchange.chronos.common.CalendarUtils.isSeriesException;
+import static com.openexchange.chronos.common.CalendarUtils.normalizeRecurrenceID;
 import static com.openexchange.chronos.impl.Check.requireCalendarPermission;
 import static com.openexchange.chronos.impl.Utils.getResolvableEntities;
 import static com.openexchange.chronos.impl.Utils.prepareOrganizer;
@@ -228,7 +229,7 @@ public class CreatePerformer extends AbstractUpdatePerformer {
         Check.startAndEndDate(session, eventData);
         EventMapper.getInstance().copy(eventData, event, EventField.START_DATE, EventField.END_DATE);
         Consistency.adjustAllDayDates(event);
-        Consistency.adjustTimeZones(session.getSession(), calendarUserId, event, null);
+        Consistency.adjustTimeZones(session.getSession(), calendarUserId, event, isNullOrEmpty(existingEvents) ? null : existingEvents.get(0));
         /*
          * attendees, attachments, conferences
          */
@@ -273,8 +274,9 @@ public class CreatePerformer extends AbstractUpdatePerformer {
              * change exception event, ensure to assign an appropriate series identifier as well
              */
             event.setSeriesId(isNullOrEmpty(existingEvents) ? storage.getEventStorage().nextId() : existingEvents.get(0).getSeriesId());
-            event.setRecurrenceId(eventData.getRecurrenceId());
-            event.setChangeExceptionDates(new TreeSet<RecurrenceId>(Collections.singleton(eventData.getRecurrenceId())));
+            RecurrenceId normalizedRecurrenceId = normalizeRecurrenceID(event.getStartDate(), eventData.getRecurrenceId());
+            event.setRecurrenceId(normalizedRecurrenceId);
+            event.setChangeExceptionDates(new TreeSet<RecurrenceId>(Collections.singleton(normalizedRecurrenceId)));
         }
         /*
          * copy over further (unchecked) event fields

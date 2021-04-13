@@ -331,7 +331,7 @@ public class CalendarServiceImpl implements CalendarService {
     }
 
     @Override
-    public CalendarResult putResource(CalendarSession session, String folderId, CalendarObjectResource resource) throws OXException {
+    public CalendarResult putResource(CalendarSession session, String folderId, CalendarObjectResource resource, boolean replace) throws OXException {
         /*
          * put event(s), trigger post-processing & return userized result
          */
@@ -339,7 +339,7 @@ public class CalendarServiceImpl implements CalendarService {
 
             @Override
             protected InternalCalendarResult execute(CalendarSession session, CalendarStorage storage) throws OXException {
-                return new PutPerformer(storage, session, getFolder(session, folderId)).perform(resource);
+                return new PutPerformer(storage, session, getFolder(session, folderId)).perform(resource, replace);
             }
         }.executeUpdate(), true).getUserizedResult();
     }

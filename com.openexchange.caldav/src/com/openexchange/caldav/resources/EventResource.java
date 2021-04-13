@@ -476,7 +476,7 @@ public class EventResource extends DAVObjectResource<Event> {
 
             @Override
             protected CalendarResult perform(IDBasedCalendarAccess access) throws OXException {
-                return access.putResource(parent.folderID, resource);
+                return access.putResource(parent.folderID, resource, true);
             }
         }.execute(factory.getSession());
     }

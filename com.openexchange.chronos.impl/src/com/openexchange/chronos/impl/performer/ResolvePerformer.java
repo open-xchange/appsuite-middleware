@@ -211,6 +211,26 @@ public class ResolvePerformer extends AbstractQueryPerformer {
         return resolveByUid(uid, null, calendarUserId);
     }
     
+    public List<Event> resolveEventsByUID(String uid, int calendarUserId) throws OXException {
+        List<Event> events = lookupByUid(uid, calendarUserId, getFields(session, EventField.ATTENDEES, EventField.ORGANIZER));
+        return postProcessor().process(events, calendarUserId).getEvents();
+    }
+
+    public String resolveFolderIdByUID(String uid, int calendarUserId, boolean fallbackToDefault) throws OXException {
+        EventField[] oldParameterFields = session.get(CalendarParameters.PARAMETER_FIELDS, EventField[].class);
+        List<Event> resolvedEvents;
+        try {
+            session.set(CalendarParameters.PARAMETER_FIELDS, new EventField[] { EventField.FOLDER_ID });
+            resolvedEvents = resolveEventsByUID(uid, calendarUserId);
+        } finally {
+            session.set(CalendarParameters.PARAMETER_FIELDS, oldParameterFields);
+        }
+        if (resolvedEvents.isEmpty()) {
+            return fallbackToDefault ? session.getConfig().getDefaultFolderId(calendarUserId) : null;
+        }
+        return resolvedEvents.get(0).getFolderId();
+    }
+
     /**
      * Resolves an unique identifier within the scope of a specific calendar user, i.e. the unique identifier is resolved to events 
      * residing in the user's <i>personal</i>, as well as <i>public</i> calendar folders.

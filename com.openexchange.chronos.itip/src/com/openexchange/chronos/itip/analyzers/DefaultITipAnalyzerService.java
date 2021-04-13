@@ -83,13 +83,14 @@ public class DefaultITipAnalyzerService implements ITipAnalyzerService {
     
     private final static Logger LOGGER = LoggerFactory.getLogger(DeclineCounterITipAnalyzer.class);
 
-    private final List<ITipAnalyzer> analyzers;
-
     private final ITipAnalyzer internalAnalyzer;
+    private final List<ITipAnalyzer> analyzers;
 
     public DefaultITipAnalyzerService(ITipIntegrationUtility util) {
         super();
         this.analyzers = Collections.unmodifiableList(Arrays.<ITipAnalyzer> asList(
+            new CancelAnalyzer(util),
+            new RequestAnalyzer(util),
             new AddITipAnalyzer(util),
             new CancelITipAnalyzer(util),
             new DeclineCounterITipAnalyzer(util),
@@ -97,7 +98,6 @@ public class DefaultITipAnalyzerService implements ITipAnalyzerService {
             new ReplyITipAnalyzer(util),
             new UpdateITipAnalyzer(util)
         ));
-
         internalAnalyzer = new InternalITipAnalyzer(util);
     }
 

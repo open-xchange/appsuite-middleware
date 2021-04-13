@@ -558,11 +558,11 @@ public class CompositingIDBasedCalendarAccess extends AbstractCompositingIDBased
     }
 
     @Override
-    public CalendarResult putResource(String folderId, CalendarObjectResource resource) throws OXException {
+    public CalendarResult putResource(String folderId, CalendarObjectResource resource, boolean replace) throws OXException {
         int accountId = getAccountId(folderId);
         try {
             GroupwareCalendarAccess calendarAccess = getGroupwareAccess(accountId);
-            CalendarResult result = calendarAccess.putResource(getRelativeFolderId(folderId), withRelativeID(resource));
+            CalendarResult result = calendarAccess.putResource(getRelativeFolderId(folderId), withRelativeID(resource), replace);
             return new IDManglingCalendarResult(result, accountId);
         } catch (OXException e) {
             throw withUniqueIDs(e, accountId);

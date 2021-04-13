@@ -97,7 +97,11 @@ public class IncomingCalendarObjectResource extends DefaultCalendarObjectResourc
     @Override
     public Event getSeriesMaster() {
         Event firstEvent = events.get(0);
-        return Strings.isNotEmpty(firstEvent.getRecurrenceRule()) ? firstEvent : null;
+        if (Strings.isNotEmpty(firstEvent.getRecurrenceRule()) || 
+            null != firstEvent.getRecurrenceDates() && false == firstEvent.getRecurrenceDates().isEmpty()) {
+            return firstEvent;
+        }
+        return null;
     }
 
     @Override

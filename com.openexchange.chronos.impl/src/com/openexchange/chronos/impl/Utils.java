@@ -675,11 +675,46 @@ public class Utils {
      * @throws OXException If folder can't be determined or is not visible for the user
      */
     public static CalendarFolder getCalendarFolder(CalendarSession session, CalendarStorage storage, String uid, RecurrenceId recurrenceId, int calendarUserId) throws OXException {
-        EventID eventID = resolveEventId(session, storage, uid, recurrenceId, calendarUserId);
-        if (Strings.isEmpty(eventID.getFolderID())) {
-            throw CalendarExceptionCodes.FOLDER_NOT_FOUND.create();
+        EventField[] oldParameterFields = session.get(CalendarParameters.PARAMETER_FIELDS, EventField[].class);
+        List<Event> resolvedEvents;
+        try {
+            session.set(CalendarParameters.PARAMETER_FIELDS, new EventField[] { EventField.FOLDER_ID });
+            resolvedEvents = session.getCalendarService().getUtilities().resolveEventsByUID(session, uid, calendarUserId);
+        } finally {
+            session.set(CalendarParameters.PARAMETER_FIELDS, oldParameterFields);
         }
-        return getFolder(session, eventID.getFolderID(), true);
+        if (resolvedEvents.isEmpty()) {
+            throw CalendarExceptionCodes.EVENT_NOT_FOUND.create(uid);
+        }
+        return getFolder(session, resolvedEvents.get(0).getFolderId());
+    }
+
+    /**
+     * Get the calendar folder to use based on the first event obtained from the scheduled resource provided by the message
+     *
+     * @param session The session to use
+     * @param storage The storage to lookup the event from
+     * @param uid The UID of the event to get the folder for
+     * @param calendarUserId The identifier of the calendar user the unique identifier should be resolved for
+     * @return The {@link CalendarFolder}
+     * @throws OXException If folder can't be determined or is not visible for the user
+     */
+    public static CalendarFolder getCalendarFolder(CalendarSession session, CalendarStorage storage, String uid, int calendarUserId) throws OXException {
+
+        //TODO: let resolveperformer resolve the folderid directly 
+
+        EventField[] oldParameterFields = session.get(CalendarParameters.PARAMETER_FIELDS, EventField[].class);
+        List<Event> resolvedEvents;
+        try {
+            session.set(CalendarParameters.PARAMETER_FIELDS, new EventField[] { EventField.FOLDER_ID });
+            resolvedEvents = session.getCalendarService().getUtilities().resolveEventsByUID(session, uid, calendarUserId);
+        } finally {
+            session.set(CalendarParameters.PARAMETER_FIELDS, oldParameterFields);
+        }
+        if (resolvedEvents.isEmpty()) {
+            throw CalendarExceptionCodes.EVENT_NOT_FOUND.create(uid);
+        }
+        return getFolder(session, resolvedEvents.get(0).getFolderId());
     }
 
     /**

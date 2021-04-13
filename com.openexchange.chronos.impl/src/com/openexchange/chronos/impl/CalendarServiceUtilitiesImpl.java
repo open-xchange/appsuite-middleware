@@ -145,6 +145,28 @@ public class CalendarServiceUtilitiesImpl implements CalendarServiceUtilities {
     }
 
     @Override
+    public List<Event> resolveEventsByUID(CalendarSession session, String uid, int calendarUserId) throws OXException {
+        return new InternalCalendarStorageOperation<List<Event>>(session) {
+
+            @Override
+            protected List<Event> execute(CalendarSession session, CalendarStorage storage) throws OXException {
+                return new ResolvePerformer(session, storage).resolveEventsByUID(uid, calendarUserId);
+            }
+        }.executeQuery();
+    }
+
+    @Override
+    public String resolveFolderIdByUID(CalendarSession session, String uid, int calendarUserId, boolean fallbackToDefault) throws OXException {
+        return new InternalCalendarStorageOperation<String>(session) {
+
+            @Override
+            protected String execute(CalendarSession session, CalendarStorage storage) throws OXException {
+                return new ResolvePerformer(session, storage).resolveFolderIdByUID(uid, calendarUserId, fallbackToDefault);
+            }
+        }.executeQuery();
+    }
+
+    @Override
     public String resolveByUID(CalendarSession session, String uid, RecurrenceId recurrenceId, int calendarUserId) throws OXException {
         return new InternalCalendarStorageOperation<String>(session) {
 

@@ -321,8 +321,8 @@ public class InternalCalendarAccess implements com.openexchange.chronos.provider
     }
 
     @Override
-    public CalendarResult putResource(String folderId, CalendarObjectResource resource) throws OXException {
-        return getCalendarService().putResource(session, folderId, resource);
+    public CalendarResult putResource(String folderId, CalendarObjectResource resource, boolean replace) throws OXException {
+        return getCalendarService().putResource(session, folderId, resource, replace);
     }
 
     @Override

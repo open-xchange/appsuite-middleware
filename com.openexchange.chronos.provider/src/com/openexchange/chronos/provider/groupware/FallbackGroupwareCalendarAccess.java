@@ -89,7 +89,7 @@ public abstract class FallbackGroupwareCalendarAccess extends FallbackFolderCale
     }
 
     @Override
-    public CalendarResult putResource(String folderId, CalendarObjectResource resource) throws OXException {
+    public CalendarResult putResource(String folderId, CalendarObjectResource resource, boolean replace) throws OXException {
         throw CalendarExceptionCodes.NO_WRITE_PERMISSION.create(folderId);
     }
 

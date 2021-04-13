@@ -49,6 +49,7 @@
 
 package com.openexchange.chronos.itip.analyzers;
 
+import static com.openexchange.chronos.common.CalendarUtils.getOccurrence;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -59,9 +60,13 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.SortedSet;
 import java.util.TimeZone;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import com.google.common.collect.Lists;
 import com.openexchange.chronos.Attachment;
 import com.openexchange.chronos.Attendee;
 import com.openexchange.chronos.AttendeeField;
+import com.openexchange.chronos.CalendarObjectResource;
 import com.openexchange.chronos.CalendarUserType;
 import com.openexchange.chronos.Event;
 import com.openexchange.chronos.EventField;
@@ -69,10 +74,15 @@ import com.openexchange.chronos.Organizer;
 import com.openexchange.chronos.ParticipationStatus;
 import com.openexchange.chronos.RecurrenceId;
 import com.openexchange.chronos.common.CalendarUtils;
+import com.openexchange.chronos.common.Consistency;
+import com.openexchange.chronos.common.DefaultCalendarObjectResource;
+import com.openexchange.chronos.common.IncomingCalendarObjectResource;
+import com.openexchange.chronos.exception.CalendarExceptionCodes;
 import com.openexchange.chronos.itip.ITipAnalysis;
 import com.openexchange.chronos.itip.ITipAnalyzer;
 import com.openexchange.chronos.itip.ITipChange;
 import com.openexchange.chronos.itip.ITipChange.Type;
+import com.openexchange.chronos.itip.ITipExceptions;
 import com.openexchange.chronos.itip.ITipIntegrationUtility;
 import com.openexchange.chronos.itip.ITipMessage;
 import com.openexchange.chronos.itip.ITipMethod;
@@ -86,6 +96,7 @@ import com.openexchange.chronos.itip.osgi.Services;
 import com.openexchange.chronos.itip.tools.ITipEventUpdate;
 import com.openexchange.chronos.scheduling.changes.Description;
 import com.openexchange.chronos.scheduling.changes.DescriptionService;
+import com.openexchange.chronos.service.CalendarParameters;
 import com.openexchange.chronos.service.CalendarSession;
 import com.openexchange.chronos.service.EventConflict;
 import com.openexchange.context.ContextService;
@@ -109,6 +120,8 @@ public abstract class AbstractITipAnalyzer implements ITipAnalyzer {
     public static final EventField[] SKIP = new EventField[] { EventField.FOLDER_ID, EventField.ID, EventField.SERIES_ID, EventField.CREATED_BY, EventField.CREATED, EventField.TIMESTAMP, EventField.LAST_MODIFIED, EventField.MODIFIED_BY, EventField.SEQUENCE,
         EventField.ALARMS, EventField.FLAGS, EventField.ATTENDEE_PRIVILEGES };
     
+    private final static Logger LOG = LoggerFactory.getLogger(AbstractITipAnalyzer.class);
+
     protected ITipIntegrationUtility util;
 
     @Override
@@ -556,5 +569,133 @@ public abstract class AbstractITipAnalyzer implements ITipAnalyzer {
 
     protected static boolean nonNullAwareEquals(Object o1, Object o2) {
         return nonNull(o1, o2) && Objects.equals(o1, o2);
+    }
+    
+    /**
+     * Resolves an UID to all events belonging to the corresponding calendar object resource. The lookup is performed case-sensitive,
+     * within the scope of a specific calendar user. I.e., the unique identifier is resolved to events residing in the user's
+     * <i>personal</i>, as well as <i>public</i> calendar folders.
+     * <p/>
+     * The events will be <i>userized</i> to reflect the view of the calendar user on the events.
+     * 
+     * @param session The calendar session
+     * @param uid The UID to resolve
+     * @param calendarUserId The identifier of the calendar user the unique identifier should be resolved for
+     * @return The <i>userized</i> events, or an empty list if no events were found
+     */
+    protected static CalendarObjectResource getOriginalResource(CalendarSession session, String uid, int calendarUserId) throws OXException {
+        EventField[] oldParameterFields = session.get(CalendarParameters.PARAMETER_FIELDS, EventField[].class);
+        try {
+            session.set(CalendarParameters.PARAMETER_FIELDS, null);
+            List<Event> events = session.getCalendarService().getUtilities().resolveEventsByUID(session, uid, calendarUserId);
+            return events.isEmpty() ? null : new DefaultCalendarObjectResource(events);
+        } finally {
+            session.set(CalendarParameters.PARAMETER_FIELDS, oldParameterFields);
+        }
+    }
+
+    protected static Event optEventOccurrence(CalendarSession session, Event seriesMaster, RecurrenceId recurrenceId) {
+        if (null == seriesMaster) {
+            return null;
+        }
+        try {
+            return getOccurrence(session.getRecurrenceService(), seriesMaster, recurrenceId);
+        } catch (OXException e) {
+            session.addWarning(e);
+            LOG.warn("Unexpected error preparing event occurrence for {} of {}", recurrenceId, seriesMaster, e);
+            return null;
+        }
+    }
+
+    /**
+     * Constructs a calendar object resource from the events of an iTIP message.
+     * 
+     * @param message The iTIP message to get the calendar object resource from
+     * @return The calendar object resource representig the events in the iTIP message
+     */
+    protected static CalendarObjectResource getResource(ITipMessage message) {
+        Iterable<Event> exceptions = message.exceptions();
+        if (null == exceptions) {
+            return new IncomingCalendarObjectResource(message.getEvent());
+        }
+        return new IncomingCalendarObjectResource(message.getEvent(), Lists.newArrayList(exceptions));
+    }
+
+    /**
+     * Patches a previously imported event so that changes can be derived properly when comparing with a currently stored event.
+     * 
+     * @param session The calendar session
+     * @param event The event to patch
+     * @param originalEvent The original event, or <code>null</code> if not applicable
+     * @param calendarUserId The calendar user id
+     * @return The patched event
+     */
+    protected static Event patchEvent(CalendarSession session, Event event, Event originalEvent, int calendarUserId) {
+        try {
+            Event patchedEvent = session.getUtilities().copyEvent(event, (EventField[]) null);
+            Consistency.adjustAllDayDates(patchedEvent);
+            session.getUtilities().adjustTimeZones(session.getSession(), calendarUserId, patchedEvent, originalEvent);
+            patchedEvent = restoreAttachments(originalEvent, patchedEvent);
+            Consistency.normalizeRecurrenceIDs(patchedEvent.getStartDate(), patchedEvent);
+            return patchedEvent;
+        } catch (OXException e) {
+            session.addWarning(e);
+            LOG.warn("Unexpected error patching {}, falling back to original representation", event, e);
+            return event;
+        }
+    }
+
+    /**
+     * Constructs a calendar object resource from the events of an iTIP message.
+     * <p/>
+     * Events not fulfilling the constraints of https://tools.ietf.org/html/rfc5546#section-3.2 are filtered if desired.
+     * 
+     * @param session The calendar session
+     * @param message The iTIP message to get the calendar object resource from
+     * @param filterInvalid <code>true</code> to filter invalid occurrences from the iTip message, <code>false</code>, otherwise
+     * @return The calendar object resource representing the events in the iTIP message
+     */
+    protected static CalendarObjectResource getResource(CalendarSession session, ITipMessage message, boolean filterInvalid) throws OXException {
+        List<Event> events = new ArrayList<Event>();
+        if (null != message.getEvent()) {
+            events.add(message.getEvent());
+        }
+        Iterable<Event> exceptions = message.exceptions();
+        if (null != exceptions) {
+            for (Event exception : exceptions) {
+                if (filterInvalid) {
+                    try {
+                        checkValidity(message, exception);
+                    } catch (OXException e) {
+                        LOG.debug("Filtering invalid exception {}: {}", exception, e.getMessage(), e);
+                        session.addWarning(e);
+                        continue;
+                    }
+                }
+                events.add(exception);
+            }
+        }
+        try {
+            return new IncomingCalendarObjectResource(events);
+        } catch (Exception e) {
+            throw ITipExceptions.NOT_CONFORM.create(e, e.getMessage());
+        }
+    }
+
+    private static void checkValidity(ITipMessage message, Event event) throws OXException {
+        if (ITipMethod.REQUEST.equals(message.getMethod()) || ITipMethod.CANCEL.equals(message.getMethod())) {
+            /*
+             * require UID, ORGANIZER and at least one ATTENDEE
+             */
+            if (null == event.getUid()) {
+                throw CalendarExceptionCodes.MANDATORY_FIELD.create(EventField.UID);
+            }
+            if (null == event.getOrganizer()) {
+                throw CalendarExceptionCodes.MANDATORY_FIELD.create(EventField.ORGANIZER);
+            }
+            if (null == event.getAttendees() || event.getAttendees().isEmpty()) {
+                throw CalendarExceptionCodes.MANDATORY_FIELD.create(EventField.ATTENDEES);
+            }
+        }
     }
 }

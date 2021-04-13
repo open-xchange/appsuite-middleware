@@ -116,7 +116,11 @@ public class CancelProcessor extends AbstractUpdatePerformer {
              * Delete transmitted occurrences one by one
              */
             for (Event deletee : message.getResource().getEvents()) {
-                delete(deletee, originator, message.getTargetUser());
+                try {
+                    delete(deletee, originator, message.getTargetUser());
+                } catch (OXException e) {
+                    session.addWarning(e);
+                }
             }
         }
         return resultTracker.getResult();
@@ -166,7 +170,7 @@ public class CancelProcessor extends AbstractUpdatePerformer {
                 /*
                  * Delete single existing change exception
                  */
-                Event originalSeriesMaster = loadEventData(originalEvent.getSeriesId());
+                Event originalSeriesMaster = optEventData(originalEvent.getSeriesId());
                 return deleteException(originalSeriesMaster, originalEvent);
             }
             if (null == recurrenceId) {

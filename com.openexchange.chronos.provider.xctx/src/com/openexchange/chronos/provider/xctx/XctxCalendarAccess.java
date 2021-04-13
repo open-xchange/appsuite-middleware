@@ -330,13 +330,13 @@ public class XctxCalendarAccess implements SubscribeAware, GroupwareCalendarAcce
     }
 
     @Override
-    public CalendarResult putResource(String folderId, CalendarObjectResource resource) throws OXException {
+    public CalendarResult putResource(String folderId, CalendarObjectResource resource, boolean replace) throws OXException {
         List<Event> unmangledEventData = new ArrayList<Event>();
         for (Event event : resource.getEvents()) {
             Check.containsNoSuchAttendees(event, Boolean.TRUE, CalendarUserType.RESOURCE, CalendarUserType.ROOM, CalendarUserType.GROUP);
             unmangledEventData.add(entityHelper.unmangleLocalEvent(event));
         }
-        CalendarResult calendarResult = getCalendarService().putResource(guestSession, folderId, new DefaultCalendarObjectResource(unmangledEventData));
+        CalendarResult calendarResult = getCalendarService().putResource(guestSession, folderId, new DefaultCalendarObjectResource(unmangledEventData), replace);
         return entityHelper.mangleRemoteCalendarResult(calendarResult);
     }
 

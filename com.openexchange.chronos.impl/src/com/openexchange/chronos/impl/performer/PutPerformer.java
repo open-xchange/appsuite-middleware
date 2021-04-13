@@ -61,7 +61,6 @@ import static com.openexchange.chronos.impl.Utils.isReply;
 import static com.openexchange.chronos.impl.Utils.isReschedule;
 import static com.openexchange.tools.arrays.Collections.isNullOrEmpty;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.ListIterator;
@@ -72,12 +71,13 @@ import com.openexchange.chronos.CalendarUserType;
 import com.openexchange.chronos.DelegatingEvent;
 import com.openexchange.chronos.Event;
 import com.openexchange.chronos.EventField;
-import com.openexchange.chronos.RecurrenceId;
 import com.openexchange.chronos.common.DefaultCalendarObjectResource;
 import com.openexchange.chronos.common.DefaultEventUpdates;
+import com.openexchange.chronos.common.mapping.EventMapper;
 import com.openexchange.chronos.exception.CalendarExceptionCodes;
 import com.openexchange.chronos.impl.CalendarFolder;
 import com.openexchange.chronos.impl.Check;
+import com.openexchange.chronos.impl.Consistency;
 import com.openexchange.chronos.impl.InternalCalendarResult;
 import com.openexchange.chronos.impl.InternalEventUpdate;
 import com.openexchange.chronos.service.CalendarResult;
@@ -137,10 +137,11 @@ public class PutPerformer extends AbstractUpdatePerformer {
      * removed, new ones are added, and existing ones are updated.
      *
      * @param resource The calendar object resource to store
+     * @param replace <code>true</code> to automatically remove stored events that are no longer present in the supplied resource, <code>false</code>, otherwise
      * @return The result
      */
-    public InternalCalendarResult perform(CalendarObjectResource resource) throws OXException {
-        return perform(resource.getEvents(), true);
+    public InternalCalendarResult perform(CalendarObjectResource resource, boolean replace) throws OXException {
+        return perform(resource.getEvents(), replace);
     }
 
     /**
@@ -185,7 +186,7 @@ public class PutPerformer extends AbstractUpdatePerformer {
                  */
                 for (ListIterator<Event> iterator = suppliedEvents.listIterator(); iterator.hasNext();) {
                     Event suppliedEvent = iterator.next();
-                    Event originalEvent = findByRecurrenceId(storedEvents, suppliedEvent.getRecurrenceId());
+                    Event originalEvent = findByRecurrenceId(storedEvents, suppliedEvent);
                     if (null != originalEvent) {
                         iterator.set(maskSequence(Check.requireInSequence(originalEvent, suppliedEvent)));
                     }
@@ -222,7 +223,7 @@ public class PutPerformer extends AbstractUpdatePerformer {
         List<Event> deletedEvents = new ArrayList<Event>();
         List<Event> createdEvents = new ArrayList<Event>();
         for (Event suppliedEvent : sortSeriesMasterFirst(indicatedEvents)) {
-            Event originalEvent = findByRecurrenceId(storedEvents, suppliedEvent.getRecurrenceId());
+            Event originalEvent = findByRecurrenceId(storedEvents, suppliedEvent);
             if (null != originalEvent) {
                 /*
                  * update for existing event
@@ -277,7 +278,7 @@ public class PutPerformer extends AbstractUpdatePerformer {
         List<EventUpdate> updatedEvents = new ArrayList<EventUpdate>();
         List<Event> deletedEvents = new ArrayList<Event>();
         for (Event originalEvent : originalResource.getEvents()) {
-            if (null == findByRecurrenceId(indicatedEvents, originalEvent.getRecurrenceId())) {
+            if (null == findByRecurrenceId(indicatedEvents, originalEvent)) {
                 /*
                  * event from original calendar object resource no longer indicated by client; proceed with deletion if still in intermediate resource
                  */
@@ -406,14 +407,28 @@ public class PutPerformer extends AbstractUpdatePerformer {
      * overridden instance from the list, i.e. a non-recurring or series master event.
      * 
      * @param events The events to search
-     * @param recurrenceId The recurrence identifier to match, or <code>null</code> to lookup an event w/o recurrence identifier
+     * @param event The event to lookup the corresponding event by recurrence id for
      * @return The matching event, or <code>null</code> if not found
      */
-    private static Event findByRecurrenceId(Collection<Event> events, RecurrenceId recurrenceId) {
-        if (null != events) {
-            for (Event event : events) {
-                if (Objects.equals(event.getRecurrenceId(), recurrenceId)) {
-                    return event;
+    private Event findByRecurrenceId(List<Event> events, Event event) {
+        if (null != events && 0 < events.size()) {
+            /*
+             * use prepared event for comparison to match recurrence id properly
+             */
+            Event preparedEvent;
+            try {
+                preparedEvent = EventMapper.getInstance().copy(event, null, EventField.START_DATE, EventField.END_DATE, EventField.RECURRENCE_ID);
+                Consistency.adjustAllDayDates(preparedEvent);
+                Consistency.adjustTimeZones(session.getSession(), calendarUserId, preparedEvent, events.get(0));
+                Consistency.normalizeRecurrenceIDs(preparedEvent.getStartDate(), preparedEvent);
+            } catch (OXException e) {
+                LOG.warn("Unexpected error preparing {} for reucurrence lookup, falling back to supplied event data.", event, e);
+                preparedEvent = event;
+            }
+            for (Event candidate : events) {
+                if (null == candidate.getRecurrenceId() && null == event.getRecurrenceId() ||
+                    null != candidate.getRecurrenceId() && candidate.getRecurrenceId().matches(event.getRecurrenceId())) {
+                    return candidate;
                 }
             }
         }

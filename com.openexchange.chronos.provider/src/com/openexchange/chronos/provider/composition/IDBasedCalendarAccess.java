@@ -509,12 +509,13 @@ public interface IDBasedCalendarAccess extends TransactionAware, CalendarParamet
      * </ul>
      *
      * @param folderId The identifier of the folder to add/update the calendar object resource in
-     * @param recource The calendar object resource to store
+     * @param resource The calendar object resource to store
+     * @param replace <code>true</code> to automatically remove stored events that are no longer present in the supplied resource, <code>false</code>, otherwise
      * @return The calendar result
      * @see <a href="https://tools.ietf.org/html/rfc4791#section-4.1">RFC 4791, section 4.1</a><br/>
      *      <a href="https://tools.ietf.org/html/rfc6638#section-3.1">RFC 6638, section 3.1</a>
      */
-    CalendarResult putResource(String folderId, CalendarObjectResource resource) throws OXException;
+    CalendarResult putResource(String folderId, CalendarObjectResource resource, boolean replace) throws OXException;
 
     /**
      * Updates an existing event.

@@ -51,6 +51,7 @@ package com.openexchange.chronos.itip.json.action;
 
 import static com.openexchange.chronos.itip.json.action.Utils.convertToResult;
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Optional;
@@ -189,6 +190,16 @@ public class IncomingSchedulingAction {
         }
         List<Event> events = CalendarUtils.sortSeriesMasterFirst(new LinkedList<>(calendar.getEvents()));
         if (looksLikeMicrosoft(calendar)) {
+
+            if (1 == 1) {  //TODO
+                for (Iterator<Event> iterator = events.iterator(); iterator.hasNext();) {
+                    Event event = iterator.next();
+                    if (null == event.getOrganizer() || null == event.getAttendees() || event.getAttendees().isEmpty() || null == event.getUid()) {
+                        iterator.remove();
+                    }
+                }
+            }
+
             /*
              * Special handling for Microsoft behavior
              */

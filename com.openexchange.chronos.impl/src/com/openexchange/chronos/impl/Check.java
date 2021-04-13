@@ -202,21 +202,6 @@ public class Check extends com.openexchange.chronos.common.Check {
     }
 
     /**
-     * Checks that an incoming event update has no sequence number smaller than the original event's sequence number.
-     *
-     * @param originalEvent The original event being updated
-     * @param eventUpdate The updated event data
-     * @return The passed event update, after the sequence number was checked
-     * @throws OXException {@link CalendarExceptionCodes#OUT_OF_SEQUENCE}
-     */
-    public static Event requireInSequence(Event originalEvent, Event eventUpdate) throws OXException {
-        if (eventUpdate.containsSequence() && eventUpdate.getSequence() < originalEvent.getSequence()) {
-            throw CalendarExceptionCodes.OUT_OF_SEQUENCE.create(originalEvent.getId(), I(eventUpdate.getSequence()), I(originalEvent.getSequence()));
-        }
-        return eventUpdate;
-    }
-
-    /**
      * Checks that the incoming update does not contain outdated participant status
      * <p>
      * Note: Due the fact that some clients will receive the timestamp in DateTime format <code>ISO.8601.2004</code>,
