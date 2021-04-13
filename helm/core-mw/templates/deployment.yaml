@@ -50,6 +50,8 @@ spec:
             {{- omit .Values.probe.readiness "enabled" | toYaml | nindent 12 }}
           {{- end }}
           env: &as-mw-env
+            - name: RELEASE_NAMESPACE
+              value: {{ .Release.Name }}
             - name: OX_DISABLED_BUNDLES
               value: '/disabled.bundles'
             - name: OX_HOSTNAME
