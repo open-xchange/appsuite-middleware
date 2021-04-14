@@ -140,14 +140,21 @@ public class CleanUpJobRunnable implements Runnable {
             // Map to manage state
             Map<String, Object> state = new HashMap<>(4);
 
-            // Prepare...
-            if (job.getExecution().prepareCleanUp(state) == false) {
-                LOG.info("Could not prepare clean-up of job '{}'.", job.getId());
-                return;
-            }
+            // Prepare, clean-up and finish
+            boolean prepared = false;
+            try {
+                prepared = job.getExecution().prepareCleanUp(state) ;
+                if (prepared == false) {
+                    LOG.info("Could not prepare clean-up of job '{}'.", job.getId());
+                    return;
+                }
 
-            // Clean-up and finish
-            cleanUpAndFinish(state, currentThread);
+                cleanUp(state, currentThread);
+            } finally {
+                if (prepared) {
+                    finishSafe(state);
+                }
+            }
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
             LOG.info("Interrupting clean-up of job '{}'.", job.getId(), e);
@@ -157,6 +164,72 @@ public class CleanUpJobRunnable implements Runnable {
         } finally {
             currentThread.setName(prevName);
         }
+    }
+
+    private void cleanUp(Map<String, Object> state, Thread currentThread) throws OXException, InterruptedException {
+        // Some time stamps...
+        long start = System.currentTimeMillis();
+        long logTimeDistance = TimeUnit.SECONDS.toMillis(10);
+        long lastLogTime = start;
+
+        // Grab needed services
+        ContextService contextService = services.getServiceSafe(ContextService.class);
+        TimerService timerService = services.getServiceSafe(TimerService.class);
+        Updater updater = Updater.getInstance();
+
+        // Iterate over representative context identifier per schema
+        List<Integer> contextsIdInDifferentSchemas = ContextStorage.getInstance().getDistinctContextsPerSchema();
+        int size = contextsIdInDifferentSchemas.size();
+        Iterator<Integer> iter = contextsIdInDifferentSchemas.iterator();
+        for (int i = 0, k = size; k-- > 0; i++) {
+            // Check if thread has been interrupted meanwhile
+            if (currentThread.isInterrupted()) {
+                LOG.info("Interrupting clean-up of job '{}'.", job.getId());
+                return;
+            }
+
+            // Process schema
+            Integer representativeContextId = iter.next();
+            PoolAndSchema poolAndSchema = getSchema(representativeContextId, contextService);
+            if (checkSchemaStatus(poolAndSchema, updater)) {
+                // No update running or pending. Continue clean-up run for that schema...
+                int retryCount = 3;
+                for (int retry = retryCount; retry-- > 0;) {
+                    // Check again if thread has been interrupted meanwhile
+                    if (currentThread.isInterrupted()) {
+                        LOG.info("Interrupting clean-up of job '{}'.", job.getId());
+                        return;
+                    }
+
+                    // Progress logging
+                    long now = System.currentTimeMillis();
+                    if (now > lastLogTime + logTimeDistance) {
+                        LOG.info("Clean-up job '{}' {}% finished ({}/{}).", job.getId(), I(i * 100 / size), I(i), I(size));
+                        lastLogTime = now;
+                    }
+
+                    // Perform clean-up
+                    try {
+                        cleanUpForSchema(representativeContextId.intValue(), poolAndSchema.getSchema(), poolAndSchema.getPoolId(), state, timerService);
+                        retry = 0;
+                    } catch (OXException e) {
+                        if (retry > 0 && Category.CATEGORY_TRY_AGAIN.equals(e.getCategory())) {
+                            long delay = ((retryCount - retry) * 1000) + ((long) (Math.random() * 1000));
+                            LOG.debug("Failed clean-up of job '{}' for schema {}: {}; trying again in {}ms...", job.getId(), poolAndSchema.getSchema(), e.getMessage(), L(delay));
+                            Thread.sleep(delay);
+                        } else {
+                            LOG.warn("Failed clean-up of job '{}' for schema {}", job.getId(), poolAndSchema.getSchema(), e);
+                            retry = 0;
+                        }
+                    } catch (Exception e) {
+                        LOG.warn("Failed clean-up of job '{}' for schema {}", job.getId(), poolAndSchema.getSchema(), e);
+                        retry = 0;
+                    }
+                }
+            }
+        }
+        long duration = System.currentTimeMillis() - start;
+        LOG.info("Clean-up for job '{}' took {}ms ({})", job.getId(), formatDuration(duration), exactly(duration, true));
     }
 
     /**
@@ -180,76 +253,6 @@ public class CleanUpJobRunnable implements Runnable {
             return false;
         }
         return true;
-    }
-
-    private void cleanUpAndFinish(Map<String, Object> state, Thread currentThread) throws OXException, InterruptedException {
-        try {
-            // Some time stamps...
-            long start = System.currentTimeMillis();
-            long logTimeDistance = TimeUnit.SECONDS.toMillis(10);
-            long lastLogTime = start;
-
-            // Grab needed services
-            ContextService contextService = services.getServiceSafe(ContextService.class);
-            TimerService timerService = services.getServiceSafe(TimerService.class);
-            Updater updater = Updater.getInstance();
-
-            // Iterate over representative context identifier per schema
-            List<Integer> contextsIdInDifferentSchemas = ContextStorage.getInstance().getDistinctContextsPerSchema();
-            int size = contextsIdInDifferentSchemas.size();
-            Iterator<Integer> iter = contextsIdInDifferentSchemas.iterator();
-            for (int i = 0, k = size; k-- > 0; i++) {
-                // Check if thread has been interrupted meanwhile
-                if (currentThread.isInterrupted()) {
-                    LOG.info("Interrupting clean-up of job '{}'.", job.getId());
-                    return;
-                }
-
-                // Process schema
-                Integer representativeContextId = iter.next();
-                PoolAndSchema poolAndSchema = getSchema(representativeContextId, contextService);
-                if (checkSchemaStatus(poolAndSchema, updater)) {
-                    // No update running or pending. Continue clean-up run for that schema...
-                    int retryCount = 3;
-                    for (int retry = retryCount; retry-- > 0;) {
-                        // Check again if thread has been interrupted meanwhile
-                        if (currentThread.isInterrupted()) {
-                            LOG.info("Interrupting clean-up of job '{}'.", job.getId());
-                            return;
-                        }
-
-                        // Progress logging
-                        long now = System.currentTimeMillis();
-                        if (now > lastLogTime + logTimeDistance) {
-                            LOG.info("Clean-up job '{}' {}% finished ({}/{}).", job.getId(), I(i * 100 / size), I(i), I(size));
-                            lastLogTime = now;
-                        }
-
-                        // Perform clean-up
-                        try {
-                            cleanUpForSchema(representativeContextId.intValue(), poolAndSchema.getSchema(), poolAndSchema.getPoolId(), state, timerService);
-                            retry = 0;
-                        } catch (OXException e) {
-                            if (retry > 0 && Category.CATEGORY_TRY_AGAIN.equals(e.getCategory())) {
-                                long delay = ((retryCount - retry) * 1000) + ((long) (Math.random() * 1000));
-                                LOG.debug("Failed clean-up of job '{}' for schema {}: {}; trying again in {}ms...", job.getId(), poolAndSchema.getSchema(), e.getMessage(), L(delay));
-                                Thread.sleep(delay);
-                            } else {
-                                LOG.warn("Failed clean-up of job '{}' for schema {}", job.getId(), poolAndSchema.getSchema(), e);
-                                retry = 0;
-                            }
-                        } catch (Exception e) {
-                            LOG.warn("Failed clean-up of job '{}' for schema {}", job.getId(), poolAndSchema.getSchema(), e);
-                            retry = 0;
-                        }
-                    }
-                }
-            }
-            long duration = System.currentTimeMillis() - start;
-            LOG.info("Clean-up for job '{}' took {}ms ({})", job.getId(), formatDuration(duration), exactly(duration, true));
-        } finally {
-            finishSafe(state);
-        }
     }
 
     private void cleanUpForSchema(int representativeContextId, String schema, int poolId, Map<String, Object> state, TimerService timerService) throws OXException {
