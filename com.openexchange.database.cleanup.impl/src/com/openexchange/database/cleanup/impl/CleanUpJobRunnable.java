@@ -137,6 +137,53 @@ public class CleanUpJobRunnable implements Runnable {
         String prevName = currentThread.getName();
         currentThread.setName(job.getId().getIdentifier());
         try {
+            // Map to manage state
+            Map<String, Object> state = new HashMap<>(4);
+
+            // Prepare...
+            if (job.getExecution().prepareCleanUp(state) == false) {
+                LOG.info("Could not prepare clean-up of job '{}'.", job.getId());
+                return;
+            }
+
+            // Clean-up and finish
+            cleanUpAndFinish(state, currentThread);
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+            LOG.info("Interrupting clean-up of job '{}'.", job.getId(), e);
+        } catch (Throwable t) {
+            ExceptionUtils.handleThrowable(t);
+            LOG.warn("Failed to perform clean-up for: '{}'", job.getId(), t);
+        } finally {
+            currentThread.setName(prevName);
+        }
+    }
+
+    /**
+     * Checks the update status of given schema.
+     *
+     * @param poolAndSchema The pool and schema information
+     * @param updater The update instance to use
+     * @return <code>true</code> if schema update status is up-to-date, otherwise <code>false</code> if either currently updating or updates are pending
+     * @throws OXException If update status cannot be checked
+     */
+    private boolean checkSchemaStatus(PoolAndSchema poolAndSchema, Updater updater) throws OXException {
+        UpdateStatus status = updater.getStatus(poolAndSchema.getSchema(), poolAndSchema.getPoolId());
+        if (status.blockingUpdatesRunning()) {
+            // Context-associated schema is currently updated. Abort clean-up for that schema
+            LOG.info("Update running: Skipping clean-up of job '{}' for schema {} since that schema is currently updated", job.getId(), poolAndSchema.getSchema());
+            return false;
+        }
+        if ((status.needsBlockingUpdates() || status.needsBackgroundUpdates()) && !status.blockingUpdatesRunning() && !status.backgroundUpdatesRunning()) {
+            // Context-associated schema needs an update. Abort clean-up for that schema
+            LOG.info("Update needed: Skipping clean-up of job '{}' for schema {} since that schema needs an update", job.getId(), poolAndSchema.getSchema());
+            return false;
+        }
+        return true;
+    }
+
+    private void cleanUpAndFinish(Map<String, Object> state, Thread currentThread) throws OXException, InterruptedException {
+        try {
             // Some time stamps...
             long start = System.currentTimeMillis();
             long logTimeDistance = TimeUnit.SECONDS.toMillis(10);
@@ -163,7 +210,6 @@ public class CleanUpJobRunnable implements Runnable {
                 PoolAndSchema poolAndSchema = getSchema(representativeContextId, contextService);
                 if (checkSchemaStatus(poolAndSchema, updater)) {
                     // No update running or pending. Continue clean-up run for that schema...
-                    Map<String, Object> state = new HashMap<>(4);
                     int retryCount = 3;
                     for (int retry = retryCount; retry-- > 0;) {
                         // Check again if thread has been interrupted meanwhile
@@ -201,38 +247,9 @@ public class CleanUpJobRunnable implements Runnable {
             }
             long duration = System.currentTimeMillis() - start;
             LOG.info("Clean-up for job '{}' took {}ms ({})", job.getId(), formatDuration(duration), exactly(duration, true));
-        } catch (InterruptedException e) {
-            Thread.currentThread().interrupt();
-            LOG.info("Interrupting clean-up of job '{}'.", job.getId(), e);
-        } catch (Throwable t) {
-            ExceptionUtils.handleThrowable(t);
-            LOG.warn("Failed to perform clean-up for: '{}'", job.getId(), t);
         } finally {
-            currentThread.setName(prevName);
+            finishSafe(state);
         }
-    }
-
-    /**
-     * Checks the update status of given schema.
-     *
-     * @param poolAndSchema The pool and schema information
-     * @param updater The update instance to use
-     * @return <code>true</code> if schema update status is up-to-date, otherwise <code>false</code> if either currently updating or updates are pending
-     * @throws OXException If update status cannot be checked
-     */
-    private boolean checkSchemaStatus(PoolAndSchema poolAndSchema, Updater updater) throws OXException {
-        UpdateStatus status = updater.getStatus(poolAndSchema.getSchema(), poolAndSchema.getPoolId());
-        if (status.blockingUpdatesRunning()) {
-            // Context-associated schema is currently updated. Abort clean-up for that schema
-            LOG.info("Update running: Skipping clean-up of job '{}' for schema {} since that schema is currently updated", job.getId(), poolAndSchema.getSchema());
-            return false;
-        }
-        if ((status.needsBlockingUpdates() || status.needsBackgroundUpdates()) && !status.blockingUpdatesRunning() && !status.backgroundUpdatesRunning()) {
-            // Context-associated schema needs an update. Abort clean-up for that schema
-            LOG.info("Update needed: Skipping clean-up of job '{}' for schema {} since that schema needs an update", job.getId(), poolAndSchema.getSchema());
-            return false;
-        }
-        return true;
     }
 
     private void cleanUpForSchema(int representativeContextId, String schema, int poolId, Map<String, Object> state, TimerService timerService) throws OXException {
@@ -314,6 +331,14 @@ public class CleanUpJobRunnable implements Runnable {
         } finally {
             // Roll-back optional connection
             connectionProvider.close();
+        }
+    }
+
+    private void finishSafe(Map<String, Object> state) {
+        try {
+            job.getExecution().finishCleanUp(state);
+        } catch (Exception e) {
+            LOG.warn("Failed to finish clean-up of job '{}'", job.getId(), e);
         }
     }
 

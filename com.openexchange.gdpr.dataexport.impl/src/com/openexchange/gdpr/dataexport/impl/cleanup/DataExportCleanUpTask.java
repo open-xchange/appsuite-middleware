@@ -106,6 +106,8 @@ public class DataExportCleanUpTask implements CleanUpExecution {
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(DataExportCleanUpTask.class);
 
     private static final String PROP_CLEANUP_ENABLED = "com.openexchange.gdpr.dataexport.cleanup.enabled";
+    private static final String PROP_DATABASE_SERVICE = "com.openexchange.gdpr.dataexport.cleanup.databaseService";
+    private static final String PROP_LOCK_ACQUISITION = "com.openexchange.gdpr.dataexport.cleanup.lockAcquisition";
     private static final String PROP_CLEANUP_PROCESSED_FILESTORE_IDS = "com.openexchange.gdpr.dataexport.cleanup.processedFilestoreIds";
     private static final String PROP_CLEANUP_GENERIC_FILESTORE_IDS = "com.openexchange.gdpr.dataexport.cleanup.genericFilestoreIds";
 
@@ -164,39 +166,83 @@ public class DataExportCleanUpTask implements CleanUpExecution {
     }
 
     @Override
-    public boolean isApplicableFor(String schema, int representativeContextId, int databasePoolId, Map<String, Object> state, CleanUpExecutionConnectionProvider connectionProvider) throws OXException {
-        Boolean enabled = (Boolean) state.get(PROP_CLEANUP_ENABLED);
-        if (enabled == null) {
+    public boolean prepareCleanUp(Map<String, Object> state) throws OXException {
+        {
             boolean defaultValue = true;
             ConfigurationService configService = services.getOptionalService(ConfigurationService.class);
-            enabled = Boolean.valueOf(configService == null ? defaultValue : configService.getBoolProperty(PROP_CLEANUP_ENABLED, defaultValue));
-            state.put(PROP_CLEANUP_ENABLED, enabled);
+            boolean enabled = configService == null ? defaultValue : configService.getBoolProperty(PROP_CLEANUP_ENABLED, defaultValue);
+            if (enabled == false) {
+                LOG.warn("Clean-up of data export files disabled per configuration. Aborting clean-up run");
+                return false;
+            }
         }
-        return enabled.booleanValue();
+
+        DatabaseService databaseService = services.getOptionalService(DatabaseService.class);
+        if (databaseService == null) {
+            // Missing database service
+            LOG.warn("Failed to acquire database service, which is needed to clean-up data export files. Aborting clean-up run");
+            return false;
+        }
+
+        // Check for possibly currently running data export tasks
+        Boolean hasRunningTasks = checkForRunningDataExportTasks();
+        if (hasRunningTasks == null) {
+            // Check failed and has already been logged
+            return false;
+        } else if (hasRunningTasks.booleanValue()) {
+            LOG.info("Detected currently running data export tasks. Aborting clean-up run");
+            return false;
+        }
+
+        // Try to acquire lock
+        boolean result = false;
+        DataExportLock lock = DataExportLock.getInstance();
+        DataExportLock.LockAcquisition acquisition = null;
+        try {
+            acquisition = lock.acquireCleanUpTaskLock(true, databaseService);
+            if (acquisition.isNotAcquired()) {
+                // Failed to acquire clean-up lock
+                LOG.info("Failed to acquire clean-up lock for data export files since another process is currently running. Aborting clean-up run");
+                return false;
+            }
+
+            // Lock acquired
+            state.put(PROP_DATABASE_SERVICE, databaseService);
+            state.put(PROP_LOCK_ACQUISITION, acquisition);
+            result = true;
+            return result;
+        } finally {
+            if (result == false) {
+                releaseCleanUpTaskLockSafe(databaseService, acquisition);
+            }
+        }
+    }
+
+    @Override
+    public void finishCleanUp(Map<String, Object> state) throws OXException {
+        DatabaseService databaseService = (DatabaseService) state.get(PROP_DATABASE_SERVICE);
+        DataExportLock.LockAcquisition acquisition = (DataExportLock.LockAcquisition) state.get(PROP_LOCK_ACQUISITION);
+        releaseCleanUpTaskLockSafe(databaseService, acquisition);
+    }
+
+    private static void releaseCleanUpTaskLockSafe(DatabaseService databaseService, DataExportLock.LockAcquisition acquisition) {
+        try {
+            DataExportLock.getInstance().releaseCleanUpTaskLock(acquisition, databaseService);
+        } catch (Exception e) {
+            LOG.warn("Failed to release clean-up lock for data export files", e);
+        }
+    }
+
+    @Override
+    public boolean isApplicableFor(String schema, int representativeContextId, int databasePoolId, Map<String, Object> state, CleanUpExecutionConnectionProvider connectionProvider) throws OXException {
+        return true;
     }
 
     @SuppressWarnings("unchecked")
     @Override
     public void executeFor(String schema, int representativeContextId, int databasePoolId, Map<String, Object> state, CleanUpExecutionConnectionProvider connectionProvider) {
-        // Ignore connection from provider, lock needs to be inserted on its own connection, so manage connections ourselves
-        DatabaseService databaseService = services.getOptionalService(DatabaseService.class);
-        if (databaseService == null) {
-            // Missing database service
-            LOG.warn("Failed to acquire database service, which is needed to clean-up data export files. Aborting clean-up run for schema {}", schema);
-            return;
-        }
-
-        // Check for possibly currently runninf data export tasks
-        Boolean hasRunningTasks = checkForRunningDataExportTasks();
-        if (hasRunningTasks == null) {
-            // Check failed and has already been logged
-            return;
-        } else if (hasRunningTasks.booleanValue()) {
-            LOG.info("Detected currently running data export tasks. Aborting clean-up run for schema {}", schema);
-            return;
-        }
-
         // Determine the file storage identifiers to process for this execution's invocation
+        DatabaseService databaseService = (DatabaseService) state.get(PROP_DATABASE_SERVICE);
         Set<Integer> fileStoreIdsToProcess;
         try {
             Set<Integer> fileStoreIdsWoSchema = (Set<Integer>) state.get(PROP_CLEANUP_GENERIC_FILESTORE_IDS);
@@ -221,17 +267,7 @@ public class DataExportCleanUpTask implements CleanUpExecution {
         }
 
         // Process determined file storage identifiers
-        DataExportLock lock = DataExportLock.getInstance();
-        DataExportLock.LockAcquisition acquisition = null;
         try {
-            acquisition = lock.acquireCleanUpTaskLock(true, databaseService);
-            if (acquisition.isNotAcquired()) {
-                // Failed to acquire clean-up lock
-                LOG.info("Failed to acquire clean-up lock for data export files since another process is currently running. Aborting clean-up run for schema {}", schema);
-                return;
-            }
-
-            // Fix for file storage identifiers
             LOG.info("Going to check {} file storage(s) for orphaned data export files", I(fileStoreIdsToProcess.size()));
             long start = System.currentTimeMillis();
             fixOrphanedEntries(fileStoreIdsToProcess);
@@ -241,14 +277,6 @@ public class DataExportCleanUpTask implements CleanUpExecution {
             ExceptionUtils.handleThrowable(t);
             LOG.warn("Failed clean-up run for schema {}", schema, t);
             return;
-        } finally {
-            if (acquisition != null) {
-                try {
-                    lock.releaseCleanUpTaskLock(acquisition, databaseService);
-                } catch (Exception e) {
-                    LOG.warn("Failed to release clean-up lock for data export files", e);
-                }
-            }
         }
 
         // Remember already processed file storage identifiers

@@ -61,6 +61,19 @@ import com.openexchange.exception.OXException;
 public interface CleanUpExecution {
 
     /**
+     * Prepares the clean-up.
+     * <p>
+     * This method is invoked prior to invoking <code>isApplicableFor()</code> and <code>executeFor()</code> for each database schema.
+     *
+     * @param state The cross-schema state for this execution, which allows to store arbitrary data that is kept for each schema-wise invocation
+     * @return <code>true</code> if this execution has successfully prepared for schema-wise clean-up executions; otherwise <code>false</code> to abort
+     * @throws OXException If preparation fails and thus prevents from invoking schema-wise clean-up executions
+     */
+    default boolean prepareCleanUp(Map<String, Object> state) throws OXException {
+        return true;
+    }
+
+    /**
      * Checks if this clean-up execution is applicable for given database schema; e.g. check if certain tables are available.
      *
      * @param schema The database schema name
@@ -84,5 +97,18 @@ public interface CleanUpExecution {
      * @throws OXException If execution fails
      */
     void executeFor(String schema, int representativeContextId, int databasePoolId, Map<String, Object> state, CleanUpExecutionConnectionProvider connectionProvider) throws OXException;
+
+    /**
+     * Finishes the clean-up.
+     * <p>
+     * This method is invoked after invoking <code>isApplicableFor()</code> and <code>executeFor()</code> for each database schema, but only
+     * if <code>prepareCleanUp()</code> advertised <code>true</code>.
+     *
+     * @param state The cross-schema state for this execution, which allows to store arbitrary data that is kept for each schema-wise invocation
+     * @throws OXException If finishing action(s) fail
+     */
+    default void finishCleanUp(Map<String, Object> state) throws OXException {
+        // Nothing
+    }
 
 }
