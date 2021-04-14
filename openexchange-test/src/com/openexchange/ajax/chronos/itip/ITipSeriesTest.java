@@ -54,6 +54,7 @@ import static com.openexchange.ajax.chronos.itip.ITipAssertion.assertChanges;
 import static com.openexchange.ajax.chronos.itip.ITipAssertion.assertSingleChange;
 import static com.openexchange.ajax.chronos.itip.ITipAssertion.assertSingleDescription;
 import static com.openexchange.ajax.chronos.itip.ITipAssertion.assertSingleEvent;
+import static com.openexchange.ajax.chronos.itip.ITipUtil.acceptSummary;
 import static com.openexchange.ajax.chronos.itip.ITipUtil.constructBody;
 import static com.openexchange.ajax.chronos.itip.ITipUtil.receiveIMip;
 import static org.hamcrest.Matchers.empty;
@@ -282,13 +283,13 @@ public class ITipSeriesTest extends AbstractITipAnalyzeTest {
 
         /*--------- b) --------*/
         /*
-         * Get invitation to new series, wit new UID and a existing change exception
+         * Get invitation to new series, wit new UID and a existing change exception. Expect unchanged part stat
          */
         MailData newSeriersIMip = receiveIMip(apiClientC2, testUser.getLogin(), summary, 1, SchedulingMethod.REQUEST);
         newEvent = assertChanges(analyze(apiClientC2, newSeriersIMip), 2, 0).getNewEvent();
         assertNotNull(newEvent);
         assertNotEquals("New series must NOT have the same UID as before", createdEvent.getUid(), newEvent.getUid());
-        assertAttendeePartStat(newEvent.getAttendees(), replyingAttendee.getEmail(), PartStat.NEEDS_ACTION.status);
+        assertAttendeePartStat(newEvent.getAttendees(), replyingAttendee.getEmail(), null == newEvent.getRrule() ? PartStat.TENTATIVE.getStatus() : PartStat.ACCEPTED.getStatus());
 
         /*
          * Accept and check that master and exception are accepted
@@ -300,7 +301,7 @@ public class ITipSeriesTest extends AbstractITipAnalyzeTest {
         /*
          * Check reply in organizers inbox
          */
-        reply = receiveIMip(apiClient, replyingAttendee.getEmail(), summary, 1, SchedulingMethod.REPLY);
+        reply = receiveIMip(apiClient, replyingAttendee.getEmail(), acceptSummary(replyingAttendee.getCn(), summary), 1, SchedulingMethod.REPLY);
         analyze(reply.getId());
     }
 }

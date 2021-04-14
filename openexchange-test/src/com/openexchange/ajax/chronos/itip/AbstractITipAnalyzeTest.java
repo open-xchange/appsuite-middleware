@@ -86,12 +86,14 @@ public abstract class AbstractITipAnalyzeTest extends AbstractITipTest {
     protected MailDestinationData mailData;
 
     protected EventData createdEvent;
-    
+
     protected Attendee prepareCommonAttendees(EventData event) {
         Attendee replyingAttendee = convertToAttendee(testUserC2, Integer.valueOf(0));
         replyingAttendee.setPartStat(PartStat.NEEDS_ACTION.getStatus());
-        // organizer gets added automatically
+        Attendee organizingAttendee = convertToAttendee(testUser, I(testUser.getUserId()));
+        organizingAttendee.setPartStat(PartStat.ACCEPTED.getStatus());
         ArrayList<Attendee> attendees = new ArrayList<>(5);
+        attendees.add(organizingAttendee);
         attendees.add(replyingAttendee);
         event.setAttendees(attendees);
         CalendarUser c = new CalendarUser();

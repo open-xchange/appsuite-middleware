@@ -37,6 +37,7 @@
 	<classpathentry combineaccessrules="false" kind="src" path="/com.openexchange.annotation"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/com.openexchange.conversion"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/com.openexchange.conversion.engine"/>
+	<classpathentry combineaccessrules="false" kind="src" path="/com.openexchange.chronos.itip"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/com.openexchange.data.conversion.ical.ical4j"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/com.openexchange.i18n"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/com.openexchange.imap"/>

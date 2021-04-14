@@ -112,6 +112,15 @@ public class PutPerformer extends AbstractUpdatePerformer {
     }
 
     /**
+     * Initializes a new {@link PutPerformer}.
+     * 
+     * @param performer Another performer 
+     */
+    public PutPerformer(AbstractUpdatePerformer performer) {
+        super(performer);
+    }
+
+    /**
      * Puts a new or updated event from a calendar object resource to the calendar. In case the calendar resource already exists, the event
      * is updated or added to the resource implicitly if possible.
      *

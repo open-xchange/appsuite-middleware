@@ -53,6 +53,7 @@ import static com.openexchange.chronos.impl.Check.requireCalendarPermission;
 import static com.openexchange.folderstorage.Permission.CREATE_OBJECTS_IN_FOLDER;
 import static com.openexchange.folderstorage.Permission.NO_PERMISSIONS;
 import static com.openexchange.folderstorage.Permission.WRITE_OWN_OBJECTS;
+import static com.openexchange.tools.arrays.Collections.isNullOrEmpty;
 import java.util.Collection;
 import java.util.List;
 import com.openexchange.chronos.CalendarUser;
@@ -97,19 +98,14 @@ public class AddProcessor extends CreatePerformer {
     /**
      * Initializes a new {@link RequestProcessor}.
      * 
-     * @param storage The underlying calendar storage
-     * @param session The calendar session
-     * @param folder The calendar folder representing the current view on the events
-     * @param source The source from which the scheduling has been triggered
-     * @param addUserAttendee <code>true</code> to indicate that the calendar user shall be added to the list of attendees if she is missing.
-     *            Set to <code>false</code> to throw an appropriated exception, which is default for the normal process of the {@link SchedulingMethod#ADD}.
+     * @param performer The update performer to take over the settings from
      */
     protected AddProcessor(AbstractUpdatePerformer performer) {
         super(performer);
     }
 
     /**
-     * Creates new change exceptions
+     * Creates new change exception(s)
      *
      * @param message The {@link IncomingSchedulingMessage}
      * @return An {@link InternalCalendarResult} containing the changes that has been performed
@@ -185,15 +181,10 @@ public class AddProcessor extends CreatePerformer {
      * @see RecurrenceId#matches(RecurrenceId)
      */
     public static Event find(Collection<Event> events, RecurrenceId recurrenceID) {
-        if (null == events) {
+        if (isNullOrEmpty(events) || null == recurrenceID) {
             return null;
         }
-        for (Event event : events) {
-            if (null != recurrenceID && recurrenceID.matches(event.getRecurrenceId())) {
-                return event;
-            }
-        }
-        return null;
+        return events.stream().filter(e -> recurrenceID.matches(e.getRecurrenceId())).findAny().orElse(null);
     }
 
 }

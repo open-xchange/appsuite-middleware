@@ -76,6 +76,7 @@ import com.openexchange.chronos.Event;
 import com.openexchange.chronos.ical.ImportedCalendar;
 import com.openexchange.chronos.ical.ical4j.mapping.ICalMapper;
 import com.openexchange.chronos.ical.impl.ICalUtils;
+import com.openexchange.chronos.itip.Messages;
 import com.openexchange.chronos.scheduling.SchedulingMethod;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.Streams;
@@ -110,7 +111,7 @@ import net.fortuna.ical4j.util.CompatibilityHints;
  * @since v7.10.3
  */
 public class ITipUtil {
-    
+
     private static final Logger LOGGER = LoggerFactory.getLogger(ITipUtil.class);
 
     private static final String NOTIFY_ACCEPTED_DECLINED_AS_CREATOR = "notifyAcceptedDeclinedAsCreator";
@@ -217,6 +218,52 @@ public class ITipUtil {
         body.setComOpenexchangeMailConversionMailid(mailId);
         body.setComOpenexchangeMailConversionSequenceid(sequenceId);
         return body;
+    }
+
+    /**
+     * Constructs the mail subject of an iMIP message where the attendee
+     * has accepted an event (series)
+     * <p>
+     * <code>anton accepted the invitation: Foo</code>
+     *
+     * @param from The attendee replying
+     * @param summary The summary of the event
+     * @return The mail subject
+     */
+    public static String acceptSummary(String from, String summary) {
+        return constructSummary("accepted", from, summary);
+    }
+
+    /**
+     * Constructs the mail subject of an iMIP message where the attendee
+     * has tentatively accepted an event (series)
+     * <p>
+     * <code>anton tentatively accepted the invitation: Foo</code>
+     *
+     * @param from The attendee replying
+     * @param summary The summary of the event
+     * @return The mail subject
+     */
+    public static String tentativeSummary(String from, String summary) {
+        return constructSummary("tentatively accepted", from, summary);
+    }
+
+    /**
+     * Constructs the mail subject of an iMIP message where the attendee
+     * has declined an event (series)
+     * <p>
+     * <code>anton declined the invitation: Foo</code>
+     *
+     * @param from The attendee replying
+     * @param summary The summary of the event
+     * @return The mail subject
+     */
+    public static String declineSummary(String from, String summary) {
+        return constructSummary("declined", from, summary);
+    }
+
+    private static String constructSummary(String action, String from, String summary) {
+        return String.format(Messages.SUBJECT_STATE_CHANGED, from, action, summary);
     }
 
     /**

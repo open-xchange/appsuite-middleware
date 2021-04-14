@@ -53,11 +53,11 @@ import static com.openexchange.chronos.impl.Utils.getCalendarFolder;
 import static com.openexchange.chronos.impl.Utils.postProcess;
 import com.openexchange.chronos.Event;
 import com.openexchange.chronos.exception.CalendarExceptionCodes;
-import com.openexchange.chronos.impl.performer.PutPerformer;
 import com.openexchange.chronos.impl.scheduling.AddProcessor;
+import com.openexchange.chronos.impl.scheduling.AttendeeUpdateProcessor;
 import com.openexchange.chronos.impl.scheduling.CancelProcessor;
-import com.openexchange.chronos.impl.scheduling.PostProcessor;
 import com.openexchange.chronos.impl.scheduling.ReplyProcessor;
+import com.openexchange.chronos.impl.scheduling.RequestProcessor;
 import com.openexchange.chronos.scheduling.IncomingSchedulingMessage;
 import com.openexchange.chronos.scheduling.SchedulingMethod;
 import com.openexchange.chronos.scheduling.SchedulingSource;
@@ -65,13 +65,9 @@ import com.openexchange.chronos.service.CalendarResult;
 import com.openexchange.chronos.service.CalendarSession;
 import com.openexchange.chronos.service.SchedulingUtilities;
 import com.openexchange.chronos.storage.CalendarStorage;
-import com.openexchange.context.ContextService;
 import com.openexchange.exception.OXException;
-import com.openexchange.groupware.container.FolderObject;
-import com.openexchange.groupware.contexts.Context;
 import com.openexchange.osgi.annotation.SingletonService;
 import com.openexchange.server.ServiceLookup;
-import com.openexchange.tools.oxfolder.OXFolderAccess;
 
 /**
  * {@link SchedulingUtilitiesImpl} - Class providing utility method for processing and updating the calendar based
@@ -135,46 +131,19 @@ public class SchedulingUtilitiesImpl implements SchedulingUtilities {
 
     @Override
     public CalendarResult processRequest(CalendarSession session, SchedulingSource source, IncomingSchedulingMessage message) throws OXException {
-        InternalCalendarResult result = postProcess(serviceLookup, new InternalCalendarStorageOperation<InternalCalendarResult>(session) {
+        InternalCalendarResult result = new InternalCalendarStorageOperation<InternalCalendarResult>(session) {
 
             @Override
             protected InternalCalendarResult execute(CalendarSession session, CalendarStorage storage) throws OXException {
-                Event event = message.getResource().getFirstEvent();
-                CalendarFolder calendarFolder;
-                try {
-                    calendarFolder = getCalendarFolder(session, storage, event.getUid(), event.getRecurrenceId(), message.getTargetUser());
-                } catch (OXException e) {
-                    if (false == e.equalsCode(CalendarExceptionCodes.EVENT_NOT_FOUND.getNumber(), CalendarExceptionCodes.PREFIX)) {
-                        throw e;
-                    }
-                    LOG.debug("Unable to find event. Using default calendar folder");
-                    calendarFolder = Utils.getFolder(session, getPrivateCalendarFolderId(session.getContextId(), session.getUserId()));
-                }
-                return new PutPerformer(storage, session, calendarFolder).perform(message.getResource());
+                return new RequestProcessor(session, storage, getTargetFolder(session, storage, message)).process(message.getResource());
             }
-        }.executeUpdate());
+        }.executeUpdate();
         return postProcessScheduling(session, source, message, result);
     }
 
     /*
      * ============================== HELPERS ==============================
      */
-
-    /**
-     * Get the private default calendar folder of the acting user
-     *
-     * @param contextId The context of the user
-     * @param userId The user identifier
-     * @return The default folder identifier of the users private calendar folder
-     * @throws OXException In case folder can't be get
-     */
-    protected String getPrivateCalendarFolderId(int contextId, int userId) throws OXException {
-        ContextService contextService = serviceLookup.getServiceSafe(ContextService.class);
-        final Context ctx = contextService.getContext(contextId);
-        final OXFolderAccess acc = new OXFolderAccess(ctx);
-        return String.valueOf(acc.getDefaultFolderID(userId, FolderObject.CALENDAR));
-    }
-
 
     /**
      * Post processes a scheduling action to e.g. adjust attendee status to transmitted data and returns
@@ -216,7 +185,7 @@ public class SchedulingUtilitiesImpl implements SchedulingUtilities {
 
             @Override
             protected InternalCalendarResult execute(CalendarSession session, CalendarStorage storage) throws OXException {
-                return new PostProcessor(session, storage, result.getFolder(), method).process(result, action, comment);
+                return new AttendeeUpdateProcessor(storage, session, result.getFolder(), method).process(result, action, comment);
             }
         }.executeUpdate());
     }

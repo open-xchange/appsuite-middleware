@@ -309,7 +309,8 @@ public class ITipAnalyzeChangesTest extends AbstractITipAnalyzeTest {
          */
         EventData deltaEvent = prepareDeltaEvent(createdEvent);
         Date date = DateTimeUtil.parseDateTime(createdEvent.getStartDate());
-        deltaEvent.setStartDate(DateTimeUtil.getDateTime("Europe/Isle_of_Man", date.getTime()));
+        String timeZone = "Europe/Isle_of_Man";
+        deltaEvent.setStartDate(DateTimeUtil.getDateTime(timeZone, date.getTime()));
 
         updateEventAsOrganizer(deltaEvent);
 
@@ -329,11 +330,7 @@ public class ITipAnalyzeChangesTest extends AbstractITipAnalyzeTest {
          */
         accept(apiClientC2, constructBody(iMip), null);
         attendeeEvent = eventManagerC2.getEvent(folderIdC2, attendeeEvent.getId());
-        /*
-         *  Converted to"Europe/London" before sending
-         *  See also com.openexchange.chronos.ical.ical4j.mapping.AbstractICalMapping.toICalDate()
-         */
-        assertTrue("Not changed!", "Europe/London".equals(attendeeEvent.getStartDate().getTzid()));
+        assertTrue(timeZone.equals(attendeeEvent.getStartDate().getTzid()));
         checkNoReplyMailReceived(testUser.getApiClient(), replyingAttendee, summary);
     }
 

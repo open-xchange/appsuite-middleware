@@ -54,8 +54,7 @@ import static com.openexchange.java.Autoboxing.L;
 import static com.openexchange.tools.arrays.Collections.isNullOrEmpty;
 import java.util.List;
 import java.util.Optional;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import java.util.stream.Collectors;
 import com.openexchange.chronos.Attendee;
 import com.openexchange.chronos.AttendeeField;
 import com.openexchange.chronos.Event;
@@ -74,36 +73,34 @@ import com.openexchange.chronos.service.CalendarResult;
 import com.openexchange.chronos.service.CalendarSession;
 import com.openexchange.chronos.service.CreateResult;
 import com.openexchange.chronos.service.DeleteResult;
+import com.openexchange.chronos.service.EventID;
 import com.openexchange.chronos.service.UpdateResult;
 import com.openexchange.chronos.storage.CalendarStorage;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.Strings;
-import com.openexchange.server.ServiceLookup;
+import com.openexchange.tools.arrays.Collections;
 
 /**
- * {@link PostProcessor} - Post processes scheduling actions, e.g. updates attendee status
- * <p>
- * Post process in one transaction to avoid inconsistent data
+ * {@link AttendeeUpdateProcessor} - Updates the status for an participant after incoming changes
+ * to an calendar object resource were processed and applied in the calendar.
  *
  * @author <a href="mailto:daniel.becker@open-xchange.com">Daniel Becker</a>
  * @since v8.0.0
  */
-public class PostProcessor extends AbstractUpdatePerformer {
+public class AttendeeUpdateProcessor extends AbstractUpdatePerformer {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(PostProcessor.class);
-
-    private final SchedulingMethod method;
+    protected final SchedulingMethod method;
 
     /**
-     * Initializes a new {@link PostProcessor}.
+     * Initializes a new {@link AttendeeUpdateProcessor}.
      * 
+     * @param storage The calendar storage
      * @param session The calendar session
-     * @param storage The {@link ServiceLookup}
-     * @param folder The calendar folder
-     * @param method The method to handle
+     * @param folder The calendar folder to operate on
+     * @param method The method being processed
      * @throws OXException In case of error
      */
-    public PostProcessor(CalendarSession session, CalendarStorage storage, CalendarFolder folder, SchedulingMethod method) throws OXException {
+    public AttendeeUpdateProcessor(CalendarStorage storage, CalendarSession session, CalendarFolder folder, SchedulingMethod method) throws OXException {
         super(storage, session, folder);
         this.method = method;
     }
@@ -133,69 +130,75 @@ public class PostProcessor extends AbstractUpdatePerformer {
         /*
          * Get user transmitted participant status, if any
          */
-        ParticipationStatus partStat = null;
-        {
-            switch (action.toLowerCase()) {
-                case "accept_and_ignore_conflicts":
-                    session.set(CalendarParameters.PARAMETER_CHECK_CONFLICTS, Boolean.FALSE);
-                    //$FALL-THROUGH$
-                case "accept":
-                    partStat = ParticipationStatus.ACCEPTED;
-                    break;
-                case "tentative":
-                    partStat = ParticipationStatus.TENTATIVE;
-                    break;
-                case "decline":
-                    partStat = ParticipationStatus.DECLINED;
-                    break;
-                case "update":
-                    // Restore participant status after update
-                    break;
-                default:
-                    return result;
-            }
+        final ParticipationStatus partStat;
+        switch (action.toLowerCase()) {
+            case "accept_and_ignore_conflicts":
+                session.set(CalendarParameters.PARAMETER_CHECK_CONFLICTS, Boolean.FALSE);
+                //$FALL-THROUGH$
+            case "accept":
+                partStat = ParticipationStatus.ACCEPTED;
+                break;
+            case "tentative":
+                partStat = ParticipationStatus.TENTATIVE;
+                break;
+            case "decline":
+                partStat = ParticipationStatus.DECLINED;
+                break;
+            case "update":
+                // Restore participant status after update
+                partStat = null;
+                break;
+            default:
+                return result;
         }
         try {
             return update(result, comment, userizedResult, partStat);
         } catch (OXException e) {
+            LOG.debug("Unable to update attendee status", e);
             session.addWarning(e);
-            LOGGER.warn("Unable to perform post processing for incoming scheduling message.", e);
         }
         return result;
-
     }
 
-    private InternalCalendarResult update(InternalCalendarResult result, String comment, CalendarResult userizedResult, ParticipationStatus partStat) throws OXException {
+    InternalCalendarResult update(InternalCalendarResult result, String comment, CalendarResult userizedResult, ParticipationStatus partStat) throws OXException {
         /*
-         * Adjust all updated events
+         * Adjust all updated and rescheduled events, keep part-stat of non-rescheduled events as user doesn't intend to change status in those
          */
-        for (UpdateResult updateResult : userizedResult.getUpdates()) {
-            /*
-             * Only adjust participant status if event was rescheduled
-             */
-            if (false == Utils.isReschedule(updateResult)) {
-                continue;
-            }
-            Attendee update = prepareAttendeeUpdate(updateResult, partStat, comment);
+        List<UpdateResult> updates = userizedResult.getUpdates();
+        if (false == Collections.isNullOrEmpty(updates)) {
+            Attendee update = prepareAttendeeUpdate(userizedResult.getUpdates(), partStat, comment);
             if (null != update) {
-                Event updatedEvent = updateResult.getUpdate();
-                new UpdateAttendeePerformer(this).perform(updatedEvent.getId(), updatedEvent.getRecurrenceId(), update, null, L(timestamp.getTime()));
+                List<EventID> eventIds = updates.stream() //@formatter:off
+                    .filter(u -> Utils.isReschedule(u))
+                    .map(u -> u.getUpdate())
+                    .map(u -> new EventID(u.getFolderId(), u.getId(), u.getRecurrenceId()))
+                    .collect(Collectors.toList()); //@formatter:on
+                if (false == Collections.isNullOrEmpty(eventIds)) {
+                    new UpdateAttendeePerformer(this).perform(eventIds, update, L(timestamp.getTime()));
+                }
             }
         }
+
         /*
          * Adjust all created events
          */
-        if (null != partStat) {
-            for (CreateResult createResult : userizedResult.getCreations()) {
-                Event createdEvent = createResult.getCreatedEvent();
-                Attendee attendee = CalendarUtils.find(createdEvent.getAttendees(), calendarUserId);
+        List<CreateResult> creations = userizedResult.getCreations();
+        if (null != partStat && false == Collections.isNullOrEmpty(creations)) {
+            List<Event> createdEvents = creations.stream().map(c -> c.getCreatedEvent()).collect(Collectors.toList());
+            Optional<Event> representativeEvent = createdEvents.stream().filter(e -> null != CalendarUtils.find(e.getAttendees(), calendarUserId)).findAny();
+            if (representativeEvent.isPresent()) {
+                /*
+                 * Perform attendee status update
+                 */
+                Attendee attendee = CalendarUtils.find(representativeEvent.get().getAttendees(), calendarUserId);
                 Attendee update = AttendeeMapper.getInstance().copy(attendee, null, (AttendeeField[]) null);
                 update.setPartStat(partStat);
                 update.setComment(comment);
                 update.setTimestamp(timestamp.getTime());
-                new UpdateAttendeePerformer(this).perform(createdEvent.getId(), createdEvent.getRecurrenceId(), update, null, L(timestamp.getTime()));
-            }
+                List<EventID> eventIds = createdEvents.stream().map(c -> new EventID(c.getFolderId(), c.getId(), c.getRecurrenceId())).collect(Collectors.toList());
+                new UpdateAttendeePerformer(this).perform(eventIds, update, L(timestamp.getTime()));
 
+            }
         } // Else; "Update" scenario, let user decide for each new event as we have no data to restore from
 
         /*
@@ -214,10 +217,30 @@ public class PostProcessor extends AbstractUpdatePerformer {
      * @return The attendee for the update or <code>null</code> to indocate that the update can be skipped
      * @throws OXException
      */
+    private Attendee prepareAttendeeUpdate(List<UpdateResult> updateResult, ParticipationStatus partStat, String comment) throws OXException {
+        for (UpdateResult result : updateResult) {
+            Attendee prepared = prepareAttendeeUpdate(result, partStat, comment);
+            if (null != prepared) {
+                return prepared;
+            }
+        }
+        return null;
+    }
+
+    /**
+     * Prepares an attendee for update and sets the desired participant status
+     *
+     * @param updateResult The update result of the event the attendee shall be updated on again
+     * @param session The calendar session
+     * @param partStat The participant status to set or <code>null</code> to restore from original event
+     * @param comment The optional comment to set
+     * @return The attendee for the update or <code>null</code> to indicate that the update can be skipped
+     * @throws OXException In case copy of the attendee fails
+     */
     private Attendee prepareAttendeeUpdate(UpdateResult updateResult, ParticipationStatus partStat, String comment) throws OXException {
         Attendee attendee = CalendarUtils.find(updateResult.getUpdate().getAttendees(), calendarUserId);
         if (null == attendee) {
-            LOGGER.debug("Unable to find attendee with ID {} in updated event {} after update for method {} was executed", I(calendarUserId), updateResult.getUpdate(), method);
+            LOG.debug("Unable to find attendee with ID {} in updated event {} after update for method {} was executed", I(calendarUserId), updateResult.getUpdate(), method);
             return null;
         }
         Attendee update = AttendeeMapper.getInstance().copy(attendee, null, (AttendeeField[]) null);
@@ -310,4 +333,5 @@ public class PostProcessor extends AbstractUpdatePerformer {
         }
         return results.stream().filter(d -> d.getEventID().equals(deleteResult.getEventID())).findAny();
     }
+
 }
