@@ -204,12 +204,12 @@ public class CardDAVOnboardingProvider implements OnboardingPlistProvider {
                 CustomLoginSource customLoginSource = getHighestRankedCustomLoginSource();
                 if (null == customLoginSource) {
                     LOG.warn("Unable to find any CustomLoginSource services! Falling back to login name.");
-                    login = session.getLogin();
+                    login = OnboardingUtility.getUserLogin(session.getUserId(), session.getContextId());
                 } else {
                     login = customLoginSource.getCardDAVLogin(session.getUserId(), session.getContextId());
                 }
             } else {
-                login = session.getLogin();
+                login = OnboardingUtility.getUserLogin(session.getUserId(), session.getContextId());
             }
         }
         configuration.put(CARDDAV_LOGIN_FIELD, login);

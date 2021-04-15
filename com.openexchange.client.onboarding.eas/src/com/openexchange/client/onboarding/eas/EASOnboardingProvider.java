@@ -204,12 +204,12 @@ public class EASOnboardingProvider implements OnboardingPlistProvider {
                 CustomLoginSource customLoginSource = getHighestRankedCustomLoginSource();
                 if (null == customLoginSource) {
                     LOG.warn("Unable to find any CustomLoginSource services! Falling back to login name.");
-                    login = session.getLogin();
+                    login = OnboardingUtility.getUserLogin(session.getUserId(), session.getContextId());;
                 } else {
                     login = customLoginSource.getEASLogin(session.getUserId(), session.getContextId());
                 }
             } else {
-                login = session.getLogin();
+                login = OnboardingUtility.getUserLogin(session.getUserId(), session.getContextId());;
             }
         }
         configuration.put(EAS_LOGIN_FIELD, login);
