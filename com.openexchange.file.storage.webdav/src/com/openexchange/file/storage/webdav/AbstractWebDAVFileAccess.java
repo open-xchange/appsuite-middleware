@@ -61,6 +61,7 @@ import static com.openexchange.webdav.client.PropertyName.DAV_GETCONTENTLENGTH;
 import static com.openexchange.webdav.client.PropertyName.DAV_GETCONTENTTYPE;
 import static com.openexchange.webdav.client.PropertyName.DAV_GETETAG;
 import static com.openexchange.webdav.client.PropertyName.DAV_GETLASTMODIFIED;
+import static com.openexchange.webdav.client.PropertyName.DAV_RESOURCETYPE;
 import static com.openexchange.webdav.client.PropertyName.DAV_LOCKDISCOVERY;
 import static com.openexchange.webdav.client.WebDAVClient.DEPTH_0;
 import static com.openexchange.webdav.client.WebDAVClient.DEPTH_1;
@@ -823,6 +824,7 @@ public abstract class AbstractWebDAVFileAccess extends AbstractWebDAVAccess impl
         }
         HashSet<QName> props = new HashSet<>(fields.size() + 1);
         props.add(DAV_GETETAG);
+        props.add(DAV_RESOURCETYPE);
         for (Field field : fields) {
             switch (field) {
                 case LAST_MODIFIED:

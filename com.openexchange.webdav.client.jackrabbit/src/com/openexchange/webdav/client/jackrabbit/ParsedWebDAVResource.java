@@ -75,7 +75,7 @@ import com.openexchange.webdav.client.WebDAVResource;
  */
 public class ParsedWebDAVResource implements WebDAVResource {
 
-    private final String href;
+    private String href;
     private final DavPropertySet propertySet;
 
     /**
@@ -88,6 +88,9 @@ public class ParsedWebDAVResource implements WebDAVResource {
         super();
         this.href = href;
         this.propertySet = propertySet;
+        if(isCollection() && !href.endsWith("/")) {
+           this.href += "/";
+        }
     }
 
     @Override
