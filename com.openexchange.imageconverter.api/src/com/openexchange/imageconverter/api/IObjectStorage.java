@@ -49,59 +49,71 @@
 
 package com.openexchange.imageconverter.api;
 
-import java.io.Closeable;
-import java.io.File;
-import java.io.IOException;
 import java.io.InputStream;
-import java.util.Date;
+import java.util.Set;
 
 /**
- * {@link IFileItemReadAccess}
+ * {@link IObjectStorage}
  *
  * @author <a href="mailto:kai.ahrens@open-xchange.com">Kai Ahrens</a>
- * @since v7.10.0
+ * @since v8.0.0
  */
-public interface IFileItemReadAccess extends Closeable {
+public interface IObjectStorage {
 
     /**
-     * Returns the {@link InputStream} to read content from.</br>
-     * The returned {@link InputStream} instance is owned by the caller and
-     * needs to be closed appropriately after final usage.
-     *
-     * @return The {@link InputStream} to read content from.
-     */
-    InputStream getInputStream() throws IOException;
-
-    /**
-     * Returns the {@link File} to read content from.
-     *
-     * @return The {@link File} to read content from.
-     * @throws IOException
-     */
-    File getInputFile() throws IOException;
-
-    /**
-     * @return The creation {@link Date} of the file as Gregorian calendar date
-     */
-    Date getCreateDate();
-
-    /**
-     * @return The last access {@link Date} of the file in as Gregorian calendar date
-     */
-    Date getModificationDate();
-
-    /**
-     * @return The length of the existing file item.
-     */
-    long getLength();
-
-    /**
-     * Returns the value of the FileItem's property with the
-     * given key. The key aliases need to be registered once
-     * via the {
-     *
-     * @param key The key to retrieve the value for
      * @return
      */
-    String getKeyValue(final String key) throws FileItemException;
+    default int getId() {
+        return 0;
+    }
+
+    /**
+     * @param inputStm
+     * @return
+     * @throws Exception
+     */
+    String createObject(InputStream inputStm) throws Exception;
+
+    /**
+     * @param objectId
+     * @throws Exception
+     */
+    void deleteObject(String objectId) throws Exception;
+
+    /**
+     * @param objectIds
+     * @return
+     * @throws Exception
+     */
+    Set<String> deleteObjects(String[] objectIds) throws Exception;
+
+    /**
+     * @param objectId
+     * @return
+     * @throws Exception
+     */
+    InputStream getObject(String objectId) throws Exception;
+
+    /**
+     * @param objectId
+     * @param inputStm
+     * @param offset
+     * @return
+     * @throws Exception
+     */
+    long appendToObject(String objectId, InputStream inputStm, long offset) throws Exception;
+
+    /**
+     * @param objectId
+     * @return
+     * @throws Exception
+     */
+    long getObjectSize(String objectId) throws Exception;
+
+    /**
+     * @param objectId
+     * @param size
+     * @throws Exception
+     */
+    void setObjectSize(String objectId, long size) throws Exception;
 }

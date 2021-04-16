@@ -85,19 +85,13 @@ public enum AccessOption {
      * If the file didn't exist before, it will be created and the initial
      * file length directly after accessing the file will be 0.
      */
-    WRITE_MODE_APPEND,
-
-    ACCESS_MODE_WAIT;
+    WRITE_MODE_APPEND;
 
     // - Default access option combinations ------------------------------------
 
     public final static AccessOption[] TRUNCATE = { AccessOption.WRITE_MODE_TRUNCATE };
 
-    public final static AccessOption[] TRUNCATE_WAIT = { AccessOption.WRITE_MODE_TRUNCATE, ACCESS_MODE_WAIT };
-
     public final static AccessOption[] APPEND = { AccessOption.WRITE_MODE_APPEND };
-
-    public final static AccessOption[] FILE_BASED_APPEND_WAIT = { AccessOption.WRITE_MODE_APPEND, ACCESS_MODE_WAIT };
 
 
     // - public API -------------------------------------------------------------
@@ -105,7 +99,7 @@ public enum AccessOption {
     /**
      * Initializes a new {@link AccessOption}.
      */
-    private AccessOption() {
+    AccessOption() {
     }
 
     /**

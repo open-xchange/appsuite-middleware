@@ -62,34 +62,32 @@ import java.io.OutputStream;
 public interface IFileItemWriteAccess extends IFileItemReadAccess {
 
     /**
-     * @return The {@link OutputStream} to write into
-     */
-    public OutputStream getOutputStream();
-
-    /**
-     * Returns the output file to write to.</br>
-     * A temporary file will be created, if
-     * the chosen access option to acquire the <code>IFileItemWriteAccess</code>
-     * interface initially doesn't use a file to work on.</br>
-     * For performance reasons, care should be taken to use the right access option
-     * if planning to use the <code>getOutputFile</code> method.</br>
-     * If this method is called, a possibly previously used <code>OutputStream</code>
-     * object is closed and not usable anymore.</br>
-     * In essence, it is best practice to initially decide for
-     * <code>AccessOption.FILE_BASED</code> write access and use either
-     * the file object or the stream obect to write content into throughout
-     * the lifetime of this access object.
-     * <code></code>
+     * Returns the output stream to write content to.</br>
+     * The returned {@link OutputStream} instance is owned by the caller and
+     * needs to be closed appropriately after final usage.</br>
+     * To avoid output data corruption, either this method <b>or</b>
+     * the {@link getOutputFile} method be used for an opened write
+     * access instance. Both methods must not be used for one instance!
      *
-     * @return The <code>File</code> to write
-     *  content into
+     * @return The {@link OutputStream} to write content to.
      * @throws IOException
      */
-    public File getOutputFile() throws IOException;
+    OutputStream getOutputStream() throws IOException;
+
+    /**
+     * Returns the output file to write content to.</br>
+     * To avoid output data corruption, either this method  <b>or</b>
+     * the {@link getOutputFile} method be used for an opened write
+     * write access instance. Both methods must not be used for one instance!
+     *
+     * @return The {@link File} to write content to.
+     * @throws IOException
+     */
+    File getOutputFile() throws IOException;
 
     /**
      * @param key
      * @param value
      */
-    public void setKeyValue(final String key, final String value) throws FileItemException;
+    void setKeyValue(final String key, final String value) throws FileItemException;
 }
