@@ -285,14 +285,30 @@ public class ITipUtil {
      * @param apiClient The {@link ApiClient} to use
      * @param fromToMatch The mail of the originator of the message
      * @param subjectToMatch The summary of the event
-     * @param sequenceToMatch The sequence identifier of event
+     * @param sequenceToMatch The sequence identifier of event to match, or <code>-1</code> if not applicable
      * @param method The iTIP method that the mail must contain, or <code>null</code> to skip checking for the event data
      * @return The mail as {@link MailData}
      * @throws Exception If the mail can't be found or something mismatches
      */
     public static MailData receiveIMip(ApiClient apiClient, String fromToMatch, String subjectToMatch, int sequenceToMatch, SchedulingMethod method) throws Exception {
+        return receiveIMip(apiClient, fromToMatch, subjectToMatch, sequenceToMatch, null, method);
+    }
+
+    /**
+     * Receive the iMIP message from the inbox
+     *
+     * @param apiClient The {@link ApiClient} to use
+     * @param fromToMatch The mail of the originator of the message
+     * @param subjectToMatch The summary of the event
+     * @param sequenceToMatch The sequence identifier of the first event to match, or <code>-1</code> if not applicable
+     * @param uidToMatch The UID of the calendar object resource to match, or <code>null</code> if not applicable
+     * @param method The iTIP method that the mail must contain, or <code>null</code> to skip checking for the event data
+     * @return The mail as {@link MailData}
+     * @throws Exception If the mail can't be found or something mismatches
+     */
+    public static MailData receiveIMip(ApiClient apiClient, String fromToMatch, String subjectToMatch, int sequenceToMatch, String uidToMatch, SchedulingMethod method) throws Exception {
         for (int i = 0; i < 10; i++) {
-            MailData mailData = lookupMail(apiClient, FOLDER_MACHINE_READABLE, fromToMatch, subjectToMatch, sequenceToMatch, method);
+            MailData mailData = lookupMail(apiClient, FOLDER_MACHINE_READABLE, fromToMatch, subjectToMatch, sequenceToMatch, uidToMatch, method);
             if (null != mailData) {
                 return mailData;
             }
@@ -301,7 +317,7 @@ public class ITipUtil {
         throw new AssertionError("No mail with " + subjectToMatch + " from " + fromToMatch + " received");
     }
 
-    private static MailData lookupMail(ApiClient apiClient, String folder, String fromToMatch, String subjectToMatch, int sequenceToMatch, SchedulingMethod method) throws Exception {
+    private static MailData lookupMail(ApiClient apiClient, String folder, String fromToMatch, String subjectToMatch, int sequenceToMatch, String uidToMatch, SchedulingMethod method) throws Exception {
         MailApi mailApi = new MailApi(apiClient);
         MailsResponse mailsResponse = mailApi.getAllMails(folder, "600,601,607,610", null, null, null, "610", "desc", null, null, I(10), null);
         assertNull(mailsResponse.getError(), mailsResponse.getError());
@@ -325,8 +341,7 @@ public class ITipUtil {
             if (null == calendar) {
                 continue;
             }
-            Event matchingEvent = extractMatchingEvent(calendar.getEvents(), sequenceToMatch);
-            if (null == matchingEvent) {
+            if (null == extractMatchingEvent(calendar.getEvents(), sequenceToMatch, uidToMatch)) {
                 continue;
             }
             return mailData;
@@ -334,12 +349,16 @@ public class ITipUtil {
         return null;
     }
 
-    private static Event extractMatchingEvent(List<Event> events, int sequence) {
+    private static Event extractMatchingEvent(List<Event> events, int sequence, String uidToMatch) {
         if (null != events) {
             for (Event event : events) {
-                if (event.getSequence() == sequence) {
-                    return event;
+                if (-1 != sequence && event.getSequence() != sequence) {
+                    continue;
                 }
+                if (null != uidToMatch && false == uidToMatch.equals(event.getUid())) {
+                    continue;
+                }
+                return event;
             }
         }
         return null;

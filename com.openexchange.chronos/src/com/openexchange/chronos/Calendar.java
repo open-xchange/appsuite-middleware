@@ -78,6 +78,24 @@ public class Calendar {
     }
 
     /**
+     * Initializes a new {@link Calendar}, taking over the properties from another calendar.
+     * 
+     * @param calendar The calendar to take over the properties from
+     */
+    public Calendar(Calendar calendar) {
+        this();
+        setProdId(calendar.getProdId());
+        setVersion(calendar.getVersion());
+        setCalScale(calendar.getCalScale());
+        setMethod(calendar.getMethod());
+        setName(calendar.getName());
+        setEvents(calendar.getEvents());
+        setFreeBusyDatas(calendar.getFreeBusyDatas());
+        setAvailability(calendar.getAvailability());
+        setExtendedProperties(calendar.getExtendedProperties());
+    }
+
+    /**
      * Gets the prodId
      *
      * @return The prodId

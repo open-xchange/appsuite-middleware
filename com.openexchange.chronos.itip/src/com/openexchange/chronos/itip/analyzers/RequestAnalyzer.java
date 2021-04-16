@@ -121,23 +121,22 @@ public class RequestAnalyzer extends AbstractITipAnalyzer {
         }
         analysis.setUid(resource.getUid());
         /*
-         * get currently stored resource & check organizer
+         * get currently stored resource & determine changes
          */
         CalendarObjectResource originalResource = getOriginalResource(session, resource.getUid(), calendarUserId);
-        if (null != originalResource && false == matches(originalResource.getOrganizer(), resource.getOrganizer())) {
-            analysis.addAnnotation(new ITipAnnotation(Messages.UNALLOWED_ORGANIZER_CHANGE, locale));
-            analysis.recommendAction(ITipAction.IGNORE);
-        }
-        /*
-         * determine changes
-         */
         for (ITipChange change : determineChanges(session, calendarUserId, originalResource, message, wrapper)) {
             analysis.addChange(change);
         }
         /*
          * set recommendation & return resulting analysis
          */
-        if (isOutOfSequence(analysis.getChanges())) {
+        if (null != originalResource && false == matches(originalResource.getOrganizer(), resource.getOrganizer())) {
+            /*
+             * organizer change, needs to be ignored
+             */
+            analysis.addAnnotation(new ITipAnnotation(Messages.UNALLOWED_ORGANIZER_CHANGE, locale));
+            analysis.recommendAction(ITipAction.IGNORE);
+        } else if (isOutOfSequence(analysis.getChanges())) {
             /*
              * old update, replace changes to only transport currently stored event as single change to client
              */
@@ -152,7 +151,8 @@ public class RequestAnalyzer extends AbstractITipAnalyzer {
              * advise to update so insignificant changes can still be processed
              * TODO Evaluate "auto-scheduled" flag and send IGNORE action if mail was already processed
              */
-            analysis.addChange(getChange(session, calendarUserId, Type.UPDATE, null, resource.getFirstEvent(), null, false));
+            Event newEvent = patchEvent(session, resource.getFirstEvent(), null != originalResource ? originalResource.getFirstEvent() : null, calendarUserId);
+            analysis.addChange(getChange(session, calendarUserId, Type.UPDATE, null, newEvent, null, false));
             analysis.recommendAction(ITipAction.UPDATE);
         } else {
             if (null != originalResource && false == rescheduling(analysis)) {

@@ -167,10 +167,14 @@ public class ReplyAnalyzer extends AbstractITipAnalyzer implements LegacyAnalyzi
          * Describe event updates
          */
         for (Event event : resource.getEvents()) {
+            /*
+             * patch event & get or derive replies based on currently stored resource
+             */
+            Event patchedEvent = patchEvent(session, event, originalResource.getFirstEvent(), calendarUserId);
             ITipChange change = new ITipChange();
-            if (null == event.getRecurrenceId()) {
+            if (null == patchedEvent.getRecurrenceId()) {
                 Event originalEvent;
-                if (Strings.isNotEmpty(event.getRecurrenceRule())) {
+                if (Strings.isNotEmpty(patchedEvent.getRecurrenceRule())) {
                     /*
                      * Update status in series master
                      */
@@ -190,12 +194,12 @@ public class ReplyAnalyzer extends AbstractITipAnalyzer implements LegacyAnalyzi
                  */
                 change.setException(true);
                 change.setMaster(originalResource.getSeriesMaster());
-                Event originalEvent = originalResource.getChangeException(event.getRecurrenceId());
+                Event originalEvent = originalResource.getChangeException(patchedEvent.getRecurrenceId());
                 if (null == originalEvent) {
                     /*
                      * Check that attendee didn't reply to a delete exception
                      */
-                    if (isDeleteException(originalResource.getSeriesMaster(), event)) {
+                    if (isDeleteException(originalResource.getSeriesMaster(), patchedEvent)) {
                         analysis.addAnnotation(new ITipAnnotation(Messages.CHANGE_PARTICIPANT_STATE_IN_DELETED_APPOINTMENT, locale));
                         analysis.recommendAction(ITipAction.IGNORE);
                         return analysis;
@@ -204,14 +208,14 @@ public class ReplyAnalyzer extends AbstractITipAnalyzer implements LegacyAnalyzi
                      * Announce new change exception due participant status update
                      */
                     change.setCurrentEvent(originalResource.getSeriesMaster());
-                    change.setNewEvent(ensureAttendees(originalResource.getSeriesMaster(), event));
+                    change.setNewEvent(ensureAttendees(originalResource.getSeriesMaster(), patchedEvent));
                     change.setType(Type.CREATE);
                 } else {
                     /*
                      * Update status in known change exception
                      */
                     change.setCurrentEvent(originalEvent);
-                    change.setNewEvent(ensureAttendees(originalEvent, event));
+                    change.setNewEvent(ensureAttendees(originalEvent, patchedEvent));
                     change.setType(Type.UPDATE);
                 }
             }

@@ -62,7 +62,7 @@ import com.openexchange.ajax.chronos.itip.bugs.ReplyBugsTest;
  * @since v7.10.0
  */
 @RunWith(Suite.class)
-@Suite.SuiteClasses({
+@Suite.SuiteClasses({ // @formatter:off
     ITipRequestTests.class,
     ITipReplyTest.class,
     ITipAnalyzeChangesTest.class,
@@ -75,7 +75,8 @@ import com.openexchange.ajax.chronos.itip.bugs.ReplyBugsTest;
     ReplyBugsTest.class, 
     Bug65533Test.class, 
     MWB263Test.class,
-})
+    SingleInstanceTest.class,
+}) // @formatter:on
 public class ITipTestSuite {
 
 }
