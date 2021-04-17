@@ -74,15 +74,44 @@ public class UserConfigurationAnalyzer {
             return Collections.emptySet();
         }
 
-        final Set<String> retval = new HashSet<String>(64);
+	    TagCollector collector = null;
+        for (Permission p : Permission.byBits(perms.getPermissionBits())) {
+            if (collector == null) {
+                collector = new TagCollector(p);
+            } else {
+                collector.addTagFor(p);
+            }
+        }
+        return collector == null ? Collections.emptySet() : collector.getTags();
+    }
 
-        final StringBuilder sb = new StringBuilder("uc");
-        for (final Permission p : Permission.byBits(perms.getPermissionBits())) {
-            sb.setLength(2);
-            retval.add(sb.append(p.getTagName()).toString());
+	// -------------------------------------------------------------------------------------------------------------------------------------
+
+	private static class TagCollector {
+
+	    private final Set<String> tags;
+	    private final StringBuilder sb;
+
+        /**
+         * Initializes a new {@link TagCollector}.
+         *
+         * @param p The initial permission to add
+         */
+        TagCollector(Permission p) {
+            super();
+            tags = new HashSet<String>(64);
+            sb = new StringBuilder("uc").append(p.getTagName());
+            tags.add(sb.toString());
         }
 
-        return retval;
-    }
+        void addTagFor(Permission p) {
+            sb.setLength(2);
+            tags.add(sb.append(p.getTagName()).toString());
+        }
+
+        Set<String> getTags() {
+            return tags;
+        }
+	}
 
 }
