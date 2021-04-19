@@ -209,7 +209,9 @@ public class ConflictCheckPerformer extends AbstractFreeBusyPerformer {
                 /*
                  * expand & check all (non overridden) instances of event series in period
                  */
-                Iterator<RecurrenceId> iterator = session.getRecurrenceService().iterateRecurrenceIds(new DefaultRecurrenceData(eventInPeriod), from, until);
+                long duration = eventInPeriod.getEndDate().getTimestamp() - eventInPeriod.getStartDate().getTimestamp();
+                Date iterateFrom = new Date(from.getTime() - duration);
+                Iterator<RecurrenceId> iterator = session.getRecurrenceService().iterateRecurrenceIds(new DefaultRecurrenceData(eventInPeriod), iterateFrom, until);
                 while (iterator.hasNext()) {
                     RecurrenceId recurrenceId = iterator.next();
                     DateTime occurrenceEnd = calculateEnd(eventInPeriod, recurrenceId);
@@ -267,6 +269,12 @@ public class ConflictCheckPerformer extends AbstractFreeBusyPerformer {
         }
         long masterEventDuration = masterEvent.getEndDate().getTimestamp() - masterEvent.getStartDate().getTimestamp();
         Date until = new Date(eventRecurrenceIds.get(eventRecurrenceIds.size() - 1).getValue().getTimestamp() + masterEventDuration);
+        /*
+         * adjust checked period (+/- one day to cover floating events in different timezone)
+         */
+        TimeZone eventTimeZone = isFloating(masterEvent) || null == masterEvent.getStartDate().getTimeZone() ? Utils.getTimeZone(session) : masterEvent.getStartDate().getTimeZone();
+        from = add(from, Calendar.DATE, -1, eventTimeZone);
+        until = add(until, Calendar.DATE, 1, eventTimeZone);
         if (today.after(until)) {
             return Collections.emptyList();
         }
@@ -305,7 +313,8 @@ public class ConflictCheckPerformer extends AbstractFreeBusyPerformer {
                  */
                 int count = 0;
                 long duration = eventInPeriod.getEndDate().getTimestamp() - eventInPeriod.getStartDate().getTimestamp();
-                Iterator<RecurrenceId> iterator = session.getRecurrenceService().iterateRecurrenceIds(new DefaultRecurrenceData(eventInPeriod), from, until);
+                Date iterateFrom = new Date(from.getTime() - duration);
+                Iterator<RecurrenceId> iterator = session.getRecurrenceService().iterateRecurrenceIds(new DefaultRecurrenceData(eventInPeriod), iterateFrom, until);
                 while (iterator.hasNext() && count < maxConflictsPerRecurrence) {
                     RecurrenceId recurrenceId = iterator.next();
                     for (RecurrenceId eventRecurrenceId : eventRecurrenceIds) {
