@@ -638,7 +638,9 @@ public class MailStorage implements IMailStorage {
             MailMessage draftMail = requireDraftMail(mailStorageId, mailAccess, false);
             checkClientToken(clientToken, parseClientToken(draftMail));
 
-            if (hardDelete && deleteSharedAttachmentsFolderIfPresent) {
+            // In case message is a Drive Mail and associated attachments are supposed to be deleted, the message is required to be hard-deleted
+            boolean hardDeleteMessage = hardDelete;
+            if (deleteSharedAttachmentsFolderIfPresent) {
                 String headerValue = HeaderUtility.decodeHeaderValue(draftMail.getFirstHeader(HeaderUtility.HEADER_X_OX_SHARED_ATTACHMENTS));
                 SharedAttachmentsInfo sharedAttachmentsInfo = HeaderUtility.headerValue2SharedAttachments(headerValue);
 
@@ -650,6 +652,9 @@ public class MailStorage implements IMailStorage {
                         AttachmentStorageRegistry attachmentStorageRegistry = services.getServiceSafe(AttachmentStorageRegistry.class);
                         AttachmentStorage attachmentStorage = attachmentStorageRegistry.getAttachmentStorageFor(session);
                         attachmentStorage.deleteFolder(sharedFolderRef.getFolderId(), ServerSessionAdapter.valueOf(session));
+
+                        // Drive Mail cannot be moved to trash. Therefore:
+                        hardDeleteMessage = true;
                     }
                 }
             }
@@ -657,7 +662,7 @@ public class MailStorage implements IMailStorage {
             IMailMessageStorageEnhancedDeletion enhancedDeletion = mailAccess.getMessageStorage().supports(IMailMessageStorageEnhancedDeletion.class);
             if (enhancedDeletion != null && enhancedDeletion.isEnhancedDeletionSupported()) {
                 // Try to delete current draft mail in storage
-                if (hardDelete) {
+                if (hardDeleteMessage) {
                     MailPath[] removedPaths = enhancedDeletion.hardDeleteMessages(draftPath.getFolder(), new String[] { draftPath.getMailID() });
                     Boolean deleted = Boolean.valueOf(removedPaths != null && removedPaths.length > 0 && draftPath.equals(removedPaths[0]));
                     return MailStorageResult.resultFor(mailStorageId, deleted, false, mailAccess);
@@ -678,7 +683,7 @@ public class MailStorage implements IMailStorage {
             }
 
             // Delete by best guess...
-            mailAccess.getMessageStorage().deleteMessages(draftPath.getFolder(), new String[] { draftPath.getMailID() }, hardDelete);
+            mailAccess.getMessageStorage().deleteMessages(draftPath.getFolder(), new String[] { draftPath.getMailID() }, hardDeleteMessage);
             return MailStorageResult.resultFor(mailStorageId, Boolean.TRUE, false, mailAccess);
         } catch (MissingDraftException e) {
             return MailStorageResult.resultFor(mailStorageId, Boolean.FALSE, false, mailAccess);
