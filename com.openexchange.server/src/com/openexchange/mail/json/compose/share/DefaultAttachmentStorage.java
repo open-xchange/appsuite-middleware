@@ -448,8 +448,10 @@ public class DefaultAttachmentStorage implements AttachmentStorage {
             storageContext.startTransaction();
             rollback = true;
 
+            Locale locale = session.getUser().getLocale();
+
             // Rename folder
-            renameFolder(subject, folderId, storageContext);
+            renameFolder(subject, folderId, locale, storageContext);
 
             storageContext.commit();
             rollback = false;
@@ -590,11 +592,12 @@ public class DefaultAttachmentStorage implements AttachmentStorage {
      *
      * @param folderName The folder name to rename to
      * @param folderId The folder to rename
+     * @param locale The locale of session-associated user
      * @param storageContext The associated storage context
      * @throws OXException If delete attempt fails
      */
-    protected void renameFolder(String folderName, String folderId, DefaultAttachmentStorageContext storageContext) throws OXException {
-        String fn = folderName;
+    protected void renameFolder(String folderName, String folderId, Locale locale, DefaultAttachmentStorageContext storageContext) throws OXException {
+        String fn = sanitizeName(folderName, StringHelper.valueOf(locale).getString(ShareComposeStrings.DEFAULT_NAME_FOLDER));
         NameBuilder name = null;
         do {
             try {
