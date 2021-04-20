@@ -81,7 +81,6 @@ import com.openexchange.search.CompositeSearchTerm.CompositeOperation;
 import com.openexchange.search.Operand;
 import com.openexchange.search.SearchTerm;
 import com.openexchange.search.SingleSearchTerm;
-import com.openexchange.search.SingleSearchTerm.SingleOperation;
 import com.openexchange.search.internal.operands.ConstantOperand;
 
 /**
@@ -353,7 +352,7 @@ public final class IDMangler {
      */
     public static String getUniqueFolderId(int accountId, String relativeFolderId) {
         if (DEFAULT_ACCOUNT_ID == accountId) {
-            if (ROOT_FOLDER_IDS.contains(relativeFolderId) || relativeFolderId.startsWith(SHARED_PREFIX)) {
+            if (null == relativeFolderId || ROOT_FOLDER_IDS.contains(relativeFolderId) || relativeFolderId.startsWith(SHARED_PREFIX)) {
                 return relativeFolderId;
             }
         } else if (null == relativeFolderId) {
@@ -496,7 +495,7 @@ public final class IDMangler {
      */
     @SuppressWarnings("deprecation")
     private static SingleSearchTerm recreateTerm(SingleSearchTerm term) throws OXException {
-        SingleSearchTerm newTerm = new SingleSearchTerm((SingleOperation) term.getOperation());
+        SingleSearchTerm newTerm = new SingleSearchTerm(term.getOperation());
         Operand<?>[] operands = term.getOperands();
         for (int i = 0; i < operands.length; i++) {
             if (Operand.Type.COLUMN != operands[i].getType()) {
