@@ -1121,7 +1121,8 @@ public final class MimeMessageUtility {
         }
 
         boolean isPadded() {
-            return value.charAt(value.length() - 1) == '=';
+            int length = value.length();
+            return length > 0 && value.charAt(length - 1) == '=';
         }
     }
 

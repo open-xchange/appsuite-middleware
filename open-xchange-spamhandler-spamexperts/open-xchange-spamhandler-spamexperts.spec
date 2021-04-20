@@ -6,7 +6,7 @@ BuildRequires: ant
 BuildRequires:  open-xchange-core
 BuildRequires: java-1.8.0-openjdk-devel
 Version:	@OXVERSION@
-%define        ox_release 21
+%define        ox_release 22
 Release:	%{ox_release}_<CI_CNT>.<B_CNT>
 Group:          Applications/Productivity
 License:        GPL_2.0
@@ -50,6 +50,8 @@ ant -lib build/lib -Dbasedir=build -DdestDir=%{buildroot} -DpackageName=%{name} 
 %doc com.openexchange.spamhandler.spamexperts/ChangeLog
 
 %changelog
+* Mon Apr 12 2021 Marcus Klein <marcus.klein@open-xchange.com>
+Build for patch 2021-04-19 (5981)
 * Tue Mar 23 2021 Marcus Klein <marcus.klein@open-xchange.com>
 Build for patch 2021-03-29 (5975)
 * Wed Mar 10 2021 Marcus Klein <marcus.klein@open-xchange.com>

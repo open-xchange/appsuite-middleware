@@ -11,7 +11,7 @@ BuildRequires: open-xchange-hazelcast
 BuildRequires: java-1.8.0-openjdk-devel
 BuildRequires: pandoc >= 2.0.0
 Version:       @OXVERSION@
-%define        ox_release 21
+%define        ox_release 22
 Release:       %{ox_release}_<CI_CNT>.<B_CNT>
 Group:         Applications/Productivity
 License:       GPL-2.0
@@ -805,6 +805,32 @@ EOF
         fi
         ox_scr_done ${SCR}
     fi
+
+    # Just fix this centrally via core instead of multiple packages as the admin may have
+    # spread these lean config keys over multiple files
+    SCR=SCR-858
+    if ox_scr_todo ${SCR}
+    then
+      unset GLOBIGNORE
+
+      matches="$(grep -Hs "^\s*com.openenexchange.httpclient" /opt/open-xchange/etc/*.properties)"
+      if [ $? -eq 0 ]
+      then
+        IFS=$'\n'
+        for match in ${matches}
+        do
+          unset IFS
+          file=${match%%:*}
+          if [ -f "${file}" ]
+          then
+            sed -i -e 's|com.openenexchange.httpclient|com.openexchange.httpclient|' ${file}
+          fi
+        done
+      fi
+      ox_scr_done ${SCR}
+    fi
+    GLOBIGNORE='*'
+
 fi
 
 PROTECT=( autoconfig.properties configdb.properties hazelcast.properties jolokia.properties mail.properties mail-push.properties management.properties secret.properties secrets server.properties sessiond.properties share.properties tokenlogin-secrets )
@@ -858,6 +884,8 @@ exit 0
 %doc com.openexchange.authentication.application.impl/doc/examples
 
 %changelog
+* Mon Apr 12 2021 Marcus Klein <marcus.klein@open-xchange.com>
+Build for patch 2021-04-19 (5981)
 * Tue Mar 23 2021 Marcus Klein <marcus.klein@open-xchange.com>
 Build for patch 2021-03-29 (5975)
 * Wed Mar 10 2021 Marcus Klein <marcus.klein@open-xchange.com>

@@ -771,6 +771,32 @@ EOF
         fi
         ox_scr_done ${SCR}
     fi
+
+    # Just fix this centrally via core instead of multiple packages as the admin may have
+    # spread these lean config keys over multiple files
+    SCR=SCR-858
+    if ox_scr_todo ${SCR}
+    then
+      unset GLOBIGNORE
+
+      matches="$(grep -Hs "^\s*com.openenexchange.httpclient" /opt/open-xchange/etc/*.properties)"
+      if [ $? -eq 0 ]
+      then
+        IFS=$'\n'
+        for match in ${matches}
+        do
+          unset IFS
+          file=${match%%:*}
+          if [ -f "${file}" ]
+          then
+            sed -i -e 's|com.openenexchange.httpclient|com.openexchange.httpclient|' ${file}
+          fi
+        done
+      fi
+      ox_scr_done ${SCR}
+    fi
+    GLOBIGNORE='*'
+
 }
 
 setConfigFilePermissions() {

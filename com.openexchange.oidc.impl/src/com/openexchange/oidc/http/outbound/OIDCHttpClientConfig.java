@@ -103,11 +103,11 @@ public class OIDCHttpClientConfig extends DefaultHttpClientConfigProvider {
             config.setConnectTimeout(DEFAULT_CONNECT_TIMEOUT);
             config.setConnectionRequestTimeout(DEFAULT_POOL_TIMEOUT);
         } else {
-            config.setSocketReadTimeout(configService.getIntProperty("com.openenexchange.httpclient.oidc.readTimeout", DEFAULT_READ_TIMEOUT));
-            config.setMaxTotalConnections(configService.getIntProperty("com.openenexchange.httpclient.oidc.totalConnections", DEFAULT_MAX_CONNECTIONS));
-            config.setMaxConnectionsPerRoute(configService.getIntProperty("com.openenexchange.httpclient.oidc.connectionsPerRoute", DEFAULT_MAX_CONNECTIONS_PER_HOST));
-            config.setConnectTimeout(configService.getIntProperty("com.openenexchange.httpclient.oidc.connectTimeout", DEFAULT_CONNECT_TIMEOUT));
-            config.setConnectionRequestTimeout(configService.getIntProperty("com.openenexchange.httpclient.oidc.connectionRequestTimeout", DEFAULT_POOL_TIMEOUT));
+            config.setSocketReadTimeout(configService.getIntProperty("com.openexchange.httpclient.oidc.readTimeout", DEFAULT_READ_TIMEOUT));
+            config.setMaxTotalConnections(configService.getIntProperty("com.openexchange.httpclient.oidc.totalConnections", DEFAULT_MAX_CONNECTIONS));
+            config.setMaxConnectionsPerRoute(configService.getIntProperty("com.openexchange.httpclient.oidc.connectionsPerRoute", DEFAULT_MAX_CONNECTIONS_PER_HOST));
+            config.setConnectTimeout(configService.getIntProperty("com.openexchange.httpclient.oidc.connectTimeout", DEFAULT_CONNECT_TIMEOUT));
+            config.setConnectionRequestTimeout(configService.getIntProperty("com.openexchange.httpclient.oidc.connectionRequestTimeout", DEFAULT_POOL_TIMEOUT));
         }
         return config;
     }

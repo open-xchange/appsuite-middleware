@@ -2,9 +2,9 @@ feature_name: HTTP Client Configuration
 feature_description: |
   This pages describes the configurable attributes that can be set to modify each HTTP client used by the Middleware to make requests against thrid parties.
   Each client can be configured for itself. Therefore simply use the service identifier of the desired service, e.g. "icalfeed", and replace "[serviceIdentifier]" with it.
-  E.g. the property looks like "com.openenexchange.httpclient.icalfeed.readTimeout". For futher details please have a look at [[https://documentation.open-xchange.com/{{version}}/middleware/administration/http_client_configuration.html]] .
+  E.g. the property looks like "com.openexchange.httpclient.icalfeed.readTimeout". For futher details please have a look at [[https://documentation.open-xchange.com/{{version}}/middleware/administration/http_client_configuration.html]] .
 properties:
-  - key: com.openenexchange.httpclient.[serviceIdentifer].readTimeout
+  - key: com.openexchange.httpclient.[serviceIdentifer].readTimeout
     description: |
        Specifies the socket timeout in milliseconds, which is the timeout for waiting for data.
     defaultValue: 30000
@@ -14,7 +14,7 @@ properties:
     file: 
     packageName: open-xchange-core
     tags: ["Server", "HTTP Client"]
-  - key: com.openenexchange.httpclient.[serviceIdentifer].connectTimeout
+  - key: com.openexchange.httpclient.[serviceIdentifer].connectTimeout
     description: |
       Specifies the timeout in milliseconds until a connection is established.
     defaultValue: 30000
@@ -24,7 +24,7 @@ properties:
     file: 
     packageName: open-xchange-core
     tags: ["Server", "HTTP Client"]
-  - key: com.openenexchange.httpclient.[serviceIdentifer].connectionRequestTimeout
+  - key: com.openexchange.httpclient.[serviceIdentifer].connectionRequestTimeout
     description: |
        Specifies the timeout in milliseconds used when requesting a connection from the HTTP connection pool.
     defaultValue: 30000
@@ -34,7 +34,7 @@ properties:
     file: 
     packageName: open-xchange-core
     tags: ["Server", "HTTP Client"]
-  - key: com.openenexchange.httpclient.[serviceIdentifer].keepAlive.duration
+  - key: com.openexchange.httpclient.[serviceIdentifer].keepAlive.duration
     description: |
        The amount of time in seconds a connectuon is kept alive.
     defaultValue: 20
@@ -44,7 +44,7 @@ properties:
     file: 
     packageName: open-xchange-core
     tags: ["Server", "HTTP Client"]
-  - key: com.openenexchange.httpclient.[serviceIdentifer].keepAlive.monitorInterval
+  - key: com.openexchange.httpclient.[serviceIdentifer].keepAlive.monitorInterval
     description: |
        The frequency in seconds to check for connections that have passed the keep-alive duration.
     defaultValue: 5
@@ -54,7 +54,7 @@ properties:
     file: 
     packageName: open-xchange-core
     tags: ["Server", "HTTP Client"]
-  - key: com.openenexchange.httpclient.[serviceIdentifer].totalConnections
+  - key: com.openexchange.httpclient.[serviceIdentifer].totalConnections
     description: |
        The number of total connections held in HTTP connection pool by each client.
     defaultValue: 20
@@ -64,7 +64,7 @@ properties:
     file: 
     packageName: open-xchange-core
     tags: ["Server", "HTTP Client"]
-  - key: com.openenexchange.httpclient.[serviceIdentifer].connectionsPerRoute
+  - key: com.openexchange.httpclient.[serviceIdentifer].connectionsPerRoute
     description: |
         The number of connections per route held in HTTP connection pool by each client
     defaultValue: 10
@@ -74,7 +74,7 @@ properties:
     file: 
     packageName: open-xchange-core
     tags: ["Server", "HTTP Client"]
-  - key: com.openenexchange.httpclient.[serviceIdentifer].socketBufferSize
+  - key: com.openexchange.httpclient.[serviceIdentifer].socketBufferSize
     description: |
        The buffer size of the underlying socket connection.
     defaultValue: 8192

@@ -72,6 +72,7 @@ import com.openexchange.proxy.Response;
 import com.openexchange.proxy.Restriction;
 import com.openexchange.proxy.servlet.osgi.Services;
 import com.openexchange.rest.client.httpclient.HttpClientService;
+import com.openexchange.rest.client.httpclient.HttpClients;
 
 /**
  * {@link ProxyServlet}
@@ -129,52 +130,57 @@ public class ProxyServlet extends SessionServlet {
             resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
             return;
         }
-        /*
-         * Fire request
-         */
-        HttpResponse httpResp = client.execute(httpMethod);
-        /*
-         * Check response code
-         */
-        if (HttpStatus.SC_OK != httpResp.getStatusLine().getStatusCode()) {
+        HttpResponse httpResp = null;
+        try {
             /*
-             * GET request failed
+             * Fire request
              */
-            final String txt = httpResp.getStatusLine().getReasonPhrase();
-            resp.sendError(httpResp.getStatusLine().getStatusCode(), txt);
-            return;
-        }
-        final Response response = new ResponseImpl(httpResp);
-        for (final Restriction restriction : registration.getRestrictions()) {
-            if (!restriction.allow(response)) {
-                final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(ProxyServlet.class);
-                log.info("Status code 403 (FORBIDDEN): Restriction failed: {}", restriction.getDescription());
-                resp.sendError(HttpServletResponse.SC_FORBIDDEN, "Restriction failed: " + restriction.getDescription());
+            httpResp = client.execute(httpMethod);
+            /*
+             * Check response code
+             */
+            if (HttpStatus.SC_OK != httpResp.getStatusLine().getStatusCode()) {
+                /*
+                 * GET request failed
+                 */
+                final String txt = httpResp.getStatusLine().getReasonPhrase();
+                resp.sendError(httpResp.getStatusLine().getStatusCode(), txt);
                 return;
             }
-        }
-        /*
-         * Set status
-         */
-        resp.setStatus(httpResp.getStatusLine().getStatusCode());
-        /*
-         * Add response header
-         */
-        header2Response(httpResp, resp);
-        /*
-         * Binary content
-         */
-        final InputStream responseStream = httpResp.getEntity().getContent();
-        try {
-            final ServletOutputStream outputStream = resp.getOutputStream();
-            final byte[] buf = new byte[8192];
-            int read = -1;
-            while ((read = responseStream.read(buf)) > 0) {
-                outputStream.write(buf, 0, read);
+            final Response response = new ResponseImpl(httpResp);
+            for (final Restriction restriction : registration.getRestrictions()) {
+                if (!restriction.allow(response)) {
+                    final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(ProxyServlet.class);
+                    log.info("Status code 403 (FORBIDDEN): Restriction failed: {}", restriction.getDescription());
+                    resp.sendError(HttpServletResponse.SC_FORBIDDEN, "Restriction failed: " + restriction.getDescription());
+                    return;
+                }
             }
-            outputStream.flush();
+            /*
+             * Set status
+             */
+            resp.setStatus(httpResp.getStatusLine().getStatusCode());
+            /*
+             * Add response header
+             */
+            header2Response(httpResp, resp);
+            /*
+             * Binary content
+             */
+            final InputStream responseStream = httpResp.getEntity().getContent();
+            try {
+                final ServletOutputStream outputStream = resp.getOutputStream();
+                final byte[] buf = new byte[8192];
+                int read = -1;
+                while ((read = responseStream.read(buf)) > 0) {
+                    outputStream.write(buf, 0, read);
+                }
+                outputStream.flush();
+            } finally {
+                Streams.close(responseStream);
+            }
         } finally {
-            Streams.close(responseStream);
+            HttpClients.close(httpMethod, httpResp);
         }
     }
 
