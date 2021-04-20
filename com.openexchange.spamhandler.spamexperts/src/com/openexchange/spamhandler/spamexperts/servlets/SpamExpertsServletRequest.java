@@ -225,15 +225,15 @@ public final class SpamExpertsServletRequest {
             getRequest = new HttpGet(buildUri(getURIFor(authid), queryString, null));
 		    setAuthorizationHeader(getRequest, admin, password);
 
-		    HttpResponse httpResponse = httpClient.execute(getRequest);
-            StatusLine statusLine = httpResponse.getStatusLine();
+            getResponse = httpClient.execute(getRequest);
+            StatusLine statusLine = getResponse.getStatusLine();
             int statusCode = statusLine.getStatusCode();
             if (statusCode != HttpStatus.SC_OK) {
                 LOG.error("HTTP request to create new spamexperts panel session failed with status: {}", statusLine);
                 throw SpamExpertsExceptionCode.SPAMEXPERTS_COMMUNICATION_ERROR.create("create panel authticket", statusLine);
             }
 
-            HttpEntity entity = httpResponse.getEntity();
+            HttpEntity entity = getResponse.getEntity();
             if (null == entity) {
                 return null;
             }
@@ -257,7 +257,7 @@ public final class SpamExpertsServletRequest {
         } finally {
             HttpClients.close(getRequest, getResponse);
         }
-	}
+    }
 
 	private String getCurrentUserUsername(){
 		return this.session.getLogin();

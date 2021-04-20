@@ -74,6 +74,7 @@ import com.openexchange.mail.autoconfig.DefaultAutoconfig;
 import com.openexchange.mail.autoconfig.xmlparser.AutoconfigParser;
 import com.openexchange.mail.autoconfig.xmlparser.ClientConfig;
 import com.openexchange.rest.client.httpclient.HttpClientService;
+import com.openexchange.rest.client.httpclient.HttpClients;
 import com.openexchange.server.ServiceLookup;
 
 /**
@@ -118,14 +119,19 @@ public class ConfigServer extends AbstractProxyAwareConfigSource {
         HttpContext httpContext = httpContextFor(contextId, userId);
         httpContext.setAttribute(OX_TARGET_ID, url);
         HttpClient httpclient = services.getServiceSafe(HttpClientService.class).getHttpClient("autoconfig-server");
+        HttpGet req = null;
+        HttpResponse rsp = null;
         try {
 
             HttpHost target = new HttpHost(url.getHost(), -1, url.getProtocol());
-            HttpGet req = new HttpGet(url.getPath() + "?" + URLEncodedUtils.format(Arrays.<NameValuePair> asList(new BasicNameValuePair("emailaddress", new StringBuilder(emailLocalPart).append('@').append(emailDomain).toString())), "UTF-8"));
+            req = new HttpGet(url.getPath() + "?" + URLEncodedUtils.format(Arrays.<NameValuePair> asList(new BasicNameValuePair("emailaddress", new StringBuilder(emailLocalPart).append('@').append(emailDomain).toString())), "UTF-8"));
 
-            HttpResponse rsp = httpclient.execute(target, req, httpContext);
+            rsp = httpclient.execute(target, req, httpContext);
             int statusCode = rsp.getStatusLine().getStatusCode();
             if (statusCode != 200) {
+                HttpClients.close(req, rsp);
+                req = null;
+                rsp = null;
                 LOG.info("Could not retrieve config XML from autoconfig server. Return code was: {}", Autoboxing.I(statusCode));
 
                 // Try 2nd URL
@@ -184,6 +190,8 @@ public class ConfigServer extends AbstractProxyAwareConfigSource {
             // Apparently an I/O communication problem occurred while trying to connect to/read from deduced end-point from auto-config data
             LOG.debug("Could not retrieve config XML.", e);
             return null;
+        } finally {
+            HttpClients.close(req, rsp);
         }
     }
 

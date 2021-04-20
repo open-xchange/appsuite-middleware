@@ -71,7 +71,7 @@ public enum HttpClientProperty implements Property {
      * Initializes a new {@link HttpClientProperty}.
      */
     private HttpClientProperty(String propNameAppendix, Integer value, BiConsumer<HttpBasicConfig, Integer> setter) {
-        StringBuilder sb = new StringBuilder("com.openenexchange.httpclient.");
+        StringBuilder sb = new StringBuilder("com.openexchange.httpclient.");
         int reslen = sb.length();
         this.fqn = sb.append('[').append(SERVICE_IDENTIFIER).append("].").append(propNameAppendix).toString();
         sb.setLength(reslen);

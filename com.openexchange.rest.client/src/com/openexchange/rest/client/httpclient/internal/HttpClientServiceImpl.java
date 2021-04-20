@@ -453,12 +453,11 @@ public class HttpClientServiceImpl implements HttpClientService, ServiceTrackerC
     }
 
     HttpBasicConfigImpl createNewDefaultConfig(LeanConfigurationService leanConfigurationService) {
-        return new HttpBasicConfigImpl(Optional.ofNullable(leanConfigurationService));
+        return HttpBasicConfigImpl.createInstance(Optional.ofNullable(leanConfigurationService));
     }
 
     /**
-     * Adjusts configuration based on properties that start with
-     * {@value HttpClientProperty#PREFIX} and the given identifier.
+     * Adjusts configuration based on properties that start with <code>"com.openexchange.httpclient."</code> prefix and the given identifier.
      * <p>
      * If a value for a specified property is set, this will overwrite
      * the set value in the configuration.
@@ -472,8 +471,7 @@ public class HttpClientServiceImpl implements HttpClientService, ServiceTrackerC
     }
 
     /**
-     * Adjusts configuration based on properties that start with
-     * {@value HttpClientProperty#PREFIX} and the given identifier.
+     * Adjusts configuration based on properties that start with <code>"com.openexchange.httpclient."</code> prefix and the given identifier.
      * <p>
      * If a value for a specified property is set, this will overwrite
      * the set value in the configuration.
@@ -491,7 +489,8 @@ public class HttpClientServiceImpl implements HttpClientService, ServiceTrackerC
         Map<String, String> specificReplacment = Collections.singletonMap(HttpClientProperty.SERVICE_IDENTIFIER, clientId);
         Map<String, String> groupReplacement = Collections.singletonMap(HttpClientProperty.SERVICE_IDENTIFIER, groupName);
         for (HttpClientProperty property : HttpClientProperty.values()) {
-            if (null != groupName && false == adjustConfig(property, httpBasicConfig, specificReplacment, configService)) {
+            boolean adjusted = adjustConfig(property, httpBasicConfig, specificReplacment, configService);
+            if (null != groupName && false == adjusted) {
                 adjustConfig(property, httpBasicConfig, groupReplacement, configService);
             }
         }
