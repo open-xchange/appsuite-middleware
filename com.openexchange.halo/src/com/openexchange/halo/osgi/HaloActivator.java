@@ -51,7 +51,7 @@ package com.openexchange.halo.osgi;
 
 import org.osgi.framework.ServiceReference;
 import com.openexchange.config.cascade.ConfigViewFactory;
-import com.openexchange.contact.ContactService;
+import com.openexchange.contact.provider.composition.IDBasedContactsAccessFactory;
 import com.openexchange.halo.ContactHalo;
 import com.openexchange.halo.HaloContactDataSource;
 import com.openexchange.halo.HaloContactImageSource;
@@ -67,8 +67,8 @@ public class HaloActivator extends HousekeepingActivator {
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { UserService.class, UserPermissionService.class, ContactService.class,
-            SessionSpecificContainerRetrievalService.class, ConfigViewFactory.class };
+        return new Class<?>[] { UserService.class, UserPermissionService.class,
+            SessionSpecificContainerRetrievalService.class, ConfigViewFactory.class, IDBasedContactsAccessFactory.class };
     }
 
     @Override

@@ -49,7 +49,6 @@
 
 package com.openexchange.contact.picture.impl.osgi;
 
-import com.openexchange.contact.ContactService;
 import com.openexchange.contact.picture.ContactPictureService;
 import com.openexchange.contact.picture.finder.ContactPictureFinder;
 import com.openexchange.contact.picture.impl.ContactPictureServiceImpl;
@@ -81,7 +80,7 @@ public final class ContactPictureActivator extends HousekeepingActivator {
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { IDBasedContactsAccessFactory.class, UserService.class, ContactUserStorage.class, ContactService.class };
+        return new Class<?>[] { IDBasedContactsAccessFactory.class, UserService.class, ContactUserStorage.class };
     }
 
     @Override
@@ -103,18 +102,16 @@ public final class ContactPictureActivator extends HousekeepingActivator {
          */
         IDBasedContactsAccessFactory idBasedContactsAccessFactory = getServiceSafe(IDBasedContactsAccessFactory.class);
         UserService userService = getServiceSafe(UserService.class);
-        ContactService contactService = getServiceSafe(ContactService.class);
+        ContactUserStorage contactUserStorage = getServiceSafe(ContactUserStorage.class);
 
         /*
          * Register ContactPictureFinder
          */
         registerService(ContactPictureFinder.class, new UserPictureFinder(userService));
-        registerService(ContactPictureFinder.class, new ContactUserFinder(contactService));
+        registerService(ContactPictureFinder.class, new ContactUserFinder(idBasedContactsAccessFactory));
         registerService(ContactPictureFinder.class, new ContactIDFinder(idBasedContactsAccessFactory));
         registerService(ContactPictureFinder.class, new ContactMailFinder(idBasedContactsAccessFactory));
-
-        ContactUserStorage contactUserStorage = getServiceSafe(ContactUserStorage.class);
-        registerService(ContactPictureFinder.class, new OwnContactFinder(contactService,idBasedContactsAccessFactory, userService, contactUserStorage));
+        registerService(ContactPictureFinder.class, new OwnContactFinder(idBasedContactsAccessFactory, userService, contactUserStorage));
 
     }
 

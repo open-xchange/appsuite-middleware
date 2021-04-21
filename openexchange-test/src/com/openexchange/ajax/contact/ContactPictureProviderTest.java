@@ -49,23 +49,17 @@
 
 package com.openexchange.ajax.contact;
 
+import static com.openexchange.java.Autoboxing.I;
+import static org.hamcrest.Matchers.greaterThan;
+import static org.hamcrest.Matchers.notNullValue;
 import static org.junit.Assert.assertThat;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 import java.util.stream.Collectors;
-import org.junit.Before;
 import org.junit.Test;
-import com.openexchange.ajax.folder.actions.EnumAPI;
-import com.openexchange.ajax.folder.manager.FolderApi;
-import com.openexchange.ajax.folder.manager.FolderManager;
-import com.openexchange.ajax.framework.AbstractAPIClientSession;
 import com.openexchange.java.Strings;
 import com.openexchange.testing.httpclient.invoker.ApiException;
 import com.openexchange.testing.httpclient.models.ContactsResponse;
-import com.openexchange.testing.httpclient.modules.ContactsApi;
-import static com.openexchange.java.Autoboxing.*;
-import static org.hamcrest.Matchers.*;
 
 /**
  * {@link ContactPictureProviderTest} - Tests retrieving contact pictures for a different contact provider (i.e com.openexchange.contact.provider.test)
@@ -73,15 +67,9 @@ import static org.hamcrest.Matchers.*;
  * @author <a href="mailto:benjamin.gruedelbach@open-xchange.com">Benjamin Gruedelbach</a>
  * @since v8.0.0
  */
-public class ContactPictureProviderTest extends AbstractAPIClientSession {
+public class ContactPictureProviderTest extends ContactProviderTest {
 
-    private static final String CONTACT_TEST_PROVIDER_NAME = "c.o.contact.provider.test";
-    private static final String PARENT_FOLDER = "1";
-    private static final String FOLDER_COLUMNS = "1,300";
     private static final String CONTACT_COLUMNS = "1,501,502,555,606";
-
-    private FolderManager folderManager;
-    protected ContactsApi contactsApi;
 
     static class TestContact {
 
@@ -91,29 +79,6 @@ public class ContactPictureProviderTest extends AbstractAPIClientSession {
         String surName;
         String email1;
         String image1_url;
-    }
-
-    @Override
-    @Before
-    public void setUp() throws Exception {
-        super.setUp();
-
-        folderManager = new FolderManager(new FolderApi(getApiClient(), testUser), String.valueOf(EnumAPI.OX_NEW.getTreeId()));
-        contactsApi = new ContactsApi(getApiClient());
-    }
-
-    /**
-     * Internal method to get the ID of the test provider's contact folder
-     *
-     * @return The ID of the contact folder provided by the test provider
-     * @throws ApiException
-     */
-    private String getFolderId() throws ApiException {
-        ArrayList<ArrayList<Object>> folders = folderManager.listFolders(PARENT_FOLDER, FOLDER_COLUMNS, Boolean.FALSE);
-        assertThat(I(folders.size()), greaterThan(I(1)));
-        Optional<ArrayList<Object>> testProviderFolder = folders.stream().filter(folder -> folder.get(1).equals(CONTACT_TEST_PROVIDER_NAME)).findFirst();
-        assertThat("The test privider's contact folder must be accessible", B(testProviderFolder.isPresent()), is(Boolean.TRUE));
-        return (String) testProviderFolder.get().get(0);
     }
 
     /**
@@ -178,14 +143,14 @@ public class ContactPictureProviderTest extends AbstractAPIClientSession {
 
     @Test
     public void testGetImageById() throws Exception {
-        String folderId = getFolderId();
+        String folderId = getAccountFolderId();
         List<TestContact> contactsWithImages = getContactsWithImages(getContactsInFolder(folderId));
         assertGetPictureById(contactsWithImages);
     }
 
     @Test
     public void testGetImageByEmail() throws Exception {
-        String folderId = getFolderId();
+        String folderId = getAccountFolderId();
         List<TestContact> contactsWithImages = getContactsWithImages(getContactsInFolder(folderId));
         assertGetPictureByEmail(contactsWithImages);
     }

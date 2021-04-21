@@ -68,6 +68,7 @@ import com.openexchange.test.concurrent.ParallelSuite;
     ContactImageApiClientScaleTest.class,
     ContactPictureTest.class,
     ContactPictureProviderTest.class,
+    ContactHaloProviderTest.class,
     DistributionListMemberSortingTest.class,
     MultipleTest.class,
     NewListTest.class,

@@ -1,5 +1,3 @@
-
-package com.openexchange.contact.provider.groupware;
 /*
  *
  *    OPEN-XCHANGE legal information
@@ -49,80 +47,23 @@ package com.openexchange.contact.provider.groupware;
  *
  */
 
+package com.openexchange.contact.provider.composition;
+
 import java.util.List;
 import com.openexchange.contact.ContactService;
 import com.openexchange.contact.common.ContactsParameters;
-import com.openexchange.contact.common.GroupwareContactsFolder;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.search.ContactsSearchObject;
 import com.openexchange.search.SearchTerm;
 
 /**
- * {@link InternalContactsAccess}
- *
- * The {@link GroupwareContactsAccess} for the default internal address books.
+ * {@link IDBasedUserAccess}
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  * @since v8.0.0
  */
-public interface InternalContactsAccess extends GroupwareContactsAccess {
-
-    /**
-     * Gets the user's default contacts folder.
-     *
-     * @return The default folder
-     */
-    GroupwareContactsFolder getDefaultFolder() throws OXException;
-
-    /**
-     * Gets a value indicating if the folder with the supplied identifier contains foreign objects, i.e. contacts that were not created
-     * by the current session's user.
-     *
-     * @param folderId The ID of the folder to check
-     * @return <code>true</code> if the folder contains foreign objects, <code>false</code>, otherwise.
-     */
-    boolean containsForeignObjectInFolder(String folderId) throws OXException;
-
-    /**
-     * Counts all contacts within the given folder.
-     *
-     * @param folderId ID of the folder to count in
-     * @return the number of contacts
-     * @throws OXException if an error is occurred
-     */
-    int countContacts(String folderId) throws OXException;
-
-    /**
-     * Deletes all contacts in the specified folder
-     *
-     * @param folderId The folder identifier
-     * @throws OXException if an error is occurred
-     */
-    void deleteContacts(String folderId) throws OXException;
-
-    /**
-     * Gets a value indicating if the folder with the supplied identifier is empty.
-     *
-     * @param folderId The ID of the folder to check
-     * @return <code>true</code> if the folder is empty, <code>false</code>, otherwise.
-     */
-    boolean isFolderEmpty(String folderId) throws OXException;
-
-    /**
-     * Searches for contacts.
-     * <p/>
-     * The following contacts parameters are evaluated:
-     * <ul>
-     * <li>{@link ContactsParameters#PARAMETER_FIELDS}</li>
-     * <li>{@link ContactsParameters#PARAMETER_ORDER}</li>
-     * <li>{@link ContactsParameters#PARAMETER_ORDER_BY}</li>
-     * </ul>
-     *
-     * @param contactSearch The contact search object
-     * @return The contacts found with the search
-     */
-    List<Contact> searchContacts(ContactsSearchObject contactSearch) throws OXException;
+public interface IDBasedUserAccess {
 
     /**
      * Gets contact information associated with internal users.
@@ -157,7 +98,7 @@ public interface InternalContactsAccess extends GroupwareContactsAccess {
      * @return The user contact
      */
     default Contact getUserContact(int userId) throws OXException {
-        return getUserContacts(new int[userId]).get(0);
+        return getUserContacts(new int[] { userId }).get(0);
     }
 
     /**
@@ -172,6 +113,8 @@ public interface InternalContactsAccess extends GroupwareContactsAccess {
      * <li>{@link ContactsParameters#PARAMETER_FIELDS}</li>
      * <li>{@link ContactsParameters#PARAMETER_ORDER}</li>
      * <li>{@link ContactsParameters#PARAMETER_ORDER_BY}</li>
+     * <li>{@link ContactsParameters#PARAMETER_LEFT_HAND_LIMIT}</li>
+     * <li>{@link ContactsParameters#PARAMETER_RIGHT_HAND_LIMIT}</li>
      * </ul>
      *
      * @return The user contacts
@@ -192,6 +135,8 @@ public interface InternalContactsAccess extends GroupwareContactsAccess {
      * <li>{@link ContactsParameters#PARAMETER_FIELDS}</li>
      * <li>{@link ContactsParameters#PARAMETER_ORDER}</li>
      * <li>{@link ContactsParameters#PARAMETER_ORDER_BY}</li>
+     * <li>{@link ContactsParameters#PARAMETER_LEFT_HAND_LIMIT}</li>
+     * <li>{@link ContactsParameters#PARAMETER_RIGHT_HAND_LIMIT}</li>
      * </ul>
      *
      * @param contactSearch The contact search object

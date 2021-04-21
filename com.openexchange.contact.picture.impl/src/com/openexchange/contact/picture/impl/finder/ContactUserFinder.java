@@ -49,8 +49,11 @@
 
 package com.openexchange.contact.picture.impl.finder;
 
-import com.openexchange.contact.ContactService;
+import static com.openexchange.java.Autoboxing.i;
+import com.openexchange.contact.common.ContactsParameters;
 import com.openexchange.contact.picture.PictureSearchData;
+import com.openexchange.contact.provider.composition.IDBasedContactsAccess;
+import com.openexchange.contact.provider.composition.IDBasedContactsAccessFactory;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contact.helpers.ContactField;
 import com.openexchange.groupware.container.Contact;
@@ -64,22 +67,25 @@ import com.openexchange.session.Session;
  */
 public class ContactUserFinder extends AbstractContactFinder {
 
-    private final ContactService contactService;
-
     /**
      * Initializes a new {@link ContactUserFinder}.
      *
-     * @param contactService The {@link ContactService}
+     * @param accessFactory A reference to the contacts access factory
      */
-    public ContactUserFinder(ContactService contactService) {
-        super(null);
-        this.contactService = contactService;
+    public ContactUserFinder(IDBasedContactsAccessFactory accessFactory) {
+        super(accessFactory);
     }
 
     @Override
     public Contact getContact(Session session, PictureSearchData data, ContactField... fields) throws OXException {
         if (data.hasUser()) {
-            return contactService.getUser(session, data.getUserId().intValue(), fields);
+            IDBasedContactsAccess contactsAccess = idBasedContactsAccessFactory.createAccess(session);
+            try {
+                contactsAccess.set(ContactsParameters.PARAMETER_FIELDS, fields);
+                return contactsAccess.getUserAccess().getUserContact(i(data.getUserId()));
+            } finally {
+                contactsAccess.finish();
+            }
         }
         return null;
     }

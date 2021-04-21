@@ -70,14 +70,17 @@ import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.config.cascade.ComposedConfigProperty;
 import com.openexchange.config.cascade.ConfigView;
 import com.openexchange.config.cascade.ConfigViewFactory;
-import com.openexchange.contact.ContactService;
+import com.openexchange.contact.ContactID;
+import com.openexchange.contact.common.ContactsParameters;
 import com.openexchange.contact.picture.ContactPicture;
+import com.openexchange.contact.provider.composition.IDBasedContactsAccess;
+import com.openexchange.contact.provider.composition.IDBasedContactsAccessFactory;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contact.ParsedDisplayName;
 import com.openexchange.groupware.contact.helpers.ContactField;
 import com.openexchange.groupware.contact.helpers.ContactMerger;
 import com.openexchange.groupware.container.Contact;
-import com.openexchange.groupware.search.ContactSearchObject;
+import com.openexchange.groupware.search.ContactsSearchObject;
 import com.openexchange.halo.ContactHalo;
 import com.openexchange.halo.HaloContactDataSource;
 import com.openexchange.halo.HaloContactImageSource;
@@ -86,8 +89,6 @@ import com.openexchange.halo.HaloExceptionCodes;
 import com.openexchange.java.Strings;
 import com.openexchange.server.ExceptionOnAbsenceServiceLookup;
 import com.openexchange.server.ServiceLookup;
-import com.openexchange.tools.iterator.SearchIterator;
-import com.openexchange.tools.iterator.SearchIterators;
 import com.openexchange.tools.session.ServerSession;
 import com.openexchange.user.User;
 import com.openexchange.user.UserService;
@@ -198,7 +199,7 @@ public class ContactHaloImpl implements ContactHalo {
     HaloContactQuery createQuery(final Contact contact, final ServerSession session, final boolean withBytes) throws OXException {
         final UserService userService = services.getService(UserService.class);
         final UserPermissionService userPermissionService = services.getService(UserPermissionService.class);
-        final ContactService contactService = services.getService(ContactService.class);
+        final IDBasedContactsAccessFactory contactAccessFactory = services.getService(IDBasedContactsAccessFactory.class);
         final HaloContactQuery.Builder contactQueryBuilder = HaloContactQuery.builder();
         final ContactField[] fields = withBytes ? null : new ContactField[] { ContactField.OBJECT_ID, ContactField.LAST_MODIFIED, ContactField.FOLDER_ID };
 
@@ -219,10 +220,16 @@ public class ContactHaloImpl implements ContactHalo {
 
             // Check by object/folder identifier
             if (null == user) {
-                if (resultContact.getObjectID() > 0 && resultContact.getParentFolderID() > 0) {
-                    Contact loaded = contactService.getContact(session, Integer.toString(resultContact.getParentFolderID()), Integer.toString(resultContact.getObjectID()), fields);
-                    contactQueryBuilder.withContact(loaded).withMergedContacts(Arrays.asList(loaded));
-                    return contactQueryBuilder.build();
+                if (null != resultContact.getId(true) && null != resultContact.getFolderId(true)) {
+                    Contact loaded;
+                    IDBasedContactsAccess contactsAccess = contactAccessFactory.createAccess(session);
+                    try {
+                        contactsAccess.set(ContactsParameters.PARAMETER_FIELDS, fields);
+                        loaded = contactsAccess.getContact(new ContactID(resultContact.getFolderId(true), resultContact.getId(true)));
+                    } finally {
+                        contactsAccess.finish();
+                    }
+                    return contactQueryBuilder.withContact(loaded).withMergedContacts(Arrays.asList(loaded)).build();
                 }
             }
 
@@ -297,28 +304,35 @@ public class ContactHaloImpl implements ContactHalo {
         List<Contact> contactsToMerge = new ArrayList<Contact>(4);
         if (user != null) {
             // Load the associated contact
-            resultContact = contactService.getUser(session, user.getId(), fields);
+            IDBasedContactsAccess contactsAccess = contactAccessFactory.createAccess(session);
+            try {
+                contactsAccess.set(ContactsParameters.PARAMETER_FIELDS, fields);
+                resultContact = contactsAccess.getUserAccess().getUserContact(user.getId());
+            } finally {
+                contactsAccess.finish();
+            }
             contactsToMerge.add(resultContact);
         } else if (Strings.isNotEmpty(resultContact.getEmail1())) {
             // Try to find a contact
-            ContactSearchObject contactSearch = new ContactSearchObject();
+            ContactsSearchObject contactSearch = new ContactsSearchObject();
             String email = resultContact.getEmail1();
             contactSearch.setEmail1(email);
             contactSearch.setEmail2(email);
             contactSearch.setEmail3(email);
             contactSearch.setOrSearch(true);
             contactSearch.setExactMatch(true);
-            SearchIterator<Contact> iterator = null;
+            List<Contact> foundContacts;
+            IDBasedContactsAccess contactsAccess = contactAccessFactory.createAccess(session);
             try {
-                iterator = contactService.searchContacts(session, contactSearch, fields);
-                while (iterator.hasNext()) {
-                    Contact c = iterator.next();
-                    if (checkEmails(c, email)) {
-                        contactsToMerge.add(c);
-                    }
-                }
+                contactsAccess.set(ContactsParameters.PARAMETER_FIELDS, fields);
+                foundContacts = contactsAccess.searchContacts(contactSearch);
             } finally {
-                SearchIterators.close(iterator);
+                contactsAccess.finish();
+            }
+            for (Contact foundContact : foundContacts) {
+                if (checkEmails(foundContact, email)) {
+                    contactsToMerge.add(foundContact);
+                }
             }
         }
         contactQueryBuilder.withMergedContacts(contactsToMerge);

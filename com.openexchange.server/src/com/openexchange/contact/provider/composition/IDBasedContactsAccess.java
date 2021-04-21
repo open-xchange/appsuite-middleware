@@ -88,6 +88,15 @@ public interface IDBasedContactsAccess extends TransactionAware, ContactsParamet
     List<OXException> getWarnings();
 
     /**
+     * Gets a reference to the access for internal users.
+     * <p/>
+     * The parameters of this access are taken over implicitly.
+     *
+     * @return The user access reference
+     */
+    IDBasedUserAccess getUserAccess();
+
+    /**
      * Creates a new contact
      *
      * @param folderId The fully qualified identifier of the parent folder to create the contact in
