@@ -843,6 +843,7 @@ public class InternalContactsAccess implements com.openexchange.contact.provider
         cso.setEmailAutoComplete(contactSearch.isEmailAutoComplete());
         cso.setOrSearch(contactSearch.isOrSearch());
         cso.setExactMatch(contactSearch.isExactMatch());
+        cso.setHasImage(contactSearch.isHasImage());
         cso.setSurname(contactSearch.getSurname());
         cso.setDisplayName(contactSearch.getDisplayName());
         cso.setGivenName(contactSearch.getGivenName());

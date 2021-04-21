@@ -143,7 +143,7 @@ public abstract class AbstractContactFinder implements ContactPictureFinder {
         Contact contact = getContact0(session, data, SearchFields.PICTURE);
         if (null == contact) {
             return new PictureResult(data);
-        } else if (false == ContactPictureUtil.hasValidImage(I(session.getContextId()), contact, data)) {
+        } else if (0 == contact.getNumberOfImages() || false == ContactPictureUtil.hasValidImage(I(session.getContextId()), contact, data)) {
             return new PictureResult(modfiyResult(contact));
         }
         return new PictureResult(ContactPictureUtil.fromContact(contact));
@@ -154,6 +154,8 @@ public abstract class AbstractContactFinder implements ContactPictureFinder {
         Contact contact = getContact0(session, data, SearchFields.ETAG);
         if (null == contact) {
             return new PictureResult(data);
+        } else if (0 == contact.getNumberOfImages()) {
+            return new PictureResult(modfiyResult(contact));
         }
         return new PictureResult(ContactPictureUtil.fromContact(contact));
     }
@@ -163,6 +165,8 @@ public abstract class AbstractContactFinder implements ContactPictureFinder {
         Contact contact = getContact0(session, data, SearchFields.LAST_MODIFIED);
         if (null == contact) {
             return new PictureResult(data);
+        } else if (0 == contact.getNumberOfImages()) {
+            return new PictureResult(modfiyResult(contact));
         }
         return new PictureResult(ContactPictureUtil.fromContact(contact));
     }

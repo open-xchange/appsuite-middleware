@@ -96,11 +96,11 @@ public class ContactPictureUtil extends FinderUtil {
          * different size the eTag must not be the same compared to the original size
          */
         return new StringBuilder(512) // @formatter:off
-            .append(contact.getParentFolderID())
+            .append(contact.getFolderId(true))
             .append('/')
-            .append(contact.getObjectID())
+            .append(contact.getId(true))
             .append('/')
-            .append(getContactLastModified(contact)).toString(); // @formatter:on
+            .append(getContactLastModified(contact).getTime()).toString(); // @formatter:on
     }
 
     /**
@@ -121,7 +121,7 @@ public class ContactPictureUtil extends FinderUtil {
 
     /**
      * Get the last modified value for the contact
-     * 
+     *
      * @param contact The contact to get the modification date from
      * @return The last modification date of the date or {@link ContactPicture#UNMODIFIED}
      */
@@ -131,7 +131,7 @@ public class ContactPictureUtil extends FinderUtil {
 
     /**
      * Get a value indicating if the current user has GAB capability
-     * 
+     *
      * @param session The {@link Session} of the current user
      * @return <code>true</code> if the current user is allowed to use GAB
      *         <code>false</code> otherwise

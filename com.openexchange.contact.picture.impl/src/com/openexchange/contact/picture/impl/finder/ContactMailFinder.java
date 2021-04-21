@@ -49,9 +49,9 @@
 
 package com.openexchange.contact.picture.impl.finder;
 
+import static com.openexchange.java.Autoboxing.I;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Optional;
 import java.util.Set;
 import com.openexchange.contact.common.ContactsParameters;
 import com.openexchange.contact.picture.PictureSearchData;
@@ -144,16 +144,13 @@ public class ContactMailFinder extends AbstractContactFinder {
                 contactsAccess.set(ContactsParameters.PARAMETER_FIELDS, fields);
                 contactsAccess.set(ContactsParameters.PARAMETER_ORDER_BY, ContactField.FOLDER_ID);
                 contactsAccess.set(ContactsParameters.PARAMETER_ORDER, Order.ASCENDING);
+                contactsAccess.set(ContactsParameters.PARAMETER_RIGHT_HAND_LIMIT, I(1));
                 result = contactsAccess.searchContacts(cso);
             } finally {
                 contactsAccess.finish();
             }
 
-            if (result != null) {
-                //Find the first result with an image
-                Optional<Contact> contact = result.stream().filter( c -> c.getImage1() != null).findFirst();
-                return contact.orElseGet(() -> null);
-            }
+            return null != result && 0 < result.size() ? result.get(0) : null;
         }
         return null;
     }
