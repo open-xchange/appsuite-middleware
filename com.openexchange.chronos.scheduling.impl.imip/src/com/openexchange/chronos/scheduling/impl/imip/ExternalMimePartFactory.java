@@ -58,6 +58,7 @@ import java.io.IOException;
 import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.ListIterator;
 import javax.activation.DataHandler;
 import javax.mail.MessagingException;
 import javax.mail.Part;
@@ -75,6 +76,7 @@ import com.openexchange.chronos.Event;
 import com.openexchange.chronos.EventField;
 import com.openexchange.chronos.ExtendedProperties;
 import com.openexchange.chronos.ExtendedProperty;
+import com.openexchange.chronos.ParticipationStatus;
 import com.openexchange.chronos.common.CalendarUtils;
 import com.openexchange.chronos.common.mapping.AttendeeMapper;
 import com.openexchange.chronos.common.mapping.EventMapper;
@@ -236,6 +238,7 @@ public class ExternalMimePartFactory extends AbstractMimePartFactory {
 
         for (Event e : message.getResource().getEvents()) {
             Event event = EventMapper.getInstance().copy(e, new Event(), (EventField[]) null);
+            event = prepareEvent(event);
             switch (message.getMethod()) {
                 case REPLY:
                     event = adjustAttendees(event);
@@ -261,6 +264,26 @@ public class ExternalMimePartFactory extends AbstractMimePartFactory {
         }
 
         return icalPart;
+    }
+
+    /**
+     * Generally prepares the event event prior export.
+     *
+     * @param event The event to export
+     * @return The prepared event
+     * @throws OXException In case of error
+     */
+    private Event prepareEvent(Event event) throws OXException {
+        for (ListIterator<Attendee> iterator = event.getAttendees().listIterator(); iterator.hasNext();) {
+            Attendee attendee = iterator.next();
+            if (null == attendee.getPartStat()) {
+                attendee = AttendeeMapper.getInstance().copy(attendee, null, (AttendeeField[]) null);
+                attendee.setPartStat(ParticipationStatus.NEEDS_ACTION);
+                iterator.set(attendee);
+            }
+        }
+
+        return event;
     }
 
     /**
