@@ -1801,6 +1801,7 @@ public class Contact extends CommonObject {
         this.image1 = image1;
         b_containsImage = true;
         b_image1 = true;
+        number_of_images = 1;
     }
 
     public void setImageContentType(final String imageContentType) {
