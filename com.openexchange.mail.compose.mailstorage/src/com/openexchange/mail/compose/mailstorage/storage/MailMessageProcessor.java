@@ -170,7 +170,6 @@ import com.openexchange.mail.usersetting.UserSettingMail;
 import com.openexchange.mail.usersetting.UserSettingMailStorage;
 import com.openexchange.mail.utils.MessageUtility;
 import com.openexchange.mailaccount.MailAccount;
-import com.openexchange.mailaccount.MailAccountStorageService;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.session.Session;
 import com.openexchange.tools.session.ServerSession;
@@ -317,12 +316,25 @@ public class MailMessageProcessor {
         } else {
             usm = UserSettingMailStorage.getInstance().getUserSettingMail(session);
         }
-        MailAccountStorageService mass = services.getServiceSafe(MailAccountStorageService.class);
-        MailAccount defaultMailAccount = mass.getDefaultMailAccount(session.getUserId(), session.getContextId());
-        Address primaryAddress = new Address(defaultMailAccount.getPersonal(), defaultMailAccount.getPrimaryAddress());
+        Optional<Address> optPrimaryAddress = optDefaultSendAddress(usm);
         MailMessageProcessor processor = new MailMessageProcessor(compositionSpaceId, session, services);
-        processor.initEmptyMimeMessage(usm.getMsgFormat(), Optional.of(primaryAddress), optionalSharedFolderRef, clientToken);
+        processor.initEmptyMimeMessage(usm.getMsgFormat(), optPrimaryAddress, optionalSharedFolderRef, clientToken);
         return processor;
+    }
+
+    private static Optional<Address> optDefaultSendAddress(UserSettingMail usm) {
+        String sendAddr = usm.getSendAddr();
+        if (Strings.isEmpty(sendAddr)) {
+            return Optional.empty();
+        }
+
+        try {
+            QuotedInternetAddress addr = new QuotedInternetAddress(sendAddr);
+            return Optional.of(convertAddress(addr));
+        } catch (Exception e) {
+            LOG.warn("Failed to parse default send address: {}", sendAddr, e);
+        }
+        return Optional.empty();
     }
 
     /**
