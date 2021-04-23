@@ -49,7 +49,22 @@
 
 package com.openexchange.chronos.impl.performer;
 
-import static com.openexchange.chronos.common.CalendarUtils.*;
+import static com.openexchange.chronos.common.CalendarUtils.add;
+import static com.openexchange.chronos.common.CalendarUtils.calculateEnd;
+import static com.openexchange.chronos.common.CalendarUtils.calculateStart;
+import static com.openexchange.chronos.common.CalendarUtils.find;
+import static com.openexchange.chronos.common.CalendarUtils.getFields;
+import static com.openexchange.chronos.common.CalendarUtils.isAttendee;
+import static com.openexchange.chronos.common.CalendarUtils.isFloating;
+import static com.openexchange.chronos.common.CalendarUtils.isGroupScheduled;
+import static com.openexchange.chronos.common.CalendarUtils.isInRange;
+import static com.openexchange.chronos.common.CalendarUtils.isInternal;
+import static com.openexchange.chronos.common.CalendarUtils.isOpaqueTransparency;
+import static com.openexchange.chronos.common.CalendarUtils.isOrganizer;
+import static com.openexchange.chronos.common.CalendarUtils.isPublicClassification;
+import static com.openexchange.chronos.common.CalendarUtils.isSeriesMaster;
+import static com.openexchange.chronos.common.CalendarUtils.matches;
+import static com.openexchange.chronos.common.CalendarUtils.truncateTime;
 import static com.openexchange.chronos.impl.Utils.isCheckConflicts;
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -245,6 +260,7 @@ public class ConflictCheckPerformer extends AbstractFreeBusyPerformer {
         }
         long masterEventDuration = masterEvent.getEndDate().getTimestamp() - masterEvent.getStartDate().getTimestamp();
         Date until = new Date(eventRecurrenceIds.get(eventRecurrenceIds.size() - 1).getValue().getTimestamp() + masterEventDuration);
+        Date from = new Date(eventRecurrenceIds.get(0).getValue().getTimestamp());
         /*
          * adjust checked period (+/- one day to cover floating events in different timezone)
          */
@@ -254,7 +270,6 @@ public class ConflictCheckPerformer extends AbstractFreeBusyPerformer {
         if (today.after(until)) {
             return Collections.emptyList();
         }
-        Date from = new Date(eventRecurrenceIds.get(0).getValue().getTimestamp());
         /*
          * search for potentially conflicting events in period
          */
