@@ -196,7 +196,7 @@ public class UpdatePerformer extends AbstractUpdatePerformer {
         /*
          * track scheduling-related notifications & return result
          */
-        handleScheduling(result);
+        handleScheduling(result.getEventUpdate(), result.getUpdatedEvent(), result.getUpdatedChangeExceptions());
         logPerform(result.getEventUpdate());
         return resultTracker.getResult();
     }
@@ -204,42 +204,47 @@ public class UpdatePerformer extends AbstractUpdatePerformer {
     /**
      * Handles any necessary scheduling after an update has been performed, i.e. tracks suitable scheduling messages and notifications.
      *
-     * @param result The update result
+     * @param eventUpdate The event update describing the performed changes
+     * @param updatedEvent The updated event as persisted in the storage
+     * @param updatedChangeExceptions The (implicitly) updated change exceptions as persisted in the storage, or <code>null</code> if not applicable 
      */
-    private void handleScheduling(InternalUpdateResult result) throws OXException {
+    private void handleScheduling(InternalEventUpdate eventUpdate, Event updatedEvent, List<Event> updatedChangeExceptions) throws OXException {
         /*
          * prepare updated resource for scheduling messages and notifications
          */
-        InternalEventUpdate eventUpdate = result.getEventUpdate();
         if (eventUpdate.isReschedule() && false == hasExternalOrganizer(eventUpdate.getOriginal())) {
             if (isSeriesMaster(eventUpdate.getOriginal())) {
                 /*
                  * update of series, determine scheduling operations based on superset of attendees in all instances of the series
                  */
+                CalendarObjectResource originalResource = eventUpdate.getOriginalResource();
+                CalendarObjectResource updatedResource = new DefaultCalendarObjectResource(updatedEvent, updatedChangeExceptions);
                 AbstractSimpleCollectionUpdate<Attendee> collectedAttendeeUpdates = getSimpleAttendeeUpdates(
-                    collectAttendees(result.getOriginalResource(), null, (CalendarUserType[]) null),
-                    collectAttendees(result.getUpdatedResource(), null, (CalendarUserType[]) null));
+                    collectAttendees(originalResource, null, (CalendarUserType[]) null), collectAttendees(updatedResource, null, (CalendarUserType[]) null));
                 if (false == collectedAttendeeUpdates.getRemovedItems().isEmpty()) {
-                    schedulingHelper.trackDeletion(result.getOriginalResource(), result.getSeriesMaster(), collectedAttendeeUpdates.getRemovedItems());
+                    schedulingHelper.trackDeletion(originalResource, null, collectedAttendeeUpdates.getRemovedItems());
                 }
                 if (false == collectedAttendeeUpdates.getRetainedItems().isEmpty()) {
-                    schedulingHelper.trackUpdate(result.getUpdatedResource(), result.getSeriesMaster(), eventUpdate, collectedAttendeeUpdates.getRetainedItems());
+                    schedulingHelper.trackUpdate(updatedResource, null, eventUpdate, collectedAttendeeUpdates.getRetainedItems());
                 }
                 if (false == collectedAttendeeUpdates.getAddedItems().isEmpty()) {
-                    schedulingHelper.trackCreation(result.getUpdatedResource(), collectedAttendeeUpdates.getAddedItems());
+                    schedulingHelper.trackCreation(updatedResource, collectedAttendeeUpdates.getAddedItems());
                 }
             } else {
                 /*
                  * update of change exception or non-recurring, determine scheduling operations based on attendee updates in this event
                  */
+                Event seriesMaster = eventUpdate.getOriginalSeriesMaster();
                 if (false == eventUpdate.getAttendeeUpdates().getRemovedItems().isEmpty()) {
-                    schedulingHelper.trackDeletion(result.getOriginalResource(), result.getSeriesMaster(), eventUpdate.getAttendeeUpdates().getRemovedItems());
+                    CalendarObjectResource originalResource = new DefaultCalendarObjectResource(eventUpdate.getOriginal());
+                    schedulingHelper.trackDeletion(originalResource, seriesMaster, eventUpdate.getAttendeeUpdates().getRemovedItems());
                 }
                 if (false == eventUpdate.getAttendeeUpdates().getRetainedItems().isEmpty()) {
-                    schedulingHelper.trackUpdate(result.getUpdatedResource(), result.getSeriesMaster(), eventUpdate, eventUpdate.getAttendeeUpdates().getRetainedItems());
+                    CalendarObjectResource updatedResource = new DefaultCalendarObjectResource(updatedEvent);
+                    schedulingHelper.trackUpdate(updatedResource, seriesMaster, eventUpdate, eventUpdate.getAttendeeUpdates().getRetainedItems());
                 }
                 if (false == eventUpdate.getAttendeeUpdates().getAddedItems().isEmpty()) {
-                    schedulingHelper.trackCreation(result.getUpdatedResource(), eventUpdate.getAttendeeUpdates().getAddedItems());
+                    schedulingHelper.trackCreation(new DefaultCalendarObjectResource(updatedEvent), eventUpdate.getAttendeeUpdates().getAddedItems());
                 }
             }
         } else if (eventUpdate.getAttendeeUpdates().isReply(calendarUser)) {
@@ -247,18 +252,30 @@ public class UpdatePerformer extends AbstractUpdatePerformer {
              * track reply message from calendar user to organizer
              */
             Attendee userAttendee = find(eventUpdate.getOriginal().getAttendees(), calendarUserId);
-            schedulingHelper.trackReply(userAttendee, result.getUpdatedResource(), result.getSeriesMaster(), eventUpdate);
+            if (isSeriesMaster(eventUpdate.getOriginal())) {
+                /*
+                 * reply of series, build updated resource from updated master & exceptions 
+                 */
+                CalendarObjectResource updatedResource = new DefaultCalendarObjectResource(updatedEvent, updatedChangeExceptions);
+                schedulingHelper.trackReply(userAttendee, updatedResource, null, eventUpdate);
+            } else {
+                /*
+                 * update of change exception or non-recurring, build updated resource from updated event & supply series master separately
+                 */
+                CalendarObjectResource updatedResource = new DefaultCalendarObjectResource(updatedEvent);
+                schedulingHelper.trackReply(userAttendee, updatedResource, eventUpdate.getOriginalSeriesMaster(), eventUpdate);
+            }
         } else {
             /*
              * track deletions for newly created delete exceptions
              */
             List<Event> deletedExceptions = eventUpdate.getDeletedExceptions();
             if (0 < deletedExceptions.size()) {
-                schedulingHelper.trackDeletion(new DefaultCalendarObjectResource(deletedExceptions), result.getSeriesMaster(), null);
+                schedulingHelper.trackDeletion(new DefaultCalendarObjectResource(deletedExceptions), eventUpdate.getOriginalSeriesMaster(), null);
             }
         }
-    }
-
+    }    
+    
     /**
      * Updates data of an existing event recurrence and tracks the update in the underlying calendar result. A new change exception event
      * will be created automatically unless it already exists for this event series.
@@ -466,7 +483,7 @@ public class UpdatePerformer extends AbstractUpdatePerformer {
         /*
          * wrap so far results for further processing
          */
-        return new InternalUpdateResult(this, eventUpdate, updatedEvent, updatedChangeExceptions);
+        return new InternalUpdateResult(eventUpdate, updatedEvent, updatedChangeExceptions);
     }
 
     /**
@@ -853,6 +870,32 @@ public class UpdatePerformer extends AbstractUpdatePerformer {
             }
         }
         return new UnmodifiableEvent(adjustedClientUpdate);
+    }
+
+    protected static class InternalUpdateResult {
+
+        private final InternalEventUpdate eventUpdate;
+        private final List<Event> updatedChangeExceptions;
+        private final Event updatedEvent;
+
+        InternalUpdateResult(InternalEventUpdate eventUpdate, Event updatedEvent, List<Event> updatedChangeExceptions) {
+            super();
+            this.eventUpdate = eventUpdate;
+            this.updatedChangeExceptions = updatedChangeExceptions;
+            this.updatedEvent = updatedEvent;
+        }
+
+        List<Event> getUpdatedChangeExceptions() {
+            return updatedChangeExceptions;
+        }
+
+        InternalEventUpdate getEventUpdate() {
+            return eventUpdate;
+        }
+
+        Event getUpdatedEvent() {
+            return updatedEvent;
+        }
     }
 
 }

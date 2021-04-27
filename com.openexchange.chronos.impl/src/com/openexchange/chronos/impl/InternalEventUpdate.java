@@ -144,6 +144,7 @@ public class InternalEventUpdate implements EventUpdate {
     private final ItemUpdate<Event, EventField> eventUpdate;
     private final Event deltaEvent;
     private final List<Event> originalChangeExceptions;
+    private final Event originalSeriesMaster;
     private final CollectionUpdate<Event, EventField> exceptionUpdates;
     private final Date timestamp;
 
@@ -166,6 +167,7 @@ public class InternalEventUpdate implements EventUpdate {
         this.folder = folder;
         this.calendarUser = Utils.getCalendarUser(session, folder);
         this.originalChangeExceptions = originalChangeExceptions;
+        this.originalSeriesMaster = originalSeriesMasterEvent;
         this.timestamp = timestamp;
         /*
          * apply, check, adjust event update as needed
@@ -234,6 +236,15 @@ public class InternalEventUpdate implements EventUpdate {
      */
     public CalendarObjectResource getOriginalResource() {
         return new DefaultCalendarObjectResource(getOriginal(), originalChangeExceptions);
+    }
+
+    /**
+     * Gets the original series master event in case an exception of a recurring event series is being updated.
+     * 
+     * @return The original series master event, or <code>null</code> if not applicable
+     */
+    public Event getOriginalSeriesMaster() {
+        return originalSeriesMaster;
     }
 
     /**

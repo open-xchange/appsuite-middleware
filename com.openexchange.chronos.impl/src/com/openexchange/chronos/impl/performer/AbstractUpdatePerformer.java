@@ -62,7 +62,6 @@ import static com.openexchange.chronos.common.CalendarUtils.initRecurrenceRule;
 import static com.openexchange.chronos.common.CalendarUtils.isGroupScheduled;
 import static com.openexchange.chronos.common.CalendarUtils.isLastNonHiddenUserAttendee;
 import static com.openexchange.chronos.common.CalendarUtils.isOrganizer;
-import static com.openexchange.chronos.common.CalendarUtils.isSeriesException;
 import static com.openexchange.chronos.common.CalendarUtils.isSeriesMaster;
 import static com.openexchange.chronos.common.CalendarUtils.matches;
 import static com.openexchange.chronos.common.CalendarUtils.splitExceptionDates;
@@ -102,7 +101,6 @@ import com.openexchange.chronos.AlarmField;
 import com.openexchange.chronos.Attachment;
 import com.openexchange.chronos.Attendee;
 import com.openexchange.chronos.AttendeeField;
-import com.openexchange.chronos.CalendarObjectResource;
 import com.openexchange.chronos.CalendarUser;
 import com.openexchange.chronos.CalendarUserType;
 import com.openexchange.chronos.Conference;
@@ -131,7 +129,6 @@ import com.openexchange.chronos.impl.CalendarFolder;
 import com.openexchange.chronos.impl.Check;
 import com.openexchange.chronos.impl.Consistency;
 import com.openexchange.chronos.impl.InterceptorRegistry;
-import com.openexchange.chronos.impl.InternalEventUpdate;
 import com.openexchange.chronos.impl.JSONPrintableEvent;
 import com.openexchange.chronos.impl.Role;
 import com.openexchange.chronos.impl.Utils;
@@ -1362,53 +1359,5 @@ public abstract class AbstractUpdatePerformer extends AbstractQueryPerformer {
             }
         }
         return attachments;
-    }
-
-    static class InternalUpdateResult {
-
-        private final AbstractUpdatePerformer performer;
-        private final InternalEventUpdate eventUpdate;
-        private final List<Event> updatedChangeExceptions;
-        private final Event updatedEvent;
-
-        private CalendarObjectResource updatedResource;
-
-        InternalUpdateResult(AbstractUpdatePerformer perfomer, InternalEventUpdate eventUpdate, Event updatedEvent, List<Event> updatedChangeExceptions) {
-            super();
-            this.performer = perfomer;
-            this.eventUpdate = eventUpdate;
-            this.updatedChangeExceptions = updatedChangeExceptions;
-            this.updatedEvent = updatedEvent;
-        }
-
-        Event getSeriesMaster() throws OXException {
-            return getUpdatedResource().getSeriesMaster();
-        }
-
-        CalendarObjectResource getOriginalResource() {
-            return eventUpdate.getOriginalResource();
-        }
-
-        CalendarObjectResource getUpdatedResource() throws OXException {
-            if (null == updatedResource) {
-                updatedResource = new DefaultCalendarObjectResource(updatedEvent, updatedChangeExceptions);
-                if (isSeriesException(updatedResource.getFirstEvent())) {
-                    Event seriesMaster = performer.optEventData(updatedResource.getFirstEvent().getSeriesId());
-                    if (null != seriesMaster) {
-                        List<Event> changeExceptions = performer.loadExceptionData(seriesMaster);
-                        updatedResource = new DefaultCalendarObjectResource(seriesMaster, changeExceptions);
-                    }
-                }
-            }
-            return updatedResource;
-        }
-
-        InternalEventUpdate getEventUpdate() {
-            return eventUpdate;
-        }
-
-        Event getUpdatedEvent() {
-            return updatedEvent;
-        }
     }
 }

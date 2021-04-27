@@ -99,7 +99,7 @@ import com.openexchange.java.Strings;
  * @since v7.10.6
  */
 public class PutPerformer extends AbstractUpdatePerformer {
-    
+
     /**
      * Initializes a new {@link PutPerformer}.
      *
@@ -114,7 +114,7 @@ public class PutPerformer extends AbstractUpdatePerformer {
     /**
      * Initializes a new {@link PutPerformer}.
      * 
-     * @param performer Another performer 
+     * @param performer Another performer
      */
     public PutPerformer(AbstractUpdatePerformer performer) {
         super(performer);
@@ -264,7 +264,7 @@ public class PutPerformer extends AbstractUpdatePerformer {
         }
         return new DefaultEventUpdates(createdEvents, deletedEvents, updatedEvents);
     }
-    
+
     /**
      * Deletes all previously stored events that are no longer indicated by the client. Performed changes are tracked, and the supplied
      * list of stored events is kept up to date implicitly.
@@ -309,7 +309,7 @@ public class PutPerformer extends AbstractUpdatePerformer {
         }
         return new DefaultEventUpdates(Collections.emptyList(), deletedEvents, updatedEvents);
     }
-    
+
     /**
      * Handles any necessary scheduling after an update has been performed, i.e. tracks suitable scheduling messages and notifications.
      * 
@@ -355,43 +355,57 @@ public class PutPerformer extends AbstractUpdatePerformer {
          * track scheduling messages & notifications for reschedules, replies and deletions
          */
         if ((0 < reschedules.size() || 0 < eventUpdates.getAddedItems().size()) && false == hasExternalOrganizer(originalResource)) {
-            /*
-             * determine scheduling operations based on superset of attendees in all instances of the calendar object resource
-             */
-            AbstractSimpleCollectionUpdate<Attendee> collectedAttendeeUpdates = getSimpleAttendeeUpdates(
-                collectAttendees(originalResource, null, (CalendarUserType[]) null), collectAttendees(newResource, null, (CalendarUserType[]) null));
-            if (false == collectedAttendeeUpdates.getRemovedItems().isEmpty()) {
+            if (null != masterUpdate) {
                 /*
-                 * send as deletion for no longer listed attendees
+                 * update of series, determine scheduling operations based on superset of attendees in all instances of the series
                  */
-                schedulingHelper.trackDeletion(originalResource, null, collectedAttendeeUpdates.getRemovedItems());
-            }
-            if (false == collectedAttendeeUpdates.getAddedItems().isEmpty()) {
-                /*
-                 * send as creation for newly appeared attendees
-                 */
-                schedulingHelper.trackCreation(newResource, collectedAttendeeUpdates.getAddedItems());
-            }
-            if (false == collectedAttendeeUpdates.getRetainedItems().isEmpty()) {
-                /*
-                 * send as series master update, or individual update(s) for retained attendees
-                 */
-                if (null != masterUpdate) {
+                AbstractSimpleCollectionUpdate<Attendee> collectedAttendeeUpdates = getSimpleAttendeeUpdates(
+                    collectAttendees(originalResource, null, (CalendarUserType[]) null), collectAttendees(newResource, null, (CalendarUserType[]) null));
+                if (false == collectedAttendeeUpdates.getRemovedItems().isEmpty()) {
+                    schedulingHelper.trackDeletion(originalResource, null, collectedAttendeeUpdates.getRemovedItems());
+                }
+                if (false == collectedAttendeeUpdates.getRetainedItems().isEmpty()) {
                     schedulingHelper.trackUpdate(newResource, null, masterUpdate, collectedAttendeeUpdates.getRetainedItems());
-                } else {
-                    schedulingHelper.trackUpdate(newResource, newResource.getSeriesMaster(), reschedules, collectedAttendeeUpdates.getRetainedItems());
+                }
+                if (false == collectedAttendeeUpdates.getAddedItems().isEmpty()) {
+                    schedulingHelper.trackCreation(newResource, collectedAttendeeUpdates.getAddedItems());
+                }
+            } else {
+                /*
+                 * update of change exception(s) or non-recurring, determine scheduling operations based on attendee updates in each re-scheduled event
+                 */
+                Event seriesMaster = originalResource.getSeriesMaster();
+                for (EventUpdate eventUpdate : reschedules) {
+                    AbstractSimpleCollectionUpdate<Attendee> collectedAttendeeUpdates = getSimpleAttendeeUpdates(
+                        eventUpdate.getOriginal().getAttendees(), eventUpdate.getUpdate().getAttendees());
+                    if (false == collectedAttendeeUpdates.getRemovedItems().isEmpty()) {
+                        CalendarObjectResource deletedResource = new DefaultCalendarObjectResource(eventUpdate.getOriginal());
+                        schedulingHelper.trackDeletion(deletedResource, seriesMaster, collectedAttendeeUpdates.getRemovedItems());
+                    }
+                    if (false == collectedAttendeeUpdates.getRetainedItems().isEmpty()) {
+                        CalendarObjectResource updatedResource = new DefaultCalendarObjectResource(eventUpdate.getUpdate());
+                        schedulingHelper.trackUpdate(updatedResource, seriesMaster, eventUpdate, collectedAttendeeUpdates.getRetainedItems());
+                    }
+                    if (false == collectedAttendeeUpdates.getAddedItems().isEmpty()) {
+                        CalendarObjectResource updatedResource = new DefaultCalendarObjectResource(eventUpdate.getUpdate());
+                        schedulingHelper.trackCreation(updatedResource, collectedAttendeeUpdates.getAddedItems());
+                    }
                 }
             }
         } else if (0 < replies.size()) {
             /*
-             * track reply message from calendar user to organizer
+             * track reply message(s) from calendar user to organizer
              */
             if (null != masterReply) {
                 Attendee userAttendee = find(masterReply.getOriginal().getAttendees(), calendarUser);
                 schedulingHelper.trackReply(userAttendee, newResource, replies);
             } else {
-                Attendee userAttendee = find(replies.get(0).getOriginal().getAttendees(), calendarUser);
-                schedulingHelper.trackReply(userAttendee, newResource, newResource.getSeriesMaster(), replies);
+                Event seriesMaster = originalResource.getSeriesMaster();
+                for (EventUpdate eventUpdate : replies) {
+                    Attendee userAttendee = find(eventUpdate.getOriginal().getAttendees(), calendarUser);
+                    CalendarObjectResource updatedResource = new DefaultCalendarObjectResource(eventUpdate.getUpdate());
+                    schedulingHelper.trackReply(userAttendee, updatedResource, seriesMaster, eventUpdate);
+                }
             }
         } else if (0 < eventUpdates.getRemovedItems().size()) {
             /*
