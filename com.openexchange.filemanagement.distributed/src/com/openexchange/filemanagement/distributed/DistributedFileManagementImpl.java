@@ -67,7 +67,9 @@ import com.hazelcast.core.HazelcastInstanceNotActiveException;
 import com.hazelcast.core.IMap;
 import com.openexchange.exception.OXException;
 import com.openexchange.filemanagement.DistributedFileManagement;
+import com.openexchange.filemanagement.DistributedFileUtils;
 import com.openexchange.filemanagement.ManagedFileExceptionErrorMessage;
+import com.openexchange.java.Streams;
 import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.threadpool.ThreadPoolService;
@@ -84,8 +86,6 @@ public class DistributedFileManagementImpl implements DistributedFileManagement 
     private static final int CONNECT_TIMEOUT = 3000;
 
     private static AtomicReference<HazelcastInstance> REFERENCE = new AtomicReference<HazelcastInstance>();
-
-    private static final String PATH = "distributedFiles";
 
     public static void setHazelcastInstance(HazelcastInstance hazelcastInstance) {
         DistributedFileManagementImpl.REFERENCE.set(hazelcastInstance);
@@ -121,6 +121,14 @@ public class DistributedFileManagementImpl implements DistributedFileManagement 
             hzDownRegistration.unregister();
             this.hzDownRegistration = null;
         }
+    }
+
+    private String encodeId(String rawId) throws OXException {
+        DistributedFileUtils utils = services.getOptionalService(DistributedFileUtils.class);
+        if (utils == null) {
+            throw ServiceExceptionCode.absentService(DistributedFileUtils.class);
+        }
+        return utils.encodeId(rawId);
     }
 
     /**
@@ -167,7 +175,7 @@ public class DistributedFileManagementImpl implements DistributedFileManagement 
             InputStream retval = null;
             if (url != null) {
                 try {
-                    retval = loadFile("http://" + url + "/" + id);
+                    return loadFile("http://" + url + "/" + encodeId(id));
                 } catch (IOException e) {
                     throw ManagedFileExceptionErrorMessage.IO_ERROR.create(e, e.getMessage());
                 }
@@ -188,7 +196,7 @@ public class DistributedFileManagementImpl implements DistributedFileManagement 
             String url = map().get(id);
             if (url != null) {
                 try {
-                    URL remoteUrl = new URL("http://" + url + "/" + id);
+                    URL remoteUrl = new URL("http://" + url + "/" + encodeId(id));
                     HttpURLConnection con = (HttpURLConnection) remoteUrl.openConnection();
                     con.setRequestMethod("POST");
                     con.setConnectTimeout(CONNECT_TIMEOUT);
@@ -253,7 +261,7 @@ public class DistributedFileManagementImpl implements DistributedFileManagement 
             String url = map().get(id);
             if (url != null) {
                 try {
-                    URL remoteUrl = new URL("http://" + url + "/" + id);
+                    URL remoteUrl = new URL("http://" + url + "/" + encodeId(id));
                     HttpURLConnection con = (HttpURLConnection) remoteUrl.openConnection();
                     con.setRequestMethod("DELETE");
                     con.setConnectTimeout(CONNECT_TIMEOUT);
@@ -275,7 +283,7 @@ public class DistributedFileManagementImpl implements DistributedFileManagement 
     }
 
     /**
-     * Gets the associyated Hazelcast map.
+     * Gets the associated Hazelcast map.
      *
      * @return The Hazelcast map
      * @throws OXException If Hazelcast map cannot be returned
@@ -297,28 +305,30 @@ public class DistributedFileManagementImpl implements DistributedFileManagement 
 
     private InputStream loadFile(String url) throws IOException {
         URL remoteUrl = new URL(url);
-        HttpURLConnection con = (HttpURLConnection) remoteUrl.openConnection();
-        con.setRequestMethod("GET");
-        con.setConnectTimeout(CONNECT_TIMEOUT);
-        con.setReadTimeout(READ_TIMEOUT);
-        con.connect();
 
-        boolean close = true;
+        HttpURLConnection con = null;
+        InputStream in = null;
         try {
+            con = (HttpURLConnection) remoteUrl.openConnection();
+            con.setRequestMethod("GET");
+            con.setConnectTimeout(CONNECT_TIMEOUT);
+            con.setReadTimeout(READ_TIMEOUT);
+            con.connect();
+
             int responseCode = con.getResponseCode();
-            if (responseCode == HttpURLConnection.HTTP_OK) {
-                final InputStream in = con.getInputStream();
-                close = false;
-                return in;
+            if (responseCode != HttpURLConnection.HTTP_OK) {
+                return null;
             }
-            return null;
+
+            in = con.getInputStream();
+            InputStream retval = in;
+            in = null; // Avoid premature closing
+            return retval;
         } finally {
-            if (close) {
-                try {
-                    // The only way to close a HttpURLConnection
-                    con.getInputStream().close();
-                } catch (Exception e) {
-                    // Ignore
+            if (in != null) {
+                Streams.close(in);
+                if (con != null) {
+                    con.disconnect();
                 }
             }
         }

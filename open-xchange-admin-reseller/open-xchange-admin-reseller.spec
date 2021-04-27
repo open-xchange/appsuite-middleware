@@ -20,7 +20,7 @@ BuildRequires: java-devel >= 1.7.0
 %endif
 %endif
 Version:       @OXVERSION@
-%define        ox_release 73
+%define        ox_release 74
 Release:       %{ox_release}_<CI_CNT>.<B_CNT>
 Group:         Applications/Productivity
 License:       GPL-2.0
@@ -83,6 +83,8 @@ done
 %doc ./com.openexchange.admin.reseller/ChangeLog
 
 %changelog
+* Mon Apr 19 2021 Jan Bauerdick <jan.bauerdick@open-xchange.com>
+Build for patch 2021-04-26 (5985)
 * Mon Jul 27 2020 Jan Bauerdick <jan.bauerdick@open-xchange.com>
 Build for patch 2020-08-07 (5828)
 * Wed Jun 24 2020 Jan Bauerdick <jan.bauerdick@open-xchange.com>

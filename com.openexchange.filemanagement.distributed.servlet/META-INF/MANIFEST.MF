@@ -6,7 +6,8 @@ Bundle-Version: 7.8.4
 Bundle-Activator: com.openexchange.filemanagement.distributed.servlet.osgi.Activator
 Bundle-Vendor: OX Software GmbH
 Bundle-RequiredExecutionEnvironment: JavaSE-1.7
-Import-Package: com.openexchange.config,
+Import-Package: com.google.common.base,
+ com.openexchange.config,
  com.openexchange.dispatcher,
  com.openexchange.exception,
  com.openexchange.filemanagement,

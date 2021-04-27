@@ -49,7 +49,6 @@
 
 package com.openexchange.filemanagement.distributed.servlet;
 
-import java.io.BufferedInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -57,8 +56,9 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import com.openexchange.config.ConfigurationService;
+import com.google.common.base.Optional;
 import com.openexchange.exception.OXException;
+import com.openexchange.filemanagement.DistributedFileUtils;
 import com.openexchange.filemanagement.ManagedFile;
 import com.openexchange.filemanagement.ManagedFileManagement;
 import com.openexchange.java.Streams;
@@ -71,28 +71,78 @@ import com.openexchange.server.ServiceLookup;
  */
 public class DistributedFileServlet extends HttpServlet {
 
-    private static final long serialVersionUID = 1L;
+    private static final long serialVersionUID = -3293278521646131568L;
+
+    /** Simple class to delay initialization until needed */
+    private static class LoggerHolder {
+        static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(DistributedFileServlet.class);
+    }
 
     private final ServiceLookup services;
 
-    private final ManagedFileManagement fileManagement;
-
-    private final int port;
-
-    public static final String PATH = "distributedFiles";
-
+    /**
+     * Initializes a new {@link DistributedFileServlet}.
+     *
+     * @param services The service look-up
+     */
     public DistributedFileServlet(ServiceLookup services) {
+        super();
         this.services = services;
-        fileManagement = services.getService(ManagedFileManagement.class);
-        port = services.getService(ConfigurationService.class).getIntProperty("com.openexchange.filemanagement.distributed.port", 2003);
+    }
+
+    private ManagedFileManagement getFileManagement(HttpServletResponse resp) throws IOException {
+        try {
+            ManagedFileManagement service = services.getOptionalService(ManagedFileManagement.class);
+            if (service == null) {
+                resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "Missing service");
+                return null;
+            }
+            return service;
+        } catch (Exception e) {
+            resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "Missing service");
+            return null;
+        }
+    }
+
+    private Optional<String> extractId(String uri, HttpServletResponse resp) throws IOException {
+        int pos = uri.lastIndexOf('/');
+        if (pos < 0) {
+            return Optional.of(uri);
+        }
+
+        String extractedId = uri.substring(pos + 1);
+        return decodeId(extractedId, resp);
+    }
+
+    private Optional<String> decodeId(String encodedId, HttpServletResponse resp) throws IOException {
+        try {
+            DistributedFileUtils utils = services.getOptionalService(DistributedFileUtils.class);
+            if (utils == null) {
+                resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "Missing service");
+                return Optional.absent();
+            }
+            return Optional.of(utils.decodeId(encodedId));
+        } catch (Exception e) {
+            resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "Missing service");
+            return Optional.absent();
+        }
     }
 
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-        String uri = req.getRequestURI();
-        String id = crop(uri);
+        ManagedFileManagement fileManagement = getFileManagement(resp);
+        if (fileManagement == null) {
+            return;
+        }
+
+        Optional<String> optionalId = extractId(req.getRequestURI(), resp);
+        if (!optionalId.isPresent()) {
+            return;
+        }
+        String id = optionalId.get();
 
         if (!fileManagement.containsLocal(id)) {
+            resp.sendError(HttpServletResponse.SC_NOT_FOUND, "No such file");
             return;
         }
 
@@ -100,32 +150,36 @@ public class DistributedFileServlet extends HttpServlet {
         OutputStream outStream = null;
         try {
             ManagedFile file = fileManagement.getByID(id);
-            inStream = new BufferedInputStream(file.getInputStream(), 65536);
+            inStream = file.getInputStream();
             resp.setContentType(file.getContentType());
 
             outStream = resp.getOutputStream();
-            int bytesRead = 0;
-
-            while ((bytesRead = inStream.read()) != -1) {
-                outStream.write(bytesRead);
+            int buflen = 65536;
+            byte[] buf = new byte[buflen];
+            for (int read; (read = inStream.read(buf, 0, buflen)) > 0;) {
+                outStream.write(buf, 0, read);
             }
+            outStream.flush();
         } catch (OXException e) {
-            org.slf4j.LoggerFactory.getLogger(DistributedFileServlet.class).error("", e);
+            LoggerHolder.LOG.error("", e);
         } finally {
             Streams.close(inStream);
             Streams.close(outStream);
         }
     }
 
-    private String crop(String uri) {
-        String[] split = uri.split("/");
-        return split[split.length-1];
-    }
-
     @Override
     protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-        String uri = req.getRequestURI();
-        String id = crop(uri);
+        ManagedFileManagement fileManagement = getFileManagement(resp);
+        if (fileManagement == null) {
+            return;
+        }
+
+        Optional<String> optionalId = extractId(req.getRequestURI(), resp);
+        if (!optionalId.isPresent()) {
+            return;
+        }
+        String id = optionalId.get();
 
         if (!fileManagement.containsLocal(id)) {
             return;
@@ -134,14 +188,22 @@ public class DistributedFileServlet extends HttpServlet {
         try {
             fileManagement.getByID(id);
         } catch (OXException e) {
-            org.slf4j.LoggerFactory.getLogger(DistributedFileServlet.class).error("", e);
+            LoggerHolder.LOG.error("", e);
         }
     }
 
     @Override
     protected void doDelete(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-        String uri = req.getRequestURI();
-        String id = crop(uri);
+        ManagedFileManagement fileManagement = getFileManagement(resp);
+        if (fileManagement == null) {
+            return;
+        }
+
+        Optional<String> optionalId = extractId(req.getRequestURI(), resp);
+        if (!optionalId.isPresent()) {
+            return;
+        }
+        String id = optionalId.get();
 
         if (!fileManagement.containsLocal(id)) {
             return;
@@ -150,7 +212,7 @@ public class DistributedFileServlet extends HttpServlet {
         try {
             fileManagement.removeByID(id);
         } catch (OXException e) {
-            org.slf4j.LoggerFactory.getLogger(DistributedFileServlet.class).error("", e);
+            LoggerHolder.LOG.error("", e);
         }
     }
 }

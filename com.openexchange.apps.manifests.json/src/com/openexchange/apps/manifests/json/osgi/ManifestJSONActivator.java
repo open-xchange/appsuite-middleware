@@ -54,8 +54,10 @@ import java.io.File;
 import java.io.FileReader;
 import org.json.JSONArray;
 import com.openexchange.ajax.requesthandler.osgiservice.AJAXModuleActivator;
+import com.openexchange.apps.manifests.DefaultManifestBuilder;
+import com.openexchange.apps.manifests.ManifestProvider;
 import com.openexchange.apps.manifests.json.ManifestActionFactory;
-import com.openexchange.apps.manifests.json.ManifestBuilder;
+import com.openexchange.apps.manifests.json.ProviderAwareManifestBuilder;
 import com.openexchange.apps.manifests.json.values.UIVersion;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.config.ForcedReloadable;
@@ -66,6 +68,7 @@ import com.openexchange.conversion.simple.SimpleConverter;
 import com.openexchange.groupware.notify.hostname.HostnameService;
 import com.openexchange.groupware.userconfiguration.osgi.PermissionRelevantServiceAddedTracker;
 import com.openexchange.java.Streams;
+import com.openexchange.osgi.RankingAwareNearRegistryServiceTracker;
 import com.openexchange.passwordchange.PasswordChangeService;
 import com.openexchange.serverconfig.ComputedServerConfigValueService;
 import com.openexchange.serverconfig.ServerConfigService;
@@ -80,7 +83,7 @@ public class ManifestJSONActivator extends AJAXModuleActivator implements Forced
 
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(ManifestJSONActivator.class);
 
-    private volatile ManifestBuilder manifestBuilder;
+    private DefaultManifestBuilder manifestBuilder;
 
     /**
      * Initializes a new {@link ManifestJSONActivator}.
@@ -106,7 +109,7 @@ public class ManifestJSONActivator extends AJAXModuleActivator implements Forced
     }
 
     @Override
-    protected void stopBundle() throws Exception {
+    protected synchronized void stopBundle() throws Exception {
         this.manifestBuilder = null;
         UIVersion.UIVERSION.set("");
         super.stopBundle();
@@ -116,7 +119,7 @@ public class ManifestJSONActivator extends AJAXModuleActivator implements Forced
      * {@inheritDoc}
      */
     @Override
-    protected void startBundle() throws Exception {
+    protected synchronized void startBundle() throws Exception {
         // Add tracker to identify if a PasswordChangeService was registered. If so, add to PermissionAvailabilityService
         rememberTracker(new PermissionRelevantServiceAddedTracker<PasswordChangeService>(context, PasswordChangeService.class));
 
@@ -126,6 +129,9 @@ public class ManifestJSONActivator extends AJAXModuleActivator implements Forced
         // And track ManifestContributors
         ManifestContributorTracker manifestContributors = new ManifestContributorTracker(context);
         rememberTracker(manifestContributors);
+        // Add tracker for ManifestProviders
+        RankingAwareNearRegistryServiceTracker<ManifestProvider> manifestProviderTracker = new RankingAwareNearRegistryServiceTracker<>(context, ManifestProvider.class);
+        rememberTracker(manifestProviderTracker);
         trackService(HostnameService.class);
         openTrackers();
 
@@ -136,10 +142,10 @@ public class ManifestJSONActivator extends AJAXModuleActivator implements Forced
         // Register as Reloadable
         registerService(Reloadable.class, this);
 
-        ManifestBuilder manifestBuilder = new ManifestBuilder(initialManifests, manifestContributors);
+        DefaultManifestBuilder manifestBuilder = new DefaultManifestBuilder(initialManifests, manifestContributors);
         this.manifestBuilder = manifestBuilder;
         manifestContributors.setManifestBuilder(manifestBuilder);
-        registerModule(new ManifestActionFactory(this, manifestBuilder), "apps/manifests");
+        registerModule(new ManifestActionFactory(this, new ProviderAwareManifestBuilder(manifestProviderTracker, manifestBuilder)), ManifestActionFactory.getModule());
     }
 
     private JSONArray readManifests(ConfigurationService configService) {
@@ -191,8 +197,8 @@ public class ManifestJSONActivator extends AJAXModuleActivator implements Forced
     // --------------------------------------------------------------------------------------------------
 
     @Override
-    public void reloadConfiguration(ConfigurationService configService) {
-        ManifestBuilder manifestBuilder = this.manifestBuilder;
+    public synchronized void reloadConfiguration(ConfigurationService configService) {
+        DefaultManifestBuilder manifestBuilder = this.manifestBuilder;
         if (null != manifestBuilder) {
             // Read manifests from files
             JSONArray initialManifests = readManifests(configService);
