@@ -117,7 +117,7 @@ public class DovecotPushListener extends AbstractDovecotPushListener implements 
     }
 
     @Override
-    public synchronized String initateRegistration() throws OXException {
+    public synchronized String initateRegistration(boolean initiateLockRefresher) throws OXException {
         if (initialized) {
             // Already initialized
             return null;
@@ -153,15 +153,17 @@ public class DovecotPushListener extends AbstractDovecotPushListener implements 
             initialized = true;
 
             // Schedule to refresh cluster lock
-            long delay = TIMEOUT_THRESHOLD_MILLIS;
-            refreshLockTask = timerService.scheduleAtFixedRate(this, delay, delay);
+            if (initiateLockRefresher) {
+                long delay = TIMEOUT_THRESHOLD_MILLIS;
+                refreshLockTask = timerService.scheduleAtFixedRate(this, delay, delay);
+            }
             return null;
         } catch (RuntimeException rte) {
             throw PushExceptionCodes.UNEXPECTED_ERROR.create(rte, rte.getMessage());
         } finally {
             if (scheduleRetry) {
                 long delay = 5000L;
-                retryTask = timerService.schedule(new RetryRunnable(logInfo, LOGGER), delay);
+                retryTask = timerService.schedule(new RetryRunnable(initiateLockRefresher, logInfo, LOGGER), delay);
             }
         }
     }

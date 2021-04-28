@@ -177,10 +177,11 @@ public abstract class AbstractDovecotPushListener implements PushListener {
     /**
      * Initializes registration for this listener.
      *
+     * @param initiateLockRefresher Whether to initiate refreshing acquired lock
      * @return A reason string in case registration failed; otherwise <code>null</code> on success
      * @throws OXException If registration failed hard
      */
-    public abstract String initateRegistration() throws OXException;
+    public abstract String initateRegistration(boolean initiateLockRefresher) throws OXException;
 
     /**
      * Unregisters this listeners.
@@ -197,10 +198,20 @@ public abstract class AbstractDovecotPushListener implements PushListener {
     /** A task that re-invokes <code>initateRegistration()</code> method */
     public class RetryRunnable implements Runnable {
 
+        private final boolean initiateLockRefresher;
         private final String logInfo;
         private final Logger logger;
 
-        public RetryRunnable(String logInfo, org.slf4j.Logger logger) {
+        /**
+         * Initializes a new {@link RetryRunnable}.
+         *
+         * @param initiateLockRefresher Whether to initiate refreshing acquired lock
+         * @param logInfo The log information
+         * @param logger The logger to use
+         */
+        public RetryRunnable(boolean initiateLockRefresher, String logInfo, org.slf4j.Logger logger) {
+            super();
+            this.initiateLockRefresher = initiateLockRefresher;
             this.logInfo = logInfo;
             this.logger = logger;
         }
@@ -208,7 +219,7 @@ public abstract class AbstractDovecotPushListener implements PushListener {
         @Override
         public void run() {
             try {
-                initateRegistration();
+                initateRegistration(initiateLockRefresher);
             } catch (Exception e) {
                 if (null == logInfo) {
                     logger.error("Failed to initiate Dovecot Push registration for user {} in context {}", Integer.valueOf(registrationContext.getUserId()), Integer.valueOf(registrationContext.getContextId()), e);

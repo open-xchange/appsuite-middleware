@@ -118,7 +118,7 @@ public class StatelessDovecotPushManagerService extends AbstractDovecotPushManag
 
         RegistrationContext registrationContext = getRegistrationContext(session);
         StatelessDovecotPushListener listener = new StatelessDovecotPushListener(registrationContext, false, services);
-        String reason = listener.initateRegistration();
+        String reason = listener.initateRegistration(true);
         if (null == reason) {
             if (LOGGER.isDebugEnabled()) {
                 LOGGER.info("Started Dovecot listener for user {} in context {} with session {} ({})", I(userId), I(contextId), session.getSessionID(), session.getClient(), new Throwable("Dovecot start listener trace"));
@@ -184,7 +184,7 @@ public class StatelessDovecotPushManagerService extends AbstractDovecotPushManag
 
         RegistrationContext registrationContext = getRegistrationContext(pushUser);
         StatelessDovecotPushListener listener = new StatelessDovecotPushListener(registrationContext, false, services);
-        String reason = listener.initateRegistration();
+        String reason = listener.initateRegistration(true);
         if (null == reason) {
             if (LOGGER.isDebugEnabled()) {
                 LOGGER.info("Started permanent Dovecot listener for user {} in context {}", I(userId), I(contextId), new Throwable("Dovecot start permanent listener trace"));
