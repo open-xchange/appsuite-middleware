@@ -47,28 +47,53 @@
  *
  */
 
-package com.openexchange.contact.storage.rdb.test;
+package com.openexchange.contact.storage.rdb.search;
 
+import static com.openexchange.java.Autoboxing.C;
+import static org.junit.Assert.assertEquals;
+import java.util.Arrays;
+import java.util.List;
+import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.junit.runners.Suite;
-import org.junit.runners.Suite.SuiteClasses;
-import com.openexchange.contact.storage.rdb.internal.DeduplicatorTest;
-import com.openexchange.contact.storage.rdb.internal.RdbContactStorageTest;
-import com.openexchange.contact.storage.rdb.search.AutoCompleteAdapterTest;
-import com.openexchange.contact.storage.rdb.search.MWB1052Test;
+import org.junit.runners.Parameterized;
+import org.junit.runners.Parameterized.Parameters;
+import com.openexchange.exception.OXException;
+import com.openexchange.java.SimpleTokenizer;
 
 /**
- * {@link UnitTests}
+ * {@link MWB1052Test}
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
+ * @since 7.10.6
  */
-@RunWith(Suite.class)
-@SuiteClasses(
-{ // @formatter:off
-    DeduplicatorTest.class,
-    RdbContactStorageTest.class,
-    AutoCompleteAdapterTest.class,
-    MWB1052Test.class,
-}) // @formatter:on
-public class UnitTests {
+@RunWith(Parameterized.class)
+public class MWB1052Test {
+
+    @Parameters(name = "{index}: {0}")
+    public static Iterable<? extends Object> data() {
+        return Arrays.asList(C('+'), C('\\'), C('-'), C('>'), C('<'), C('('), C(')'), C('~'), C('*'), C('\"'), C('@'));
+    }
+
+    // C('+'), C('\\'), C('-'), C('>'), C('<'), C('('), C(')'), C('~'), C('*'), C('\"'), C('@')
+    private Character nonWordChar;
+
+    /**
+     * Initializes a new {@link MWB1052Test}.
+     *
+     * @param nonWordChar The non-word character to use in the test
+     */
+    public MWB1052Test(Character nonWordChar) {
+        super();
+        this.nonWordChar = nonWordChar;
+    }
+
+    @Test
+    public void testTokenizeQuery() throws OXException {
+        String query = nonWordChar + "x";
+        String expectedPattern = "x*";
+        List<String> patterns = FulltextAutocompleteAdapter.preparePatterns(SimpleTokenizer.tokenize(query));
+        assertEquals("unexpected length of tokenized patterns", 1, patterns.size());
+        assertEquals("unexpected tokenized pattern", expectedPattern, patterns.get(0));
+    }
+
 }
