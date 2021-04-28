@@ -454,7 +454,7 @@ public class DovecotPushManagerService implements PushManagerExtendedService {
                         DovecotPushListener listener = new DovecotPushListener(registrationContext, false, this, services);
                         listeners.put(key, listener);
                         removeListener = true;
-                        String reason = listener.initateRegistration();
+                        String reason = listener.initateRegistration(true);
                         if (null == reason) {
                             removeListener = false;
                             unlock = false;
@@ -500,6 +500,7 @@ public class DovecotPushManagerService implements PushManagerExtendedService {
             } else {
                 LOGGER.info("Could not acquire lock to start Dovecot listener for user {} in context {} with session {} ({}) as there is already an associated listener", I(userId), I(contextId), session.getSessionID(), session.getClient());
             }
+            new DovecotPushListener(registrationContext, false, this, services).initateRegistration(false);
         }
 
         // No listener registered for given session
@@ -595,7 +596,7 @@ public class DovecotPushManagerService implements PushManagerExtendedService {
                         DovecotPushListener listener = new DovecotPushListener(registrationContext, true, this, services);
                         listeners.put(key, listener);
                         removeListener = true;
-                        String reason = listener.initateRegistration();
+                        String reason = listener.initateRegistration(true);
                         if (null == reason) {
                             removeListener = false;
                             unlock = false;
@@ -615,7 +616,7 @@ public class DovecotPushManagerService implements PushManagerExtendedService {
                         DovecotPushListener listener = new DovecotPushListener(registrationContext, true, this, services);
                         listeners.put(key, listener);
                         removeListener = true;
-                        String reason = listener.initateRegistration();
+                        String reason = listener.initateRegistration(true);
                         if (null == reason) {
                             removeListener = false;
                             unlock = false;
@@ -661,6 +662,7 @@ public class DovecotPushManagerService implements PushManagerExtendedService {
             } else {
                 LOGGER.info("Could not acquire lock to start permanent Dovecot listener for user {} in context {} as there is already an associated listener", I(userId), I(contextId));
             }
+            new DovecotPushListener(registrationContext, true, this, services).initateRegistration(false);
         }
 
         // No listener registered for given session

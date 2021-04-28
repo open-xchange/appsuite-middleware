@@ -79,7 +79,7 @@ import com.openexchange.user.UserService;
 public class DovecotPushListener implements PushListener, Runnable {
 
     /** The logger */
-    static final Logger LOGGER = org.slf4j.LoggerFactory.getLogger(DovecotPushListener.class);
+    private static final Logger LOGGER = org.slf4j.LoggerFactory.getLogger(DovecotPushListener.class);
 
     /** The timeout threshold; cluster lock timeout minus one minute */
     private static final long TIMEOUT_THRESHOLD_MILLIS = DovecotPushClusterLock.TIMEOUT_MILLIS - 60000L;
@@ -204,10 +204,11 @@ public class DovecotPushListener implements PushListener, Runnable {
     /**
      * Initializes registration for this listener.
      *
+     * @param initiateLockRefresher Whether to initiate refreshing acquired lock
      * @return A reason string in case registration failed; otherwise <code>null</code> on success
      * @throws OXException If registration failed hard
      */
-    public synchronized String initateRegistration() throws OXException {
+    public synchronized String initateRegistration(boolean initiateLockRefresher) throws OXException {
         if (initialized) {
             // Already initialized
             return null;
@@ -243,15 +244,17 @@ public class DovecotPushListener implements PushListener, Runnable {
             initialized = true;
 
             // Schedule to refresh cluster lock
-            long delay = TIMEOUT_THRESHOLD_MILLIS;
-            refreshLockTask = timerService.scheduleAtFixedRate(this, delay, delay);
+            if (initiateLockRefresher) {
+                long delay = TIMEOUT_THRESHOLD_MILLIS;
+                refreshLockTask = timerService.scheduleAtFixedRate(this, delay, delay);
+            }
             return null;
         } catch (RuntimeException rte) {
             throw PushExceptionCodes.UNEXPECTED_ERROR.create(rte, rte.getMessage());
         } finally {
             if (scheduleRetry) {
                 long delay = 5000L;
-                retryTask = timerService.schedule(new RetryRunnable(logInfo), delay);
+                retryTask = timerService.schedule(new RetryRunnable(initiateLockRefresher, logInfo, LOGGER), delay);
             }
         }
     }
@@ -369,21 +372,35 @@ public class DovecotPushListener implements PushListener, Runnable {
 
     private class RetryRunnable implements Runnable {
 
+        private final boolean initiateLockRefresher;
         private final String logInfo;
+        private final Logger logger;
 
-        RetryRunnable(String logInfo) {
+
+        /**
+         * Initializes a new {@link RetryRunnable}.
+         *
+         * @param initiateLockRefresher Whether to initiate refreshing acquired lock
+         * @param logInfo The log information
+         * @param logger The logger to use
+         */
+        public RetryRunnable(boolean initiateLockRefresher, String logInfo, org.slf4j.Logger logger) {
+            super();
+            this.initiateLockRefresher = initiateLockRefresher;
             this.logInfo = logInfo;
+            this.logger = logger;
         }
+
 
         @Override
         public void run() {
             try {
-                initateRegistration();
+                initateRegistration(initiateLockRefresher);
             } catch (Exception e) {
                 if (null == logInfo) {
-                    LOGGER.error("Failed to initiate Dovecot Push registration for user {} in context {}", Integer.valueOf(registrationContext.getUserId()), Integer.valueOf(registrationContext.getContextId()), e);
+                    logger.error("Failed to initiate Dovecot Push registration for user {} in context {}", Integer.valueOf(registrationContext.getUserId()), Integer.valueOf(registrationContext.getContextId()), e);
                 } else {
-                    LOGGER.error("Failed to initiate Dovecot Push registration for {} (user={}, context={})", logInfo, Integer.valueOf(registrationContext.getUserId()), Integer.valueOf(registrationContext.getContextId()), e);
+                    logger.error("Failed to initiate Dovecot Push registration for {} (user={}, context={})", logInfo, Integer.valueOf(registrationContext.getUserId()), Integer.valueOf(registrationContext.getContextId()), e);
                 }
             }
         }
