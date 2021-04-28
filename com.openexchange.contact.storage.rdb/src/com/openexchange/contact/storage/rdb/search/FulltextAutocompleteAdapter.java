@@ -217,14 +217,20 @@ public class FulltextAutocompleteAdapter extends DefaultSearchAdapter {
             /*
              * replace all non-word characters in token
              */
-            token = token.replaceAll("[+\\-><()~*\"@]+", " ");
+            token = token.replaceAll("[+-><()*\"@\\\\~]+", " ").trim();
             for (String pattern : Strings.splitByWhitespaces(token)) {
+                if (Strings.isEmpty(pattern)) {
+                    /*
+                     * again, ignore empty patterns
+                     */
+                    continue;
+                }
                 pattern = pattern + '*';
                 if ("*".equals(pattern)) {
                     /*
                      * sole wildcard, match everything
                      */
-                    return Collections.singletonList(pattern);
+                    return Collections.emptyList();
                 }
                 if (resultingPatterns.contains(pattern)) {
                     /*
