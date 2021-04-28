@@ -60,26 +60,35 @@ import java.io.InputStream;
  */
 public class VCardInputStream extends FilterInputStream {
 
-    private final long maxSize;
-
     private long currentSize;
 
     /**
      * Initializes a new {@link VCardInputStream}.
      *
      * @param delegate The underlying stream
-     * @param maxSize The maximum allowed size in bytes, or a value smaller or equal to <code>0</code> if there are no restrictions
      */
-    public VCardInputStream(InputStream delegate, long maxSize) {
+    public VCardInputStream(InputStream delegate) {
         super(delegate);
-        this.maxSize = maxSize;
     }
 
     /**
      * Resets the current number of read bytes.
+     *
+     * @return The reader's current size, prior reseting
      */
-    public void resetCurrentSize() {
+    public long resetCurrentSize() {
+        long size = this.currentSize;
         this.currentSize = 0;
+        return size;
+    }
+
+    /**
+     * Gets the current size of the input stream, i.e. the number of read bytes since last reset.
+     *
+     * @return The current size
+     */
+    public long getCurrentSize() {
+        return currentSize;
     }
 
     @Override
@@ -87,7 +96,6 @@ public class VCardInputStream extends FilterInputStream {
         int r = in.read();
         if (r != -1) {
             currentSize++;
-            checkSize(currentSize);
         }
         return r;
     }
@@ -97,7 +105,6 @@ public class VCardInputStream extends FilterInputStream {
         int r = in.read(arg0, arg1, arg2);
         if (r > 0) {
             currentSize += r;
-            checkSize(currentSize);
         }
         return r;
     }
@@ -120,12 +127,6 @@ public class VCardInputStream extends FilterInputStream {
     @Override
     public void close() throws IOException {
         super.close();
-    }
-
-    private void checkSize(@SuppressWarnings("unused") long size) throws IOException {
-        if (0 < maxSize && currentSize > maxSize) {
-            throw new IOException(VCardExceptionCodes.MAXIMUM_SIZE_EXCEEDED.create(Long.valueOf(maxSize)));
-        }
     }
 
 }

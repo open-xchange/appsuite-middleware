@@ -183,6 +183,7 @@ public class CardDAVCollection extends FolderCollection<Contact> {
                 importResult.setHref(url);
             }
             try {
+                checkImportError(contact);
                 checkMaxResourceSize(vCardImport);
                 checkUidConflict(contact.getUid());
                 checkSimilarityConflict(maxSimilarity, contact, importResult);
@@ -239,6 +240,23 @@ public class CardDAVCollection extends FolderCollection<Contact> {
                 throw new PreconditionException(DAVProtocol.CARD_NS.getURI(), "max-resource-size", getUrl(), HttpServletResponse.SC_FORBIDDEN);
             }
         }
+    }
+
+    /**
+     * Checks an imported contact regarding a possible import error.
+     *
+     * @param contact The imported contact to check
+     * @throws PreconditionException if there was an import error
+     */
+    private void checkImportError(Contact contact) throws PreconditionException {
+        OXException importError = (OXException) contact.getProperty("com.openexchange.contact.vcard.importError");
+        if (null == importError) {
+            return;
+        }
+        if ("VCARD-0006".equals(importError.getErrorCode())) {
+            throw new PreconditionException(importError, DAVProtocol.CARD_NS.getURI(), "max-resource-size", getUrl(), HttpServletResponse.SC_FORBIDDEN);
+        }
+        throw new PreconditionException(importError, DAVProtocol.CARD_NS.getURI(), "valid-address-data", getUrl(), HttpServletResponse.SC_FORBIDDEN);
     }
 
     /**
