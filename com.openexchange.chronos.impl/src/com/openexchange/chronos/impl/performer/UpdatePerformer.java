@@ -346,15 +346,17 @@ public class UpdatePerformer extends AbstractUpdatePerformer {
             /*
              * perform the update on the newly created change exception
              * - recurrence rule is forcibly ignored during update to satisfy UsmFailureDuringRecurrenceTest.testShouldFailWhenTryingToMakeAChangeExceptionASeriesButDoesNot()
-             * - sequence number is also ignored (since possibly incremented implicitly before)
+             * - sequence number is also ignored (since possibly incremented implicitly before) for internal organized events
              */
-            InternalUpdateResult result = updateEvent(newExceptionEvent, updatedEventData, EventField.ID, EventField.RECURRENCE_RULE, EventField.SEQUENCE);
+            InternalUpdateResult result = updateEvent(newExceptionEvent, updatedEventData, hasExternalOrganizer(originalSeriesMaster) ? //
+                new EventField[] { EventField.ID, EventField.RECURRENCE_RULE } : //
+                new EventField[] { EventField.ID, EventField.RECURRENCE_RULE, EventField.SEQUENCE });
             Event updatedExceptionEvent = result.getUpdatedEvent();
             /*
              * add change exception date to series master & track results
              */
             resultTracker.rememberOriginalEvent(originalSeriesMaster);
-            addChangeExceptionDate(originalSeriesMaster, newExceptionEvent.getRecurrenceId(), CalendarUtils.isInternal(originalSeriesMaster.getOrganizer(), CalendarUserType.INDIVIDUAL));
+            addChangeExceptionDate(originalSeriesMaster, newExceptionEvent.getRecurrenceId(), false);
             Event updatedMasterEvent = loadEventData(originalSeriesMaster.getId());
             resultTracker.trackUpdate(originalSeriesMaster, updatedMasterEvent);
             /*

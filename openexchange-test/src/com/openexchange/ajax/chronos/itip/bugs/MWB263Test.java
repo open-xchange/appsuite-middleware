@@ -118,7 +118,8 @@ public class MWB263Test extends AbstractITipAnalyzeTest {
         EventData secondOccurrence = events.get(1);
         EventData deltaEvent = prepareDeltaEvent(secondOccurrence);
         deltaEvent.setEndDate(incrementDateTimeData(secondOccurrence.getEndDate(), TimeUnit.HOURS.toMillis(1)));
-        eventManager.updateEvent(deltaEvent);
+        createdEvent = eventManager.updateEvent(deltaEvent);
+        assertThat(createdEvent.getSequence(), is(I(0)));
 
         /*
          * Receive series mail as attendee
@@ -150,9 +151,10 @@ public class MWB263Test extends AbstractITipAnalyzeTest {
         EventData masterEvent = eventManager.getEvent(null, createdEvent.getId());
         assertAttendeePartStat(masterEvent.getAttendees(), replyingAttendee.getEmail(), PartStat.ACCEPTED.getStatus());
         assertAttendeePartStat(masterEvent.getAttendees(), testUser.getLogin(), PartStat.ACCEPTED.getStatus());
+        assertThat(masterEvent.getSequence(), is(I(0)));
 
         /*
-         * Receive exception mail as attendee, status for series still NEEDS_ACTION as mail was sent before organizer updated
+         * Receive exception mail as attendee, status for change exception is still NEEDS_ACTION as mail was sent before organizer updated
          */
         MailData iMipException = receiveIMip(apiClientC2, userResponseC1.getData().getEmail1(), summary, 1, SchedulingMethod.REQUEST);
         AnalysisChange change = assertSingleChange(analyze(apiClientC2, iMipException));
@@ -177,14 +179,17 @@ public class MWB263Test extends AbstractITipAnalyzeTest {
         assertAttendeePartStat(attendeeEvent.getAttendees(), replyingAttendee.getEmail(), PartStat.ACCEPTED.getStatus());
         assertThat("no excpetion", attendeeEvent.getChangeExceptionDates(), is(not(empty())));
         assertThat("no excpetion", I(attendeeEvent.getChangeExceptionDates().size()), is(I(1)));
-
         /*
          * Ensure that there are no duplicates
          */
         List<EventData> allEvents = eventManagerC2.getAllEvents(parseDateTime(eventToCreate.getStartDate()), parseDateTime(deltaEvent.getEndDate()));
         allEvents = allEvents.stream().filter(e -> summary.equals(e.getSummary())).collect(Collectors.toList());
         assertThat(I(allEvents.size()), is(I(2)));
-        allEvents.forEach(e -> assertThat(e.getSequence(), is(I(1))));
+        /*
+         * Ensure that the master event wasn't updated (besides change exception field) 
+         * Reason: Only an exception was transmitted in the mail, no update for the master indicated
+         */
+        allEvents.forEach(e -> assertThat(e.getSequence(), is(I(e.getId().equals(e.getSeriesId()) ? 0 : 1))));
 
         /*
          * Receive decline as organizer and update event
@@ -203,9 +208,11 @@ public class MWB263Test extends AbstractITipAnalyzeTest {
         assertAttendeePartStat(masterEvent.getAttendees(), replyingAttendee.getEmail(), PartStat.ACCEPTED.getStatus());
         assertAttendeePartStat(masterEvent.getAttendees(), testUser.getLogin(), PartStat.ACCEPTED.getStatus());
         assertTrue(null != masterEvent.getChangeExceptionDates() && masterEvent.getChangeExceptionDates().size() == 1);
+        assertThat(masterEvent.getSequence(), is(I(0)));
         EventData exceptionEvent = eventManager.getRecurringEvent(null, masterEvent.getId(), masterEvent.getChangeExceptionDates().get(0), false);
         assertAttendeePartStat(exceptionEvent.getAttendees(), replyingAttendee.getEmail(), PartStat.DECLINED.getStatus());
         assertAttendeePartStat(exceptionEvent.getAttendees(), testUser.getLogin(), PartStat.ACCEPTED.getStatus());
+        assertThat(exceptionEvent.getSequence(), is(I(1)));
     }
 
 }

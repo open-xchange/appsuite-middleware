@@ -231,7 +231,7 @@ public class ITipUtil {
      * @return The mail subject
      */
     public static String acceptSummary(String from, String summary) {
-        return constructSummary("accepted", from, summary);
+        return constructActionSummary("accepted", from, summary);
     }
 
     /**
@@ -245,7 +245,7 @@ public class ITipUtil {
      * @return The mail subject
      */
     public static String tentativeSummary(String from, String summary) {
-        return constructSummary("tentatively accepted", from, summary);
+        return constructActionSummary("tentatively accepted", from, summary);
     }
 
     /**
@@ -259,11 +259,22 @@ public class ITipUtil {
      * @return The mail subject
      */
     public static String declineSummary(String from, String summary) {
-        return constructSummary("declined", from, summary);
+        return constructActionSummary("declined", from, summary);
     }
 
-    private static String constructSummary(String action, String from, String summary) {
+    private static String constructActionSummary(String action, String from, String summary) {
         return String.format(Messages.SUBJECT_STATE_CHANGED, from, action, summary);
+    }
+
+    /**
+     * Constructs the mail subject of an iMIP message where the
+     * event generically has changed
+     *
+     * @param summary The summary of the event
+     * @return The mail subject
+     */
+    public static String changedSummary(String summary) {
+        return String.format(Messages.SUBJECT_CHANGED_APPOINTMENT, summary);
     }
 
     /**

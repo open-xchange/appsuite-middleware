@@ -266,7 +266,7 @@ public class ITipSeriesTest extends AbstractITipAnalyzeTest {
         /*
          * Get update to existing event as attendee and decline
          */
-        MailData updatedSeriersIMip = receiveIMip(apiClientC2, testUser.getLogin(), updatedSummary, 2, SchedulingMethod.REQUEST);
+        MailData updatedSeriersIMip = receiveIMip(apiClientC2, testUser.getLogin(), updatedSummary, 1, SchedulingMethod.REQUEST);
         analyzeResponse = analyze(apiClientC2, updatedSeriersIMip);
         change = assertSingleChange(analyzeResponse);
         AnalysisChangeNewEvent updatedEvent = change.getNewEvent();
@@ -288,7 +288,7 @@ public class ITipSeriesTest extends AbstractITipAnalyzeTest {
         /*
          * Check reply in organizers inbox
          */
-        reply = receiveIMip(apiClient, replyingAttendee.getEmail(), updatedSummary, 2, SchedulingMethod.REPLY);
+        reply = receiveIMip(apiClient, replyingAttendee.getEmail(), updatedSummary, 1, SchedulingMethod.REPLY);
         analyze(reply.getId());
 
         /*--------- b) --------*/
