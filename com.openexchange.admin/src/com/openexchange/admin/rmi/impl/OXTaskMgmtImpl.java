@@ -49,6 +49,7 @@
 
 package com.openexchange.admin.rmi.impl;
 
+import static com.openexchange.java.Autoboxing.I;
 import java.rmi.RemoteException;
 import java.util.concurrent.ExecutionException;
 import com.openexchange.admin.daemons.ClientAdminThread;
@@ -151,6 +152,21 @@ public class OXTaskMgmtImpl extends OXCommonImpl implements OXTaskMgmtInterface 
 
             contextcheck(ctx);
             return TaskManager.getInstance().getJobList(ctx.getId());
+        } catch (Throwable e) {
+            logAndEnhanceException(e, cred, ctx.getIdAsString(), null);
+            throw e;
+        }
+    }
+
+    @Override
+    public String getJob(final Context ctx, final Credentials cred, final int jobId) throws RemoteException, InvalidDataException, InvalidCredentialsException, StorageException {
+        try {
+            doAuth(cred, ctx);
+            if (cache.isMasterAdmin(cred)) {
+                return TaskManager.getInstance().getJob(null, I(jobId));
+            }
+            contextcheck(ctx);
+            return TaskManager.getInstance().getJob(ctx.getId(), I(jobId));
         } catch (Throwable e) {
             logAndEnhanceException(e, cred, ctx.getIdAsString(), null);
             throw e;

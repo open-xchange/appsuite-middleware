@@ -92,13 +92,31 @@ public interface OXTaskMgmtInterface extends Remote {
         throws RemoteException, InvalidCredentialsException, StorageException, InterruptedException, ExecutionException, InvalidDataException;
 
     /**
-     * @return
+     * Gets a pretty printed list of jobs
+     *
+     * @param ctx The optional context
+     * @param cred The credentials
+     * @return A pretty printed list of jobs
      * @throws RemoteException
      * @throws InvalidDataException
      * @throws StorageException
      * @throws InvalidCredentialsException
      */
     public String getJobList(final Context ctx, final Credentials cred) throws RemoteException, InvalidDataException, InvalidCredentialsException, StorageException;
+
+    /**
+     * Gets the pretty printed job
+     *
+     * @param ctx The optional context
+     * @param cred The credentials
+     * @param jobId The job id
+     * @return A pretty printed job
+     * @throws RemoteException
+     * @throws InvalidDataException
+     * @throws StorageException
+     * @throws InvalidCredentialsException
+     */
+    public String getJob(final Context ctx, final Credentials cred, int jobId) throws RemoteException, InvalidDataException, InvalidCredentialsException, StorageException;
 
     /**
      * This method is used to delete finished jobs (jobs != running) from the list

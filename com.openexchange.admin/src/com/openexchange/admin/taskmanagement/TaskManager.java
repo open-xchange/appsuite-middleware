@@ -401,6 +401,8 @@ public class TaskManager {
         return getJobList(null);
     }
 
+    private final static String PRETTY_PRINT_FORMAT = "%-5s %-40s %-10s %-40s %n";
+
     /**
      * Gets the pretty-printed list for jobs belonging to specified context (if not <code>null</code>).
      *
@@ -414,17 +416,39 @@ public class TaskManager {
         }
 
         StringBuffer buf = new StringBuffer(256);
-        String TFORMAT = "%-5s %-20s %-10s %-40s %n";
-        String VFORMAT = "%-5s %-20s %-10s %-40s %n";
-        buf.append(String.format(TFORMAT, "ID", "Type of Job", "Status", "Further Information"));
+        buf.append(String.format(PRETTY_PRINT_FORMAT, "ID", "Type of Job", "Status", "Further Information"));
 
         while (jids.hasNext()) {
             final Entry<Integer, Extended<?>> jidEntry = jids.next();
             final ExtendedFutureTask<?> job = jidEntry.getValue();
             if (null == cid || job.cid == cid.intValue() ) {
-                buf.append(String.format(VFORMAT, jidEntry.getKey(), job.getTypeofjob(), formatStatus(job), job.getFurtherinformation()));
+                buf.append(String.format(PRETTY_PRINT_FORMAT, jidEntry.getKey(), job.getTypeofjob(), formatStatus(job), job.getFurtherinformation()));
             }
         }
+        return buf.toString();
+    }
+
+    /**
+     * Gets a pretty-printed info about the job with the given id
+     *
+     * @param An optional context id
+     * @param jobId The job id
+     * @return The pretty-printed job info
+     */
+    public String getJob(Integer cid, Integer jobId) {
+
+        ExtendedFutureTask<?> job = jobs.get(jobId);
+        if (job == null) {
+            return "Job not found";
+        }
+
+        if (cid != null && job.cid != cid.intValue()) {
+            return "Job not found";
+        }
+
+        StringBuffer buf = new StringBuffer(256);
+        buf.append(String.format(PRETTY_PRINT_FORMAT, "ID", "Type of Job", "Status", "Further Information"));
+        buf.append(String.format(PRETTY_PRINT_FORMAT, jobId, job.getTypeofjob(), formatStatus(job), job.getFurtherinformation()));
         return buf.toString();
     }
 

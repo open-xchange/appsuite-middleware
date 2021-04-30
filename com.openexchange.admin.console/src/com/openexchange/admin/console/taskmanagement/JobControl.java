@@ -52,7 +52,6 @@ import java.net.MalformedURLException;
 import java.rmi.Naming;
 import java.rmi.NotBoundException;
 import java.rmi.RemoteException;
-import java.util.concurrent.ExecutionException;
 import com.openexchange.admin.console.AdminParser;
 import com.openexchange.admin.console.AdminParser.NeededQuadState;
 import com.openexchange.admin.console.BasicCommandlineOptions;
@@ -131,13 +130,10 @@ public class JobControl extends BasicCommandlineOptions {
                 System.out.println("Deleted job with ID" + deleteValue);
             } else if (null != detailValue) {
                 try {
-                    oxtask.getTaskResults(ctx, auth, Integer.parseInt(detailValue));
-                } catch (InterruptedException e) {
-                    System.err.println("This job was interrupted with the following exception: ");
-                    e.printStackTrace();
-                } catch (ExecutionException e) {
-                    System.err.println("The execution of this job was aborted by the following exception: ");
-                    e.getCause().printStackTrace();
+                    System.out.println(oxtask.getJob(ctx, auth, Integer.valueOf(detailValue)));
+                } catch (@SuppressWarnings("unused") NumberFormatException e) {
+                    System.out.println("Invalid job identifier");
+                    sysexit(1);
                 }
             } else if (null != parser.getOptionValue(this.flush)) {
                 oxtask.flush(ctx, auth);
