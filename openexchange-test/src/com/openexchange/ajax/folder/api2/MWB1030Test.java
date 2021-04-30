@@ -50,7 +50,6 @@
 package com.openexchange.ajax.folder.api2;
 
 import static com.openexchange.java.Autoboxing.L;
-import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 import java.util.ArrayList;
@@ -59,6 +58,7 @@ import org.junit.Test;
 import com.openexchange.ajax.folder.manager.FolderManager;
 import com.openexchange.ajax.framework.AbstractAPIClientSession;
 import com.openexchange.groupware.modules.Module;
+import com.openexchange.java.util.Pair;
 import com.openexchange.testing.httpclient.invoker.ApiException;
 import com.openexchange.testing.httpclient.models.FolderUpdatesResponse;
 import com.openexchange.testing.httpclient.modules.FoldersApi;
@@ -102,20 +102,13 @@ public class MWB1030Test extends AbstractAPIClientSession {
         String newFolderId = folderManager.createFolder(parent, "TestFolder", Module.INFOSTORE.getName());
         FolderUpdatesResponse folderUpdates = foldersApi.getFolderUpdates(timestamp, "1,300", null, null, null, null);
         // Expects an array with the structure: [[folderId1, folderName1],[folderId2, folderName2],...]
-        ArrayList<ArrayList<String>> data = (ArrayList<ArrayList<String>>) checkResponse(folderUpdates.getError(), folderUpdates.getErrorDesc(), folderUpdates.getData());
+        ArrayList<Object> data = (ArrayList<Object>) checkResponse(folderUpdates.getError(), folderUpdates.getErrorDesc(), folderUpdates.getData());
 
         // Test for no duplicates in response data
-        ArrayList<String> folderIds = new ArrayList<>();
-        for (ArrayList<String> folder : data) {
-            String folderId = folder.get(0);
-            if (folderIds.contains(folderId)) {
-                fail("There are duplicates in the response array: Folder \"" + folder.get(1) + "\" with folder id " + folderId);
-            } else {
-                folderIds.add(folderId);
-            }
-        }
-        assertTrue("Parent folder not included in updated folders.", folderIds.contains(parent));
-        assertTrue("New created folder not included in updated folders.", folderIds.contains(newFolderId));
+        Pair<ArrayList<String>, ArrayList<String>> pair = getFolderIds(data);
+        ArrayList<String> modifiedFolderIds = pair.getFirst();
+        assertTrue("Parent folder not included in updated folders.", modifiedFolderIds.contains(parent));
+        assertTrue("New created folder not included in updated folders.", modifiedFolderIds.contains(newFolderId));
     }
 
     /**
@@ -136,11 +129,26 @@ public class MWB1030Test extends AbstractAPIClientSession {
         ArrayList<Object> data = (ArrayList<Object>) checkResponse(folderUpdates.getError(), folderUpdates.getErrorDesc(), folderUpdates.getData());
 
         // Test for no duplicates in response data
-        ArrayList<String> modifiedFolderIds = new ArrayList<>();
-        boolean foundDeletedFolder = false;
-        for(Object item : data) {
+        Pair<ArrayList<String>, ArrayList<String>> pair = getFolderIds(data);
+        ArrayList<String> modifiedFolderIds = pair.getFirst();
+        ArrayList<String> deletedFolderIds = pair.getSecond();
+        assertTrue("Deleted folder not included in response.", deletedFolderIds.contains(newFolderId));
+        assertTrue("Parent folder not included in updated folders.", modifiedFolderIds.contains(parent));
+    }
+    
+    /**
+     * 
+     * Gets the folder ids of the modified and deleted folders from an updates response.
+     *
+     * @param updatesResponseData An array list with data from FolderUpdatesResponse.
+     * @return A pair with two array lists. The lists contain the folder ids from the modified (1) and deleted (2) folders.
+     */
+    private Pair<ArrayList<String>, ArrayList<String>> getFolderIds(ArrayList<Object> updatesResponseData) {
+        ArrayList<String> modifiedFolderIds = new ArrayList<String>();
+        ArrayList<String> deletedFolderIds = new ArrayList<String>();
+        for (Object item : updatesResponseData) {
             if (item instanceof ArrayList) {
-                ArrayList<String> folder = (ArrayList<String>) item;
+                @SuppressWarnings("unchecked") ArrayList<String> folder = (ArrayList<String>) item;
                 String folderId = folder.get(0);
                 if (modifiedFolderIds.contains(folderId)) {
                     fail("There are duplicates in the response array: Folder \"" + folder.get(1) + "\" with folder id " + folderId);
@@ -148,15 +156,14 @@ public class MWB1030Test extends AbstractAPIClientSession {
                     modifiedFolderIds.add(folderId);
                 }
             } else if (item instanceof String) {
-                if (foundDeletedFolder) {
-                    fail("There are duplicates in the response array for deleted folders");
+                String folderId = (String) item;
+                if (deletedFolderIds.contains(folderId)) {
+                    fail("There are duplicates in the response array: Folder id " + folderId);
+                } else {
+                    deletedFolderIds.add(folderId);
                 }
-                assertEquals("New created folder not included in deleted folders.", newFolderId, item);
-                foundDeletedFolder = true;
-
             }
         }
-        
-        assertTrue("Parent folder not included in updated folders.", modifiedFolderIds.contains(parent));
+        return new Pair<ArrayList<String>, ArrayList<String>>(modifiedFolderIds, deletedFolderIds);
     }
 }
