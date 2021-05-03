@@ -83,6 +83,7 @@ import com.openexchange.contact.AutocompleteParameters;
 import com.openexchange.contact.ContactID;
 import com.openexchange.contact.ContactService;
 import com.openexchange.contact.SortOptions;
+import com.openexchange.contact.SortOrder;
 import com.openexchange.contact.common.ContactsFolder;
 import com.openexchange.contact.common.ContactsParameters;
 import com.openexchange.contact.common.ContactsSession;
@@ -358,16 +359,12 @@ public class InternalContactsAccess implements com.openexchange.contact.provider
     ///////////////////////////////// CONTACTS PARAMETERS /////////////////////////////
 
     /**
-     * Gets the {@link ContactsParameters#PARAMETER_ORDER_BY} parameter. If absent falls back to the {@link ContactField#INTERNAL_USERID}
+     * Gets the {@link ContactsParameters#PARAMETER_ORDER_BY} parameter.
      *
      * @return The order by {@link ContactField}
      */
     private ContactField getOrderBy() {
-        ContactField orderBy = session.get(ContactsParameters.PARAMETER_ORDER_BY, ContactField.class);
-        if (orderBy == null) {
-            orderBy = ContactField.INTERNAL_USERID;
-        }
-        return orderBy;
+        return session.get(ContactsParameters.PARAMETER_ORDER_BY, ContactField.class);
     }
 
     /**
@@ -404,7 +401,8 @@ public class InternalContactsAccess implements com.openexchange.contact.provider
      * @throws OXException if the leftHandLimit is greater than the rightHandLimit
      */
     private SortOptions getSortOptions() throws OXException {
-        SortOptions options = new SortOptions(SortOptions.Order(getOrderBy(), getOrder()));
+        SortOrder order = SortOptions.Order(getOrderBy(), getOrder());
+        SortOptions options = order == null ? new SortOptions() : new SortOptions(order);
         String collation = getCollation();
         if (Strings.isNotEmpty(collation)) {
             options.setCollation(collation);

@@ -1175,6 +1175,7 @@ public class ContactServiceImpl extends DefaultContactService {
         } catch (OXException e) {
             throw e;
         } catch (Exception e) {
+            LOG.error(e.getMessage(), e);
             if (null != e.getCause() && OXException.class.isInstance(e.getCause())) {
                 throw (OXException)e.getCause();
             }

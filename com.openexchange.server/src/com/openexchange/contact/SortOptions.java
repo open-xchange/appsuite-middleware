@@ -73,13 +73,16 @@ public final class SortOptions {
 	private int limit;
 
 	/**
-	 * Creates a new {@link SortOrder} instance.
-	 *
-	 * @param by the contact field for ordering
-	 * @param order the order
-	 * @return the sort order
-	 */
+     * Creates a new {@link SortOrder} instance.
+     *
+     * @param by the contact field for ordering
+     * @param order the order
+     * @return the sort order or null in case {@link ContactField} is null
+     */
 	public static final SortOrder Order(ContactField by, Order order) {
+        if (by == null) {
+            return null;
+        }
 		return new SortOrder(by, order);
 	}
 

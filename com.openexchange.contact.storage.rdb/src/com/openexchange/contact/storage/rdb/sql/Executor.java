@@ -586,40 +586,42 @@ public class Executor {
 
     private static String getOrderClause(final SortOptions sortOptions, boolean forAutocomplete, boolean wrappingClauseForGroupBy) throws OXException {
         final StringBuilder stringBuilder = new StringBuilder();
-        if (forAutocomplete || (null != sortOptions && false == SortOptions.EMPTY.equals(sortOptions) && null != sortOptions.getOrder())) {
+        if (null != sortOptions && false == SortOptions.EMPTY.equals(sortOptions) && null != sortOptions.getOrder() && sortOptions.getOrder().length > 0) {
             stringBuilder.append("ORDER BY ");
-            if (forAutocomplete) {
-                if (wrappingClauseForGroupBy) {
-                    stringBuilder.append("min(value) DESC, min(fid) ASC, ");
-                } else {
-                    stringBuilder.append("value DESC, fid ASC, ");
-                }
+            final SortOrder[] order = sortOptions.getOrder();
+            final SuperCollator collator = SuperCollator.get(sortOptions.getCollation());
+            stringBuilder.append(getOrderClause(order[0], collator, wrappingClauseForGroupBy, forAutocomplete));
+            for (int i = 1; i < order.length; i++) {
+                stringBuilder.append(", ").append(getOrderClause(order[i], collator, wrappingClauseForGroupBy, forAutocomplete));
             }
-            if (null != sortOptions) {
-                final SortOrder[] order = sortOptions.getOrder();
-                if (null != order && 0 < order.length) {
-                    final SuperCollator collator = SuperCollator.get(sortOptions.getCollation());
-                    stringBuilder.append(getOrderClause(order[0], collator, wrappingClauseForGroupBy));
-                    for (int i = 1; i < order.length; i++) {
-                        stringBuilder.append(", ").append(getOrderClause(order[i], collator, wrappingClauseForGroupBy));
-                    }
-                } else {
-                    stringBuilder.deleteCharAt(stringBuilder.lastIndexOf(","));
-                }
+        } else if (forAutocomplete) {
+            stringBuilder.append("ORDER BY ");
+            if (wrappingClauseForGroupBy) {
+                stringBuilder.append("min(value) DESC, min(fid) ASC ");
+            } else {
+                stringBuilder.append("value DESC, fid ASC ");
             }
         }
         return stringBuilder.toString();
     }
 
-    private static String getOrderClause(final SortOrder order, final SuperCollator collator, boolean wrappingClauseForGroupBy) throws OXException {
+    private static String getOrderClause(final SortOrder order, final SuperCollator collator, boolean wrappingClauseForGroupBy, boolean forAutocomplete) throws OXException {
         final StringBuilder stringBuilder = new StringBuilder();
         if (null == collator || SuperCollator.DEFAULT.equals(collator)) {
             ContactField by = order.getBy();
             if (ContactField.USE_COUNT == by) {
                 if (wrappingClauseForGroupBy) {
-                    stringBuilder.append("min(").append(Table.OBJECT_USE_COUNT).append(".value)");
+                    if (forAutocomplete) {
+                        stringBuilder.append("min(value)");
+                    } else {
+                        stringBuilder.append("min(").append(Table.OBJECT_USE_COUNT).append(".value)");
+                    }
                 } else {
-                    stringBuilder.append(Table.OBJECT_USE_COUNT).append(".value");
+                    if(forAutocomplete) {
+                        stringBuilder.append("value");
+                    } else {
+                        stringBuilder.append(Table.OBJECT_USE_COUNT).append(".value");
+                    }
                 }
             } else {
                 if (wrappingClauseForGroupBy) {
