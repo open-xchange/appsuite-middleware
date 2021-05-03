@@ -132,7 +132,7 @@ public class MWB1024Test extends CardDAVTest {
                     "EMAIL;type=INTERNET;type=WORK;type=pref:" + email + "\r\n" +
                     "ORG:Metzgerei Fischer" + "\r\n" +
                     "TITLE:Angestellter" + "\r\n" +
-                    "NOTE;CHARSET=Windows-1252:Wollte mich am Montag zurückrufen." + "\r\n" +
+                    "NOTE;CHARSET=Windows-1252:Wollte mich am Montag zur\u00fcckrufen." + "\r\n" +
                     "TEL;WORK;VOICE:034523-34234234" + "\r\n" +
                     "TEL;HOME;VOICE:0444 / 2340349" + "\r\n" +
                     "TEL;CELL;VOICE:+49 4545345324523" + "\r\n" +
