@@ -144,14 +144,12 @@ public final class TokenLoginActivator extends HousekeepingActivator implements 
                         final HazelcastInstance hazelcastInstance = context.getService(reference);
                         try {
                             final String sessionId2tokenMapName = discoverHzMapName(hazelcastConfig.getConfig(),"sessionId2token");
-                            final String token2sessionIdMapName = discoverHzMapName(hazelcastConfig.getConfig(),"token2sessionId");
-                            if (null == sessionId2tokenMapName || null == token2sessionIdMapName) {
+                            if (null == sessionId2tokenMapName) {
                                 context.ungetService(reference);
                                 return null;
                             }
                             addService(HazelcastInstance.class, hazelcastInstance);
-                            serviceImpl.setSessionId2tokenHzMapName(sessionId2tokenMapName);
-                            serviceImpl.setToken2sessionIdMapNameHzMapName(token2sessionIdMapName);
+                            serviceImpl.setBackingHzMapName(sessionId2tokenMapName);
                             serviceImpl.changeBackingMapToHz();
                             return hazelcastInstance;
                         } catch (OXException e) {

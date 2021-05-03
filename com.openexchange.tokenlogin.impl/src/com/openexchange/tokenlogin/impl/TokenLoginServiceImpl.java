@@ -100,10 +100,6 @@ public class TokenLoginServiceImpl implements TokenLoginService {
 
     private volatile String sessionId2tokenMapName;
 
-    private volatile String token2sessionIdMapName;
-
-    private final Cache<String, String> token2sessionId;
-
     private final Cache<String, String> sessionId2token;
 
     private final Map<String, TokenLoginSecret> secrets;
@@ -114,6 +110,9 @@ public class TokenLoginServiceImpl implements TokenLoginService {
 
     /**
      * Initializes a new {@link TokenLoginServiceImpl}.
+     *
+     * @param maxIdleTime The max idle time for the local cache
+     * @param configService The configuration service
      */
     public TokenLoginServiceImpl(final int maxIdleTime, final ConfigurationService configService) throws OXException {
         this(maxIdleTime, configService, null);
@@ -121,19 +120,14 @@ public class TokenLoginServiceImpl implements TokenLoginService {
 
     /**
      * Initializes a new {@link TokenLoginServiceImpl}.
+     *
+     * @param maxIdleTime The max idle time for the local cache
+     * @param configService The configuration service
+     * @param notActiveExceptionHandler The {@link HazelcastInstanceNotActiveExceptionHandler}
      */
     public TokenLoginServiceImpl(final int maxIdleTime, final ConfigurationService configService, final HazelcastInstanceNotActiveExceptionHandler notActiveExceptionHandler) throws OXException {
         super();
         Validate.notNull(configService);
-        {
-            CacheBuilder<Object, Object> cacheBuilder = CacheBuilder.newBuilder()
-                .concurrencyLevel(4)
-                .maximumSize(Integer.MAX_VALUE)
-                .initialCapacity(1024)
-                .expireAfterAccess(maxIdleTime, TimeUnit.MILLISECONDS);
-            Cache<String, String> token2sessionId = cacheBuilder.build();
-            this.token2sessionId = token2sessionId;
-        }
         {
             CacheBuilder<Object, Object> cacheBuilder = CacheBuilder.newBuilder()
                 .concurrencyLevel(4)
@@ -151,6 +145,13 @@ public class TokenLoginServiceImpl implements TokenLoginService {
 
     // -------------------------------------------------------------------------------------------------------- //
 
+    /**
+     * Initializes web application secrets
+     *
+     * @param secretsFile The secrets file to use
+     * @return A map of secret to {@link TokenLoginSecret}s
+     * @throws OXException in case an error occured while reading the given file
+     */
     protected Map<String, TokenLoginSecret> initSecrets(final File secretsFile) throws OXException {
         if (null == secretsFile) {
             return Collections.emptyMap();
@@ -196,6 +197,12 @@ public class TokenLoginServiceImpl implements TokenLoginService {
         }
     }
 
+    /**
+     * Parse secret parameter
+     *
+     * @param param The param to parse
+     * @param params The map to add the params to
+     */
     private static void parseParameter(final String param, final Map<String, Object> params) {
         if (Strings.isNotEmpty(param)) {
             final int pos = param.indexOf('=');
@@ -211,12 +218,12 @@ public class TokenLoginServiceImpl implements TokenLoginService {
                     try {
                         final Integer i = Integer.valueOf(value);
                         params.put(param.substring(0, pos).trim(), i);
-                    } catch (NumberFormatException nfe1) {
+                    } catch (@SuppressWarnings("unused") NumberFormatException nfe1) {
                         // Try parse to long
                         try {
                             final Long l = Long.valueOf(value);
                             params.put(param.substring(0, pos).trim(), l);
-                        } catch (NumberFormatException nfe2) {
+                        } catch (@SuppressWarnings("unused") NumberFormatException nfe2) {
                             // Assume String value
                             params.put(param.substring(0, pos).trim(), value);
                         }
@@ -234,23 +241,19 @@ public class TokenLoginServiceImpl implements TokenLoginService {
     // -------------------------------------------------------------------------------------------------------- //
 
     /**
-     * Sets the name of the Hazelcast map for sessionId2token.
+     * Sets the name of the backing Hazelcast map
      *
      * @param hzMapName The map name
      */
-    public void setSessionId2tokenHzMapName(final String sessionId2tokenMapName) {
+    public void setBackingHzMapName(final String sessionId2tokenMapName) {
         this.sessionId2tokenMapName = sessionId2tokenMapName;
     }
 
     /**
-     * Sets the name of the Hazelcast map for token2sessionId.
+     * Handles {@link HazelcastInstanceNotActiveException}
      *
-     * @param hzMapName The map name
+     * @param e The {@link HazelcastInstanceNotActiveException}
      */
-    public void setToken2sessionIdMapNameHzMapName(final String token2sessionIdMapName) {
-        this.token2sessionIdMapName = token2sessionIdMapName;
-    }
-
     private void handleNotActiveException(HazelcastInstanceNotActiveException e) {
         LOG.warn("Encountered a {} error.", HazelcastInstanceNotActiveException.class.getSimpleName());
         changeBackingMapToLocalMap();
@@ -263,6 +266,8 @@ public class TokenLoginServiceImpl implements TokenLoginService {
 
     /**
      * Gets the Hazelcast map or <code>null</code> if unavailable.
+     *
+     * @param mapIdentifier The Hazelcast map id
      */
     private IMap<String, String> hzMap(String mapIdentifier) {
         if (null == mapIdentifier) {
@@ -282,6 +287,13 @@ public class TokenLoginServiceImpl implements TokenLoginService {
         }
     }
 
+    /**
+     * Removes the key/value pair from the Hazelcast map with the given id
+     *
+     * @param mapIdentifier The Hazelcast map id
+     * @param key The key to remove
+     * @return The removed value or null
+     */
     private String removeFromHzMap(String mapIdentifier, String key) {
         final IMap<String, String> hzMap = hzMap(mapIdentifier);
         String retval = null;
@@ -294,6 +306,14 @@ public class TokenLoginServiceImpl implements TokenLoginService {
         return retval;
     }
 
+    /**
+     * Puts the given key/value pair into the Hazelcast map with given id if absent
+     *
+     * @param mapIdentifier The Hazelcast map identifier
+     * @param key The key to add
+     * @param value The value to add
+     * @return The already existing value or null
+     */
     private String putToHzMapIfAbsent(String mapIdentifier, String key, String value) {
         final IMap<String, String> hzMap = hzMap(mapIdentifier);
         String retval = null;
@@ -306,17 +326,13 @@ public class TokenLoginServiceImpl implements TokenLoginService {
         return retval;
     }
 
-    private void putToHzMap(String mapIdentifier, String key, String value) {
-        final IMap<String, String> hzMap = hzMap(mapIdentifier);
-        if (null == hzMap) {
-            LOG.trace("Hazelcast map for remote token logins is not available.");
-        } else {
-            // This MUST be synchronous! Otherwise it may be possible to use a token twice, once from local map and once from remote map
-            // because remote remove happens before asynchronous put.
-            hzMap.put(key, value);
-        }
-    }
-
+    /**
+     * Gets a value from a given Hazelcast map
+     *
+     * @param mapIdentifier The Hazelcast map id
+     * @param key The key to get
+     * @return The value for the given key or null
+     */
     private String getFromHzMap(String mapIdentifier, String key) {
         final IMap<String, String> hzMap = hzMap(mapIdentifier);
         String retval = null;
@@ -335,15 +351,27 @@ public class TokenLoginServiceImpl implements TokenLoginService {
         // Only one token per session
         final String sessionId = session.getSessionID();
         String token = getToken(sessionId);
+        // Check token is in correct format
+        if (token != null && token.startsWith(sessionId) == false) {
+            token = null;
+            remove(sessionId);
+        }
         if (null == token) {
-            final String newToken = UUIDs.getUnformattedString(UUID.randomUUID());
-            token = putSessionIfAbsent(sessionId, newToken);
-            if (null == token) {
-                token = newToken;
-                putToken(token, sessionId);
-            }
+            final String newToken = createNewToken(sessionId);
+            token = putIfAbsent(sessionId, newToken);
+            return token == null ? newToken : token;
         }
         return token;
+    }
+
+    /**
+     * Creates a new token
+     *
+     * @param sessionId The session id
+     * @return The new token
+     */
+    private String createNewToken(String sessionId) {
+        return new StringBuilder(sessionId).append("-").append(UUIDs.getUnformattedString(UUID.randomUUID())).toString();
     }
 
     @Override
@@ -371,12 +399,16 @@ public class TokenLoginServiceImpl implements TokenLoginService {
         String sessionId;
         lock.lock();
         try {
-            sessionId = removeToken(token);
-            if (null == sessionId) {
+            String[] splitedToken = token.split("-", 2);
+            if (splitedToken.length != 2) {
                 throw TokenLoginExceptionCodes.NO_SUCH_TOKEN.create(token);
             }
-            // Remove from other mapping, too
-            removeSession(sessionId);
+            sessionId = splitedToken[0];
+            String storedToken = getToken(sessionId);
+            if (storedToken == null || storedToken.equals(token) == false) {
+                throw TokenLoginExceptionCodes.NO_SUCH_TOKEN.create(token);
+            }
+            remove(sessionId);
         } finally {
             lock.unlock();
         }
@@ -405,86 +437,55 @@ public class TokenLoginServiceImpl implements TokenLoginService {
     }
 
     /**
-     * @param sessionId
-     * @param token
+     * Puts the given token into the map if not already present
+     *
+     * @param sessionId The session id
+     * @param newToken The new token
+     * @return the existing value or null
      */
-    private void putToken(final String token, String sessionId) {
-        blocker.acquire();
-        try {
-            if (useHzMap) {
-                putToHzMap(token2sessionIdMapName, token, sessionId);
-            } else {
-                token2sessionId.put(token, sessionId);
-            }
-        } finally {
-            blocker.release();
-        }
-    }
-
-    /**
-     * @param sessionId
-     * @param newToken
-     * @return
-     */
-    private String putSessionIfAbsent(final String sessionId, final String newToken) {
+    private String putIfAbsent(final String sessionId, final String newToken) {
         blocker.acquire();
         try {
             if (useHzMap) {
                 return putToHzMapIfAbsent(sessionId2tokenMapName, sessionId, newToken);
-            } else {
-                return sessionId2token.asMap().putIfAbsent(sessionId, newToken);
             }
+            return sessionId2token.asMap().putIfAbsent(sessionId, newToken);
         } finally {
             blocker.release();
         }
     }
 
     /**
-     * @param sessionId
-     * @return
+     * Gets the token associated with the given session id
+     *
+     * @param sessionId The session id
+     * @return The token or null
      */
     private String getToken(final String sessionId) {
         blocker.acquire();
         try {
             if (useHzMap) {
                 return getFromHzMap(sessionId2tokenMapName, sessionId);
-            } else {
-                return sessionId2token.getIfPresent(sessionId);
             }
+            return sessionId2token.getIfPresent(sessionId);
         } finally {
             blocker.release();
         }
     }
 
     /**
-     * @param sessionId
-     * @return
+     * Removes the token for the given session
+     *
+     * @param sessionId The session id
+     * @return The associated token or null
      */
-    private String removeSession(String sessionId) {
+    private String remove(String sessionId) {
         blocker.acquire();
         try {
             if (useHzMap) {
                 return removeFromHzMap(sessionId2tokenMapName, sessionId);
-            } else {
-                return sessionId2token.asMap().remove(sessionId);
             }
-        } finally {
-            blocker.release();
-        }
-    }
-
-    /**
-     * @param token
-     * @return
-     */
-    private String removeToken(final String token) {
-        blocker.acquire();
-        try {
-            if (useHzMap) {
-                return removeFromHzMap(token2sessionIdMapName, token);
-            } else {
-                return token2sessionId.asMap().remove(token);
-            }
+            return sessionId2token.asMap().remove(sessionId);
         } finally {
             blocker.release();
         }
@@ -497,15 +498,11 @@ public class TokenLoginServiceImpl implements TokenLoginService {
      */
     public void removeTokenFor(final Session session) {
         Validate.notNull(session);
-
-        final String token = removeSession(session.getSessionID());
-        if (null != token) {
-            removeToken(token);
-        }
+        remove(session.getSessionID());
     }
 
     /**
-     *
+     * Changes the backing map to a local map
      */
     public void changeBackingMapToLocalMap() {
         blocker.block();
@@ -519,36 +516,25 @@ public class TokenLoginServiceImpl implements TokenLoginService {
     }
 
     /**
-     *
+     * Changes the backing map to a Hazelcast one
      */
     public void changeBackingMapToHz() {
         blocker.block();
         try {
             Validate.notNull(sessionId2tokenMapName);
-            Validate.notNull(token2sessionIdMapName);
             if (useHzMap) {
                 return;
-            } else {
-                if (0 < sessionId2token.size()) {
-                    IMap<String, String> hzMap = hzMap(sessionId2tokenMapName);
-                    if (null == hzMap) {
-                        LOG.trace("Hazelcast map for remote token logins is not available.");
-                    } else {
-                        hzMap.putAll(sessionId2token.asMap());
-                        sessionId2token.invalidateAll();
-                    }
-                }
-                if (0 < token2sessionId.size()) {
-                    IMap<String, String> hzMap = hzMap(token2sessionIdMapName);
-                    if (null == hzMap) {
-                        LOG.trace("Hazelcast map for remote token logins is not available.");
-                    } else {
-                        hzMap.putAll(token2sessionId.asMap());
-                        token2sessionId.invalidateAll();
-                    }
-                }
-                useHzMap = true;
             }
+            if (0 < sessionId2token.size()) {
+                IMap<String, String> hzMap = hzMap(sessionId2tokenMapName);
+                if (null == hzMap) {
+                    LOG.trace("Hazelcast map for remote token logins is not available.");
+                } else {
+                    hzMap.putAll(sessionId2token.asMap());
+                    sessionId2token.invalidateAll();
+                }
+            }
+            useHzMap = true;
             LOG.info("Token-login backing map changed to hazelcast");
         } finally {
             blocker.unblock();
