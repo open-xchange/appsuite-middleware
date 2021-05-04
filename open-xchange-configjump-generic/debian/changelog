@@ -1,3 +1,9 @@
+open-xchange-configjump-generic (7.10.5-10) stable; urgency=medium
+
+  * Build for patch 2021-05-03 (5989)
+
+ -- Carsten Hoeger <choeger@open-xchange.com>  Mon, 26 Apr 2021 12:41:12 +0000
+
 open-xchange-configjump-generic (7.10.5-9) stable; urgency=medium
 
   * Build for patch 2021-04-19 (5982)
