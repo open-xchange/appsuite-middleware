@@ -78,12 +78,12 @@ import javax.mail.internet.MailDateFormat;
 import javax.mail.internet.ParameterList;
 import com.google.common.collect.ImmutableMap;
 import com.openexchange.exception.OXException;
-import com.openexchange.imap.IMAPCapabilities;
 import com.openexchange.imap.IMAPServerInfo;
 import com.openexchange.java.Strings;
 import com.openexchange.log.LogProperties;
 import com.openexchange.mail.FullnameArgument;
 import com.openexchange.mail.MailExceptionCode;
+import com.openexchange.mail.PreviewMode;
 import com.openexchange.mail.dataobjects.IDMailMessage;
 import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.mail.mime.ContentType;
@@ -181,11 +181,11 @@ public final class MailMessageFetchIMAPCommand extends AbstractIMAPCommand<MailM
      * @param fp The fetch profile to use
      * @param serverInfo The IMAP server information deduced from configuration
      * @param examineHasAttachmentUserFlags Whether has-attachment user flags should be considered
-     * @param previewSupported Whether target IMAP server supports <code>"PREVIEW=FUZZY"</code> capability
+     * @param previewMode Whether target IMAP server supports any preview capability
      * @param optionalInterceptor The optional interceptor
      * @throws MessagingException If initialization fails
      */
-    public MailMessageFetchIMAPCommand(IMAPFolder imapFolder, boolean isRev1, int[] seqNums, FetchProfile fp, IMAPServerInfo serverInfo, boolean examineHasAttachmentUserFlags, boolean previewSupported, Optional<? extends MailMessageFetchInterceptor> optionalInterceptor) throws MessagingException {
+    public MailMessageFetchIMAPCommand(IMAPFolder imapFolder, boolean isRev1, int[] seqNums, FetchProfile fp, IMAPServerInfo serverInfo, boolean examineHasAttachmentUserFlags, PreviewMode previewMode, Optional<? extends MailMessageFetchInterceptor> optionalInterceptor) throws MessagingException {
         super(imapFolder);
         determineAttachmentByHeader = false;
         this.examineHasAttachmentUserFlags = examineHasAttachmentUserFlags;
@@ -195,7 +195,7 @@ public final class MailMessageFetchIMAPCommand extends AbstractIMAPCommand<MailM
         }
         accountId = null == serverInfo ? 0 : serverInfo.getAccountId();
         lastHandlers = new HashSet<FetchItemHandler>();
-        command = getFetchCommand(isRev1, fp, false, serverInfo, previewSupported);
+        command = getFetchCommand(isRev1, fp, false, serverInfo, previewMode);
         uid = false;
         length = seqNums.length;
         uid2index = null;
@@ -230,10 +230,10 @@ public final class MailMessageFetchIMAPCommand extends AbstractIMAPCommand<MailM
      * @param fp The fetch profile to use
      * @param serverInfo The IMAP server information deduced from configuration
      * @param examineHasAttachmentUserFlags Whether has-attachment user flags should be considered
-     * @param previewSupported Whether target IMAP server supports <code>"PREVIEW=FUZZY"</code> capability
+     * @param previewMode Whether target IMAP server supports any preview capability
      * @param optionalInterceptor The optional interceptor
      */
-    public MailMessageFetchIMAPCommand(IMAPFolder imapFolder, boolean isRev1, int messageCount, FetchProfile fp, IMAPServerInfo serverInfo, boolean examineHasAttachmentUserFlags, boolean previewSupported, Optional<? extends MailMessageFetchInterceptor> optionalInterceptor) {
+    public MailMessageFetchIMAPCommand(IMAPFolder imapFolder, boolean isRev1, int messageCount, FetchProfile fp, IMAPServerInfo serverInfo, boolean examineHasAttachmentUserFlags, PreviewMode previewMode, Optional<? extends MailMessageFetchInterceptor> optionalInterceptor) {
         super(imapFolder);
         determineAttachmentByHeader = false;
         this.examineHasAttachmentUserFlags = examineHasAttachmentUserFlags;
@@ -242,7 +242,7 @@ public final class MailMessageFetchIMAPCommand extends AbstractIMAPCommand<MailM
         }
         accountId = null == serverInfo ? 0 : serverInfo.getAccountId();
         lastHandlers = new HashSet<FetchItemHandler>();
-        command = getFetchCommand(isRev1, fp, false, serverInfo, previewSupported);
+        command = getFetchCommand(isRev1, fp, false, serverInfo, previewMode);
         uid = false;
         length = messageCount;
         uid2index = null;
@@ -270,11 +270,11 @@ public final class MailMessageFetchIMAPCommand extends AbstractIMAPCommand<MailM
      * @param fp The fetch profile to use
      * @param serverInfo The IMAP server information deduced from configuration
      * @param examineHasAttachmentUserFlags Whether has-attachment user flags should be considered
-     * @param previewSupported Whether target IMAP server supports <code>"PREVIEW=FUZZY"</code> capability
+     * @param previewMode Whether target IMAP server supports any preview capability
      * @param optionalInterceptor The optional interceptor
      * @throws MessagingException If initialization fails
      */
-    public MailMessageFetchIMAPCommand(IMAPFolder imapFolder, boolean isRev1, long[] uids, FetchProfile fp, IMAPServerInfo serverInfo, boolean examineHasAttachmentUserFlags, boolean previewSupported, Optional<? extends MailMessageFetchInterceptor> optionalInterceptor) throws MessagingException {
+    public MailMessageFetchIMAPCommand(IMAPFolder imapFolder, boolean isRev1, long[] uids, FetchProfile fp, IMAPServerInfo serverInfo, boolean examineHasAttachmentUserFlags, PreviewMode previewMode, Optional<? extends MailMessageFetchInterceptor> optionalInterceptor) throws MessagingException {
         super(imapFolder);
         determineAttachmentByHeader = false;
         this.examineHasAttachmentUserFlags = examineHasAttachmentUserFlags;
@@ -296,11 +296,11 @@ public final class MailMessageFetchIMAPCommand extends AbstractIMAPCommand<MailM
         }
         if (length == messageCount) {
             fp.add(UIDFolder.FetchProfileItem.UID);
-            command = getFetchCommand(isRev1, fp, false, serverInfo, previewSupported);
+            command = getFetchCommand(isRev1, fp, false, serverInfo, previewMode);
             args = (1 == length ? ARGS_FIRST : ARGS_ALL);
             uid = false;
         } else {
-            command = getFetchCommand(isRev1, fp, false, serverInfo, previewSupported);
+            command = getFetchCommand(isRev1, fp, false, serverInfo, previewMode);
             args = IMAPNumArgSplitter.splitUIDArg(uids, false, LENGTH_WITH_UID + command.length());
             uid = true;
         }
@@ -1425,10 +1425,10 @@ public final class MailMessageFetchIMAPCommand extends AbstractIMAPCommand<MailM
      * @param fp The fetch profile to convert
      * @param loadBody <code>true</code> if message body should be loaded; otherwise <code>false</code>
      * @param serverInfo The IMAP server information
-     * @param previewSupported Whether target IMAP server supports <code>"PREVIEW=FUZZY"</code> capability
+     * @param previewMode Whether target IMAP server supports any preview capability
      * @return The FETCH items to craft a FETCH command
      */
-    public static String getFetchCommand(boolean isRev1, FetchProfile fp, boolean loadBody, IMAPServerInfo serverInfo, boolean previewSupported) {
+    public static String getFetchCommand(boolean isRev1, FetchProfile fp, boolean loadBody, IMAPServerInfo serverInfo, PreviewMode previewMode) {
         StringBuilder command = new StringBuilder(128);
         boolean sizeIncluded;
         if (fp.contains(FetchProfile.Item.ENVELOPE)) {
@@ -1482,26 +1482,44 @@ public final class MailMessageFetchIMAPCommand extends AbstractIMAPCommand<MailM
             }
         }
 
-        if (previewSupported) {
-            if (fp.contains(IMAPFolder.PreviewFetchProfileItem.PREVIEW_LAZY)) {
-                if (null != capabilities && capabilities.containsKey(IMAPCapabilities.CAP_TEXT_PREVIEW_NEW)) {
-                    command.append(" PREVIEW (LAZY=FUZZY)");
+        switch (previewMode) {
+            case NONE:
+                break;
+            case PREVIEW_FUZZY:
+                if (fp.contains(IMAPFolder.PreviewFetchProfileItem.PREVIEW_LAZY)) {
+                    if (null != capabilities && capabilities.containsKey(previewMode.getCapabilityName())) {
+                        command.append(" PREVIEW (LAZY=FUZZY)");
+                    }
+                } else if (fp.contains(IMAPFolder.PreviewFetchProfileItem.PREVIEW)) {
+                    if (null != capabilities && capabilities.containsKey(previewMode.getCapabilityName())) {
+                        command.append(" PREVIEW (FUZZY)");
+                    }
                 }
-            } else if (fp.contains(IMAPFolder.PreviewFetchProfileItem.PREVIEW)) {
-                if (null != capabilities && capabilities.containsKey(IMAPCapabilities.CAP_TEXT_PREVIEW_NEW)) {
-                    command.append(" PREVIEW (FUZZY)");
+                break;
+            case PREVIEW_RFC8970:
+                if (fp.contains(IMAPFolder.Rfc8970PreviewFetchProfileItem.PREVIEW_LAZY)) {
+                    if (null != capabilities && capabilities.containsKey(previewMode.getCapabilityName())) {
+                        command.append(" PREVIEW (LAZY)");
+                    }
+                } else if (fp.contains(IMAPFolder.Rfc8970PreviewFetchProfileItem.PREVIEW)) {
+                    if (null != capabilities && capabilities.containsKey(previewMode.getCapabilityName())) {
+                        command.append(" PREVIEW");
+                    }
                 }
-            }
-        } else {
-            if (fp.contains(IMAPFolder.SnippetFetchProfileItem.SNIPPETS_LAZY)) {
-                if (null != capabilities && capabilities.containsKey(IMAPCapabilities.CAP_TEXT_PREVIEW)) {
-                    command.append(" SNIPPET (LAZY=FUZZY)");
+                break;
+            case SNIPPET_FUZZY:
+                if (fp.contains(IMAPFolder.SnippetFetchProfileItem.SNIPPETS_LAZY)) {
+                    if (null != capabilities && capabilities.containsKey(previewMode.getCapabilityName())) {
+                        command.append(" SNIPPET (LAZY=FUZZY)");
+                    }
+                } else if (fp.contains(IMAPFolder.SnippetFetchProfileItem.SNIPPETS)) {
+                    if (null != capabilities && capabilities.containsKey(previewMode.getCapabilityName())) {
+                        command.append(" SNIPPET (FUZZY)");
+                    }
                 }
-            } else if (fp.contains(IMAPFolder.SnippetFetchProfileItem.SNIPPETS)) {
-                if (null != capabilities && capabilities.containsKey(IMAPCapabilities.CAP_TEXT_PREVIEW)) {
-                    command.append(" SNIPPET (FUZZY)");
-                }
-            }
+                break;
+            default:
+                break;
         }
 
         boolean allHeaders = (fp.contains(IMAPFolder.FetchProfileItem.HEADERS) && !loadBody);

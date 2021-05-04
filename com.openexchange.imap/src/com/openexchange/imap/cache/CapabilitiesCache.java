@@ -60,6 +60,7 @@ import com.openexchange.imap.acl.ACLExtension;
 import com.openexchange.imap.acl.ACLExtensionFactory;
 import com.openexchange.imap.config.IMAPConfig;
 import com.openexchange.imap.services.Services;
+import com.openexchange.mail.PreviewMode;
 import com.openexchange.mail.api.MailConfig.BoolCapVal;
 import com.openexchange.mail.cache.SessionMailCache;
 import com.openexchange.mail.cache.SessionMailCacheEntry;
@@ -208,7 +209,17 @@ public final class CapabilitiesCache {
             imapCaps.setChildren(map.containsKey(IMAPCapabilities.CAP_CHILDREN));
             imapCaps.setHasSubscription(!imapConfig.getIMAPProperties().isIgnoreSubscription());
             imapCaps.setFileNameSearch(map.containsKey(IMAPCapabilities.CAP_SEARCH_FILENAME));
-            imapCaps.setTextPreview(map.containsKey(IMAPCapabilities.CAP_TEXT_PREVIEW) || map.containsKey(IMAPCapabilities.CAP_TEXT_PREVIEW_NEW));
+            {
+                PreviewMode previewMode = PreviewMode.NONE;
+                for (PreviewMode pm : PreviewMode.values()) {
+                    String capabilityName = pm.getCapabilityName();
+                    if (capabilityName != null && map.containsKey(capabilityName)) {
+                        previewMode = pm;
+                        break;
+                    }
+                }
+                imapCaps.setTextPreview(previewMode != PreviewMode.NONE);
+            }
             imapCaps.setMailFilterApplication(map.containsKey(IMAPCapabilities.CAP_FILTER_SIEVE));
             if (hasSort && imapConfig.getIMAPProperties().isImapSort()) {
                 // IMAP sort supported & enabled

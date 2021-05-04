@@ -81,6 +81,7 @@ import com.openexchange.imap.threader.nntp.ThreadableImpl;
 import com.openexchange.imap.threadsort.ThreadSortNode;
 import com.openexchange.java.Reference;
 import com.openexchange.log.LogProperties;
+import com.openexchange.mail.PreviewMode;
 import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.mail.mime.MessageHeaders;
 import com.openexchange.mail.mime.utils.MimeMessageUtility;
@@ -263,12 +264,12 @@ public final class Threadables {
      * @param fetchProfile The FETCH profile
      * @param serverInfo The IMAP server information
      * @param examineHasAttachmentUserFlags Whether has-attachment user flags should be considered
-     * @param previewSupported Whether target IMAP server supports <code>"PREVIEW=FUZZY"</code> capability
+     * @param previewMode Whether target IMAP server supports any preview capability
      * @return The fetched <tt>MailMessage</tt>s
      * @throws MessagingException If an error occurs
      */
     @SuppressWarnings("unchecked")
-    public static List<MailMessage> getAllMailsFrom(IMAPFolder imapFolder, int limit, FetchProfile fetchProfile, IMAPServerInfo serverInfo, boolean examineHasAttachmentUserFlags, boolean previewSupported) throws MessagingException {
+    public static List<MailMessage> getAllMailsFrom(IMAPFolder imapFolder, int limit, FetchProfile fetchProfile, IMAPServerInfo serverInfo, boolean examineHasAttachmentUserFlags, PreviewMode previewMode) throws MessagingException {
         final int messageCount = imapFolder.getMessageCount();
         if (messageCount <= 0) {
             /*
@@ -298,7 +299,7 @@ public final class Threadables {
                             mails = new ArrayList<MailMessage>(limit);
                         }
                     }
-                    sb.append(" (").append(getFetchCommand(protocol.isREV1(), fetchProfile, false, serverInfo, previewSupported)).append(')');
+                    sb.append(" (").append(getFetchCommand(protocol.isREV1(), fetchProfile, false, serverInfo, previewMode)).append(')');
                     command = sb.toString();
                 }
 

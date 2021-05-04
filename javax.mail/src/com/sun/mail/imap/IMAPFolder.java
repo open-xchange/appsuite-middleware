@@ -532,7 +532,50 @@ public class IMAPFolder extends Folder implements UIDFolder, ResponseHandler {
             return algorithmName;
         }
 
-    } // End of class SnippetFetchProfileItem
+    } // End of class PreviewFetchProfileItem
+    
+    /**
+     * A fetch profile item for fetching text previews.
+     * <p>
+     * This inner class extends the <code>FetchProfile.Item</code>
+     * class to add new FetchProfile item types, specific to IMAPFolders.
+     *
+     * @see FetchProfile
+     */
+    public static class Rfc8970PreviewFetchProfileItem extends FetchProfile.Item {
+
+        /**
+         * This is the fuzzy PREVIEW item for a message's text preview.
+         */
+        public static final Rfc8970PreviewFetchProfileItem PREVIEW = new Rfc8970PreviewFetchProfileItem(null);
+        
+        /**
+         * This is the lazy fuzzy PREVIEW item for a message's text preview.
+         */
+        public static final Rfc8970PreviewFetchProfileItem PREVIEW_LAZY = new Rfc8970PreviewFetchProfileItem("LAZY");
+
+        private final String optionalAlgorithmName;
+
+        /**
+         * Initializes a new {@link SnippetFetchProfileItem}.
+         * 
+         * @param optionalAlgorithmName The optional algorithm name; e.g. <code>"LAZY"</code>
+         */
+        protected Rfc8970PreviewFetchProfileItem(String optionalAlgorithmName) {
+            super("PREVIEW");
+            this.optionalAlgorithmName = optionalAlgorithmName == null ? null : Utility.toUpperCase(optionalAlgorithmName);
+        }
+
+        /**
+         * Gets the algorithm name; e.g. <code>"LAZY"</code>.
+         *
+         * @return The algorithm name or <code>null</code>
+         */
+        public String getOptionalAlgoritmhName() {
+            return optionalAlgorithmName;
+        }
+
+    } // End of class Rfc8970PreviewFetchProfileItem
 
     /**
      * Constructor used to create a possibly non-existent folder.
@@ -1459,7 +1502,6 @@ public class IMAPFolder extends Folder implements UIDFolder, ResponseHandler {
     // Special fetch items
     Map<String, String> capabilities = protocol.getCapabilities();
     boolean xdovecot = capabilities.containsKey("XDOVECOT");
-    boolean hasSnippets = capabilities.containsKey("SNIPPET=FUZZY");
     for (FetchProfile.Item item : fp.getItems()) {
         if ("ORIGINAL-MAILBOX".equals(item.name())) {
             if (xdovecot) {
@@ -1477,8 +1519,23 @@ public class IMAPFolder extends Folder implements UIDFolder, ResponseHandler {
                 first = false;
             }
         } else if (item instanceof SnippetFetchProfileItem) {
-            if (hasSnippets) {
+            if (capabilities.containsKey("SNIPPET=FUZZY")) {
                 command.append(first ? "SNIPPET" : " SNIPPET").append(" (").append(((SnippetFetchProfileItem) item).getAlgoritmhName()).append(')');
+                first = false;
+            }
+        } else if (item instanceof PreviewFetchProfileItem) {
+            if (capabilities.containsKey("PREVIEW=FUZZY")) {
+                command.append(first ? "PREVIEW" : " PREVIEW").append(" (").append(((PreviewFetchProfileItem) item).getAlgoritmhName()).append(')');
+                first = false;
+            }
+        } else if (item instanceof Rfc8970PreviewFetchProfileItem) {
+            if (capabilities.containsKey("PREVIEW")) {
+                String optionalAlgoritmhName = ((Rfc8970PreviewFetchProfileItem) item).getOptionalAlgoritmhName();
+                if (optionalAlgoritmhName == null) {
+                    command.append(first ? "PREVIEW" : " PREVIEW");
+                } else {
+                    command.append(first ? "PREVIEW" : " PREVIEW").append(" (").append(optionalAlgoritmhName).append(')');
+                }
                 first = false;
             }
         }

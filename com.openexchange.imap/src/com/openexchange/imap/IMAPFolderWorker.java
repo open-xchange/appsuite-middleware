@@ -75,6 +75,7 @@ import com.openexchange.imap.services.Services;
 import com.openexchange.java.Strings;
 import com.openexchange.log.LogProperties;
 import com.openexchange.mail.MailExceptionCode;
+import com.openexchange.mail.PreviewMode;
 import com.openexchange.mail.api.MailMessageStorage;
 import com.openexchange.mail.api.enhanced.MailMessageStorageLong;
 import com.openexchange.mail.dataobjects.MailFolder;
@@ -204,7 +205,7 @@ public abstract class IMAPFolderWorker extends MailMessageStorageLong {
     protected int holdsMessages = -1;
     protected final boolean ignoreSubscriptions;
     protected final boolean examineHasAttachmentUserFlags;
-    protected final boolean previewSupported;
+    protected final PreviewMode previewMode;
 
     /**
      * Initializes a new {@link IMAPFolderWorker}.
@@ -228,7 +229,14 @@ public abstract class IMAPFolderWorker extends MailMessageStorageLong {
         otherFolders = new HashSet<IMAPFolder>(4);
         ignoreSubscriptions = imapConfig.getIMAPProperties().isIgnoreSubscription();
         examineHasAttachmentUserFlags = imapConfig.getCapabilities().hasAttachmentMarker();
-        previewSupported = imapConfig.asMap().containsKey(IMAPCapabilities.CAP_TEXT_PREVIEW_NEW);
+        PreviewMode previewMode = PreviewMode.NONE;
+        for (PreviewMode pm : PreviewMode.values()) {
+            String capabilityName = pm.getCapabilityName();
+            if (capabilityName != null && imapConfig.asMap().containsKey(capabilityName)) {
+                previewMode = pm;
+            }
+        }
+        this.previewMode = previewMode;
     }
 
     /**

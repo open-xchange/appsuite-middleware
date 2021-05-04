@@ -74,18 +74,20 @@ public class FetchResponse extends IMAPResponse {
     private Item[] items;
     private Map<String, Object> extensionItems;
     private final FetchItem[] fitems;
+    private final boolean rfc8970Preview;
 
-    public FetchResponse(Protocol p) 
+    public FetchResponse(Protocol p, boolean rfc8970Preview) 
 		throws IOException, ProtocolException {
 	super(p);
+	this.rfc8970Preview = rfc8970Preview;
 	fitems = null;
 	parse();
 	buffer = null; // Not needed anymore as completely parsed by now
     }
 
-    public FetchResponse(IMAPResponse r)
+    public FetchResponse(IMAPResponse r, boolean rfc8970Preview)
 		throws IOException, ProtocolException {
-	this(r, null);
+	this(r, null, rfc8970Preview);
     }
 
     /**
@@ -97,9 +99,10 @@ public class FetchResponse extends IMAPResponse {
      * @exception	ProtocolException	for protocol failures
      * @since JavaMail 1.4.6
      */
-    public FetchResponse(IMAPResponse r, FetchItem[] fitems)
+    public FetchResponse(IMAPResponse r, FetchItem[] fitems, boolean rfc8970Preview)
 		throws IOException, ProtocolException {
 	super(r);
+    this.rfc8970Preview = rfc8970Preview;
 	this.fitems = fitems;
 	parse();
 	buffer = null; // Not needed anymore as completely parsed by now
@@ -356,7 +359,7 @@ public class FetchResponse extends IMAPResponse {
         break;
 	case 'P': case 'p':
         if (match(PREVIEW.name))
-        return new PREVIEW(this);
+        return new PREVIEW(this, rfc8970Preview);
         break;
 	default: 
 	    break;

@@ -49,6 +49,7 @@
 
 package com.openexchange.imap;
 
+import com.openexchange.mail.PreviewMode;
 import com.openexchange.mail.api.MailCapabilities;
 
 /**
@@ -127,18 +128,23 @@ public class IMAPCapabilities extends MailCapabilities {
     /**
      * TEXT PREVIEW: <code>"SNIPPET=FUZZY"</code>
      */
-    public static final String CAP_TEXT_PREVIEW = "SNIPPET=FUZZY";
+    public static final String CAP_TEXT_PREVIEW = PreviewMode.SNIPPET_FUZZY.getCapabilityName();
 
     /**
      * TEXT PREVIEW: <code>"PREVIEW=FUZZY"</code>
      */
-    public static final String CAP_TEXT_PREVIEW_NEW = "PREVIEW=FUZZY";
+    public static final String CAP_TEXT_PREVIEW_NEW = PreviewMode.PREVIEW_FUZZY.getCapabilityName();
+
+    /**
+     * RFC8970-conform TEXT PREVIEW: <code>"PREVIEW"</code>
+     */
+    public static final String CAP_TEXT_PREVIEW_RFC8970 = PreviewMode.PREVIEW_RFC8970.getCapabilityName();
 
     /**
      * CONDSTORE support according to <a href="https://tools.ietf.org/html/rfc7162">https://tools.ietf.org/html/rfc7162</a>
      */
     public static final String CAP_CONDSTORE = "CONDSTORE";
-    
+
     /**
      * Filters applicable to existing messages: <code>"FILTER=SIEVE"</code>
      */

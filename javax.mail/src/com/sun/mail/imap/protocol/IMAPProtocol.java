@@ -521,9 +521,9 @@ public class IMAPProtocol extends Protocol {
 	// assert Thread.holdsLock(this);
 	// can't assert because it's called from constructor
 	IMAPResponse r = new IMAPResponse(this);
-	if (r.keyEquals("FETCH"))
-	    r = new FetchResponse(r, getFetchItems());
-	else if (r.keyEquals("FILTERED"))
+	if (r.keyEquals("FETCH")) {
+	    r = new FetchResponse(r, getFetchItems(), capabilities.containsKey("PREVIEW"));
+	} else if (r.keyEquals("FILTERED"))
 	    r = new FilteredResponse(r);
 	return r;
     }

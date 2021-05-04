@@ -62,6 +62,7 @@ import javax.mail.FetchProfile;
 import javax.mail.FetchProfile.Item;
 import javax.mail.UIDFolder;
 import com.openexchange.mail.MailField;
+import com.openexchange.mail.PreviewMode;
 import com.openexchange.mail.mime.HeaderName;
 import com.openexchange.mail.mime.MessageHeaders;
 import com.sun.mail.imap.IMAPFolder;
@@ -99,7 +100,7 @@ public final class MimeStorageUtility {
         // CACHE_FETCH_PROFILE.add(IMAPFolder.FetchProfileItem.HEADERS);
 
         // Cache fields
-        final Collection<MailField> fields = fetchProfile2MailListFields(CACHE_FETCH_PROFILE, false, false);
+        final Collection<MailField> fields = fetchProfile2MailListFields(CACHE_FETCH_PROFILE, false, PreviewMode.NONE);
         fields.add(MailField.ACCOUNT_NAME);
         CACHE_FIELDS = fields;
         CACHE_FIELDS_ARR = CACHE_FIELDS.toArray(new MailField[CACHE_FIELDS.size()]);
@@ -176,10 +177,10 @@ public final class MimeStorageUtility {
      *
      * @param fetchProfile The fetch profile
      * @param considerUserFlags Whether user flags should be considered to determine "has attachment" flag
-     * @param previewSupported Whether target mail server supports preview capability
+     * @param previewMode Whether target mail server supports preview capability
      * @return An appropriate collection of {@link MailField} enumeration constants
      */
-    public static Collection<MailField> fetchProfile2MailListFields(FetchProfile fetchProfile, boolean considerUserFlags, boolean previewSupported) {
+    public static Collection<MailField> fetchProfile2MailListFields(FetchProfile fetchProfile, boolean considerUserFlags, PreviewMode previewMode) {
         final EnumSet<MailField> set = EnumSet.noneOf(MailField.class);
         /*
          * Folder is always set
@@ -206,20 +207,35 @@ public final class MimeStorageUtility {
         if (fetchProfile.contains(UIDFolder.FetchProfileItem.UID)) {
             set.add(MailField.ID);
         }
-        if (previewSupported) {
-            if (fetchProfile.contains(IMAPFolder.PreviewFetchProfileItem.PREVIEW_LAZY)) {
-                set.add(MailField.TEXT_PREVIEW_IF_AVAILABLE);
-            }
-            if (fetchProfile.contains(IMAPFolder.PreviewFetchProfileItem.PREVIEW)) {
-                set.add(MailField.TEXT_PREVIEW);
-            }
-        } else {
-            if (fetchProfile.contains(IMAPFolder.SnippetFetchProfileItem.SNIPPETS_LAZY)) {
-                set.add(MailField.TEXT_PREVIEW_IF_AVAILABLE);
-            }
-            if (fetchProfile.contains(IMAPFolder.SnippetFetchProfileItem.SNIPPETS)) {
-                set.add(MailField.TEXT_PREVIEW);
-            }
+        switch (previewMode) {
+            case NONE:
+                break;
+            case PREVIEW_FUZZY:
+                if (fetchProfile.contains(IMAPFolder.PreviewFetchProfileItem.PREVIEW_LAZY)) {
+                    set.add(MailField.TEXT_PREVIEW_IF_AVAILABLE);
+                }
+                if (fetchProfile.contains(IMAPFolder.PreviewFetchProfileItem.PREVIEW)) {
+                    set.add(MailField.TEXT_PREVIEW);
+                }
+                break;
+            case PREVIEW_RFC8970:
+                if (fetchProfile.contains(IMAPFolder.Rfc8970PreviewFetchProfileItem.PREVIEW_LAZY)) {
+                    set.add(MailField.TEXT_PREVIEW_IF_AVAILABLE);
+                }
+                if (fetchProfile.contains(IMAPFolder.Rfc8970PreviewFetchProfileItem.PREVIEW)) {
+                    set.add(MailField.TEXT_PREVIEW);
+                }
+                break;
+            case SNIPPET_FUZZY:
+                if (fetchProfile.contains(IMAPFolder.SnippetFetchProfileItem.SNIPPETS_LAZY)) {
+                    set.add(MailField.TEXT_PREVIEW_IF_AVAILABLE);
+                }
+                if (fetchProfile.contains(IMAPFolder.SnippetFetchProfileItem.SNIPPETS)) {
+                    set.add(MailField.TEXT_PREVIEW);
+                }
+                break;
+            default:
+                break;
         }
         if (fetchProfile.contains(FetchProfile.Item.CONTENT_INFO)) {
             set.add(MailField.CONTENT_TYPE);
@@ -316,11 +332,11 @@ public final class MimeStorageUtility {
      * @param fields The fields
      * @param preferEnvelope <code>true</code> to prefer ENVELOPE instead of single fetch items; otherwise <code>false</code>
      * @param forceAddFlags <code>true</code> to signal that flags have to be requested; otherwise <code>false</code>
-     * @param previewSupported Whether target mail server supports preview capability
+     * @param previewMode Whether target mail server supports preview capability
      * @return The appropriate IMAP fetch profile
      */
-    public static FetchProfile getFetchProfile(MailField[] fields, boolean preferEnvelope, boolean forceAddFlags, boolean previewSupported) {
-        return getFetchProfile(fields, null, preferEnvelope, forceAddFlags, previewSupported);
+    public static FetchProfile getFetchProfile(MailField[] fields, boolean preferEnvelope, boolean forceAddFlags, PreviewMode previewMode) {
+        return getFetchProfile(fields, null, preferEnvelope, forceAddFlags, previewMode);
     }
 
     /**
@@ -333,11 +349,11 @@ public final class MimeStorageUtility {
      * @param sortField The sort field
      * @param preferEnvelope <code>true</code> to prefer ENVELOPE instead of single fetch items; otherwise <code>false</code>
      * @param forceAddFlags <code>true</code> to signal that flags have to be requested; otherwise <code>false</code>
-     * @param previewSupported Whether target mail server supports preview capability
+     * @param previewMode Whether target mail server supports preview capability
      * @return The appropriate IMAP fetch profile
      */
-    public static FetchProfile getFetchProfile(MailField[] fields, MailField sortField, boolean preferEnvelope, boolean forceAddFlags, boolean previewSupported) {
-        return getFetchProfile(fields, null, sortField, preferEnvelope, forceAddFlags, previewSupported);
+    public static FetchProfile getFetchProfile(MailField[] fields, MailField sortField, boolean preferEnvelope, boolean forceAddFlags, PreviewMode previewMode) {
+        return getFetchProfile(fields, null, sortField, preferEnvelope, forceAddFlags, previewMode);
     }
 
     private static final EnumSet<MailField> ENV_FIELDS;
@@ -386,11 +402,11 @@ public final class MimeStorageUtility {
      * @param sortField The sort field
      * @param preferEnvelope <code>true</code> to prefer ENVELOPE instead of single fetch items; otherwise <code>false</code>
      * @param forceAddFlags <code>true</code> to signal that flags have to be requested; otherwise <code>false</code>
-     * @param previewSupported Whether target mail server supports preview capability
+     * @param previewMode Whether target server supports any preview capability
      * @return The appropriate IMAP fetch profile
      */
-    public static FetchProfile getFetchProfile(MailField[] fields, MailField[] searchFields, MailField sortField, boolean preferEnvelope, boolean forceAddFlags, boolean previewSupported) {
-        return getFetchProfile(fields, null, searchFields, sortField, preferEnvelope, forceAddFlags, previewSupported);
+    public static FetchProfile getFetchProfile(MailField[] fields, MailField[] searchFields, MailField sortField, boolean preferEnvelope, boolean forceAddFlags, PreviewMode previewMode) {
+        return getFetchProfile(fields, null, searchFields, sortField, preferEnvelope, forceAddFlags, previewMode);
     }
 
     /**
@@ -405,10 +421,10 @@ public final class MimeStorageUtility {
      * @param sortField The sort field
      * @param preferEnvelope <code>true</code> to prefer ENVELOPE instead of single fetch items; otherwise <code>false</code>
      * @param forceAddFlags <code>true</code> to signal that flags have to be requested; otherwise <code>false</code>
-     * @param previewSupported Whether target mail server supports preview capability
+     * @param previewMode Whether target server supports any preview capability
      * @return The appropriate IMAP fetch profile
      */
-    public static FetchProfile getFetchProfile(MailField[] fields, String[] headerNames, MailField[] searchFields, MailField sortField, boolean preferEnvelope, boolean forceAddFlags, boolean previewSupported) {
+    public static FetchProfile getFetchProfile(MailField[] fields, String[] headerNames, MailField[] searchFields, MailField sortField, boolean preferEnvelope, boolean forceAddFlags, PreviewMode previewMode) {
         /*
          * Use a set to avoid duplicate entries
          */
@@ -478,7 +494,7 @@ public final class MimeStorageUtility {
              * Iterate fields
              */
             for (MailField mailField : set) {
-                addFetchItem(fetchProfile, mailField, forceAddFlags, previewSupported);
+                addFetchItem(fetchProfile, mailField, forceAddFlags, previewMode);
             }
             /*
              * Iterate header names
@@ -541,8 +557,6 @@ public final class MimeStorageUtility {
         field2item.put(MailField.COLOR_LABEL, FetchProfile.Item.FLAGS);
         field2item.put(MailField.ORIGINAL_ID, ORIGINAL_MAILBOX);
         field2item.put(MailField.ORIGINAL_FOLDER_ID, ORIGINAL_UID);
-        field2item.put(MailField.TEXT_PREVIEW_IF_AVAILABLE, IMAPFolder.SnippetFetchProfileItem.SNIPPETS_LAZY);
-        field2item.put(MailField.TEXT_PREVIEW, IMAPFolder.SnippetFetchProfileItem.SNIPPETS);
         FIELD2ITEM = field2item;
         /*
          * Header name map
@@ -567,23 +581,50 @@ public final class MimeStorageUtility {
      * @param fp The fetch profile to add to
      * @param field The field to add
      * @param considerUserFlags Whether user flags are supposed to be considered to determine "has attachment" flag
-     * @param previewSupported Whether target mail server supports preview capability
+     * @param previewMode Whether target mail server supports preview capability
      */
-    public static void addFetchItem(FetchProfile fp, MailField field, boolean considerUserFlags, boolean previewSupported) {
+    public static void addFetchItem(FetchProfile fp, MailField field, boolean considerUserFlags, PreviewMode previewMode) {
         if (considerUserFlags && MailField.ATTACHMENT == field) {
             fp.add(FetchProfile.Item.FLAGS);
             return;
         }
 
-        if (previewSupported) {
-            if (MailField.TEXT_PREVIEW_IF_AVAILABLE == field) {
-                fp.add(IMAPFolder.PreviewFetchProfileItem.PREVIEW_LAZY);
-                return;
-            }
-            if (MailField.TEXT_PREVIEW == field) {
-                fp.add(IMAPFolder.PreviewFetchProfileItem.PREVIEW);
-                return;
-            }
+        switch (previewMode) {
+            case NONE:
+                break;
+            case PREVIEW_FUZZY:
+                if (MailField.TEXT_PREVIEW_IF_AVAILABLE == field) {
+                    fp.add(IMAPFolder.PreviewFetchProfileItem.PREVIEW_LAZY);
+                    return;
+                }
+                if (MailField.TEXT_PREVIEW == field) {
+                    fp.add(IMAPFolder.PreviewFetchProfileItem.PREVIEW);
+                    return;
+                }
+                break;
+            case PREVIEW_RFC8970:
+                if (MailField.TEXT_PREVIEW_IF_AVAILABLE == field) {
+                    fp.add(IMAPFolder.Rfc8970PreviewFetchProfileItem.PREVIEW_LAZY);
+                    return;
+                }
+                if (MailField.TEXT_PREVIEW == field) {
+                    fp.add(IMAPFolder.Rfc8970PreviewFetchProfileItem.PREVIEW);
+                    return;
+                }
+                break;
+            case SNIPPET_FUZZY:
+                if (MailField.TEXT_PREVIEW_IF_AVAILABLE == field) {
+                    fp.add(IMAPFolder.SnippetFetchProfileItem.SNIPPETS_LAZY);
+                    return;
+                }
+                if (MailField.TEXT_PREVIEW == field) {
+                    fp.add(IMAPFolder.SnippetFetchProfileItem.SNIPPETS);
+                    return;
+                }
+                break;
+            default:
+                break;
+
         }
 
         Item item = FIELD2ITEM.get(field);

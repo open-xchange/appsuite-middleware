@@ -99,6 +99,7 @@ import com.openexchange.mail.MailField;
 import com.openexchange.mail.MailFields;
 import com.openexchange.mail.MailSortField;
 import com.openexchange.mail.OrderDirection;
+import com.openexchange.mail.PreviewMode;
 import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.mail.dataobjects.MailPart;
 import com.openexchange.mail.mime.HeaderCollection;
@@ -2377,8 +2378,15 @@ public final class IMAPCommandsCollection {
                     final MailFields set = new MailFields(fields);
                     final boolean body = set.contains(MailField.BODY) || set.contains(MailField.FULL);
                     final MailField sort = MailField.toField((sortField == null ? MailSortField.RECEIVED_DATE : sortField).getListField());
-                    final FetchProfile fp = getFetchProfile(fields, sort, fastFetch, imapConfig.getCapabilities().hasAttachmentMarker(), imapConfig.asMap().containsKey(IMAPCapabilities.CAP_TEXT_PREVIEW_NEW));
-                    newMsgs = new MessageFetchIMAPCommand(folder, p.isREV1(), newMsgSeqNums, fp, serverInfo, false, false, body).doCommand();
+                    PreviewMode previewMode = PreviewMode.NONE;
+                    for (PreviewMode pm : PreviewMode.values()) {
+                        String capabilityName = pm.getCapabilityName();
+                        if (capabilityName != null && imapConfig.asMap().containsKey(capabilityName)) {
+                            previewMode = pm;
+                        }
+                    }
+                    final FetchProfile fp = getFetchProfile(fields, sort, fastFetch, imapConfig.getCapabilities().hasAttachmentMarker(), previewMode);
+                    newMsgs = new MessageFetchIMAPCommand(folder, p.isREV1(), newMsgSeqNums, fp, serverInfo, false, false, body, previewMode).doCommand();
                 } catch (MessagingException e) {
                     throw wrapException(e, null);
                 }

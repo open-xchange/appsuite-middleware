@@ -73,6 +73,7 @@ import com.openexchange.java.Reference;
 import com.openexchange.log.LogProperties;
 import com.openexchange.mail.MailField;
 import com.openexchange.mail.OrderDirection;
+import com.openexchange.mail.PreviewMode;
 import com.openexchange.mail.dataobjects.IDMailMessage;
 import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.mail.mime.MessageHeaders;
@@ -121,16 +122,16 @@ public final class Conversations {
      * Gets the <i>"by envelope"</i> fetch profile including specified fields.
      *
      * @param considerUserFlags Whether to consider user flags to determine "has attachment(s)" flag
-     * @param previewSupported Whether target IMAP server supports <code>"PREVIEW=FUZZY"</code> capability
+     * @param previewMode Whether target IMAP server supports any preview capability
      * @param fields The fields to add
      * @return The <i>"by envelope"</i> fetch profile
      */
-    public static FetchProfile getFetchProfileConversationByEnvelope(boolean considerUserFlags, boolean previewSupported, MailField... fields) {
+    public static FetchProfile getFetchProfileConversationByEnvelope(boolean considerUserFlags, PreviewMode previewMode, MailField... fields) {
         FetchProfile fp = newFetchProfile(true);
         if (null != fields) {
             for (MailField field : fields) {
                 if (!MimeStorageUtility.isEnvelopeField(field)) {
-                    MimeStorageUtility.addFetchItem(fp, field, considerUserFlags, previewSupported);
+                    MimeStorageUtility.addFetchItem(fp, field, considerUserFlags, previewMode);
                 }
             }
         }
@@ -141,18 +142,18 @@ public final class Conversations {
      * Gets the <i>"by headers"</i> fetch profile including specified fields.
      *
      * @param considerUserFlags Whether to consider user flags to determine "has attachment(s)" flag
-     * @param previewSupported Whether target IMAP server supports <code>"PREVIEW=FUZZY"</code> capability
+     * @param previewMode Whether target IMAP server supports any preview capability
      * @param fields The fields to add
      * @return The <i>"by headers"</i> fetch profile
      */
-    public static FetchProfile getFetchProfileConversationByHeaders(boolean considerUserFlags, boolean previewSupported, MailField... fields) {
+    public static FetchProfile getFetchProfileConversationByHeaders(boolean considerUserFlags, PreviewMode previewMode, MailField... fields) {
         FetchProfile fp = newFetchProfile(false);
         if (null != fields) {
             for (MailField field : fields) {
                 if (MailField.RECEIVED_DATE.equals(field)) {
                     fp.add(MailMessageFetchIMAPCommand.INTERNALDATE);
                 } else {
-                    MimeStorageUtility.addFetchItem(fp, field, considerUserFlags, previewSupported);
+                    MimeStorageUtility.addFetchItem(fp, field, considerUserFlags, previewMode);
                 }
             }
         }
@@ -203,12 +204,12 @@ public final class Conversations {
      * @param serverInfo The IMAP server information
      * @param byEnvelope Whether to build-up using ENVELOPE; otherwise <code>false</code>
      * @param examineHasAttachmentUserFlags Whether has-attachment user flags should be considered
-     * @param previewSupported Whether target IMAP server supports <code>"PREVIEW=FUZZY"</code> capability
+     * @param previewMode Whether target IMAP server supports any preview capability
      * @return The unfolded conversations
      * @throws MessagingException If a messaging error occurs
      */
-    public static List<Conversation> conversationsFor(IMAPFolder imapFolder, int lookAhead, OrderDirection order, FetchProfile fetchProfile, IMAPServerInfo serverInfo, boolean byEnvelope, boolean examineHasAttachmentUserFlags, boolean previewSupported) throws MessagingException {
-        final List<MailMessage> messages = messagesFor(imapFolder, lookAhead, order, fetchProfile, serverInfo, byEnvelope, examineHasAttachmentUserFlags, previewSupported);
+    public static List<Conversation> conversationsFor(IMAPFolder imapFolder, int lookAhead, OrderDirection order, FetchProfile fetchProfile, IMAPServerInfo serverInfo, boolean byEnvelope, boolean examineHasAttachmentUserFlags, PreviewMode previewMode) throws MessagingException {
+        final List<MailMessage> messages = messagesFor(imapFolder, lookAhead, order, fetchProfile, serverInfo, byEnvelope, examineHasAttachmentUserFlags, previewMode);
         if (null == messages || messages.isEmpty()) {
             return Collections.<Conversation> emptyList();
         }
@@ -229,12 +230,12 @@ public final class Conversations {
      * @param serverInfo The IMAP server information
      * @param byEnvelope Whether to build-up using ENVELOPE; otherwise <code>false</code>
      * @param examineHasAttachmentUserFlags Whether has-attachment user flags should be considered
-     * @param previewSupported Whether target IMAP server supports <code>"PREVIEW=FUZZY"</code> capability
+     * @param previewMode Whether target IMAP server supports any preview capability
      * @return The messages with conversation information (References, In-Reply-To, Message-Id)
      * @throws MessagingException If a messaging error occurs
      */
     @SuppressWarnings("unchecked")
-    public static List<MailMessage> messagesFor(IMAPFolder imapFolder, int lookAhead, OrderDirection order, FetchProfile fetchProfile, IMAPServerInfo serverInfo, boolean byEnvelope, boolean examineHasAttachmentUserFlags, boolean previewSupported) throws MessagingException {
+    public static List<MailMessage> messagesFor(IMAPFolder imapFolder, int lookAhead, OrderDirection order, FetchProfile fetchProfile, IMAPServerInfo serverInfo, boolean byEnvelope, boolean examineHasAttachmentUserFlags, PreviewMode previewMode) throws MessagingException {
         final int messageCount = imapFolder.getMessageCount();
         if (messageCount <= 0) {
             /*
@@ -270,7 +271,7 @@ public final class Conversations {
                         }
                     }
                     final FetchProfile fp = null == fetchProfile ? (byEnvelope ? FETCH_PROFILE_CONVERSATION_BY_ENVELOPE : FETCH_PROFILE_CONVERSATION_BY_HEADERS) : checkFetchProfile(fetchProfile, byEnvelope);
-                    sb.append(" (").append(getFetchCommand(protocol.isREV1(), fp, false, serverInfo, previewSupported)).append(')');
+                    sb.append(" (").append(getFetchCommand(protocol.isREV1(), fp, false, serverInfo, previewMode)).append(')');
                     command = sb.toString();
                 }
 
@@ -386,7 +387,7 @@ public final class Conversations {
             Map<String, Conversation> tempLookupTable = new HashMap<String, Conversation>(toFold.size());
             for (Iterator<Conversation> iter = toFold.iterator(); iter.hasNext();) {
                 Conversation conversation = iter.next();
-                
+
                 boolean removed = false;
                 for (String messageId : conversation.getMessageIds()) {
                     Conversation existing = tempLookupTable.putIfAbsent(messageId, conversation);
@@ -401,7 +402,7 @@ public final class Conversations {
                         }
                     }
                 }
-                
+
                 for (String reference : conversation.getReferences()) {
                     Conversation existing = tempLookupTable.putIfAbsent(reference, conversation);
                     if (null != existing && !conversation.equals(existing)) {

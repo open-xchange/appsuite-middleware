@@ -61,42 +61,53 @@ public class PREVIEW implements Item {
      * @param	r	the FetchResponse
      * @exception	ParsingException	for parsing failures
      */
-    public PREVIEW(FetchResponse r) throws ParsingException {
+    public PREVIEW(FetchResponse r, boolean rfc8970Preview) throws ParsingException {
 	r.skipSpaces();
-
-	byte b = r.peekByte();
-	if (b == '(') {
-	    // Expect: ``PREVIEW (FUZZY "Some text")''
-	    r.readByte();
-	    algorithm = r.readString(' ');
-	    if (r.readByte() != ' ') {
-	        throw new ParsingException("PREVIEW parse error: missing space at algorithm end");
-	    }
-
-	    String text = r.readUtf8AtomString();
-	    if ("NIL".equalsIgnoreCase(text)) {
-	        // Preview is empty
-	        text = "";
-	    }
-	    this.text = text;
-
-	    if (!r.isNextNonSpace(')')) // eat the end ')'
-	        throw new ParsingException(
-	        "PREVIEW parse error: missing ``)'' at end");
-	} else {
-        // Expect: ``PREVIEW FUZZY "Some text"''
-	    algorithm = r.readString(' ');
-	    if (r.readByte() != ' ') {
-	        throw new ParsingException("PREVIEW parse error: missing space at algorithm end");
-	    }
-
-	    String text = r.readUtf8AtomString();
-	    if ("NIL".equalsIgnoreCase(text)) {
-	        // Preview is empty
-	        text = "";
-	    }
-	    this.text = text;
-	}
+	
+	if (rfc8970Preview) {
+        // Expect: ``PREVIEW "Some text"''
+        algorithm = null;
+        String text = r.readUtf8AtomString();
+        if ("NIL".equalsIgnoreCase(text)) {
+            // Preview is empty
+            text = null;
+        }
+        this.text = text;
+    } else {        
+        byte b = r.peekByte();
+        if (b == '(') {
+            // Expect: ``PREVIEW (FUZZY "Some text")''
+            r.readByte();
+            algorithm = r.readString(' ');
+            if (r.readByte() != ' ') {
+                throw new ParsingException("PREVIEW parse error: missing space at algorithm end");
+            }
+            
+            String text = r.readUtf8AtomString();
+            if ("NIL".equalsIgnoreCase(text)) {
+                // Preview is empty
+                text = "";
+            }
+            this.text = text;
+            
+            if (!r.isNextNonSpace(')')) // eat the end ')'
+                throw new ParsingException(
+                    "PREVIEW parse error: missing ``)'' at end");
+        } else {
+            // Expect: ``PREVIEW FUZZY "Some text"''
+            algorithm = r.readString(' ');
+            if (r.readByte() != ' ') {
+                throw new ParsingException("PREVIEW parse error: missing space at algorithm end");
+            }
+            
+            String text = r.readUtf8AtomString();
+            if ("NIL".equalsIgnoreCase(text)) {
+                // Preview is empty
+                text = "";
+            }
+            this.text = text;
+        }
+    }
     }
 
     /**
@@ -116,7 +127,7 @@ public class PREVIEW implements Item {
     /**
      * Gets the algorithm; e.g. <code>"FUZZY"</code>
      *
-     * @return The algorithm
+     * @return The algorithm or <code>null</code>
      */
     public String getAlgorithm() {
         return algorithm;

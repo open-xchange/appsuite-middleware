@@ -59,6 +59,7 @@ import org.slf4j.Logger;
 import com.openexchange.exception.OXException;
 import com.openexchange.imap.IMAPCommandsCollection;
 import com.openexchange.imap.IMAPServerInfo;
+import com.openexchange.mail.PreviewMode;
 import com.openexchange.mail.dataobjects.IDMailMessage;
 import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.mail.utils.StorageUtility;
@@ -101,11 +102,11 @@ public final class MailMessageFillerIMAPCommand extends AbstractIMAPCommand<Void
      * @param fp The fetch profile to use
      * @param serverInfo The IMAP server information deduced from configuration
      * @param examineHasAttachmentUserFlags Whether has-attachment user flags should be considered
-     * @param previewSupported Whether target IMAP server supports <code>"PREVIEW=FUZZY"</code> capability
+     * @param previewMode Whether target IMAP server supports any preview> capability
      * @param imapFolder The IMAP folder providing connected protocol
      * @throws MessagingException If initialization fails
      */
-    public MailMessageFillerIMAPCommand(Collection<MailMessage> messages, boolean isRev1, FetchProfile fp, IMAPServerInfo serverInfo, boolean examineHasAttachmentUserFlags, boolean previewSupported, IMAPFolder imapFolder) throws MessagingException {
+    public MailMessageFillerIMAPCommand(Collection<MailMessage> messages, boolean isRev1, FetchProfile fp, IMAPServerInfo serverInfo, boolean examineHasAttachmentUserFlags, PreviewMode previewMode, IMAPFolder imapFolder) throws MessagingException {
         super(imapFolder);
         this.examineHasAttachmentUserFlags = examineHasAttachmentUserFlags;
         final int messageCount = imapFolder.getMessageCount();
@@ -128,11 +129,11 @@ public final class MailMessageFillerIMAPCommand extends AbstractIMAPCommand<Void
         this.messages = tm;
         this.uids = tuids.toArray();
         if (length == messageCount) {
-            command = getFetchCommand(isRev1, checkFetchProfile(fp), false, serverInfo, previewSupported);
+            command = getFetchCommand(isRev1, checkFetchProfile(fp), false, serverInfo, previewMode);
             args = (1 == length ? ARGS_FIRST : ARGS_ALL);
             uid = false;
         } else {
-            command = getFetchCommand(isRev1, checkFetchProfile(fp), false, serverInfo, previewSupported);
+            command = getFetchCommand(isRev1, checkFetchProfile(fp), false, serverInfo, previewMode);
             args = IMAPNumArgSplitter.splitUIDArg(uids, false, LENGTH_WITH_UID + command.length());
             uid = true;
         }
