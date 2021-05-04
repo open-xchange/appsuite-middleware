@@ -7,7 +7,7 @@ BuildRequires:  open-xchange-spamhandler-spamassassin >= @OXVERSION@
 BuildRequires:  open-xchange-parallels >= @OXVERSION@
 BuildRequires: java-1.8.0-openjdk-devel
 Version:        @OXVERSION@
-%define         ox_release 22
+%define         ox_release 23
 Release:        %{ox_release}_<CI_CNT>.<B_CNT>
 Group:          Applications/Productivity
 License:        GPL-2.0
@@ -49,6 +49,8 @@ ant -lib build/lib -Dbasedir=build -DdestDir=%{buildroot} -DpackageName=%{name} 
 /opt/open-xchange/bundles/*
 
 %changelog
+* Mon Apr 26 2021 Marcus Klein <marcus.klein@open-xchange.com>
+Build for patch 2021-05-03 (5988)
 * Mon Apr 12 2021 Marcus Klein <marcus.klein@open-xchange.com>
 Build for patch 2021-04-19 (5981)
 * Tue Mar 23 2021 Marcus Klein <marcus.klein@open-xchange.com>

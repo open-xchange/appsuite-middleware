@@ -970,6 +970,10 @@ public final class OXFolderSQL {
                     if (failed) {
                         return Boolean.FALSE;
                     }
+
+                    // Logging to trace cause for MWB-938
+                    LOG.debug(stmt.toString());
+
                     Databases.closeSQLStuff(stmt);
                     stmt = null;
 
@@ -1781,11 +1785,37 @@ public final class OXFolderSQL {
         }
     }
 
+    private static String formatPermissionsForLogMessage(FolderObject folder, Context ctx, int userId, Connection con) throws OXException {
+        FolderObject fromDB = FolderObject.loadFolderObjectFromDB(folder.getObjectID(), ctx, con, true, false);
+        StringBuilder sb = new StringBuilder(String.format("Update folder %s (%d) in context %d by user %d", fromDB.getFolderName(), I(fromDB.getObjectID()), I(ctx.getContextId()), I(userId)));
+        sb.append("\n");
+        OCLPermission[] permissionsFromDB = fromDB.getNonSystemPermissionsAsArray();
+        if (null != permissionsFromDB && 0 < permissionsFromDB.length) {
+            sb.append("Permissions stored in database:");
+            for (OCLPermission perm : permissionsFromDB) {
+                sb.append(perm).append(",");
+            }
+            sb.deleteCharAt(sb.length() - 1).append("\n");
+        }
+        OCLPermission[] permissionsFromUpdatedFolder = folder.getNonSystemPermissionsAsArray();
+        if (null != permissionsFromUpdatedFolder && 0 < permissionsFromUpdatedFolder.length) {
+            sb.append("Updated permissions:");
+            for (OCLPermission perm : folder.getPermissions()) {
+                sb.append(perm).append(",");
+            }
+            sb.deleteCharAt(sb.length() - 1);
+        }
+        return sb.toString();
+    }
+
     static void updateFolderSQL(final int userId, final FolderObject folder, final long lastModified, final Context ctx, final Connection writeCon) throws SQLException, OXException {
         if (writeCon == null) {
             updateFolderSQL(userId, folder, lastModified, ctx);
             return;
         }
+
+        // Logging to trace cause for MWB-938
+        LOG.debug(formatPermissionsForLogMessage(folder, ctx, userId, writeCon));
 
         /*
          * Update Folder
@@ -1884,6 +1914,9 @@ public final class OXFolderSQL {
                     stmt.setInt(pos++, ctx.getContextId());
                     stmt.setInt(pos++, folder.getObjectID());
                     executeUpdate(stmt);
+
+                    // Logging to trace cause for MWB-938
+                    LOG.debug(stmt.toString());
                     stmt.close();
                     stmt = null;
                     /*
@@ -1912,6 +1945,8 @@ public final class OXFolderSQL {
                         stmt.addBatch();
                     }
                     executeBatch(stmt);
+                    // Logging to trace cause for MWB-938
+                    LOG.debug(stmt.toString());
                     stmt.close();
                     stmt = null;
                 } catch (JSONException e) {
@@ -2743,6 +2778,9 @@ public final class OXFolderSQL {
             stmt.setInt(8, destUser);
             stmt.setInt(9, fuid);
             executeUpdate(stmt);
+
+            // Logging to trace cause for MWB-938
+            LOG.debug(stmt.toString());
         } finally {
             closeResources(null, stmt, close ? wc : null, false, ctx);
         }

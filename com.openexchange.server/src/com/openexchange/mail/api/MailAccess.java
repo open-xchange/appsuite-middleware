@@ -785,19 +785,12 @@ public abstract class MailAccess<F extends IMailFolderStorage, M extends IMailMe
             }
             checkIfDisabled(mailConfig);
             try {
-                connectInternal();
+                doConnect0(mailConfig);
             } catch (OXException e) {
-                AuthenticationFailureHandlerResult result = handleConnectFailure(e, mailConfig);
-                Type type = result.getType();
-                switch (type) {
-                    case RETRY:
-                        connectInternal();
-                        break;
-                    case EXCEPTION:
-                        throw result.getError();
-                    default:
-                        throw e;
+                if (accountId == Account.DEFAULT_ID && MimeMailException.isAuthenticationFailedException(e)) {
+                    LOG.warn("Failed authentication against primary mail server", e);
                 }
+                throw e;
             }
             if (checkDefaultFolder) {
                 checkDefaultFolderOnConnect();
@@ -809,6 +802,24 @@ public abstract class MailAccess<F extends IMailFolderStorage, M extends IMailMe
         if (isTrackable() && !tracked) {
             MailAccessWatcher.addMailAccess(this);
             tracked = true;
+        }
+    }
+
+    private void doConnect0(MailConfig mailConfig) throws OXException {
+        try {
+            connectInternal();
+        } catch (OXException e) {
+            AuthenticationFailureHandlerResult result = handleConnectFailure(e, mailConfig);
+            Type type = result.getType();
+            switch (type) {
+                case RETRY:
+                    connectInternal();
+                    break;
+                case EXCEPTION:
+                    throw result.getError();
+                default:
+                    throw e;
+            }
         }
     }
 
