@@ -66,6 +66,18 @@ public class FeedbackMetaData {
     final String uiVersion;
     final String serverVersion;
 
+    /**
+     * Initializes a new {@link FeedbackMetaData}.
+     *
+     * @param type The feedback type
+     * @param date The date of the feedback
+     * @param ctxId The context id
+     * @param userId The user id
+     * @param loginName The login name
+     * @param typeId The feedback id
+     * @param uiVersion The ui version
+     * @param serverVersion The server version
+     */
     FeedbackMetaData(String type, long date, int ctxId, int userId, String loginName, long typeId, String uiVersion, String serverVersion) {
         super();
         this.type = type;

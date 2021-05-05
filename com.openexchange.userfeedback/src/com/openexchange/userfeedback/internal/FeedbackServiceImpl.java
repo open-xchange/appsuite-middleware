@@ -66,14 +66,16 @@ import com.openexchange.database.DatabaseService;
 import com.openexchange.database.Databases;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.Strings;
+import com.openexchange.osgi.ServiceSet;
 import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.serverconfig.ServerConfig;
 import com.openexchange.serverconfig.ServerConfigService;
 import com.openexchange.session.Session;
+import com.openexchange.threadpool.ThreadPools;
 import com.openexchange.tools.validate.ParameterValidator;
 import com.openexchange.userfeedback.FeedbackMetaData;
-import com.openexchange.userfeedback.FeedbackMetaData.Builder;
 import com.openexchange.userfeedback.FeedbackService;
+import com.openexchange.userfeedback.FeedbackStoreListener;
 import com.openexchange.userfeedback.FeedbackType;
 import com.openexchange.userfeedback.FeedbackTypeRegistry;
 import com.openexchange.userfeedback.exception.FeedbackExceptionCodes;
@@ -90,6 +92,15 @@ import com.openexchange.userfeedback.osgi.Services;
 public class FeedbackServiceImpl implements FeedbackService {
 
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(FeedbackServiceImpl.class);
+    
+    private final ServiceSet<FeedbackStoreListener> storeListeners;
+    
+    /**
+     * Initializes a new {@link FeedbackServiceImpl}.
+     */
+    public FeedbackServiceImpl(ServiceSet<FeedbackStoreListener> storeListeners) {
+        this.storeListeners = storeListeners;
+    }
 
     @Override
     public void store(Session session, Object feedback, Map<String, String> params) throws OXException {
@@ -155,6 +166,7 @@ public class FeedbackServiceImpl implements FeedbackService {
         ConfigView view = factory.getView(session.getUserId(), session.getContextId());
         String contextGroupId = view.opt("com.openexchange.context.group", String.class, null);
         Connection writeCon = dbService.getWritableForGlobal(contextGroupId);
+        FeedbackMetaData metaData = null;
         int rollback = 0;
         try {
             // Store feedback and feedback metadata
@@ -167,9 +179,20 @@ public class FeedbackServiceImpl implements FeedbackService {
                 throw FeedbackExceptionCodes.UNEXPECTED_ERROR.create("Unable to store feedback metadata.");
             }
 
-            Builder builder = FeedbackMetaData.builder().setCtxId(session.getContextId()).setDate(System.currentTimeMillis()).setLoginName(session.getLoginName()).setServerVersion(serverVersion).setUiVersion(uiVersion).setType(type).setTypeId(fid).setUserId(session.getUserId());
+            // @formatter:off
+            metaData = FeedbackMetaData.builder()
+                            .setCtxId(session.getContextId())
+                            .setDate(System.currentTimeMillis())
+                            .setLoginName(session.getLoginName())
+                            .setServerVersion(serverVersion)
+                            .setUiVersion(uiVersion)
+                            .setType(type)
+                            .setTypeId(fid)
+                            .setUserId(session.getUserId())
+                            .build();
+            // @formatter:on
 
-            saveFeedBackInternal(writeCon, builder.build(), contextGroupId == null ? "default" : contextGroupId);
+            saveFeedBackInternal(writeCon, metaData, contextGroupId == null ? "default" : contextGroupId);
             writeCon.commit();
             rollback = 2;
         } catch (SQLException e) {
@@ -182,6 +205,9 @@ public class FeedbackServiceImpl implements FeedbackService {
                 Databases.autocommit(writeCon);
             }
             dbService.backWritableForGlobal(contextGroupId, writeCon);
+        }
+        if (rollback == 2 && metaData != null) {
+            notifyStoreListeners(session, feedBackType, feedback, metaData);
         }
     }
 
@@ -363,4 +389,26 @@ public class FeedbackServiceImpl implements FeedbackService {
             Databases.closeSQLStuff(stmt);
         }
     }
+
+    /**
+     * Notifies {@link FeedbackStoreListener}s after a feedback was successfully stored
+     *
+     * @param session The user session
+     * @param feedBackType The feedback type
+     * @param feedback The stored feedback
+     * @param metaData The feedback metadata
+     */
+    private void notifyStoreListeners(Session session, FeedbackType feedBackType, Object feedback, FeedbackMetaData metaData) {
+        for (FeedbackStoreListener storeListener : storeListeners) {
+            Runnable notifyStoreListener = () -> {
+                try {
+                    storeListener.onAfterStore(session, feedBackType, feedback, metaData);
+                } catch (Exception e) {
+                    LOG.warn("Unexpected error while notifying listener {}", storeListener, e);
+                }
+            };
+            ThreadPools.submitElseExecute(ThreadPools.task(notifyStoreListener));
+        }
+    }
+    
 }
