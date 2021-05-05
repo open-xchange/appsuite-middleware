@@ -61,6 +61,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentSkipListSet;
 import org.json.JSONObject;
 import org.junit.Before;
 import org.junit.Test;
@@ -77,10 +78,12 @@ import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.config.lean.LeanConfigurationService;
 import com.openexchange.database.DatabaseService;
 import com.openexchange.exception.OXException;
+import com.openexchange.osgi.ServiceSet;
 import com.openexchange.serverconfig.ServerConfigService;
 import com.openexchange.session.Session;
 import com.openexchange.test.mock.MockUtils;
 import com.openexchange.userfeedback.FeedbackMetaData;
+import com.openexchange.userfeedback.FeedbackStoreListener;
 import com.openexchange.userfeedback.FeedbackType;
 import com.openexchange.userfeedback.export.ExportResultConverter;
 import com.openexchange.userfeedback.filter.FeedbackFilter;
@@ -95,8 +98,10 @@ import com.openexchange.userfeedback.osgi.Services;
 @RunWith(PowerMockRunner.class)
 @PrepareForTest({ Services.class, FeedbackTypeRegistryImpl.class })
 public class FeedbackServiceImplTest {
+    
+    private ServiceSet<FeedbackStoreListener> serviceSet;
 
-    private FeedbackServiceImpl feedbackService = new FeedbackServiceImpl();
+    private FeedbackServiceImpl feedbackService;
 
     private final int userId = 111;
 
@@ -150,6 +155,9 @@ public class FeedbackServiceImplTest {
     @Mock
     private ExportResultConverter resultConverter;
 
+    @Mock
+    private FeedbackStoreListener storeListener;
+
     private Map<String, String> storeParams;
 
     @Before
@@ -184,6 +192,9 @@ public class FeedbackServiceImplTest {
         storeParams = new HashMap<>();
         storeParams.put("type", type);
         storeParams.put("hostname", hostname);
+        
+        serviceSet = new ServiceSet<FeedbackStoreListener>();
+        feedbackService = new FeedbackServiceImpl(serviceSet);
     }
 
     @Test(expected = OXException.class)
@@ -240,7 +251,7 @@ public class FeedbackServiceImplTest {
     public void testStore_feedbackTypeNotAbleToPersist_ensureNotSaved() throws SQLException, OXException {
         FeedbackTypeRegistryImpl.getInstance().registerType(feedbackType);
         PowerMockito.when(L(feedbackType.storeFeedback(ArgumentMatchers.any(), (Connection) ArgumentMatchers.any()))).thenReturn(L(-1L));
-        feedbackService = Mockito.spy(new FeedbackServiceImpl());
+        feedbackService = Mockito.spy(new FeedbackServiceImpl(serviceSet));
         Mockito.doNothing().when(feedbackService).saveFeedBackInternal((Connection) ArgumentMatchers.any(), (FeedbackMetaData) ArgumentMatchers.any(), ArgumentMatchers.anyString());
 
         boolean exceptionThrown = false;
@@ -259,12 +270,32 @@ public class FeedbackServiceImplTest {
         PowerMockito.when(leanConfigurationService.getProperty(ArgumentMatchers.anyInt(), ArgumentMatchers.anyInt(), ArgumentMatchers.any())).thenReturn("star-rating-v1");
 
         FeedbackTypeRegistryImpl.getInstance().registerType(feedbackType);
-        feedbackService = Mockito.spy(new FeedbackServiceImpl());
+        feedbackService = Mockito.spy(new FeedbackServiceImpl(serviceSet));
         Mockito.doNothing().when(feedbackService).saveFeedBackInternal((Connection) ArgumentMatchers.any(), (FeedbackMetaData) ArgumentMatchers.any(), ArgumentMatchers.anyString());
 
         feedbackService.store(session, feedback, storeParams);
 
         Mockito.verify(feedbackService, Mockito.times(1)).saveFeedBackInternal((Connection) ArgumentMatchers.any(), (FeedbackMetaData) ArgumentMatchers.any(), ArgumentMatchers.anyString());
+    }
+
+    @Test
+    public void testStore_onAfterStore() throws OXException, SQLException {
+        PowerMockito.when(leanConfigurationService.getProperty(ArgumentMatchers.anyInt(), ArgumentMatchers.anyInt(), ArgumentMatchers.any())).thenReturn("star-rating-v1");
+
+        FeedbackTypeRegistryImpl.getInstance().registerType(feedbackType);
+        
+        ServiceSet<FeedbackStoreListener> serviceSetWithFeedbackStoreListener = new ServiceSet<FeedbackStoreListener>();
+        ConcurrentSkipListSet<FeedbackStoreListener> entries = new ConcurrentSkipListSet<FeedbackStoreListener>();
+        entries.add(storeListener);
+        MockUtils.injectValueIntoPrivateField(serviceSetWithFeedbackStoreListener, "entries", entries);
+        
+        feedbackService = Mockito.spy(new FeedbackServiceImpl(serviceSetWithFeedbackStoreListener));
+        
+        Mockito.doNothing().when(feedbackService).saveFeedBackInternal((Connection) ArgumentMatchers.any(), (FeedbackMetaData) ArgumentMatchers.any(), ArgumentMatchers.anyString());
+       
+        feedbackService.store(session, feedback, storeParams);
+
+        Mockito.verify(storeListener, Mockito.times(1)).onAfterStore(ArgumentMatchers.any(), ArgumentMatchers.any(), ArgumentMatchers.any(), ArgumentMatchers.any());
     }
 
     @Test(expected = OXException.class)
@@ -290,7 +321,7 @@ public class FeedbackServiceImplTest {
 
     @Test(expected = OXException.class)
     public void testExport_feedbackTypeNotRegistered_throwException() throws OXException, SQLException {
-        feedbackService = Mockito.spy(new FeedbackServiceImpl());
+        feedbackService = Mockito.spy(new FeedbackServiceImpl(serviceSet));
         Mockito.doReturn(Collections.EMPTY_LIST).when(feedbackService).loadFeedbackMetaData((Connection) ArgumentMatchers.any(), (FeedbackFilter) ArgumentMatchers.any(), ArgumentMatchers.anyString());
 
         feedbackService.export("default", FeedbackFilter.DEFAULT_FILTER);
@@ -311,7 +342,7 @@ public class FeedbackServiceImplTest {
     @Test
     public void testExport_noDataAvailable_returnEmptyResult() throws OXException, SQLException {
         FeedbackTypeRegistryImpl.getInstance().registerType(feedbackType);
-        feedbackService = Mockito.spy(new FeedbackServiceImpl());
+        feedbackService = Mockito.spy(new FeedbackServiceImpl(serviceSet));
         Mockito.doReturn(Collections.EMPTY_LIST).when(feedbackService).loadFeedbackMetaData((Connection) ArgumentMatchers.any(), (FeedbackFilter) ArgumentMatchers.any(), ArgumentMatchers.anyString());
 
         ExportResultConverter export = feedbackService.export("default", FeedbackFilter.DEFAULT_FILTER, Collections.<String, String> emptyMap());
