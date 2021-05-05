@@ -711,9 +711,9 @@ public class ITipAnalyzeChangesTest extends AbstractITipAnalyzeTest {
          * Check that mails has been send (updates still needs to be propagated) without any description
          */
         MailData iMip = receiveMailAsAttendee();
-        AnalyzeResponse analyzeResponse = analyzeUpdateAsAttendee(iMip, PartStat.ACCEPTED, CustomConsumers.EMPTY);
+        AnalyzeResponse analyzeResponse = analyzeUpdateAsAttendee(iMip, PartStat.ACCEPTED, CustomConsumers.UPDATE);
         AnalysisChange change = assertSingleChange(analyzeResponse);
-        assertThat("Should have been no change", change.getDiffDescription(), empty());
+        assertThat("Found an unexpected description", change.getDiffDescription(), empty());
     }
 
     @Test
@@ -738,9 +738,9 @@ public class ITipAnalyzeChangesTest extends AbstractITipAnalyzeTest {
          * Check that mails has been send (updates still needs to be propagated) without any description
          */
         MailData iMip = receiveMailAsAttendee();
-        AnalyzeResponse analyzeResponse = analyzeUpdateAsAttendee(iMip, PartStat.ACCEPTED, CustomConsumers.EMPTY);
+        AnalyzeResponse analyzeResponse = analyzeUpdateAsAttendee(iMip, PartStat.ACCEPTED, CustomConsumers.UPDATE);
         AnalysisChange change = assertSingleChange(analyzeResponse);
-        assertThat("Should have been no change", change.getDiffDescription(), empty());
+        assertThat("Found an unexpected description", change.getDiffDescription(), empty());
     }
 
     @Test

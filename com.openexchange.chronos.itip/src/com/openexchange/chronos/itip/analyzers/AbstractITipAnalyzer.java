@@ -346,7 +346,7 @@ public abstract class AbstractITipAnalyzer implements ITipAnalyzer {
          */
         if (diff.isAboutCertainParticipantsStateChangeOnly(String.valueOf(session.getUserId()))) {
             /*
-             * Get the update attendee and check if the status was "reset"
+             * Get the updated attendee and check if the status was "reseted" by the incoming event
              */
             ItemUpdate<Attendee, AttendeeField> itemUpdate = diff.getAttendeeUpdates().getUpdatedItems().get(0);
             if (false == ParticipationStatus.NEEDS_ACTION.matches(itemUpdate.getOriginal().getPartStat())//

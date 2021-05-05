@@ -51,6 +51,7 @@ package com.openexchange.ajax.chronos.itip;
 
 import static com.openexchange.ajax.chronos.itip.ITipAssertion.assertAttendeePartStat;
 import static com.openexchange.ajax.chronos.itip.ITipAssertion.assertChanges;
+import static com.openexchange.ajax.chronos.itip.ITipAssertion.assertEvents;
 import static com.openexchange.ajax.chronos.itip.ITipAssertion.assertSingleChange;
 import static com.openexchange.ajax.chronos.itip.ITipAssertion.assertSingleDescription;
 import static com.openexchange.ajax.chronos.itip.ITipAssertion.assertSingleEvent;
@@ -193,7 +194,6 @@ public class ITipSeriesTest extends AbstractITipAnalyzeTest {
 
         UpdateEventBody body = getUpdateBody(deltaEvent);
         ChronosCalendarResultResponse result = chronosApi.updateEvent(defaultFolderId, createdEvent.getId(), now(), body, recurrenceId, null, null, null, null, null, null, null, null, null, null);
-
         /*
          * Check result
          */
@@ -201,9 +201,11 @@ public class ITipSeriesTest extends AbstractITipAnalyzeTest {
         CalendarResult calendarResult = checkResponse(result.getError(), result.getErrorDesc(), result.getData());
         assertNotNull(calendarResult.getCreated());
         assertTrue(calendarResult.getCreated().size() == 1);
+        assertTrue(calendarResult.getUpdated().size() == 1);
         assertFalse(createdEvent.getId().equals(calendarResult.getCreated().get(0).getId()));
         assertTrue(createdEvent.getId().equals(calendarResult.getCreated().get(0).getSeriesId()));
-
+        String exceptionId = calendarResult.getCreated().get(0).getId();
+        createdEvent = calendarResult.getUpdated().get(0);
         /*
          * Receive update as attendee, no rescheduling
          */
@@ -215,17 +217,23 @@ public class ITipSeriesTest extends AbstractITipAnalyzeTest {
         assertAttendeePartStat(newEvent.getAttendees(), replyingAttendee.getEmail(), PartStat.ACCEPTED.getStatus());
         analyze(analyzeResponse, CustomConsumers.ALL);
         assertSingleDescription(change, "The appointment description has changed");
-
         /*
          * Tentative accept for attendee and check in calendar
          */
         tentative(apiClientC2, constructBody(iMip), null);
-        EventData attendeeMaster = eventManagerC2.getEvent(null, change.getMasterEvent().getId());
+        EventData attendeeMaster = eventManagerC2.getEvent(null, change.getCurrentEvent().getSeriesId());
         assertTrue("No exception", attendeeMaster.getChangeExceptionDates().size() == 1);
         assertAttendeePartStat(attendeeMaster.getAttendees(), replyingAttendee.getEmail(), PartStat.ACCEPTED.getStatus());
         EventData attendeeException = eventManagerC2.getRecurringEvent(null, attendeeMaster.getId(), attendeeMaster.getChangeExceptionDates().get(0), false);
         assertAttendeePartStat(attendeeException.getAttendees(), replyingAttendee.getEmail(), PartStat.TENTATIVE.getStatus());
-
+        /*
+         * Update calendar object with the tentative accepted event as organizer
+         */
+        MailData reply = receiveIMip(apiClient, replyingAttendee.getEmail(), summary, 1, SchedulingMethod.REPLY);
+        assertEvents(update(constructBody(reply)), createdEvent.getUid(), 2);
+        EventResponse eventResponse = chronosApi.getEvent(exceptionId, createdEvent.getFolder(), null, null, null);
+        assertNull(eventResponse.getError(), eventResponse.getError());
+        assertAttendeePartStat(eventResponse.getData().getAttendees(), replyingAttendee.getEmail(), PartStat.TENTATIVE.getStatus());
         /*
          * Split series by changing location and summary at fifth occurrence
          */
@@ -247,7 +255,8 @@ public class ITipSeriesTest extends AbstractITipAnalyzeTest {
         assertFalse(createdEvent.getUid().equals(calendarResult.getCreated().get(0).getUid()));
         assertTrue(calendarResult.getUpdated().size() == 2);
         assertTrue(createdEvent.getUid().equals(calendarResult.getUpdated().get(0).getUid()) || createdEvent.getUid().equals(calendarResult.getUpdated().get(1).getUid()));
-
+        createdEvent = eventManager.getEvent(createdEvent.getFolder(), createdEvent.getSeriesId());
+        assertThat("Should have no exception", createdEvent.getChangeExceptionDates(), is(empty()));
         /*
          * Get mails as attendee
          * a) Update with existing UID of event, updated summary
@@ -268,17 +277,18 @@ public class ITipSeriesTest extends AbstractITipAnalyzeTest {
         ITipAssertion.assertMultipleDescription(change, "recurrence rule has changed", "appointment was rescheduled", "new subject", "takes place in a new location");
         String updatedEventSeriesId = assertSingleEvent(decline(apiClientC2, constructBody(updatedSeriersIMip), null)).getSeriesId();
         assertTrue(Strings.isNotEmpty(updatedEventSeriesId));
+        assertTrue(attendeeMaster.getSeriesId().equals(updatedEventSeriesId));
         /*
          * Check event in attendees calendar
          */
         EventData attendeeSeriesMaster = eventManagerC2.getEvent(null, updatedEventSeriesId);
         assertAttendeePartStat(attendeeSeriesMaster.getAttendees(), replyingAttendee.getEmail(), PartStat.DECLINED.getStatus());
         assertAttendeePartStat(attendeeSeriesMaster.getAttendees(), testUser.getLogin(), PartStat.ACCEPTED.getStatus());
-        assertThat(attendeeSeriesMaster.getChangeExceptionDates(), is(empty()));
+        assertThat(attendeeSeriesMaster.getChangeExceptionDates(), is(empty())); // TODO BUG?!
         /*
          * Check reply in organizers inbox
          */
-        MailData reply = receiveIMip(apiClient, replyingAttendee.getEmail(), updatedSummary, 2, SchedulingMethod.REPLY);
+        reply = receiveIMip(apiClient, replyingAttendee.getEmail(), updatedSummary, 2, SchedulingMethod.REPLY);
         analyze(reply.getId());
 
         /*--------- b) --------*/

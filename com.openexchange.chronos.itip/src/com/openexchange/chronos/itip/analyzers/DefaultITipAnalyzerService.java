@@ -91,6 +91,7 @@ public class DefaultITipAnalyzerService implements ITipAnalyzerService {
         this.analyzers = Collections.unmodifiableList(Arrays.<ITipAnalyzer> asList(
             new CancelAnalyzer(util),
             new RequestAnalyzer(util),
+            new ReplyAnalyzer(util),
             new AddITipAnalyzer(util),
             new CancelITipAnalyzer(util),
             new DeclineCounterITipAnalyzer(util),

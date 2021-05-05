@@ -121,39 +121,41 @@ public class RequestAnalyzer extends AbstractITipAnalyzer {
         }
         analysis.setUid(resource.getUid());
         /*
-         * get currently stored resource & determine changes
+         * get currently stored resource & check organizer
          */
         CalendarObjectResource originalResource = getOriginalResource(session, resource.getUid(), calendarUserId);
+        if (null != originalResource && false == matches(originalResource.getOrganizer(), resource.getOrganizer())) {
+            analysis.addAnnotation(new ITipAnnotation(Messages.UNALLOWED_ORGANIZER_CHANGE, locale));
+            analysis.recommendAction(ITipAction.IGNORE);
+        }
+        /*
+         * determine changes
+         */
         for (ITipChange change : determineChanges(session, calendarUserId, originalResource, message, wrapper)) {
             analysis.addChange(change);
         }
         /*
          * set recommendation & return resulting analysis
          */
-        if (null != originalResource && false == matches(originalResource.getOrganizer(), resource.getOrganizer())) {
-            analysis.addAnnotation(new ITipAnnotation(Messages.UNALLOWED_ORGANIZER_CHANGE, locale));
-            analysis.recommendAction(ITipAction.IGNORE);
-        } else if (isOutOfSequence(analysis.getChanges())) {
-
-            //TODO okay? 
-
-            // replace changes to only transport currently stored event as single change to client
+        if (isOutOfSequence(analysis.getChanges())) {
+            /*
+             * old update, replace changes to only transport currently stored event as single change to client
+             */
             analysis.getChanges().clear();
             Event currentEvent = null != originalResource ? originalResource.getFirstEvent() : null;
             analysis.addChange(getChange(session, calendarUserId, Type.UPDATE, currentEvent, null, null, false));
             analysis.addAnnotation(new ITipAnnotation(Messages.OLD_UPDATE, locale));
             analysis.recommendAction(ITipAction.IGNORE);
         } else if (analysis.getChanges().isEmpty()) {
-            
-            //TODO no-op only if really same sequence?
-            //TODO how to still update to apply undetected or insignificant changes?
-            //TODO still recommend actions?
-
-            // transport currently stored event as single change to client
-            Event currentEvent = null != originalResource ? originalResource.getFirstEvent() : null;
-            analysis.addChange(getChange(session, calendarUserId, Type.UPDATE, currentEvent, null, null, false));
+            /*
+             * transport first incoming event as single change to client,
+             * advise to update so insignificant changes can still be processed
+             * TODO Evaluate "auto-scheduled" flag and send IGNORE action if mail was already processed
+             */
+            analysis.addChange(getChange(session, calendarUserId, Type.UPDATE, null, resource.getFirstEvent(), null, false));
+            analysis.recommendAction(ITipAction.UPDATE);
         } else {
-            if (null != originalResource) {
+            if (null != originalResource && false == rescheduling(analysis)) {
                 analysis.recommendAction(ITipAction.UPDATE);
             }
             analysis.recommendActions(ITipAction.DECLINE, ITipAction.TENTATIVE, ITipAction.DELEGATE, ITipAction.COUNTER);
@@ -180,8 +182,8 @@ public class RequestAnalyzer extends AbstractITipAnalyzer {
 
     private List<ITipChange> determineChanges(CalendarSession session, int calendarUserId, CalendarObjectResource originalResource, ITipMessage message, TypeWrapper wrapper) throws OXException {
         CalendarObjectResource resource = getResource(session, message, true);
-        Event patchedSeriesMaster = null != resource.getSeriesMaster() ? patchEvent(session, resource.getSeriesMaster(), null, calendarUserId) : null;
-        List<ITipChange> changes = new ArrayList<ITipChange>();
+        Event seriesMaster = null != originalResource && null != originalResource.getSeriesMaster() ? originalResource.getSeriesMaster() : null;
+        List<ITipChange> changes = new ArrayList<ITipChange>(resource.getEvents().size());
         for (Event event : resource.getEvents()) {
             /*
              * patch event & get or derive change based on currently stored resource
@@ -189,9 +191,9 @@ public class RequestAnalyzer extends AbstractITipAnalyzer {
             Event patchedEvent = patchEvent(session, event, null != originalResource ? originalResource.getFirstEvent() : null, calendarUserId);
             ITipChange change;
             if (null == originalResource) {
-                change = getChange(session, calendarUserId, Type.CREATE, null, patchedEvent, patchedSeriesMaster, null != patchedEvent.getRecurrenceId());
+                change = getChange(session, calendarUserId, Type.CREATE, null, patchedEvent, seriesMaster, null != patchedEvent.getRecurrenceId());
             } else {
-                change = optChange(session, calendarUserId, originalResource, patchedEvent, patchedSeriesMaster);
+                change = optChange(session, calendarUserId, originalResource, patchedEvent, seriesMaster);
             }
             if (null != change) {
                 describeDiff(change, wrapper, session, message);

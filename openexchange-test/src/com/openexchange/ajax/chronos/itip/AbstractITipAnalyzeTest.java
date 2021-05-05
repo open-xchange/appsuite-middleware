@@ -262,21 +262,21 @@ public abstract class AbstractITipAnalyzeTest extends AbstractITipTest {
         }),
         /** Validates that the response doesn't contain any action */
         EMPTY((Analysis t) -> {
-            assertTrue("There should be no action, but was " + t.getActions().toString(), t.getActions().isEmpty());
+            assertTrue("There should be no action, but was " + t.getActions(), t.getActions().isEmpty());
         }),
         /** Validates that the response does contain the party crasher action */
         PARTY_CRASHER((Analysis t) -> {
-            assertTrue("There should be onyl one action!", t.getActions().size() == 1);
+            assertTrue("There should be onyl one action! But was " + t.getActions(), t.getActions().size() == 1);
             assertTrue("Unwanted action!", t.getActions().contains(ActionsEnum.ACCEPT_PARTY_CRASHER));
         }),
         /** Validates that the response does contain the cancel action */
         CANCEL((Analysis t) -> {
-            assertTrue("There should be only one action!", t.getActions().size() == 1);
+            assertTrue("There should be only one action! But was " + t.getActions(), t.getActions().size() == 1);
             assertTrue("Unwanted action!", t.getActions().contains(ActionsEnum.DELETE));
         }),
         /** Validates that the response does contain the cancel action */
         IGNORE((Analysis t) -> {
-            assertTrue("There should be only one action!", t.getActions().size() == 1);
+            assertTrue("There should be only one action! But was " + t.getActions(), t.getActions().size() == 1);
             assertTrue("Unwanted action!", t.getActions().contains(ActionsEnum.IGNORE));
         }),
         ;
