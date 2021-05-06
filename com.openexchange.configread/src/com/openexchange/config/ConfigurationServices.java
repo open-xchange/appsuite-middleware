@@ -65,6 +65,7 @@ import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
 import org.yaml.snakeyaml.Yaml;
+import org.yaml.snakeyaml.constructor.SafeConstructor;
 import org.yaml.snakeyaml.error.YAMLException;
 import com.openexchange.config.utils.TokenReplacingReader;
 import com.openexchange.java.Charsets;
@@ -401,7 +402,7 @@ public class ConfigurationServices {
         try {
             fr = new InputStreamReader((fis = new FileInputStream(file)), Charsets.UTF_8);
             trr = new TokenReplacingReader((br = new BufferedReader(fr, 2048)));
-            Yaml yaml = new Yaml();
+            Yaml yaml = new Yaml(new SafeConstructor());
             return yaml.load(trr);
         } catch (YAMLException e) {
             throw new IllegalArgumentException("Failed to load YAML file '" + file + ". Please fix any syntax errors in it.", e);
@@ -429,7 +430,7 @@ public class ConfigurationServices {
         try {
             fr = new InputStreamReader(in, Charsets.UTF_8);
             trr = new TokenReplacingReader((br = new BufferedReader(fr, 2048)));
-            Yaml yaml = new Yaml();
+            Yaml yaml = new Yaml(new SafeConstructor());
             return yaml.load(trr);
         } catch (YAMLException e) {
             throw new IllegalArgumentException("Failed to read YAML content from given input stream.", e);
@@ -459,7 +460,7 @@ public class ConfigurationServices {
         try {
             fr = new InputStreamReader(in, Charsets.UTF_8);
             trr = new TokenReplacingReader((br = new BufferedReader(fr, 2048)));
-            Yaml yaml = new Yaml();
+            Yaml yaml = new Yaml(new SafeConstructor());
             return yaml.loadAs(trr, type);
         } catch (YAMLException e) {
             throw new IllegalArgumentException("Failed to read YAML content from given input stream.", e);
