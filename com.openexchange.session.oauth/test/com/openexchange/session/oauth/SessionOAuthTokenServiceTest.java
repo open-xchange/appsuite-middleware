@@ -121,6 +121,7 @@ public class SessionOAuthTokenServiceTest {
             }
             return null;
         });
+        Mockito.when(services.getOptionalService(SessiondService.class)).thenReturn(sessiondService);
 
         tokenService = new DefaultSessionOAuthTokenService(services);
 
