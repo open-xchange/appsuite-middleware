@@ -58,7 +58,6 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.Date;
 import java.util.LinkedHashMap;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -705,21 +704,16 @@ public class DefaultAttachmentStorage implements AttachmentStorage {
             if (autoDelete && expiry != null) {
                 TimedResult<File> documents = storageContext.fileAccess.getDocuments(folderId);
                 iterator = documents.results();
-
-                List<String> fileIds = new LinkedList<>();
                 while (iterator.hasNext()) {
-                    File file = iterator.next();
-                    fileIds.add(file.getId());
+                    File existingFile = iterator.next();
+                    // Compile the file to update
+                    File file = new DefaultFile();
+                    file.setId(existingFile.getId());
+                    file.setMeta(mapFor("expiration-date-" + getId(), Long.valueOf(expiry.getTime())));
+                    storageContext.fileAccess.saveDocument(file, null, existingFile.getSequenceNumber(), Collections.singletonList(Field.META));
                 }
                 SearchIterators.close(iterator);
                 iterator = null;
-
-                for (String fileId : fileIds) {
-                    File file = new DefaultFile();
-                    file.setId(fileId);
-                    file.setMeta(mapFor("expiration-date-" + getId(), Long.valueOf(expiry.getTime())));
-                    storageContext.fileAccess.saveDocument(file, null, FileStorageFileAccess.UNDEFINED_SEQUENCE_NUMBER, Collections.singletonList(Field.META));
-                }
             }
 
             if (password != null || expiry != null) {
