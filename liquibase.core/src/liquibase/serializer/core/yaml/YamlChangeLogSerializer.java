@@ -17,6 +17,7 @@ import java.util.Set;
 import java.util.TreeMap;
 import org.yaml.snakeyaml.DumperOptions;
 import org.yaml.snakeyaml.Yaml;
+import org.yaml.snakeyaml.constructor.SafeConstructor;
 import org.yaml.snakeyaml.introspector.GenericProperty;
 import org.yaml.snakeyaml.introspector.Property;
 import org.yaml.snakeyaml.nodes.MappingNode;
@@ -43,7 +44,7 @@ public class YamlChangeLogSerializer implements ChangeLogSerializer {
     protected Yaml createYaml() {
         DumperOptions dumperOptions = new DumperOptions();
         dumperOptions.setDefaultFlowStyle(DumperOptions.FlowStyle.BLOCK);
-        return new Yaml(new LiquibaseRepresenter(), dumperOptions);
+        return new Yaml(new SafeConstructor(), new LiquibaseRepresenter(), dumperOptions);
     }
 
     @Override
