@@ -131,6 +131,14 @@ public interface OXResellerServicePortType {
         @WebParam(name = "creds", targetNamespace = "http://soap.reseller.admin.openexchange.com")
         com.openexchange.admin.soap.reseller.service.rmi.dataobjects.Credentials creds
     ) throws InvalidCredentialsException_Exception, StorageException_Exception, RemoteException_Exception, OXResellerException_Exception, InvalidDataException_Exception;
+    
+    @SOAPBinding(parameterStyle = SOAPBinding.ParameterStyle.BARE)
+    @Action(input = "urn:getSelfData", output = "urn:getSelfDataResponse", fault = {@FaultAction(className = InvalidCredentialsException_Exception.class, value = "urn:getSelfDataInvalidCredentialsException"), @FaultAction(className = StorageException_Exception.class, value = "urn:getSelfDataStorageException"), @FaultAction(className = RemoteException_Exception.class, value = "urn:getSelfDataRemoteException"), @FaultAction(className = OXResellerException_Exception.class, value = "urn:getSelfDataOXResellerException"), @FaultAction(className = InvalidDataException_Exception.class, value = "urn:getSelfDataInvalidDataException")})
+    @WebMethod(action = "urn:getSelfData")
+    public com.openexchange.admin.soap.reseller.service.reseller.rmi.dataobjects.ResellerAdmin getSelfData(
+        @WebParam(partName = "parameters", name = "getSelfData", targetNamespace = "http://soap.reseller.admin.openexchange.com")
+        SelfData parameters
+    ) throws InvalidCredentialsException_Exception, StorageException_Exception, RemoteException_Exception, OXResellerException_Exception, InvalidDataException_Exception;
 
     @SOAPBinding(parameterStyle = SOAPBinding.ParameterStyle.BARE)
     @Action(input = "urn:updateDatabaseModuleAccessRestrictions", output = "urn:updateDatabaseModuleAccessRestrictionsResponse", fault = {@FaultAction(className = InvalidCredentialsException_Exception.class, value = "urn:updateDatabaseModuleAccessRestrictionsInvalidCredentialsException"), @FaultAction(className = StorageException_Exception.class, value = "urn:updateDatabaseModuleAccessRestrictionsStorageException"), @FaultAction(className = RemoteException_Exception.class, value = "urn:updateDatabaseModuleAccessRestrictionsRemoteException"), @FaultAction(className = OXResellerException_Exception.class, value = "urn:updateDatabaseModuleAccessRestrictionsOXResellerException")})

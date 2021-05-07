@@ -452,6 +452,31 @@ public class OXReseller extends OXCommonImpl implements OXResellerInterface {
     }
 
     @Override
+    public ResellerAdmin getSelfData(ResellerAdmin admin, Credentials credentials) throws RemoteException, InvalidDataException, InvalidCredentialsException, StorageException, OXResellerException {
+        try {
+            doNullCheck(LOGGER, credentials, admin);
+            
+            Credentials masterCredentials = cache.getMasterCredentials();
+            if (null != masterCredentials && masterCredentials.getLogin().equals(credentials.getLogin())) {
+                basicauth.doAuthentication(credentials);
+            } else {
+                resellerauth.doAuthentication(credentials);
+                ResellerAdmin parent = oxresell.getData(new ResellerAdmin[] { new ResellerAdmin(credentials.getLogin(), credentials.getPassword()) })[0];
+                ResellerAdmin dbAdmin = oxresell.getData(new ResellerAdmin[] { admin })[0];
+                if (!dbAdmin.equals(parent) && null != parent && false == dbAdmin.getParentId().equals(parent.getId())) {
+                    log(LogLevel.ERROR, LOGGER, credentials, null, "unathorized access to {} by {}", dbAdmin.getName(), credentials.getLogin());
+                    throw new InvalidCredentialsException("authentication failed");
+                }
+            }
+            checkIdOrName(admin);
+            return oxresell.getData(new ResellerAdmin[] { new ResellerAdmin(admin.getId(), admin.getName()) })[0];
+        } catch (Throwable e) {
+            enhanceAndLogException(e, credentials);
+            throw e;
+        }
+    }
+
+    @Override
     public ResellerAdmin[] getMultipleData(final ResellerAdmin[] admins, final Credentials creds) throws RemoteException, InvalidDataException, InvalidCredentialsException, StorageException, OXResellerException {
         try {
             doNullCheck(LOGGER, creds, (Object[]) admins);

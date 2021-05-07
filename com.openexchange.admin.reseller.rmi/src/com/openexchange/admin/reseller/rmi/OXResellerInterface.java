@@ -180,6 +180,20 @@ public interface OXResellerInterface extends Remote {
     ResellerAdmin getData(final ResellerAdmin adm, Credentials creds) throws RemoteException, InvalidDataException, InvalidCredentialsException, StorageException, OXResellerException;
 
     /**
+     * Returns data for the specified reseller admin
+     *
+     * @param admin The reseller admin to return data for
+     * @param credentials The reseller admin's credentials
+     * @return The reseller admin with the data
+     * @throws RemoteException
+     * @throws InvalidDataException
+     * @throws InvalidCredentialsException
+     * @throws StorageException
+     * @throws OXResellerException
+     */
+    ResellerAdmin getSelfData(ResellerAdmin admin, Credentials credentials) throws RemoteException, InvalidDataException, InvalidCredentialsException, StorageException, OXResellerException;
+
+    /**
      * Retrieve a list of all currently available {@link Restriction} objects
      *
      * @param creds {@link Credentials} of the master admin
@@ -252,7 +266,7 @@ public interface OXResellerInterface extends Remote {
      * @throws OXResellerException
      */
     void updateDatabaseRestrictions(final Credentials creds) throws RemoteException, StorageException, InvalidCredentialsException, OXResellerException;
-    
+
     /**
      * Retrieves all capabilities for the reseller with the specified identifier
      * 
