@@ -4,7 +4,7 @@ BuildArch:        noarch
 BuildRequires: ant
 BuildRequires: java-1.8.0-openjdk-devel
 Version:          @OXVERSION@
-%define           ox_release 10
+%define           ox_release 11
 Release:          %{ox_release}_<CI_CNT>.<B_CNT>
 Group:            Applications/Productivity
 License:          GPL-2.0
@@ -85,6 +85,8 @@ systemctl daemon-reload &> /dev/null || :
 %doc docs/%{dropin_example}
 
 %changelog
+* Tue May 11 2021 Marcus Klein <marcus.klein@open-xchange.com>
+Build for patch 2021-05-17 (5994)
 * Mon Apr 26 2021 Marcus Klein <marcus.klein@open-xchange.com>
 Build for patch 2021-05-03 (5989)
 * Tue Apr 13 2021 Marcus Klein <marcus.klein@open-xchange.com>

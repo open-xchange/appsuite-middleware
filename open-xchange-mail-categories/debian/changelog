@@ -1,3 +1,9 @@
+open-xchange-mail-categories (7.10.5-11) stable; urgency=medium
+
+  * Build for patch 2021-05-17 (5994)
+
+ -- Kevin Ruthmann <kevin.ruthmann@open-xchange.com>  Tue, 11 May 2021 15:21:01 +0000
+
 open-xchange-mail-categories (7.10.5-10) stable; urgency=medium
 
   * Build for patch 2021-05-03 (5989)
