@@ -92,6 +92,7 @@ import com.openexchange.test.concurrent.ParallelSuite;
     MWB999Test.class,
     MWB1014Test.class,
     MWB1040Test.class,
+    MWB1077Test.class,
     // @formatter:on
 })
 public class ChronosBugsTestSuite {

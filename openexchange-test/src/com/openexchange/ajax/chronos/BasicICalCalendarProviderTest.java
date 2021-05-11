@@ -72,8 +72,6 @@ import java.util.concurrent.TimeUnit;
 import org.apache.commons.lang.RandomStringUtils;
 import org.apache.http.HttpHeaders;
 import org.apache.http.HttpStatus;
-import org.joda.time.format.DateTimeFormat;
-import org.joda.time.format.DateTimeFormatter;
 import org.json.JSONException;
 import org.junit.Test;
 import com.openexchange.ajax.chronos.manager.CalendarFolderManager;
@@ -95,7 +93,6 @@ import com.openexchange.testing.httpclient.models.FolderCalendarExtendedProperti
 import com.openexchange.testing.httpclient.models.FolderCalendarExtendedPropertiesColor;
 import com.openexchange.testing.httpclient.models.FolderCalendarExtendedPropertiesDescription;
 import com.openexchange.testing.httpclient.models.FolderData;
-import com.openexchange.testing.httpclient.models.FolderPermission;
 import com.openexchange.testing.httpclient.models.FolderUpdateResponse;
 import com.openexchange.testing.httpclient.models.MultipleEventDataError;
 import com.openexchange.testing.httpclient.models.MultipleFolderEventsResponse;
@@ -108,20 +105,7 @@ import com.openexchange.testing.httpclient.models.NewFolderBodyFolder;
  * @author <a href="mailto:martin.schneider@open-xchange.com">Martin Schneider</a>
  * @since v7.10.0
  */
-public class BasicICalCalendarProviderTest extends AbstractExternalProviderChronosTest {
-
-    public BasicICalCalendarProviderTest() {
-        super(CalendarFolderManager.ICAL_ACCOUNT_PROVIDER_ID);
-    }
-
-    private String createAccount(NewFolderBody body) throws ApiException {
-        return this.folderManager.createFolder(body);
-    }
-
-    protected long dateToMillis(String date) {
-        DateTimeFormatter formatter = DateTimeFormat.forPattern("yyyyMMdd'T'HHmmssZ");
-        return formatter.parseDateTime(date).getMillis();
-    }
+public class BasicICalCalendarProviderTest extends AbstractICalCalendarProviderTest {
 
     @Test
     public void testProbe_containsSurrogateChars_returnException() throws ApiException {
@@ -1161,39 +1145,4 @@ public class BasicICalCalendarProviderTest extends AbstractExternalProviderChron
         return ids;
     }
 
-    protected String createDefaultAccount(String externalUri) throws ApiException {
-        FolderCalendarConfig config = new FolderCalendarConfig();
-        NewFolderBodyFolder folder = createFolder(externalUri, config);
-        addPermissions(folder);
-
-        NewFolderBody body = new NewFolderBody();
-        body.setFolder(folder);
-
-        return createAccount(body);
-    }
-
-    private NewFolderBodyFolder createFolder(String externalUri, FolderCalendarConfig config) {
-        config.setEnabled(Boolean.TRUE);
-        config.setUri(externalUri);
-        NewFolderBodyFolder folder = new NewFolderBodyFolder();
-        folder.setModule("event");
-        folder.setComOpenexchangeCalendarConfig(config);
-        folder.setSubscribed(Boolean.TRUE);
-        folder.setTitle("testFolder_" + System.nanoTime());
-        folder.setComOpenexchangeCalendarProvider(CalendarFolderManager.ICAL_ACCOUNT_PROVIDER_ID);
-        folder.setComOpenexchangeCalendarExtendedProperties(new FolderCalendarExtendedProperties());
-        return folder;
-    }
-
-    private void addPermissions(NewFolderBodyFolder folder) {
-        FolderPermission perm = new FolderPermission();
-        perm.setEntity(defaultUserApi.getCalUser());
-        perm.setGroup(Boolean.FALSE);
-        perm.setBits(I(403710016));
-
-        List<FolderPermission> permissions = new ArrayList<>();
-        permissions.add(perm);
-
-        folder.setPermissions(permissions);
-    }
 }

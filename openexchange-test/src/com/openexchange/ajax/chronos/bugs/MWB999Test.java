@@ -59,7 +59,7 @@ import java.util.UUID;
 import org.apache.http.HttpStatus;
 import org.json.JSONException;
 import org.junit.Test;
-import com.openexchange.ajax.chronos.BasicICalCalendarProviderTest;
+import com.openexchange.ajax.chronos.AbstractICalCalendarProviderTest;
 import com.openexchange.exception.OXException;
 import com.openexchange.testing.httpclient.invoker.ApiException;
 import com.openexchange.testing.httpclient.models.DateTimeData;
@@ -71,7 +71,7 @@ import com.openexchange.testing.httpclient.models.EventData;
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  * @since v8.0.0
  */
-public class MWB999Test extends BasicICalCalendarProviderTest {
+public class MWB999Test extends AbstractICalCalendarProviderTest {
 
     @Test
     public void testSameEndDate() throws JSONException, ApiException, OXException, IOException {
