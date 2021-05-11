@@ -54,11 +54,14 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.TimeZone;
 import org.json.JSONException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
+import com.openexchange.chronos.Attendee;
 import com.openexchange.chronos.Event;
-import com.openexchange.chronos.common.IncomingSchedulingMessageBuilder;
-import com.openexchange.chronos.ical.ImportedCalendar;
+import com.openexchange.chronos.ParticipationStatus;
+import com.openexchange.chronos.scheduling.IncomingSchedulingMessage;
 import com.openexchange.chronos.scheduling.SchedulingBroker;
 import com.openexchange.chronos.scheduling.SchedulingMethod;
 import com.openexchange.chronos.scheduling.SchedulingSource;
@@ -79,6 +82,8 @@ import com.openexchange.tools.servlet.AjaxExceptionCodes;
  */
 public class IncomingSchedulingAction {
 
+    private static final Logger LOGGER = LoggerFactory.getLogger(IncomingSchedulingAction.class);
+
     private final ServiceLookup services;
     private final SchedulingMethod method;
 
@@ -95,20 +100,20 @@ public class IncomingSchedulingAction {
     }
 
     /**
-     * Gets a value indicating whether this instance can handle a calendar update
+     * Gets a value indicating whether this instance can handle a specific message or not
      *
-     * @param calendar The calendar with the update
+     * @param message The incoming message to get the method from
      * @return <code>true</code> if this instance can handle the update, <code>false</code> otherwise
      */
-    public boolean canPerform(ImportedCalendar calendar) {
-        return method.name().equalsIgnoreCase(calendar.getMethod());
+    public boolean canPerform(IncomingSchedulingMessage message) {
+        return method.equals(message.getMethod());
     }
 
     /**
      * Tries to apply the designated method by applying updates to the calendar.
      *
      * @param request The request
-     * @param calendar The calendar
+     * @param message The incoming message
      * @param session The session
      * @param tz The timezone for the user
      * @return Either an result for the client or
@@ -116,12 +121,11 @@ public class IncomingSchedulingAction {
      *         in the calendar doesn't match the expected method to handle
      * @throws OXException In case of an error while updating
      */
-    public AJAXRequestResult perform(AJAXRequestData request, ImportedCalendar calendar, CalendarSession session, TimeZone tz) throws OXException {
+    public AJAXRequestResult perform(AJAXRequestData request, IncomingSchedulingMessage message, CalendarSession session, TimeZone tz) throws OXException {
         /*
          * patch imported calendar & perform scheduling operation
          */
-        ImportedCalendar importedCalendar = ITipPatches.applyAll(calendar);
-        CalendarResult result = perform(request, importedCalendar, session);
+        CalendarResult result = perform(request, message, session);
         if (null == result) {
             return null;
         }
@@ -147,26 +151,18 @@ public class IncomingSchedulingAction {
      * the corresponding update in the calendar.
      *
      * @param request The request to get the information from
+     * @param message The incoming message
      * @param session The session
      * @return A {@link CalendarResult} of the update or
      *         <code>null</code> to indicate that no processing has been performed
      * @throws OXException In case of error
      * @see <a href="https://tools.ietf.org/html/rfc5546">RFC 5546</a>
      */
-    private CalendarResult perform(AJAXRequestData request, ImportedCalendar calendar, CalendarSession session) throws OXException {
-        /*
-         * Build message and send to scheduling broker for processing
-         */
+    private CalendarResult perform(AJAXRequestData request, IncomingSchedulingMessage message, CalendarSession session) throws OXException {
         setCalendarParameters(request, session);
-        IncomingSchedulingMail schedulingMail = new IncomingSchedulingMail(services, request, session.getSession());
-        IncomingSchedulingMessageBuilder builder = IncomingSchedulingMessageBuilder.newBuilder();
-        builder.setMethod(method);
-        builder.setTargetUser(session.getUserId());
-        builder.setSchedulingObject(schedulingMail);
-        builder.setResource(new IncomingMailResource(calendar.getEvents(), schedulingMail));
-        
+
         SchedulingBroker schedulingBroker = services.getServiceSafe(SchedulingBroker.class);
-        return schedulingBroker.handleIncomingScheduling(session, SchedulingSource.API, builder.build());
+        return schedulingBroker.handleIncomingScheduling(session, SchedulingSource.API, message, getAttendee(request, message));
     }
 
     /**
@@ -179,6 +175,40 @@ public class IncomingSchedulingAction {
         if ("accept_and_ignore_conflicts".equalsIgnoreCase(request.getAction())) {
             session.set(CalendarParameters.PARAMETER_CHECK_CONFLICTS, Boolean.FALSE);
         }
+    }
+
+    private Attendee getAttendee(AJAXRequestData request, IncomingSchedulingMessage message) {
+        if (SchedulingMethod.ADD.equals(message.getMethod()) || SchedulingMethod.REQUEST.equals(message.getMethod())) {
+            Attendee update = new Attendee();
+            update.setEntity(message.getTargetUser());
+            update.setPartStat(getPartStat(request.getAction()));
+            update.setComment(getComment(request));
+            return update;
+        }
+        return null;
+    }
+
+    private static ParticipationStatus getPartStat(String action) {
+        switch (action.toLowerCase()) {
+            case "accept_and_ignore_conflicts":
+            case "accept":
+                return ParticipationStatus.ACCEPTED;
+            case "tentative":
+                return ParticipationStatus.TENTATIVE;
+            case "decline":
+                return ParticipationStatus.DECLINED;
+            default:
+                return null;
+        }
+    }
+
+    private static String getComment(AJAXRequestData request) {
+        try {
+            return request.getParameter("message", String.class);
+        } catch (OXException e) {
+            LOGGER.debug("Unable to get comment", e);
+        }
+        return null;
     }
 
 }

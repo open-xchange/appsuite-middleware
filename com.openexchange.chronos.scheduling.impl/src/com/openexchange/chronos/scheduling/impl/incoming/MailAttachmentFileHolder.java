@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH group of companies.
+ *    trademarks of the OX Software GmbH. group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -47,72 +47,105 @@
  *
  */
 
-package com.openexchange.chronos.common;
+package com.openexchange.chronos.scheduling.impl.incoming;
 
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
-import com.openexchange.chronos.Event;
-import com.openexchange.java.Strings;
+import com.openexchange.ajax.fileholder.IFileHolder;
+import com.openexchange.exception.OXException;
 
 /**
- * 
- * {@link IncomingCalendarObjectResource} - Resource that orders event based on recurrence IDs or rules
+ * {@link MailAttachmentFileHolder} - {@link IFileHolder} for an calendar attachment received through an incoming mail
  *
  * @author <a href="mailto:daniel.becker@open-xchange.com">Daniel Becker</a>
  * @since v7.10.6
  */
-public class IncomingCalendarObjectResource extends DefaultCalendarObjectResource {
+public class MailAttachmentFileHolder implements IFileHolder {
+
+    private final ShortLivingMailAccess access;
+    private final String contentId;
+    private final String fileName;
+    private final String contentType;
+    private final long size;
+
+    private List<Runnable> tasks;
 
     /**
-     * Initializes a new {@link IncomingCalendarObjectResource} for a single event.
+     * Initializes a new {@link MailAttachmentFileHolder}.
      * 
-     * @param event The event of the calendar object resource
+     * @param access The access to gain the part from
+     * @param contentId The sequence identifier of the attachment
+     * @param fileName The name of the attachment
+     * @param contentType The content type of the attachment
+     * @param size The size or rather length of the attachment
      */
-    public IncomingCalendarObjectResource(Event event) {
-        super(event);
-    }
-
-    /**
-     * Initializes a new {@link IncomingCalendarObjectResource} from one specific and further events.
-     * 
-     * @param event One event of the calendar object resource
-     * @param events Further events of the calendar object resource
-     * 
-     * @throws IllegalArgumentException If passed events do not represent a valid calendar object resource
-     */
-    public IncomingCalendarObjectResource(Event event, List<Event> events) {
-        super(event, events);
-    }
-
-    /**
-     * Initializes a new {@link IncomingCalendarObjectResource}.
-     * 
-     * @param events The events of the calendar object resource
-     * @throws IllegalArgumentException If passed events do not represent a valid calendar object resource
-     */
-    public IncomingCalendarObjectResource(List<Event> events) {
-        super(events);
+    public MailAttachmentFileHolder(ShortLivingMailAccess access, String contentId, String fileName, String contentType, long size) {
+        super();
+        this.access = access;
+        this.contentId = contentId;
+        this.fileName = fileName;
+        this.contentType = contentType;
+        this.size = size;
     }
 
     @Override
-    public Event getSeriesMaster() {
-        Event firstEvent = events.get(0);
-        if (Strings.isNotEmpty(firstEvent.getRecurrenceRule()) || 
-            null != firstEvent.getRecurrenceDates() && false == firstEvent.getRecurrenceDates().isEmpty()) {
-            return firstEvent;
-        }
+    public boolean repetitive() {
+        return true;
+    }
+
+    @Override
+    public void close() throws IOException {
+        // No-op
+    }
+
+    @Override
+    public InputStream getStream() throws OXException {
+        return access.getMailPart(contentId).getInputStream();
+    }
+
+    @Override
+    public RandomAccess getRandomAccess() throws OXException {
         return null;
     }
 
     @Override
-    public List<Event> getChangeExceptions() {
-        List<Event> changeExceptions = new ArrayList<Event>(events.size());
-        for (Event event : events) {
-            if (null != event.getRecurrenceId()) {
-                changeExceptions.add(event);
-            }
+    public long getLength() {
+        return size;
+    }
+
+    @Override
+    public String getContentType() {
+        return contentType;
+    }
+
+    @Override
+    public String getName() {
+        return fileName;
+    }
+
+    @Override
+    public String getDisposition() {
+        return null;
+    }
+
+    @Override
+    public String getDelivery() {
+        return null;
+    }
+
+    @Override
+    public List<Runnable> getPostProcessingTasks() {
+        return tasks;
+    }
+
+    @Override
+    public void addPostProcessingTask(Runnable task) {
+        if (null == tasks) {
+            tasks = new ArrayList<>(2);
         }
-        return changeExceptions;
+        tasks.add(task);
     }
 
 }

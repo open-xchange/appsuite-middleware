@@ -330,7 +330,11 @@ public class ITipAnalyzeChangesTest extends AbstractITipAnalyzeTest {
          */
         accept(apiClientC2, constructBody(iMip), null);
         attendeeEvent = eventManagerC2.getEvent(folderIdC2, attendeeEvent.getId());
-        assertTrue(timeZone.equals(attendeeEvent.getStartDate().getTzid()));
+        /*
+         * Converted to"Europe/London" before sending
+         * See also com.openexchange.chronos.ical.ical4j.mapping.AbstractICalMapping.toICalDate()
+         */
+        assertTrue("Not changed!", "Europe/London".equals(attendeeEvent.getStartDate().getTzid()));
         checkNoReplyMailReceived(testUser.getApiClient(), replyingAttendee, summary);
     }
 
@@ -832,10 +836,6 @@ public class ITipAnalyzeChangesTest extends AbstractITipAnalyzeTest {
 
     private MailData receiveMailAsAttendee(String summary) throws Exception {
         return receiveMailAsAttendee(summary, 1);
-    }
-
-    private MailData receiveMailAsAttendee(int sequence) throws Exception {
-        return receiveMailAsAttendee(summary, sequence);
     }
 
     private MailData receiveMailAsAttendee(String summary, int sequnce) throws Exception {

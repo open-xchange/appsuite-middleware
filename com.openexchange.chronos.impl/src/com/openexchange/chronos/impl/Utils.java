@@ -664,60 +664,6 @@ public class Utils {
     }
 
     /**
-     * Get the calendar folder to use based on the first event obtained from the scheduled resource provided by the message
-     *
-     * @param session The session to use
-     * @param storage The storage to lookup the event from
-     * @param uid The UID of the event to get the folder for
-     * @param recurrenceId The recurrence identifier of the event, can be <code>null</code>
-     * @param calendarUserId The identifier of the calendar user the unique identifier should be resolved for
-     * @return The {@link CalendarFolder}
-     * @throws OXException If folder can't be determined or is not visible for the user
-     */
-    public static CalendarFolder getCalendarFolder(CalendarSession session, CalendarStorage storage, String uid, RecurrenceId recurrenceId, int calendarUserId) throws OXException {
-        EventField[] oldParameterFields = session.get(CalendarParameters.PARAMETER_FIELDS, EventField[].class);
-        List<Event> resolvedEvents;
-        try {
-            session.set(CalendarParameters.PARAMETER_FIELDS, new EventField[] { EventField.FOLDER_ID });
-            resolvedEvents = session.getCalendarService().getUtilities().resolveEventsByUID(session, uid, calendarUserId);
-        } finally {
-            session.set(CalendarParameters.PARAMETER_FIELDS, oldParameterFields);
-        }
-        if (resolvedEvents.isEmpty()) {
-            throw CalendarExceptionCodes.EVENT_NOT_FOUND.create(uid);
-        }
-        return getFolder(session, resolvedEvents.get(0).getFolderId());
-    }
-
-    /**
-     * Get the calendar folder to use based on the first event obtained from the scheduled resource provided by the message
-     *
-     * @param session The session to use
-     * @param storage The storage to lookup the event from
-     * @param uid The UID of the event to get the folder for
-     * @param calendarUserId The identifier of the calendar user the unique identifier should be resolved for
-     * @return The {@link CalendarFolder}
-     * @throws OXException If folder can't be determined or is not visible for the user
-     */
-    public static CalendarFolder getCalendarFolder(CalendarSession session, CalendarStorage storage, String uid, int calendarUserId) throws OXException {
-
-        //TODO: let resolveperformer resolve the folderid directly 
-
-        EventField[] oldParameterFields = session.get(CalendarParameters.PARAMETER_FIELDS, EventField[].class);
-        List<Event> resolvedEvents;
-        try {
-            session.set(CalendarParameters.PARAMETER_FIELDS, new EventField[] { EventField.FOLDER_ID });
-            resolvedEvents = session.getCalendarService().getUtilities().resolveEventsByUID(session, uid, calendarUserId);
-        } finally {
-            session.set(CalendarParameters.PARAMETER_FIELDS, oldParameterFields);
-        }
-        if (resolvedEvents.isEmpty()) {
-            throw CalendarExceptionCodes.EVENT_NOT_FOUND.create(uid);
-        }
-        return getFolder(session, resolvedEvents.get(0).getFolderId());
-    }
-
-    /**
      * Gets a value indicating whether a specific event is actually present in the supplied folder. Based on the folder type, the
      * event's public folder identifier or the attendee's personal calendar folder is checked, as well as the attendee's <i>hidden</i>
      * marker.
@@ -930,6 +876,7 @@ public class Utils {
      * @param originalAttendee The original attendee
      * @param updatedAttendee The updated attendee
      * @return <code>true</code> if the changed properties represent a reply, <code>false</code>, otherwise
+     * @throws OXException In case field mapping is not found
      * @see <a href="https://tools.ietf.org/html/rfc6638#section-3.2.2.3">RFC 6638, section 3.2.2.3</a>
      */
     public static boolean isReply(Attendee originalAttendee, Attendee updatedAttendee) throws OXException {
@@ -938,6 +885,9 @@ public class Utils {
         }
         if (null == updatedAttendee) {
             return true;
+        }
+        if (false == isTrackableReply(updatedAttendee)) {
+            return false;
         }
         return false == AttendeeMapper.getInstance().get(AttendeeField.PARTSTAT).equals(originalAttendee, updatedAttendee) ||
             false == AttendeeMapper.getInstance().get(AttendeeField.COMMENT).equals(originalAttendee, updatedAttendee);
@@ -954,7 +904,9 @@ public class Utils {
     public static boolean isReply(CollectionUpdate<Attendee, AttendeeField> attendeeUpdates, CalendarUser calendarUser) {
         for (ItemUpdate<Attendee, AttendeeField> itemUpdate : attendeeUpdates.getUpdatedItems()) {
             if (matches(itemUpdate.getOriginal(), calendarUser)) {
-                return itemUpdate.containsAnyChangeOf(REPLY_FIELDS);
+                if (itemUpdate.containsAnyChangeOf(REPLY_FIELDS) && isTrackableReply(itemUpdate.getUpdate())) {
+                    return true;
+                }
             }
         }
         return false;
@@ -977,6 +929,17 @@ public class Utils {
             }
         }
         return false;
+    }
+
+    /**
+     * Gets a value indicating whether the participant status of the attendee can
+     * be tracked or not.
+     *
+     * @param attendee The attendee to check
+     * @return <code>true</code> if the status can be tracked, <code>false</code> otherwise
+     */
+    private static boolean isTrackableReply(Attendee attendee) {
+        return false == ParticipationStatus.NEEDS_ACTION.matches(attendee.getPartStat());
     }
 
     /**

@@ -102,7 +102,7 @@ import com.openexchange.user.User;
  * For details see <a href="https://tools.ietf.org/html/rfc2446#section-3.2.3">RFC 2446</a>
  *
  * @author <a href="mailto:daniel.becker@open-xchange.com">Daniel Becker</a>
- * @since v8.0.0
+ * @since v7.10.6
  */
 public class ReplyAnalyzer extends AbstractITipAnalyzer implements LegacyAnalyzing {
 
@@ -335,7 +335,9 @@ public class ReplyAnalyzer extends AbstractITipAnalyzer implements LegacyAnalyzi
     private boolean containsPartyCrasher(ITipAnalysis analysis) throws OXException {
         for (ITipChange change : analysis.getChanges()) {
             ITipEventUpdate eventUpdate = change.getDiff();
-            if (null != eventUpdate && null != eventUpdate.getAttendeeUpdates() && null != eventUpdate.getAttendeeUpdates().getAddedItems() && false == eventUpdate.getAttendeeUpdates().getAddedItems().isEmpty()) {
+            if (null != eventUpdate && null != eventUpdate.getAttendeeUpdates()//
+                && null != eventUpdate.getAttendeeUpdates().getAddedItems()//
+                && false == eventUpdate.getAttendeeUpdates().getAddedItems().isEmpty()) {
                 return true;
             }
         }

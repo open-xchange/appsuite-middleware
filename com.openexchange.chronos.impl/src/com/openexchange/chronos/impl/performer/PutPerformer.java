@@ -96,7 +96,7 @@ import com.openexchange.java.Strings;
  * {@link PutPerformer}
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
- * @since v8.0.0
+ * @since v7.10.6
  */
 public class PutPerformer extends AbstractUpdatePerformer {
     

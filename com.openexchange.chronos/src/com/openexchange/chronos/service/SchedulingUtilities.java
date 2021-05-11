@@ -49,6 +49,7 @@
 
 package com.openexchange.chronos.service;
 
+import com.openexchange.chronos.Attendee;
 import com.openexchange.chronos.scheduling.IncomingSchedulingMessage;
 import com.openexchange.chronos.scheduling.SchedulingMethod;
 import com.openexchange.chronos.scheduling.SchedulingSource;
@@ -70,10 +71,11 @@ public interface SchedulingUtilities {
      * @param calendarSession The calendar session
      * @param source The source from which the scheduling has been triggered
      * @param message The message to process
+     * @param attendee The attendee to update or <code>null</code> to just apply the changes
      * @return A userized calendar result of the update
      * @throws OXException if adding fails
      */
-    CalendarResult processAdd(CalendarSession calendarSession, SchedulingSource source, IncomingSchedulingMessage message) throws OXException;
+    CalendarResult processAdd(CalendarSession calendarSession, SchedulingSource source, IncomingSchedulingMessage message, Attendee attendee) throws OXException;
 
     /**
      * Processes a {@link SchedulingMethod#CANCEL} and removes the event(s)
@@ -103,9 +105,10 @@ public interface SchedulingUtilities {
      * @param calendarSession The calendar session
      * @param source The source from which the scheduling has been triggered
      * @param message The message to process
+     * @param attendee The attendee to update or <code>null</code> to just apply the changes
      * @return A userized calendar result of the update
      * @throws OXException if updating fails
      */
-    CalendarResult processRequest(CalendarSession calendarSession, SchedulingSource source, IncomingSchedulingMessage message) throws OXException;
+    CalendarResult processRequest(CalendarSession calendarSession, SchedulingSource source, IncomingSchedulingMessage message, Attendee attendee) throws OXException;
 
 }

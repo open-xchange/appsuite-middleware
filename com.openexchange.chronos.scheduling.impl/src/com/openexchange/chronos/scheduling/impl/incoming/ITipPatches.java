@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.chronos.itip.json.action;
+package com.openexchange.chronos.scheduling.impl.incoming;
 
 import static com.openexchange.tools.arrays.Collections.isNullOrEmpty;
 import java.util.ArrayList;
@@ -67,7 +67,7 @@ import com.openexchange.chronos.common.mapping.AttendeeMapper;
 import com.openexchange.chronos.exception.CalendarExceptionCodes;
 import com.openexchange.chronos.exception.ProblemSeverity;
 import com.openexchange.chronos.ical.ImportedCalendar;
-import com.openexchange.chronos.itip.ITipMethod;
+import com.openexchange.chronos.scheduling.SchedulingMethod;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.Strings;
 
@@ -75,6 +75,7 @@ import com.openexchange.java.Strings;
  * {@link ITipPatches}
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
+ * @author <a href="mailto:daniel.becker@open-xchange.com">Daniel Becker</a>
  * @since v7.10.6
  */
 public class ITipPatches {
@@ -98,10 +99,14 @@ public class ITipPatches {
         List<OXException> warnings = importedCalendar.getWarnings();
         events = CalendarUtils.sortSeriesMasterFirst(new ArrayList<Event>(events));
         /*
+         * apply common patches
+         */
+        copyCommentToAttendee(events, importedCalendar.getMethod());
+        /*
          * apply microsoft-specific patches if applicable
          */
         if (looksLikeMicrosoft(importedCalendar)) {
-            ITipMethod method = ITipMethod.get(importedCalendar.getMethod());
+            SchedulingMethod method = SchedulingMethod.valueOf(importedCalendar.getMethod());
             events = removeOverriddenInstanceLeftovers(method, events, warnings);
             ensureOrganizer(events);
             ensureAtteendees(events);
@@ -115,8 +120,41 @@ public class ITipPatches {
     }
 
     /**
+     * Copies the comment for an event to the corresponding attendee in case of
+     * an {@link SchedulingMethod#REPLY}
+     *
+     * @param events The events to copy the comment from
+     * @param method The calendar method
+     */
+    private static void copyCommentToAttendee(List<Event> events, String method) {
+        if (false == SchedulingMethod.REPLY.name().equals(method.toUpperCase())) {
+            return;
+        }
+        for (Event event : events) {
+            /*
+             * Check if applicable
+             */
+            if (null == event.getAttendees() // @formatter:off
+                || event.getAttendees().size() != 1
+                || null == event.getExtendedProperties()
+                || null == event.getExtendedProperties().get("COMMENT")) {  // @formatter:on
+                return;
+            }
+            /*
+             * Move comment to the corresponding replying attendee and remove from event
+             */
+            Attendee replyingAttendee = event.getAttendees().get(0);
+            Object comment = event.getExtendedProperties().get("COMMENT").getValue();
+            if (null != comment && Strings.isNotEmpty(comment.toString())) {
+                replyingAttendee.setComment(comment.toString());
+            }
+            event.getExtendedProperties().removeAll("COMMENT");
+        }
+    }
+
+    /**
      * Removes leftovers from overridden instances of a recurring event series, that sometimes are sent by Microsoft to attendees that
-     * were previously invited to single instances only. These incomplete event neither contain the organizer or attendees, and have an 
+     * were previously invited to single instances only. These incomplete event neither contain the organizer or attendees, and have an
      * incorrect recurrence id value set to the 00:00 local time.
      * <p/>
      * <b>Example:</b>
@@ -126,7 +164,7 @@ public class ITipPatches {
      * DTSTART;TZID=W. Europe Standard Time:20210420T090000
      * DTEND;TZID=W. Europe Standard Time:20210420T093000
      * UID:040000008200E00074C5B7101A82E00800000000EC4CA982E931D701000000000000000
-     *  0100000008108FCBB3F72F046A2D505AD100241B8
+     * 0100000008108FCBB3F72F046A2D505AD100241B8
      * RECURRENCE-ID;TZID=W. Europe Standard Time:20210420T000000
      * CLASS:PUBLIC
      * PRIORITY:5
@@ -150,24 +188,24 @@ public class ITipPatches {
      * @param warnings A reference to collect warnings
      * @return The (possibly patched) list of events
      */
-    private static List<Event> removeOverriddenInstanceLeftovers(ITipMethod method, List<Event> events, List<OXException> warnings) {
-        if (ITipMethod.REQUEST.equals(method) || ITipMethod.CANCEL.equals(method)) {
+    private static List<Event> removeOverriddenInstanceLeftovers(SchedulingMethod method, List<Event> events, List<OXException> warnings) {
+        if (SchedulingMethod.REQUEST.equals(method) || SchedulingMethod.CANCEL.equals(method)) {
             for (Iterator<Event> iterator = events.iterator(); iterator.hasNext();) {
                 Event event = iterator.next();
                 if (null != event.getRecurrenceId()) {
                     if (null == event.getOrganizer()) {
                         addInvalidDataWarning(warnings, event, EventField.ORGANIZER, "Ignoring overridden instance without organizer");
-                        iterator.remove(); 
+                        iterator.remove();
                     } else if (isNullOrEmpty(event.getAttendees())) {
                         addInvalidDataWarning(warnings, event, EventField.ATTENDEES, "Ignoring overridden instance without attendees");
-                        iterator.remove(); 
+                        iterator.remove();
                     } else if (Strings.isEmpty(event.getUid())) {
                         addInvalidDataWarning(warnings, event, EventField.UID, "Ignoring overridden instance without uid");
                         iterator.remove();
                     }
                 }
             }
-        } 
+        }
         return events;
     }
 

@@ -75,7 +75,7 @@ import com.openexchange.user.User;
  * {@link AddAnalyzer} - Analyzer for the iTIP method <code>ADD</code>
  *
  * @author <a href="mailto:daniel.becker@open-xchange.com">Daniel Becker</a>
- * @since v8.0.0
+ * @since v7.10.6
  */
 public class AddAnalyzer extends AbstractITipAnalyzer {
 

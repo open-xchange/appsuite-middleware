@@ -50,7 +50,6 @@
 package com.openexchange.chronos.scheduling;
 
 import com.openexchange.annotation.NonNull;
-import com.openexchange.annotation.Nullable;
 import com.openexchange.chronos.CalendarUser;
 import com.openexchange.exception.OXException;
 
@@ -70,28 +69,5 @@ public interface IncomingSchedulingObject {
      */
     @NonNull
     CalendarUser getOriginator() throws OXException;
-
-    /**
-     * Get the action that shall be performed.
-     * <p>
-     * In the iMIP context this can be e.g. one of
-     * <li>accept_and_ignore_conflicts<li>
-     * <li>accept<li>
-     * <li>tentative<li>
-     * <li>decline<li>
-     * <li>update<li>
-     *
-     * @return The action or <code>null</code>
-     */
-    @Nullable
-    String getAction();
-
-    /**
-     * Get the optional comment that shall be set
-     *
-     * @return The comment or <code>null</code>
-     */
-    @Nullable
-    String getComment();
 
 }

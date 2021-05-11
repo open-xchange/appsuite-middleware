@@ -57,6 +57,7 @@ import java.util.List;
 import org.osgi.framework.BundleContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import com.openexchange.chronos.Attendee;
 import com.openexchange.chronos.exception.CalendarExceptionCodes;
 import com.openexchange.chronos.scheduling.ChangeNotification;
 import com.openexchange.chronos.scheduling.IncomingSchedulingMessage;
@@ -170,7 +171,7 @@ public class SchedulingBrokerImpl extends RankingAwareNearRegistryServiceTracker
     }
 
     @Override
-    public CalendarResult handleIncomingScheduling(CalendarSession session, SchedulingSource source, IncomingSchedulingMessage message) throws OXException {
+    public CalendarResult handleIncomingScheduling(CalendarSession session, SchedulingSource source, IncomingSchedulingMessage message, Attendee attendee) throws OXException {
         SchedulingUtilities utilities = services.getServiceSafe(CalendarService.class).getSchedulingUtilities();
         if (LOGGER.isTraceEnabled()) {
             LOGGER.trace("An message for user {} in context {} with the method {} will be processed.", I(session.getUserId()), I(session.getContextId()), message.getMethod());
@@ -178,13 +179,13 @@ public class SchedulingBrokerImpl extends RankingAwareNearRegistryServiceTracker
 
         switch (message.getMethod()) {
             case ADD:
-                return utilities.processAdd(session, source, message);
+                return utilities.processAdd(session, source, message, attendee);
             case CANCEL:
                 return utilities.processCancel(session, source, message);
             case REPLY:
                 return utilities.processReply(session, source, message);
             case REQUEST:
-                return utilities.processRequest(session, source, message);
+                return utilities.processRequest(session, source, message, attendee);
             default:
                 throw CalendarExceptionCodes.UNEXPECTED_ERROR.create("Unable to handle {} method", message.getMethod());
         }

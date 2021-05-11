@@ -63,6 +63,7 @@ import com.openexchange.chronos.common.DataHandlers;
 import com.openexchange.chronos.ical.ICalService;
 import com.openexchange.chronos.itip.ITipActionPerformerFactoryService;
 import com.openexchange.chronos.itip.ITipAnalyzerService;
+import com.openexchange.chronos.itip.IncomingSchedulingMailFactory;
 import com.openexchange.chronos.itip.json.action.ITipActionFactory;
 import com.openexchange.chronos.itip.json.converter.ITipAnalysisResultConverter;
 import com.openexchange.chronos.json.action.ChronosActionFactory;
@@ -120,7 +121,7 @@ public class ChronosJsonActivator extends AJAXModuleActivator {
             IDBasedCalendarAccessFactory.class, CalendarUtilities.class, CalendarService.class, LeanConfigurationService.class,
             CalendarAccountService.class, ConversionService.class, ITipActionPerformerFactoryService.class,
             ContactService.class, ResourceService.class, GroupService.class, MimeTypeMap.class, ICalService.class, 
-            SchedulingBroker.class, ConfigurationService.class
+            SchedulingBroker.class, ConfigurationService.class, IncomingSchedulingMailFactory.class
             //@formatter:on
         };
     }

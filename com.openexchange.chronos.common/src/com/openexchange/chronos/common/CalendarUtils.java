@@ -87,6 +87,7 @@ import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.TimeUnit;
 import java.util.function.BiFunction;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 import javax.mail.internet.idn.IDNA;
 import org.dmfs.rfc5545.DateTime;
 import org.dmfs.rfc5545.Duration;
@@ -2756,6 +2757,17 @@ public class CalendarUtils {
             }
         }
         return new AbstractMap.SimpleEntry<SortedSet<RecurrenceId>, SortedSet<RecurrenceId>>(leftExceptionDates, rightExceptionDates);
+    }
+
+    /**
+     * Gets the full identifiers for the supplied events, based on the property values
+     * of each event for {@link EventField#FOLDER_ID}, {@link EventField#ID} and {@link EventField#RECURRENCE_ID}.
+     *
+     * @param events The events to get the full identifier for
+     * @return The full identifiers for the events or an empty list
+     */
+    public static List<EventID> getEventIDs(Collection<Event> events) {
+        return isNullOrEmpty(events) ? Collections.emptyList() : events.stream().map(c -> getEventID(c)).collect(Collectors.toList());
     }
 
     /**

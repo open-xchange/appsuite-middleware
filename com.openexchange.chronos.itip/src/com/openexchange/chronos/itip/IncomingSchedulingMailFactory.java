@@ -47,38 +47,43 @@
  *
  */
 
-package com.openexchange.chronos.impl.scheduling;
+package com.openexchange.chronos.itip;
 
-import com.openexchange.chronos.CalendarUser;
-import com.openexchange.chronos.Event;
-import com.openexchange.chronos.Organizer;
-import com.openexchange.chronos.common.CalendarUtils;
+import com.openexchange.chronos.scheduling.IncomingSchedulingMessage;
+import com.openexchange.chronos.service.CalendarSession;
+import com.openexchange.exception.OXException;
 
 /**
- * {@link SchedulingUtils}
+ * {@link IncomingSchedulingMailFactory}
  *
  * @author <a href="mailto:daniel.becker@open-xchange.com">Daniel Becker</a>
  * @since v7.10.6
  */
-public class SchedulingUtils {
-
-    private SchedulingUtils() {
-        super();
-    }
+public interface IncomingSchedulingMailFactory {
 
     /**
-     * Check if originator is allowed to perform any action,
-     * either by perfect match comparing to the organizer
-     * or by comparing to the sent-by field of the organizer
-     *
-     * @param originalEvent The original event to get the organizer from
-     * @param originator The originator of a scheduling action
-     * @return <code>true</code> if the originator matches the organizer, <code>false</code> otherwise
+     * Creates an {@link IncomingSchedulingMessage} based on the given data by loading an e-mail.
+     * <p>
+     * The calendar data from the mail is copied <b>unchanged</b> meaning no additional adjustments or patches
+     * has been applied. Use {@link #createPatched(CalendarSession, IncomingSchedulingMailData)}
+     * for an patched version adjusted to our internal model.
+     * 
+     * @param session The users session
+     * @param data The data of the mail
+     * @return The request parsed to an {@link IncomingSchedulingMessage}
+     * @throws OXException In case the request can't be parsed
      */
-    public static boolean originatorMatches(Event originalEvent, CalendarUser originator) {
-        Organizer organizer = originalEvent.getOrganizer();
-        return CalendarUtils.matches(originator, organizer) //perfect match 
-            || (null != organizer.getSentBy() && CalendarUtils.matches(originator, organizer.getSentBy()));
-    }
+    IncomingSchedulingMessage create(CalendarSession session, IncomingSchedulingMailData data) throws OXException;
+
+    /**
+     * Creates an {@link IncomingSchedulingMessage} based on the given data by loading an e-mail and purifies specific
+     * fields in the calendar object(s) to work with our internal model.
+     *
+     * @param session The users session
+     * @param data The data of the mail
+     * @return The request parsed to an {@link IncomingSchedulingMessage}
+     * @throws OXException In case the request can't be parsed
+     */
+    IncomingSchedulingMessage createPatched(CalendarSession session, IncomingSchedulingMailData data) throws OXException;
 
 }

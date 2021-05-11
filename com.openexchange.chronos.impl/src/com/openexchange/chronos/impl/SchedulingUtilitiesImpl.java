@@ -49,9 +49,8 @@
 
 package com.openexchange.chronos.impl;
 
-import static com.openexchange.chronos.impl.Utils.getCalendarFolder;
 import static com.openexchange.chronos.impl.Utils.postProcess;
-import com.openexchange.chronos.Event;
+import com.openexchange.chronos.Attendee;
 import com.openexchange.chronos.exception.CalendarExceptionCodes;
 import com.openexchange.chronos.impl.performer.ResolvePerformer;
 import com.openexchange.chronos.impl.scheduling.AddProcessor;
@@ -94,16 +93,16 @@ public class SchedulingUtilitiesImpl implements SchedulingUtilities {
     }
 
     @Override
-    public CalendarResult processAdd(CalendarSession session, SchedulingSource source, IncomingSchedulingMessage message) throws OXException {
-        InternalCalendarResult result = postProcess(serviceLookup, new InternalCalendarStorageOperation<InternalCalendarResult>(session) {
+    public CalendarResult processAdd(CalendarSession session, SchedulingSource source, IncomingSchedulingMessage message, Attendee attendee) throws OXException {
+        return postProcess(serviceLookup, new InternalCalendarStorageOperation<InternalCalendarResult>(session) {
 
             @Override
             protected InternalCalendarResult execute(CalendarSession session, CalendarStorage storage) throws OXException {
-                Event event = message.getResource().getFirstEvent();
-                return new AddProcessor(storage, session, getCalendarFolder(session, storage, event.getUid(), event.getRecurrenceId(), message.getTargetUser())).process(message);
+                AddProcessor addProcessor = new AddProcessor(storage, session, getTargetFolder(session, storage, message));
+                addProcessor.process(message);
+                return new AttendeeUpdateProcessor(addProcessor, message.getMethod()).process(attendee);
             }
-        }.executeUpdate());
-        return postProcessScheduling(session, source, message, result);
+        }.executeUpdate()).getUserizedResult();
     }
 
     @Override
@@ -123,22 +122,22 @@ public class SchedulingUtilitiesImpl implements SchedulingUtilities {
 
             @Override
             protected InternalCalendarResult execute(CalendarSession session, CalendarStorage storage) throws OXException {
-                Event event = message.getResource().getFirstEvent();
-                return new ReplyProcessor(storage, session, getCalendarFolder(session, storage, event.getUid(), event.getRecurrenceId(), message.getTargetUser()), source).process(message);
+                return new ReplyProcessor(storage, session, getTargetFolder(session, storage, message), source).process(message);
             }
         }.executeUpdate()).getUserizedResult();
     }
 
     @Override
-    public CalendarResult processRequest(CalendarSession session, SchedulingSource source, IncomingSchedulingMessage message) throws OXException {
-        InternalCalendarResult result = new InternalCalendarStorageOperation<InternalCalendarResult>(session) {
+    public CalendarResult processRequest(CalendarSession session, SchedulingSource source, IncomingSchedulingMessage message, Attendee attendee) throws OXException {
+        return postProcess(serviceLookup, new InternalCalendarStorageOperation<InternalCalendarResult>(session) {
 
             @Override
             protected InternalCalendarResult execute(CalendarSession session, CalendarStorage storage) throws OXException {
-                return new RequestProcessor(session, storage, getTargetFolder(session, storage, message)).process(message.getResource());
+                RequestProcessor requestProcessor = new RequestProcessor(session, storage, getTargetFolder(session, storage, message));
+                requestProcessor.process(message.getResource());
+                return new AttendeeUpdateProcessor(requestProcessor, message.getMethod()).process(attendee);
             }
-        }.executeUpdate();
-        return postProcessScheduling(session, source, message, result);
+        }.executeUpdate()).getUserizedResult();
     }
 
     /*
@@ -155,50 +154,4 @@ public class SchedulingUtilitiesImpl implements SchedulingUtilities {
         }
         return Utils.getFolder(session, folderId);
     }
-
-    /**
-     * Post processes a scheduling action to e.g. adjust attendee status to transmitted data and returns
-     * the userized result
-     *
-     * @param session The calendar session
-     * @param source The scheduling source
-     * @param message The message
-     * @param result The result from the processed action
-     * @return Userized result
-     * @throws OXException In case post processing fails
-     */
-    private CalendarResult postProcessScheduling(CalendarSession session, SchedulingSource source, IncomingSchedulingMessage message, InternalCalendarResult result) throws OXException {
-        if (SchedulingSource.API.equals(source)) {
-            /*
-             * Post process data, e.g. set correct attendee status
-             */
-            return postProcessScheduling(session, result, SchedulingMethod.REQUEST, message.getSchedulingObject().getAction(), message.getSchedulingObject().getComment()).getUserizedResult();
-        }
-        return result.getUserizedResult();
-    }
-
-    /**
-     * Post processes a scheduling action to e.g. adjust attendee status to transmitted data
-     *
-     * @param session The calendar session
-     * @param result The result from the processed action
-     * @param method The method
-     * @param action The action to perform in the post processing
-     * @param comment The optional comment to set for the current user
-     * @return A merged result
-     * @throws OXException In case processing fails
-     */
-    private InternalCalendarResult postProcessScheduling(CalendarSession session, InternalCalendarResult result, SchedulingMethod method, String action, String comment) throws OXException {
-        /*
-         * Send messages to organizer or other attendees as usual
-         */
-        return postProcess(serviceLookup, new InternalCalendarStorageOperation<InternalCalendarResult>(session) {
-
-            @Override
-            protected InternalCalendarResult execute(CalendarSession session, CalendarStorage storage) throws OXException {
-                return new AttendeeUpdateProcessor(storage, session, result.getFolder(), method).process(result, action, comment);
-            }
-        }.executeUpdate());
-    }
-
 }

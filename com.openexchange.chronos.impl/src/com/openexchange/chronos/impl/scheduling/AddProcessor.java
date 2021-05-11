@@ -79,7 +79,7 @@ import com.openexchange.exception.OXException;
  * {@link AddProcessor} - Processes the method {@link SchedulingMethod#ADD}
  *
  * @author <a href="mailto:daniel.becker@open-xchange.com">Daniel Becker</a>
- * @since v8.0.0
+ * @since v7.10.6
  */
 public class AddProcessor extends CreatePerformer {
 
@@ -112,7 +112,7 @@ public class AddProcessor extends CreatePerformer {
      * @throws OXException In case data is invalid, outdated or permissions are missing
      */
     public InternalCalendarResult process(IncomingSchedulingMessage message) throws OXException {
-        return process(message, message.getResource().getEvents());
+        return process(message, message.getResource().getChangeExceptions());
     }
 
     /**
@@ -124,12 +124,11 @@ public class AddProcessor extends CreatePerformer {
      * @throws OXException In case data is invalid, outdated or permissions are missing
      */
     public InternalCalendarResult process(IncomingSchedulingMessage message, List<Event> changeExceptions) throws OXException {
-        if (null == changeExceptions || changeExceptions.isEmpty()) {
+        if (isNullOrEmpty(changeExceptions)) {
             return resultTracker.getResult();
         }
 
-        Event firstEvent = changeExceptions.get(0);
-        EventID eventID = Utils.resolveEventId(session, storage, firstEvent.getUid(), null, message.getTargetUser());
+        EventID eventID = Utils.resolveEventId(session, storage, changeExceptions.get(0).getUid(), null, message.getTargetUser());
         Event originalMasterEvent = loadEventData(eventID.getObjectID());
         if (false == CalendarUtils.isSeriesMaster(originalMasterEvent)) {
             /*

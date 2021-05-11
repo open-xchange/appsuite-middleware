@@ -59,7 +59,7 @@ import com.openexchange.chronos.service.EventUpdates;
  * {@link DefaultEventUpdates}
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
- * @since v8.0.0
+ * @since v7.10.6
  */
 public class DefaultEventUpdates implements EventUpdates {
 
@@ -67,6 +67,13 @@ public class DefaultEventUpdates implements EventUpdates {
     private final List<Event> removedItems;
     private final List<EventUpdate> updatedItems;
 
+    /**
+     * Initializes a new {@link DefaultEventUpdates}.
+     * 
+     * @param addedItems The added events
+     * @param removedItems The removed events
+     * @param updatedItems The update events
+     */
     public DefaultEventUpdates(List<Event> addedItems, List<Event> removedItems, List<EventUpdate> updatedItems) {
         super();
         this.addedItems = null != addedItems ? addedItems : Collections.emptyList();

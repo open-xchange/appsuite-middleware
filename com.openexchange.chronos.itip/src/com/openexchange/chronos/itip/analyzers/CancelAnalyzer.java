@@ -77,7 +77,7 @@ import com.openexchange.user.User;
  * {@link CancelAnalyzer}
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
- * @since 8.0.0
+ * @since v7.10.6
  */
 public class CancelAnalyzer extends AbstractITipAnalyzer {
 

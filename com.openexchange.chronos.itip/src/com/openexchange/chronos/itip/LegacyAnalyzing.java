@@ -54,7 +54,7 @@ package com.openexchange.chronos.itip;
  * {@link LegacyAnalyzing} - Marker interface for old iTIP scheduling mechnisms
  *
  * @author <a href="mailto:daniel.becker@open-xchange.com">Daniel Becker</a>
- * @since v8.0.0
+ * @since v7.10.6
  */
 public interface LegacyAnalyzing {
 

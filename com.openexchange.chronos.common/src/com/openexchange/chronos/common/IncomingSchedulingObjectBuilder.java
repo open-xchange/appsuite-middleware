@@ -47,38 +47,85 @@
  *
  */
 
-package com.openexchange.chronos.impl.scheduling;
+package com.openexchange.chronos.common;
 
+import com.openexchange.annotation.NonNull;
 import com.openexchange.chronos.CalendarUser;
-import com.openexchange.chronos.Event;
-import com.openexchange.chronos.Organizer;
-import com.openexchange.chronos.common.CalendarUtils;
+import com.openexchange.chronos.scheduling.IncomingSchedulingObject;
+import com.openexchange.exception.OXException;
 
 /**
- * {@link SchedulingUtils}
+ * {@link IncomingSchedulingObjectBuilder}
  *
  * @author <a href="mailto:daniel.becker@open-xchange.com">Daniel Becker</a>
  * @since v7.10.6
  */
-public class SchedulingUtils {
+public class IncomingSchedulingObjectBuilder {
 
-    private SchedulingUtils() {
-        super();
+    protected CalendarUser originator;
+
+    /**
+     * Initializes a new {@link IncomingSchedulingObjectBuilder}.
+     */
+    private IncomingSchedulingObjectBuilder() {}
+
+    /**
+     * Initializes a new {@link IncomingSchedulingMessageBuilder}.
+     *
+     * @return This instance for chaining
+     */
+    public static IncomingSchedulingObjectBuilder newBuilder() {
+        return new IncomingSchedulingObjectBuilder();
     }
 
     /**
-     * Check if originator is allowed to perform any action,
-     * either by perfect match comparing to the organizer
-     * or by comparing to the sent-by field of the organizer
+     * Set the originator
      *
-     * @param originalEvent The original event to get the organizer from
-     * @param originator The originator of a scheduling action
-     * @return <code>true</code> if the originator matches the organizer, <code>false</code> otherwise
+     * @param originator The originator to set
+     * @return This instance for chaining
      */
-    public static boolean originatorMatches(Event originalEvent, CalendarUser originator) {
-        Organizer organizer = originalEvent.getOrganizer();
-        return CalendarUtils.matches(originator, organizer) //perfect match 
-            || (null != organizer.getSentBy() && CalendarUtils.matches(originator, organizer.getSentBy()));
+    public IncomingSchedulingObjectBuilder setOriginator(CalendarUser originator) {
+        this.originator = originator;
+        return this;
+    }
+
+    /**
+     * Builds the object
+     *
+     * @return The {@link IncomingSchedulingObject}
+     */
+    public IncomingSchedulingObject build() {
+        return new IncomingSchedulingObjectImpl(this);
+    }
+}
+
+class IncomingSchedulingObjectImpl implements IncomingSchedulingObject {
+
+    private final @NonNull CalendarUser originator;
+
+    /**
+     * Initializes a new {@link IncomingSchedulingObjectImpl}.
+     * 
+     * @param builder The builder
+     */
+    public IncomingSchedulingObjectImpl(IncomingSchedulingObjectBuilder builder) {
+        super();
+        CalendarUser originator = builder.originator;
+        if (null == originator) {
+            throw new IllegalStateException();
+        }
+        this.originator = originator;
+    }
+
+    @Override
+    @NonNull
+    public CalendarUser getOriginator() throws OXException {
+        return originator;
+    }
+
+    @Override
+    public String toString() {
+        return "IncomingSchedulingMailMeta [originator=" + originator + "]";
     }
 
 }

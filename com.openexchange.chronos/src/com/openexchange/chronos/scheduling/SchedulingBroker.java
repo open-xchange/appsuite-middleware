@@ -50,6 +50,7 @@
 package com.openexchange.chronos.scheduling;
 
 import java.util.List;
+import com.openexchange.chronos.Attendee;
 import com.openexchange.chronos.service.CalendarResult;
 import com.openexchange.chronos.service.CalendarSession;
 import com.openexchange.exception.OXException;
@@ -107,6 +108,25 @@ public interface SchedulingBroker {
      * @throws OXException In case the change could not be applied, e.g. the transmitted data can't be
      *             parsed or is outdated
      */
-    CalendarResult handleIncomingScheduling(CalendarSession session, SchedulingSource source, IncomingSchedulingMessage incomingScheduling) throws OXException;
+    default CalendarResult handleIncomingScheduling(CalendarSession session, SchedulingSource source, IncomingSchedulingMessage incomingScheduling) throws OXException {
+        return handleIncomingScheduling(session, source, incomingScheduling, null);
+    }
+
+    /**
+     * Handles incoming calendar changes triggered by external attendees. Updates the calendar data
+     * based on the transmitted calendar object resources.
+     * <p>
+     * Will check for sanity and consistency of the data as well as permissions of the user applying
+     * the changes.
+     *
+     * @param session The calendar session
+     * @param source The source from which the scheduling has been triggered
+     * @param incomingScheduling The incoming change(s)
+     * @param attendee The attendee to update, can be <code>null</code> e.g. when handling a CANCEL
+     * @return A {@link CalendarResult} containing the updates
+     * @throws OXException In case the change could not be applied, e.g. the transmitted data can't be
+     *             parsed or is outdated
+     */
+    CalendarResult handleIncomingScheduling(CalendarSession session, SchedulingSource source, IncomingSchedulingMessage incomingScheduling, Attendee attendee) throws OXException;
 
 }

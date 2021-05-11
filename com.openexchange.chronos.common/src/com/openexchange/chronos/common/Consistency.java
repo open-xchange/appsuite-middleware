@@ -60,7 +60,7 @@ import com.openexchange.exception.OXException;
  * {@link Consistency}
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
- * @since v8.0.0
+ * @since v7.10.6
  */
 public class Consistency {
 
