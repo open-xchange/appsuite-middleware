@@ -118,9 +118,9 @@ import com.openexchange.chronos.provider.caching.internal.CachingCalendarAccessC
 import com.openexchange.chronos.provider.caching.internal.Services;
 import com.openexchange.chronos.provider.caching.internal.handler.utils.EmptyUidUpdates;
 import com.openexchange.chronos.provider.caching.internal.response.AccountResponseGenerator;
-import com.openexchange.chronos.provider.caching.internal.response.SearchResponseGenerator;
 import com.openexchange.chronos.provider.caching.internal.response.ChangeExceptionsResponseGenerator;
 import com.openexchange.chronos.provider.caching.internal.response.DedicatedEventsResponseGenerator;
+import com.openexchange.chronos.provider.caching.internal.response.SearchResponseGenerator;
 import com.openexchange.chronos.provider.caching.internal.response.SingleEventResponseGenerator;
 import com.openexchange.chronos.provider.extensions.BasicSearchAware;
 import com.openexchange.chronos.provider.extensions.BasicSyncAware;
@@ -1099,13 +1099,14 @@ public abstract class BasicCachingCalendarAccess implements BasicCalendarAccess,
              */
             Consistency.adjustAllDayDates(event);
             /*
-             * Adjust timezones
+             * adjust timezones of the event's start- and end-time & normalize
              */
             try {
                 Services.getService(CalendarUtilities.class).adjustTimeZones(session, session.getUserId(), event, null);
             } catch (OXException e) {
                 LOG.error("Unable to adjust timezone for event with identifier {} and uid {}.", event.getId(), event.getUid(), e);
             }
+            Consistency.normalizeRecurrenceIDs(event.getStartDate(), event);
             /*
              * map events by UID
              */
