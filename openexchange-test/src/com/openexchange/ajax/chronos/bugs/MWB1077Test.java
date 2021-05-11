@@ -159,7 +159,7 @@ public class MWB1077Test extends AbstractICalCalendarProviderTest {
         /*
          * verify event data
          */
-        assertEquals("unexpcted number of events", 17, events.size());
+        assertEquals("unexpcted number of events", 18, events.size());
         EventData changeException = null;
         for (EventData event : events) {
             if ("rec44_edit".equals(event.getSummary())) {
