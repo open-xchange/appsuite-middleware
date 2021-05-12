@@ -72,6 +72,7 @@ import com.google.api.client.http.GenericUrl;
 import com.google.api.client.http.HttpResponse;
 import com.google.api.client.http.InputStreamContent;
 import com.google.api.services.drive.Drive;
+import com.google.api.services.drive.Drive.Files.Update;
 import com.google.api.services.drive.model.Change;
 import com.google.api.services.drive.model.FileList;
 import com.openexchange.annotation.NonNull;
@@ -318,7 +319,6 @@ public class GoogleDriveFileAccess extends AbstractGoogleDriveAccess implements 
 
                 // Create patch file
                 com.google.api.services.drive.model.File patch = new com.google.api.services.drive.model.File();
-                GoogleDriveUtil.setParentFolder(patch, destId);
 
                 if (null != update) {
                     if (isFileNameChanged(update, modifiedFields, srcFile)) {
@@ -327,13 +327,16 @@ public class GoogleDriveFileAccess extends AbstractGoogleDriveAccess implements 
                     }
                 }
 
-                String fileName = getFileName(drive, destFolder, name);
+                String fileName = getFileName(drive, destId, name);
                 if (false == name.equals(fileName)) {
                     patch.setName(fileName);
                 }
 
                 // Patch the file
-                com.google.api.services.drive.model.File patchedFile = drive.files().update(id, patch).execute();
+                Update update = drive.files().update(id, patch);
+                update.setRemoveParents(GoogleDriveUtil.getParentFolders(srcFile));
+                update.setAddParents(destId);
+                com.google.api.services.drive.model.File patchedFile = update.execute();
 
                 return new IDTuple(destFolder, patchedFile.getId());
 
