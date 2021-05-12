@@ -6,7 +6,7 @@ BuildRequires: ant
 BuildRequires: open-xchange-core
 BuildRequires: java-1.8.0-openjdk-devel
 Version:       @OXVERSION@
-%define        ox_release 23
+%define        ox_release 24
 Release:       %{ox_release}_<CI_CNT>.<B_CNT>
 Group:         Applications/Productivity
 License:       GPL-2.0
@@ -84,6 +84,8 @@ fi
 %config(noreplace) %attr(640,root,open-xchange) /opt/open-xchange/etc/mailfilter.properties
 
 %changelog
+* Wed May 12 2021 Marcus Klein <marcus.klein@open-xchange.com>
+Build for patch 2021-05-17 (5993)
 * Mon Apr 26 2021 Marcus Klein <marcus.klein@open-xchange.com>
 Build for patch 2021-05-03 (5988)
 * Mon Apr 12 2021 Marcus Klein <marcus.klein@open-xchange.com>

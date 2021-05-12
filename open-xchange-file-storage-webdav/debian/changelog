@@ -1,3 +1,9 @@
+open-xchange-file-storage-webdav (7.10.4-24) stable; urgency=medium
+
+  * Build for patch 2021-05-17 (5993)
+
+ -- Kevin Ruthmann <kevin.ruthmann@open-xchange.com>  Wed, 12 May 2021 08:48:58 +0000
+
 open-xchange-file-storage-webdav (7.10.4-23) stable; urgency=medium
 
   * Build for patch 2021-05-03 (5988)

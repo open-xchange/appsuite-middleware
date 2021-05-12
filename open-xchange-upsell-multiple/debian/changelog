@@ -1,3 +1,9 @@
+open-xchange-upsell-multiple (7.10.4-24) stable; urgency=medium
+
+  * Build for patch 2021-05-17 (5993)
+
+ -- Carsten Hoeger <choeger@open-xchange.com>  Wed, 12 May 2021 08:49:54 +0000
+
 open-xchange-upsell-multiple (7.10.4-23) stable; urgency=medium
 
   * Build for patch 2021-05-03 (5988)
