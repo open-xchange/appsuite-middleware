@@ -93,6 +93,7 @@ import com.openexchange.mail.mime.MessageHeaders;
 import com.openexchange.mail.mime.datasource.MessageDataSource;
 import com.openexchange.mail.mime.utils.MimeMessageUtility;
 import com.openexchange.mail.utils.MessageUtility;
+import com.openexchange.mime.MimeTypeMap;
 import com.openexchange.server.ServiceLookup;
 
 /**
@@ -333,7 +334,7 @@ public class ExternalMimePartFactory extends AbstractMimePartFactory {
                 Attachment a = new Attachment();
                 a.setCreated(attachment.getCreated());
                 a.setFilename(attachment.getFilename());
-                a.setFormatType(attachment.getFormatType());
+                setFormatType(a, attachment.getFormatType());
                 a.setSize(attachment.getSize());
                 a.setUri("cid:" + getAttachmentUri(attachment.getManagedId(), event.getUid()));
                 a.setManagedId(0);
@@ -456,5 +457,25 @@ public class ExternalMimePartFactory extends AbstractMimePartFactory {
      */
     private String getAttachmentUri(int managedId, String uid) {
         return new StringBuilder().append(managedId).append('@').append(uid).toString();
+    }
+
+    /**
+     * Sets the format type of an attachment
+     *
+     * @param attachment The attachment to set the type for
+     * @param formatType The format. Can be <code>null</code>, then the type is looked up by its file name
+     */
+    private void setFormatType(Attachment attachment, String formatType) {
+        String type = formatType;
+        if (Strings.isEmpty(type)) {
+            MimeTypeMap mimeTypeMap = services.getOptionalService(MimeTypeMap.class);
+            if (null != mimeTypeMap) {
+                type = mimeTypeMap.getContentType(attachment.getFilename());
+            } else {
+                type = com.openexchange.mail.mime.MimeTypes.MIME_APPL_OCTET;
+            }
+            LOGGER.trace("Auto detected MIME type {} for attchment {}", type, attachment.getFilename());
+        }
+        attachment.setFormatType(type);
     }
 }

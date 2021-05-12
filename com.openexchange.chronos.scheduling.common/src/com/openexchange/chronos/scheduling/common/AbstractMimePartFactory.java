@@ -74,6 +74,8 @@ public abstract class AbstractMimePartFactory implements MimePartFactory {
 
     protected String charset = MailProperties.getInstance().getDefaultMimeCharset();
 
+    protected final ServiceLookup services;
+
     protected final HtmlService htmlService;
     protected final ScheduleChange scheduleChange;
     protected final RecipientSettings recipientSettings;
@@ -88,6 +90,7 @@ public abstract class AbstractMimePartFactory implements MimePartFactory {
      */
     public AbstractMimePartFactory(ServiceLookup serviceLookup, ScheduleChange scheduleChange, RecipientSettings recipientSettings) throws OXException {
         super();
+        this.services = serviceLookup;
         this.htmlService = serviceLookup.getServiceSafe(HtmlService.class);
         this.scheduleChange = scheduleChange;
         this.recipientSettings = recipientSettings;

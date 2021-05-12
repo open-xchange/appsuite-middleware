@@ -98,6 +98,7 @@ import org.dmfs.rfc5545.Duration;
 import org.dmfs.rfc5545.recur.RecurrenceRule;
 import com.openexchange.chronos.Alarm;
 import com.openexchange.chronos.AlarmField;
+import com.openexchange.chronos.Attachment;
 import com.openexchange.chronos.Attendee;
 import com.openexchange.chronos.AttendeeField;
 import com.openexchange.chronos.CalendarUser;
@@ -142,6 +143,7 @@ import com.openexchange.folderstorage.type.PublicType;
 import com.openexchange.groupware.tools.mappings.common.CollectionUpdate;
 import com.openexchange.groupware.tools.mappings.common.ItemUpdate;
 import com.openexchange.java.Strings;
+import com.openexchange.mime.MimeTypeMap;
 
 /**
  * {@link AbstractUpdatePerformer}
@@ -1332,4 +1334,31 @@ public abstract class AbstractUpdatePerformer extends AbstractQueryPerformer {
         storage.getAlarmTriggerStorage().deleteTriggers(originalMasterEvent.getId());
         storage.getAlarmTriggerStorage().insertTriggers(updatedMasterEvent, alarms);
     }
+
+    /**
+     * Prepares attachment prior insert in the storage
+     * <p>
+     * Will automatically detected MIME type if not set by the client
+     *
+     * @param attachments The attachments to prepare
+     * @return The prepared attachments
+     */
+    protected List<Attachment> prepareAttachments(List<Attachment> attachments) {
+        for (Attachment attachment : attachments) {
+            if (Strings.isEmpty(attachment.getFormatType())) {
+                MimeTypeMap mimeTypeMap = Services.optService(MimeTypeMap.class);
+                String type;
+                if (Strings.isEmpty(attachment.getFilename()) || null == mimeTypeMap) {
+                    LOG.debug("Unable to set correct fomat-/ MIME-type for attachment {}. Using default.", attachment.getFilename());
+                    type = com.openexchange.mail.mime.MimeTypes.MIME_APPL_OCTET;
+                } else {
+                    type = mimeTypeMap.getContentType(attachment.getFilename());
+                }
+                LOG.trace("Auto detected mime type {} for attachment {}.", type, attachment.getFilename());
+                attachment.setFormatType(type);
+            }
+        }
+        return attachments;
+    }
+
 }

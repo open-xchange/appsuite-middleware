@@ -719,7 +719,7 @@ public class UpdatePerformer extends AbstractUpdatePerformer {
         }
         if (0 < attachmentUpdates.getAddedItems().size()) {
             Check.attachmentsAreVisible(session, storage, attachmentUpdates.getAddedItems());
-            storage.getAttachmentStorage().insertAttachments(session.getSession(), folder.getId(), originalEvent.getId(), attachmentUpdates.getAddedItems());
+            storage.getAttachmentStorage().insertAttachments(session.getSession(), folder.getId(), originalEvent.getId(), prepareAttachments(attachmentUpdates.getAddedItems()));
         }
         return true;
     }

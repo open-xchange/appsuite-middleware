@@ -89,6 +89,7 @@ import com.openexchange.folderstorage.FolderService;
 import com.openexchange.group.GroupService;
 import com.openexchange.groupware.delete.DeleteListener;
 import com.openexchange.groupware.downgrade.DowngradeRegistry;
+import com.openexchange.mime.MimeTypeMap;
 import com.openexchange.objectusecount.ObjectUseCountService;
 import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.osgi.ServiceSet;
@@ -130,7 +131,7 @@ public class ChronosActivator extends HousekeepingActivator {
     protected Class<?>[] getOptionalServices() {
         return new Class<?>[] { FreeBusyService.class, ContactCollectorService.class, ObjectUseCountService.class, CalendarAvailabilityService.class,
             PrincipalUseCountService.class, CalendarEventNotificationService.class, SchedulingBroker.class, SchedulingChangeService.class, DescriptionService.class,
-            RegionalSettingsService.class, FolderSubscriptionHelper.class };
+            RegionalSettingsService.class, FolderSubscriptionHelper.class, MimeTypeMap.class };
     }
 
     @Override

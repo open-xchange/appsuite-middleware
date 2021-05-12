@@ -469,17 +469,18 @@ public abstract class AbstractITipAnalyzer implements ITipAnalyzer {
                 if (0 < item1.getManagedId() && 0 < item2.getManagedId()) {
                     return item1.getManagedId() == item2.getManagedId();
                 }
-                if (null != item1.getUri() && null != item2.getUri()) {
+                if (nonNull(item1.getUri(), item2.getUri())) {
                     return item1.getUri().equals(item2.getUri());
                 }
-                if (null != item1.getChecksum() && null != item2.getChecksum()) {
+                if (nonNull(item1.getChecksum(), item2.getChecksum())) {
                     return item1.getChecksum().equals(item2.getChecksum());
                 }
                 /*
                  * match via metadata
                  */
-                if (Objects.equals(item1.getFilename(), item2.getFilename()) && item1.getSize() == item2.getSize() && 
-                    Objects.equals(item1.getFormatType(), item2.getFormatType())) {
+                if (nonNullAwareEquals(item1.getFilename(), item2.getFilename())//
+                    && item1.getSize() == item2.getSize()//
+                    && nonNullAwareEquals(item1.getFormatType(), item2.getFormatType())) {
                     return true;
                 }
                 return false;
@@ -531,5 +532,22 @@ public abstract class AbstractITipAnalyzer implements ITipAnalyzer {
             }
         }
         return false;
+    }
+
+    protected static boolean nonNull(Object... o) {
+        if (null == o) {
+            return false;
+        }
+        for (int i = 0; i < o.length; i++) {
+            if (null == o[i]) {
+                return false;
+            }
+
+        }
+        return true;
+    }
+
+    protected static boolean nonNullAwareEquals(Object o1, Object o2) {
+        return nonNull(o1, o2) && Objects.equals(o1, o2);
     }
 }

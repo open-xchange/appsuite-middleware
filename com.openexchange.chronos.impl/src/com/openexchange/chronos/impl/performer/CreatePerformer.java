@@ -147,7 +147,7 @@ public class CreatePerformer extends AbstractUpdatePerformer {
             storage.getAttendeeStorage().insertAttendees(newEvent.getId(), newEvent.getAttendees());
         }
         if (false == isNullOrEmpty(newEvent.getAttachments())) {
-            storage.getAttachmentStorage().insertAttachments(session.getSession(), folder.getId(), newEvent.getId(), newEvent.getAttachments());
+            storage.getAttachmentStorage().insertAttachments(session.getSession(), folder.getId(), newEvent.getId(), prepareAttachments(newEvent.getAttachments()));
         }
         if (false == isNullOrEmpty(newEvent.getConferences())) {
             storage.getConferenceStorage().insertConferences(newEvent.getId(), newEvent.getConferences());
