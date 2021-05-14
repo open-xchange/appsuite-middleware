@@ -125,11 +125,13 @@ public class MWB1024Test extends CardDAVTest {
             for (int i = 0; i < numCards; i++) {
                 String email = i + '_' + randomUID() + "@example.com";
                 emails.add(email);
+                String uid = randomUID();
                 String vCard = // @formatter:off
                     "BEGIN:VCARD" + "\r\n" +
                     "VERSION:3.0" + "\r\n" +
                     "FN:test1 " + randomUID() + "\r\n" +
                     "EMAIL;type=INTERNET;type=WORK;type=pref:" + email + "\r\n" +
+                    "UID:" + uid + "\r\n" +
                     "ORG:Metzgerei Fischer" + "\r\n" +
                     "TITLE:Angestellter" + "\r\n" +
                     "NOTE;CHARSET=Windows-1252:Wollte mich am Montag zur\u00fcckrufen." + "\r\n" +
