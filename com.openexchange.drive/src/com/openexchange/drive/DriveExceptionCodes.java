@@ -235,6 +235,9 @@ public enum DriveExceptionCodes implements DisplayableOXExceptionCode {
     /** Directory %1$s not accessible. */
     NOT_ACCESSIBLE_DIRECTORY("Directory %1$s not accessible.", NOT_ACCESSIBLE_DIRECTORY_MSG, Category.CATEGORY_USER_INPUT, 44),
 
+    /** No checksum for directory \"%1$s\" available */
+    NO_CHECKSUM_FOR_DIRECTORY("No checksum for directory \"%1$s\" available", OXExceptionStrings.MESSAGE, Category.CATEGORY_WARNING, 45),
+
     ;
 
     private static final String PREFIX = "DRV";

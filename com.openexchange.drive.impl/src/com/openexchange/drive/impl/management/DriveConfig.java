@@ -570,6 +570,17 @@ public class DriveConfig {
     }
 
     /**
+     * Gets a value indicating whether directory checksums should be calculated in a lazy way or not. If enabled, server directory
+     * checksums will be retrieved in chunks according to the configured "maxDirectoryActions", which may reduce the processing time for
+     * the initial sync of large directory subtrees.
+     *
+     * @return <code>true</code> if lazy directory calculation is enabled, <code>false</code>, otherwise
+     */
+    public boolean isLazyDirectoryChecksumCalculation() {
+        return getConfigService().getBooleanProperty(userId, contextId, DriveProperty.LAZY_DIRECTORY_CHECKSUM_CALCULATION);
+    }
+
+    /**
      * Parse Drive client version
      *
      * @param value The version to parse

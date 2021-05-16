@@ -64,8 +64,10 @@ import com.openexchange.drive.checksum.rdb.RdbChecksumStore;
 import com.openexchange.drive.impl.DriveUtils;
 import com.openexchange.drive.impl.checksum.ChecksumProvider;
 import com.openexchange.drive.impl.checksum.ChecksumStore;
+import com.openexchange.drive.impl.checksum.ChecksumSupplier;
 import com.openexchange.drive.impl.checksum.DirectoryChecksum;
 import com.openexchange.drive.impl.checksum.FileChecksum;
+import com.openexchange.drive.impl.comparison.LazyServerDirectoryVersion;
 import com.openexchange.drive.impl.comparison.ServerDirectoryVersion;
 import com.openexchange.drive.impl.comparison.ServerFileVersion;
 import com.openexchange.drive.impl.management.DriveConfig;
@@ -394,16 +396,30 @@ public class SyncSession {
             return Collections.emptyList();
         }
         StringBuilder stringBuilder = isTraceEnabled() ? new StringBuilder("Server directories:\n") : null;
-        List<DirectoryChecksum> checksums = ChecksumProvider.getChecksums(this, folderIDs);
         List<ServerDirectoryVersion> serverDirectories = new ArrayList<ServerDirectoryVersion>(folderIDs.size());
-        for (int i = 0; i < folderIDs.size(); i++) {
-            ServerDirectoryVersion directoryVersion = new ServerDirectoryVersion(
-                getStorage().getPath(folderIDs.get(i)), checksums.get(i));
-            serverDirectories.add(directoryVersion);
-            if (null != stringBuilder) {
-                stringBuilder.append(" [").append(directoryVersion.getDirectoryChecksum().getFolderID()).append("] ")
-                    .append(directoryVersion.getPath()).append(" | ").append(directoryVersion.getChecksum())
-                    .append(" (").append(directoryVersion.getDirectoryChecksum().getSequenceNumber()).append(")\n");
+        int lazyDirectoryChecksumChunkSize = 2 + getConfig().getMaxDirectoryActions();
+        if (lazyDirectoryChecksumChunkSize < folderIDs.size() && getConfig().isLazyDirectoryChecksumCalculation()) {
+            ChecksumSupplier checksumSupplier = new ChecksumSupplier(this, folderIDs, lazyDirectoryChecksumChunkSize);
+            for (String folderID : folderIDs) {
+                LazyServerDirectoryVersion directoryVersion = new LazyServerDirectoryVersion(getStorage().getPath(folderID), folderID, checksumSupplier);
+                serverDirectories.add(directoryVersion);
+                if (null != stringBuilder) {
+                    DirectoryChecksum checksum = directoryVersion.optDirectoryChecksum();
+                    stringBuilder.append(" [").append(folderID).append("] ")
+                        .append(directoryVersion.getPath()).append(" | ").append(null != checksum ? checksum.getChecksum() : "<pending>")
+                        .append(" (").append(null != checksum ? checksum.getSequenceNumber() : 0L).append(")\n");
+                }
+            }
+        } else {
+            List<DirectoryChecksum> checksums = ChecksumProvider.getChecksums(this, folderIDs);
+            for (int i = 0; i < folderIDs.size(); i++) {
+                ServerDirectoryVersion directoryVersion = new ServerDirectoryVersion(getStorage().getPath(folderIDs.get(i)), checksums.get(i));
+                serverDirectories.add(directoryVersion);
+                if (null != stringBuilder) {
+                    stringBuilder.append(" [").append(directoryVersion.getDirectoryChecksum().getFolderID()).append("] ")
+                        .append(directoryVersion.getPath()).append(" | ").append(directoryVersion.getChecksum())
+                        .append(" (").append(directoryVersion.getDirectoryChecksum().getSequenceNumber()).append(")\n");
+                }
             }
         }
         if (null != stringBuilder) {

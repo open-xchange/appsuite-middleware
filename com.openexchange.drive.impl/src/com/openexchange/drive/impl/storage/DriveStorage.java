@@ -67,6 +67,7 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
+import java.util.TreeMap;
 import com.openexchange.drive.DriveExceptionCodes;
 import com.openexchange.drive.FolderStats;
 import com.openexchange.drive.RestoreContent;
@@ -999,13 +1000,15 @@ public class DriveStorage {
     /**
      * Gets all folders in the storage recursively. The "temp" folder, as well as the trash folder including all subfolders are ignored
      * implicitly.
+     * <p/>
+     * Folders will be returned in a map, sorted by their associated <i>path</i> ascending, case-insensitive.
      *
      * @param limit The maximum number of folders to add, or <code>-1</code> for no limitations
      * @param maxDepth The maximum subtree depth folders to add, or <code>-1</code> for no limitations
      * @return The folders, each one mapped to its corresponding relative path
      */
     public Map<String, FileStorageFolder> getFolders(int limit, int maxDepth) throws OXException {
-        Map<String, FileStorageFolder> folders = new HashMap<String, FileStorageFolder>();
+        Map<String, FileStorageFolder> folders = new TreeMap<String, FileStorageFolder>(String.CASE_INSENSITIVE_ORDER);
         FileStorageFolder rootFolder = getRootFolder();
         folders.put(ROOT_PATH, rootFolder);
         if (0 != maxDepth) {

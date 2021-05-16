@@ -505,5 +505,16 @@ properties:
       reloadable: true
       configcascadeAware: false
       file: drive.properties
+    - key: com.openexchange.drive.lazyDirectoryChecksumCalculation
+      description: |
+        Configures whether directory checksums should be calculated in a lazy way or not. If enabled, server directory checksums will be 
+        retrieved in chunks according to the configured "maxDirectoryActions", which may reduce the processing time for the initial sync of 
+        large directory subtrees.
+      defaultValue: true
+      version: 7.10.6
+      reloadable: true
+      configcascadeAware: true
+      file: drive.properties
+      related: ["com.openexchange.drive.maxDirectoryActions"]
       packageName: open-xchange-drive
       tags: ["Drive"]
