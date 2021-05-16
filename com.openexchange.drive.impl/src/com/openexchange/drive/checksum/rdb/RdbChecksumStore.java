@@ -64,6 +64,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+import java.util.stream.Collectors;
 import com.openexchange.database.DatabaseService;
 import com.openexchange.database.Databases;
 import com.openexchange.drive.DriveExceptionCodes;
@@ -162,18 +163,18 @@ public class RdbChecksumStore implements ChecksumStore {
 
     @Override
     public List<FileChecksum> updateFileChecksums(List<FileChecksum> fileChecksums) throws OXException {
-        Connection connection = databaseService.getWritable(contextID);
-        try {
-            for (FileChecksum fileChecksum : fileChecksums) {
-                if (null == fileChecksum.getUuid()) {
-                    throw new IllegalArgumentException("Updating file checksums requires an existing UUID");
+        List<FileChecksum> storedChecksums = fileChecksums.stream().filter(f -> null != f.getUuid()).collect(Collectors.toList());
+        if (false == storedChecksums.isEmpty()) {
+            Connection connection = databaseService.getWritable(contextID);
+            try {
+                for (FileChecksum fileChecksum : storedChecksums) {
+                    updateFileChecksum(connection, contextID, fileChecksum);
                 }
-                updateFileChecksum(connection, contextID, fileChecksum);
+            } catch (SQLException e) {
+                throw SQL.wrap(e);
+            } finally {
+                databaseService.backWritable(contextID, connection);
             }
-        } catch (SQLException e) {
-            throw SQL.wrap(e);
-        } finally {
-            databaseService.backWritable(contextID, connection);
         }
         return fileChecksums;
     }
@@ -197,21 +198,21 @@ public class RdbChecksumStore implements ChecksumStore {
 
     @Override
     public int removeFileChecksums(List<FileChecksum> fileChecksums) throws OXException {
+        List<FileChecksum> storedChecksums = fileChecksums.stream().filter(f -> null != f.getUuid()).collect(Collectors.toList());
+        if (storedChecksums.isEmpty()) {
+            return 0;
+        }
         Connection connection = databaseService.getWritable(contextID);
         try {
             int deleted = 0;
-            for (int i = 0; i < fileChecksums.size(); i += DELETE_CHUNK_SIZE) {
+            for (int i = 0; i < storedChecksums.size(); i += DELETE_CHUNK_SIZE) {
                 /*
                  * prepare chunk
                  */
-                int length = Math.min(fileChecksums.size(), i + DELETE_CHUNK_SIZE) - i;
+                int length = Math.min(storedChecksums.size(), i + DELETE_CHUNK_SIZE) - i;
                 String[] uuids = new String[length];
                 for (int j = 0; j < length; j++) {
-                    String uuid = fileChecksums.get(i + j).getUuid();
-                    if (null == uuid) {
-                        throw new IllegalArgumentException("Removing file checksums requires an existing UUID");
-                    }
-                    uuids[j] = uuid;
+                    uuids[j] = storedChecksums.get(i + j).getUuid();
                 }
                 /*
                  * delete chunk
@@ -248,7 +249,7 @@ public class RdbChecksumStore implements ChecksumStore {
     }
 
     /**
-     * 
+     *
      * Removes all file checksums matching one of the supplied folder IDs.
      *
      * @param connection The database connection
@@ -550,7 +551,7 @@ public class RdbChecksumStore implements ChecksumStore {
     }
 
     /**
-     * 
+     *
      * Gets the directory checksums.
      *
      * @param connection The database connection
@@ -589,7 +590,7 @@ public class RdbChecksumStore implements ChecksumStore {
     }
 
     /**
-     * 
+     *
      * Removes the directory checksums.
      *
      * @param connection The database connection

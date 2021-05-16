@@ -454,8 +454,11 @@ public class DriveServiceImpl implements DriveService {
             /*
              * store checksum, invalidate parent directory checksum
              */
-            FileChecksum fileChecksum = syncSession.getChecksumStore().insertFileChecksum(new FileChecksum(
-                DriveUtils.getFileID(createdFile), createdFile.getVersion(), createdFile.getSequenceNumber(), newVersion.getChecksum()));
+            FileChecksum fileChecksum = new FileChecksum(
+                DriveUtils.getFileID(createdFile), createdFile.getVersion(), createdFile.getSequenceNumber(), newVersion.getChecksum());
+            if (Strings.isEmpty(createdFile.getFileMD5Sum())) {
+                fileChecksum = syncSession.getChecksumStore().insertFileChecksum(fileChecksum);
+            }
             syncSession.getChecksumStore().removeDirectoryChecksum(new FolderID(createdFile.getFolderId()));
             /*
              * check if created file still equals uploaded one

@@ -170,6 +170,15 @@ public class DriveMetadata extends DefaultFile {
         return md5sum;
     }
 
+    /**
+     * Optionally gets the pre-calculated md5sum of this .drive-meta file's binary contents.
+     *
+     * @return The md5 sum, or <code>null</code> if not yet available
+     */
+    public String optFileMD5Sum() {
+        return md5sum;
+    }
+
     @Override
     public long getFileSize() {
         if (null == fileSize) {

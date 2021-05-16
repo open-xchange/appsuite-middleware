@@ -248,9 +248,9 @@ public class FileActionExecutor extends BatchActionExecutor<FileVersion> {
             metadata.setVersionComment(session.getStorage().getVersionComment());
             InputStream data = new UnsynchronizedByteArrayInputStream(new byte[0]);
             File createdFile = session.getStorage().createFile(path, action.getNewVersion().getName(), metadata, data);
-            FileChecksum insertedFileChecksum = session.getChecksumStore().insertFileChecksum(new FileChecksum(
-                DriveUtils.getFileID(createdFile), createdFile.getVersion(), createdFile.getSequenceNumber(), DriveConstants.EMPTY_MD5));
-            action.setResultingVersion(new ServerFileVersion(createdFile, insertedFileChecksum));
+            FileChecksum createdFileChecksum = new FileChecksum(
+                DriveUtils.getFileID(createdFile), createdFile.getVersion(), createdFile.getSequenceNumber(), DriveConstants.EMPTY_MD5);
+            action.setResultingVersion(new ServerFileVersion(createdFile, createdFileChecksum));
             return;
         }
         /*
