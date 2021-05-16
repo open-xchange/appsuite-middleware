@@ -49,6 +49,7 @@
 
 package com.openexchange.drive.impl.management;
 
+import static com.openexchange.java.Autoboxing.I;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
@@ -578,6 +579,23 @@ public class DriveConfig {
      */
     public boolean isLazyDirectoryChecksumCalculation() {
         return getConfigService().getBooleanProperty(userId, contextId, DriveProperty.LAZY_DIRECTORY_CHECKSUM_CALCULATION);
+    }
+
+    /**
+     * Gets the processing time (in seconds) after a running syncFiles- or syncFolders-operation is cancelled. This can be helpful
+     * during initial synchronizations where no previously calculated checksums are available, and a long running request would otherwise be
+     * interrupted by a proxy timeout. The value can be defined using units of measurement: "m" (=minutes), "s" (=seconds) and "m" (=minutes).
+     *
+     * @return The maximum sync processing time (in milliseconds)
+     */
+    public long getMaxSyncProcessingTime() {
+        String value = getConfigService().getProperty(userId, contextId, DriveProperty.MAX_SYNC_PROCESSING_TIME);
+        try {
+            return TimeSpanParser.parseTimespanToPrimitive(value);
+        } catch (IllegalArgumentException e) {
+            LoggerHolder.LOG.warn("{} configuration error for user {} in context {}", DriveProperty.MAX_SYNC_PROCESSING_TIME.getFQPropertyName(), I(userId), I(contextId), e);
+            return TimeSpanParser.parseTimespanToPrimitive(DriveProperty.MAX_SYNC_PROCESSING_TIME.getDefaultValue(String.class));
+        }
     }
 
     /**

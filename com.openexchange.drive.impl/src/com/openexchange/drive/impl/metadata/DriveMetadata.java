@@ -261,7 +261,7 @@ public class DriveMetadata extends DefaultFile {
             try {
                 return new JsonDirectoryMetadata(session, folder).build();
             } catch (OXException e) {
-                if (retryCount < DriveConstants.MAX_RETRIES) {
+                if (false == DriveExceptionCodes.SERVER_BUSY.equals(e) && retryCount < DriveConstants.MAX_RETRIES) {
                     retryCount++;
                     int delay = DriveConstants.RETRY_BASEDELAY * retryCount;
                     session.trace("Got exception during generation of .drive-meta file (" + e.getMessage() + "), trying again in " +

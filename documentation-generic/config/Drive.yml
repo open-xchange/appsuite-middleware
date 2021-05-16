@@ -518,3 +518,16 @@ properties:
       related: ["com.openexchange.drive.maxDirectoryActions"]
       packageName: open-xchange-drive
       tags: ["Drive"]
+    - key: com.openexchange.drive.maxSyncProcessingTime
+      description: |
+        Configures the processing time (in seconds) after a running syncFiles- or syncFolders-operation is cancelled. This can be helpful 
+        during initial synchronizations where no previously calculated checksums are available, and a long running request would otherwise be
+        interrupted by a proxy timeout. The value can be defined using units of measurement: "m" (=minutes), "s" (=seconds) and "ms" 
+        (=milliseconds).
+      defaultValue: 90s
+      version: 7.10.6
+      reloadable: true
+      configcascadeAware: true
+      file: drive.properties
+      packageName: open-xchange-drive
+      tags: ["Drive", "Limit"]

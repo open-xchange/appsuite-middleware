@@ -205,12 +205,14 @@ public class DriveServiceImpl implements DriveService {
         DriveVersionValidator.validateDirectoryVersions(originalVersions);
         DriveVersionValidator.validateDirectoryVersions(clientVersions);
         List<ServerDirectoryVersion> serverVersions;
+        long maxProcessingTime = driveConfig.getMaxSyncProcessingTime();
         int retryCount = 0;
         while (true) {
             /*
              * init sync session & check root folder validity
              */
-            final SyncSession driveSession = new SyncSession(session);
+            long remainingProcessingTime = 0 < maxProcessingTime ? Math.max(1L, start + maxProcessingTime - System.currentTimeMillis()) : -1L;
+            final SyncSession driveSession = new SyncSession(session, remainingProcessingTime);
             FileStorageFolder rootFolder;
             try {
                 rootFolder = driveSession.getStorage().getFolder(DriveConstants.ROOT_PATH);
@@ -314,12 +316,14 @@ public class DriveServiceImpl implements DriveService {
         if (false == DriveUtils.isSynchronizable(session.getRootFolderID(), driveConfig)) {
             return getErrorResult(session, path, DriveExceptionCodes.NOT_SYNCHRONIZABLE_DIRECTORY.create(session.getRootFolderID()), true);
         }
+        long maxProcessingTime = driveConfig.getMaxSyncProcessingTime();
         int retryCount = 0;
         while (true) {
             /*
              * init sync session & check root folder validity
              */
-            final SyncSession driveSession = new SyncSession(session);
+            long remainingProcessingTime = 0 < maxProcessingTime ? Math.max(1L, start + maxProcessingTime - System.currentTimeMillis()) : -1L;
+            final SyncSession driveSession = new SyncSession(session, remainingProcessingTime);
             FileStorageFolder rootFolder;
             try {
                 rootFolder = driveSession.getStorage().getFolder(DriveConstants.ROOT_PATH);
@@ -674,6 +678,9 @@ public class DriveServiceImpl implements DriveService {
      * @return <code>true</code> if the operation may be tried again, <code>false</code>, otherwise
      */
     private static boolean tryAgain(SyncSession session, OXException e, int retryCount, String message) {
+        if (DriveExceptionCodes.SERVER_BUSY.equals(e)) {
+            return false;
+        }
         if (0 == retryCount || (mayTryAgain(e) && retryCount <= DriveConstants.MAX_RETRIES)) {
             int delay = DriveConstants.RETRY_BASEDELAY * retryCount + DriveConstants.RANDOM.nextInt(1000);
             session.trace(message + " (" + e.getMessage() + "), trying again in " + delay + "ms" +

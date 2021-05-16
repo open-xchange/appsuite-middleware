@@ -255,18 +255,30 @@ public class ChecksumProvider {
                     newChecksums.add(directoryChecksum);
                 }
                 checksums.add(directoryChecksum);
+                /*
+                 * flush so-far calculated checksums to storage
+                 */
+                if (100 < newChecksums.size() + updatedChecksums.size()) {
+                    storeCalculatedChecksums(session, newChecksums, updatedChecksums);
+                    newChecksums.clear();
+                    updatedChecksums.clear();
+                }
             }
-            if (0 < updatedChecksums.size()) {
-                session.getChecksumStore().updateDirectoryChecksums(updatedChecksums);
-            }
-            if (0 < newChecksums.size()) {
-                session.getChecksumStore().insertDirectoryChecksums(newChecksums);
-            }
+            storeCalculatedChecksums(session, newChecksums, updatedChecksums);
         }
         if (null != trace) {
             session.trace(trace);
         }
         return checksums;
+    }
+
+    private static void storeCalculatedChecksums(SyncSession session, List<DirectoryChecksum> newChecksums, List<DirectoryChecksum> updatedChecksums) throws OXException {
+        if (0 < updatedChecksums.size()) {
+            session.getChecksumStore().updateDirectoryChecksums(updatedChecksums);
+        }
+        if (0 < newChecksums.size()) {
+            session.getChecksumStore().insertDirectoryChecksums(newChecksums);
+        }
     }
 
     /**
