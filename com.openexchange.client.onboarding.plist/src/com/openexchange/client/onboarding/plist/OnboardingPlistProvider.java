@@ -66,11 +66,6 @@ import com.openexchange.serverconfig.ServerConfigService;
  */
 public interface OnboardingPlistProvider extends OnboardingProvider {
 
-    public static final String PROFILE_NAME_EAS = "Exchange ActiveSync";
-    public static final String PROFILE_NAME_MAIL = "E-Mail";
-    public static final String PROFILE_NAME_CARDDAV = "CardDAV";
-    public static final String PROFILE_NAME_CALDAV = "CalDAV";
-
     /**
      * Retrieves the PLIST dictionary for the given user and scenario.
      *
@@ -89,23 +84,26 @@ public interface OnboardingPlistProvider extends OnboardingProvider {
      *
      * @param name The profile name, will always be displayed
      * @param serverConfigService The optional server configuration service, if not <code>null</code> the product name will be added to resulting display name
-     * @param hostname The optional hostname, if not <code>null</code> the product name will be added to resulting display name
+     * @param hostName The optional host name, if not <code>null</code> the product name will be added to resulting display name
      * @param userId The user id
      * @param contextId The context id
      * @return The display name containing optional product name and profile name
      * @throws OXException If retrieving product name fails
      */
-    default String getPListPayloadName(String name, ServerConfigService serverConfigService, String hostname, int userId, int contextId) throws OXException {
-        StringBuilder sb = new StringBuilder();
-        if (null != serverConfigService) {
-            ServerConfig serverConfig = serverConfigService.getServerConfig(hostname, userId, contextId);
-            String productName = serverConfig.getProductName();
-            if (Strings.isNotEmpty(productName)) {
-                sb.append(productName).append(" ");
-            }
+    default String getPListPayloadName(String name, ServerConfigService serverConfigService, String hostName, int userId, int contextId) throws OXException {
+        if (null == serverConfigService) {
+            // No server configuration service. Return name as-is
+            return name;
         }
-        sb.append(name);
-        return sb.toString();
+
+        ServerConfig serverConfig = serverConfigService.getServerConfig(hostName, userId, contextId);
+        String productName = serverConfig.getProductName();
+        if (Strings.isEmpty(productName)) {
+            // No product name available from server configuration service. Return name as-is
+            return name;
+        }
+
+        return new StringBuilder(productName).append(' ').append(name).toString();
     }
 
 }
