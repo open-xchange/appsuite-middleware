@@ -82,7 +82,6 @@ import com.openexchange.java.Strings;
 import com.openexchange.osgi.ServiceListing;
 import com.openexchange.plist.PListDict;
 import com.openexchange.server.ServiceLookup;
-import com.openexchange.serverconfig.ServerConfig;
 import com.openexchange.serverconfig.ServerConfigService;
 import com.openexchange.session.Session;
 
@@ -228,14 +227,7 @@ public class EASOnboardingProvider implements OnboardingPlistProvider {
     @Override
     public PListDict getPlist(PListDict optPrevPListDict, Scenario scenario, String hostName, int userId, int contextId) throws OXException {
 
-        ServerConfigService serverConfigService = services.getOptionalService(ServerConfigService.class);
-        String scenarioProductName = null;
-        if (null != serverConfigService) {
-            ServerConfig config = serverConfigService.getServerConfig(hostName, userId, contextId);
-            scenarioProductName = config.getProductName();
-        } else {
-            scenarioProductName = scenario.getDisplayName(userId, contextId);
-        }
+        String scenarioDisplayName = getPListPayloadName(OnboardingPlistProvider.PROFILE_NAME_EAS, services.getOptionalService(ServerConfigService.class), hostName, userId, contextId);
 
         // Get the PListDict to contribute to
         PListDict pListDict;
@@ -245,7 +237,7 @@ public class EASOnboardingProvider implements OnboardingPlistProvider {
             pListDict.setPayloadType("Configuration");
             pListDict.setPayloadUUID(OnboardingUtility.craftScenarioUUIDFrom(scenario.getId(), userId, contextId).toString());
             pListDict.setPayloadVersion(1);
-            pListDict.setPayloadDisplayName(scenarioProductName);
+            pListDict.setPayloadDisplayName(scenarioDisplayName);
         } else {
             pListDict = optPrevPListDict;
         }
@@ -255,7 +247,6 @@ public class EASOnboardingProvider implements OnboardingPlistProvider {
         payloadContent.setPayloadType("com.apple.eas.account");
         payloadContent.setPayloadUUID(OnboardingUtility.craftProviderUUIDFrom(identifier, userId, contextId).toString());
         payloadContent.setPayloadIdentifier("com.open-xchange.eas");
-        payloadContent.setPayloadDisplayName(scenarioProductName + " Exchange ActiveSync");
         String login;
         {
             Boolean customSource = OnboardingUtility.getBoolFromProperty("com.openexchange.client.onboarding.eas.login.customsource", Boolean.FALSE, userId, contextId);

@@ -52,7 +52,10 @@ package com.openexchange.client.onboarding.plist;
 import com.openexchange.client.onboarding.OnboardingProvider;
 import com.openexchange.client.onboarding.Scenario;
 import com.openexchange.exception.OXException;
+import com.openexchange.java.Strings;
 import com.openexchange.plist.PListDict;
+import com.openexchange.serverconfig.ServerConfig;
+import com.openexchange.serverconfig.ServerConfigService;
 
 
 /**
@@ -62,6 +65,11 @@ import com.openexchange.plist.PListDict;
  * @since v7.8.1
  */
 public interface OnboardingPlistProvider extends OnboardingProvider {
+
+    public static final String PROFILE_NAME_EAS = "Exchange ActiveSync";
+    public static final String PROFILE_NAME_MAIL = "E-Mail";
+    public static final String PROFILE_NAME_CARDDAV = "CardDAV";
+    public static final String PROFILE_NAME_CALDAV = "CalDAV";
 
     /**
      * Retrieves the PLIST dictionary for the given user and scenario.
@@ -75,5 +83,29 @@ public interface OnboardingPlistProvider extends OnboardingProvider {
      * @throws OXException If returning PLIST dictionary fails
      */
     PListDict getPlist(PListDict optPrevPListDict, Scenario scenario, String hostName, int userId, int contextId) throws OXException;
+
+    /**
+     * Gets the display name for this scenario. This is the identifier that is displayed in iOS' profile overview, e.g. 'Some provider - CalDAV'
+     *
+     * @param name The profile name, will always be displayed
+     * @param serverConfigService The optional server configuration service, if not <code>null</code> the product name will be added to resulting display name
+     * @param hostname The optional hostname, if not <code>null</code> the product name will be added to resulting display name
+     * @param userId The user id
+     * @param contextId The context id
+     * @return The display name containing optional product name and profile name
+     * @throws OXException If retrieving product name fails
+     */
+    default String getPListPayloadName(String name, ServerConfigService serverConfigService, String hostname, int userId, int contextId) throws OXException {
+        StringBuilder sb = new StringBuilder();
+        if (null != serverConfigService) {
+            ServerConfig serverConfig = serverConfigService.getServerConfig(hostname, userId, contextId);
+            String productName = serverConfig.getProductName();
+            if (Strings.isNotEmpty(productName)) {
+                sb.append(productName).append(" ");
+            }
+        }
+        sb.append(name);
+        return sb.toString();
+    }
 
 }
