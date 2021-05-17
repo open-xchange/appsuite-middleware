@@ -71,6 +71,7 @@ import com.openexchange.client.onboarding.carddav.custom.CustomLoginSource;
 import com.openexchange.client.onboarding.net.HostAndPort;
 import com.openexchange.client.onboarding.net.NetUtility;
 import com.openexchange.client.onboarding.plist.OnboardingPlistProvider;
+import com.openexchange.client.onboarding.plist.PlistProviderNames;
 import com.openexchange.client.onboarding.plist.PlistResult;
 import com.openexchange.config.cascade.ComposedConfigProperty;
 import com.openexchange.config.cascade.ConfigView;
@@ -78,6 +79,7 @@ import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.notify.hostname.HostData;
 import com.openexchange.groupware.userconfiguration.Permission;
+import com.openexchange.i18n.tools.StringHelper;
 import com.openexchange.java.Strings;
 import com.openexchange.osgi.ServiceListing;
 import com.openexchange.plist.PListDict;
@@ -226,8 +228,8 @@ public class CardDAVOnboardingProvider implements OnboardingPlistProvider {
 
     @Override
     public PListDict getPlist(PListDict optPrevPListDict, Scenario scenario, String hostName, int userId, int contextId) throws OXException {
-
-        String scenarioDisplayName = getPListPayloadName(OnboardingPlistProvider.PROFILE_NAME_CARDDAV, services.getOptionalService(ServerConfigService.class), hostName, userId, contextId);
+        String defaultName = StringHelper.valueOf(OnboardingUtility.getLocaleFor(userId, contextId)).getString(PlistProviderNames.PROFILE_NAME_CARDDAV);
+        String scenarioDisplayName = getPListPayloadName(defaultName, services.getOptionalService(ServerConfigService.class), hostName, userId, contextId);
 
         // Get the PListDict to contribute to
         PListDict pListDict;

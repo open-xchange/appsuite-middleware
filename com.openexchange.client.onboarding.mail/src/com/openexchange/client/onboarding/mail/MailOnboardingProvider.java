@@ -70,6 +70,7 @@ import com.openexchange.client.onboarding.ResultReply;
 import com.openexchange.client.onboarding.Scenario;
 import com.openexchange.client.onboarding.mail.custom.CustomLoginSource;
 import com.openexchange.client.onboarding.plist.OnboardingPlistProvider;
+import com.openexchange.client.onboarding.plist.PlistProviderNames;
 import com.openexchange.client.onboarding.plist.PlistResult;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.exception.OXException;
@@ -504,7 +505,8 @@ public class MailOnboardingProvider implements OnboardingPlistProvider {
     public PListDict getPlist(PListDict optPrevPListDict, Scenario scenario, String hostName, int userId, int contextId) throws OXException {
         Configurations configurations = getEffectiveConfigurations(userId, contextId);
 
-        String scenarioDisplayName = getPListPayloadName(OnboardingPlistProvider.PROFILE_NAME_MAIL, services.getOptionalService(ServerConfigService.class), hostName, userId, contextId);
+        String defaultName = StringHelper.valueOf(OnboardingUtility.getLocaleFor(userId, contextId)).getString(PlistProviderNames.PROFILE_NAME_MAIL);
+        String scenarioDisplayName = getPListPayloadName(defaultName, services.getOptionalService(ServerConfigService.class), hostName, userId, contextId);
 
         // Get the PListDict to contribute to
         PListDict pListDict;
