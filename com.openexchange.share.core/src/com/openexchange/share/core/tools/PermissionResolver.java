@@ -288,14 +288,28 @@ public class PermissionResolver {
         Integer key = I(userID);
         Contact userContact = knownUserContacts.get(key);
         if (null == userContact && 0 < userID) {
-            try {
-                userContact = services.getService(ContactService.class).getUser(session, userID, CONTACT_FIELDS);
-                knownUserContacts.put(key, userContact);
-            } catch (OXException e) {
-                if (ContactExceptionCodes.CONTACT_NOT_FOUND.equals(e)) {
-                    LOGGER.debug("Error getting user contact {}", key, e);
-                } else {
-                    LOGGER.error("Error getting user contact {}", key, e);
+            User user = getUser(userID);
+            if (null != user && user.isGuest()) {
+                try {
+                    userContact = services.getService(ContactUserStorage.class).getGuestContact(session.getContextId(), userID, CONTACT_FIELDS);
+                    knownUserContacts.put(key, userContact);
+                } catch (OXException e) {
+                    if (ContactExceptionCodes.CONTACT_NOT_FOUND.equals(e)) {
+                        LOGGER.debug("Error getting guest user contact {}", key, e);
+                    } else {
+                        LOGGER.error("Error getting guest user contact {}", key, e);
+                    }
+                }
+            } else {
+                try {
+                    userContact = services.getService(ContactService.class).getUser(session, userID, CONTACT_FIELDS);
+                    knownUserContacts.put(key, userContact);
+                } catch (OXException e) {
+                    if (ContactExceptionCodes.CONTACT_NOT_FOUND.equals(e)) {
+                        LOGGER.debug("Error getting user contact {}", key, e);
+                    } else {
+                        LOGGER.error("Error getting user contact {}", key, e);
+                    }
                 }
             }
         }

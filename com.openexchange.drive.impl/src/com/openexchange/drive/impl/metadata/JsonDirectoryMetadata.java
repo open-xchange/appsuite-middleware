@@ -170,6 +170,7 @@ public class JsonDirectoryMetadata extends AbstractJsonMetadata {
             }
             Set<String> capabilities = folder.getCapabilities();
             if (null != capabilities && capabilities.contains(FileStorageFolder.CAPABILITY_PERMISSIONS)) {
+                session.getPermissionResolver().cacheFileStorageFolderPermissionEntities(Collections.singletonList(folder));
                 jsonObject.put("own_rights", createPermissionBits(folder.getOwnPermission()));
                 jsonObject.putOpt("permissions", getJSONPermissions(folder.getPermissions(), false));
                 jsonObject.putOpt("extended_permissions", getJSONPermissions(folder.getPermissions(), true));

@@ -52,6 +52,7 @@ package com.openexchange.drive.impl.metadata;
 import static com.openexchange.java.Autoboxing.I;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
@@ -129,6 +130,7 @@ public class JsonFileMetadata extends AbstractJsonMetadata {
                 }
                 break;
             case OBJECT_PERMISSIONS:
+                session.getPermissionResolver().cacheFilePermissionEntities(Collections.singletonList(file));
                 jsonObject.putOpt("object_permissions", getJSONObjectPermissions(file.getObjectPermissions(), false));
                 jsonObject.putOpt("extended_object_permissions", getJSONObjectPermissions(file.getObjectPermissions(), true));
                 if (isShared(file)) {
