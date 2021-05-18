@@ -72,6 +72,7 @@ import com.openexchange.mail.compose.Meta;
 import com.openexchange.mail.compose.OpenCompositionSpaceParameters;
 import com.openexchange.mail.compose.Security;
 import com.openexchange.mail.compose.SharedAttachmentsInfo;
+import com.openexchange.mail.compose.Message.Priority;
 import com.openexchange.mail.compose.impl.attachment.AttachmentImageDataSource;
 import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.mail.dataobjects.MailPart;
@@ -200,6 +201,15 @@ public class EditCopy extends AbstractOpener {
             recipients = originalMail.getBcc();
             if (null != recipients && recipients.length > 0) {
                 state.message.addBcc(toAddresses(recipients));
+            }
+        }
+
+        // Priority
+        if (state.message.containsPriority() == false) {
+            int level = originalMail.getPriority();
+            Priority priority = Priority.priorityForLevel(level);
+            if (priority != Priority.NORMAL) {
+                state.message.setPriority(priority);
             }
         }
 
