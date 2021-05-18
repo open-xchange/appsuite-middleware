@@ -132,7 +132,7 @@ The APIs can be enabled via the [Google Developers Console](https://console.deve
 
 The following Google APIs are required to enable contact synchronisation:
 
-  * Contacts API
+  * People API
   * Google Cloud SQL
   * Google Cloud Storage
   * Google Cloud Storage JSON API

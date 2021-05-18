@@ -23,11 +23,14 @@ package com.openexchange.subscribe.google.parser;
 
 import java.util.List;
 import java.util.function.BiConsumer;
+import java.util.stream.Collectors;
+import com.google.api.services.people.v1.PeopleService;
+import com.google.api.services.people.v1.model.ListConnectionsResponse;
+import com.google.api.services.people.v1.model.Person;
 import com.google.common.collect.ImmutableList;
-import com.google.gdata.client.contacts.ContactsService;
-import com.google.gdata.data.contacts.ContactEntry;
-import com.google.gdata.data.contacts.ContactFeed;
 import com.openexchange.groupware.container.Contact;
+import com.openexchange.i18n.I18nService;
+import com.openexchange.subscribe.google.parser.consumers.AddressConsumer;
 import com.openexchange.subscribe.google.parser.consumers.BirthdayConsumer;
 import com.openexchange.subscribe.google.parser.consumers.EmailAddressesConsumer;
 import com.openexchange.subscribe.google.parser.consumers.ImAddressesConsumer;
@@ -36,65 +39,57 @@ import com.openexchange.subscribe.google.parser.consumers.NicknameConsumer;
 import com.openexchange.subscribe.google.parser.consumers.OccupationConsumer;
 import com.openexchange.subscribe.google.parser.consumers.PhoneNumbersConsumer;
 import com.openexchange.subscribe.google.parser.consumers.PhotoConsumer;
-import com.openexchange.subscribe.google.parser.consumers.StructuredPostalAddressConsumer;
-import com.openexchange.subscribe.google.parser.consumers.UnstructuredPostalAddressConsumer;
 
 /**
  * {@link ContactParser}
  *
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
+ * @author <a href="mailto:philipp.schumacher@open-xchange.com">Philipp Schumacher</a>
  * @since v7.10.1
  */
 public final class ContactParser {
 
-    private final List<BiConsumer<ContactEntry, Contact>> elementParsers;
+    private final List<BiConsumer<Person, Contact>> elementParsers;
 
     /**
      * Initialises a new {@link ContactParser}.
      *
      * @param googleContactsService The Google's {@link ContactsService}
      */
-    public ContactParser(ContactsService googleContactsService) {
-        ImmutableList.Builder<BiConsumer<ContactEntry, Contact>> listBuilder = ImmutableList.builder();
+    public ContactParser(PeopleService googlePeopleService, I18nService i18nService, int maxImageSize) {
+        ImmutableList.Builder<BiConsumer<Person, Contact>> listBuilder = ImmutableList.builder();
         listBuilder.add(new NameConsumer());
         listBuilder.add(new NicknameConsumer());
-        listBuilder.add(new EmailAddressesConsumer());
+        listBuilder.add(new EmailAddressesConsumer(i18nService));
         listBuilder.add(new BirthdayConsumer());
         listBuilder.add(new OccupationConsumer());
-        listBuilder.add(new ImAddressesConsumer());
-        listBuilder.add(new PhoneNumbersConsumer());
-        listBuilder.add(new UnstructuredPostalAddressConsumer());
-        listBuilder.add(new StructuredPostalAddressConsumer());
-        listBuilder.add(new PhotoConsumer(googleContactsService));
+        listBuilder.add(new ImAddressesConsumer(i18nService));
+        listBuilder.add(new PhoneNumbersConsumer(i18nService));
+        listBuilder.add(new PhotoConsumer(googlePeopleService, maxImageSize));
+        listBuilder.add(new AddressConsumer(i18nService));
         elementParsers = listBuilder.build();
     }
 
     /**
-     * Parses the specified {@link ContactFeed} and returns it as a {@link List} of {@link Contact}s
+     * Parses the specified {@link ListConnectionsResponse} and returns it as a {@link List} of {@link Contact}s
      *
-     * @param feed The {@link ContactFeed} to parse
+     * @param response The {@link ListConnectionsResponse} to parse
      * @return a {@link List} of {@link Contact}s
      */
-    public List<Contact> parseFeed(ContactFeed feed) {
-        List<ContactEntry> entries = feed.getEntries();
-        List<Contact> contacts = new java.util.ArrayList<Contact>(entries.size());
-        for (ContactEntry contact : entries) {
-            contacts.add(parseContactEntry(contact));
-        }
-        return contacts;
+    public List<Contact> parseListConnectionsResponse(ListConnectionsResponse response) {
+        List<Person> connections = response.getConnections();
+        return connections.stream().map(person -> parsePerson(person)).collect(Collectors.toList());
     }
 
     /**
-     * Parses the specified {@link ContactEntry} to a {@link Contact}
+     * Parses the specified {@link Person} to a {@link Contact}
      *
-     * @param entry The {@link ContactEntry} to parse
+     * @param person The {@link Person} to parse
      * @return a new {@link Contact}
      */
-    private Contact parseContactEntry(ContactEntry entry) {
-        Contact c = new Contact();
-        for (BiConsumer<ContactEntry, Contact> consumer : elementParsers) {
-            consumer.accept(entry, c);
-        }
-        return c;
+    private Contact parsePerson(Person person) {
+        Contact contact = new Contact();
+        elementParsers.forEach(parser -> parser.accept(person, contact));
+        return contact;
     }
 }

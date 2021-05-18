@@ -21,72 +21,139 @@
 
 package com.openexchange.subscribe.google.parser.consumers;
 
+import java.util.List;
 import java.util.function.BiConsumer;
-import com.google.gdata.data.contacts.ContactEntry;
-import com.google.gdata.data.extensions.PhoneNumber;
+import com.google.api.services.people.v1.model.Person;
+import com.google.api.services.people.v1.model.PhoneNumber;
 import com.openexchange.groupware.container.Contact;
+import com.openexchange.i18n.I18nService;
+import com.openexchange.subscribe.google.parser.ContactNoteStrings;
 
 /**
  * {@link PhoneNumbersConsumer} - Parses the contact's phone numbers. Note that google
  * can store an unlimited mount of phone numbers for a contact due to their different
  * data model (probably EAV). Our contacts API however can only store a handful, therefore
- * we only fetch the first seven we encounter.
+ * phone numbers, which can't be mapped are saved inside the contact's note field.
  *
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
+ * @author <a href="mailto:philipp.schumacher@open-xchange.com">Philipp Schumacher</a>
  * @since v7.10.1
  */
-public class PhoneNumbersConsumer implements BiConsumer<ContactEntry, Contact> {
+public class PhoneNumbersConsumer extends AbstractNoteConsumer implements BiConsumer<Person, Contact> {
 
     /**
      * Initialises a new {@link PhoneNumbersConsumer}.
      */
-    public PhoneNumbersConsumer() {
-        super();
+    public PhoneNumbersConsumer(I18nService i18nService) {
+        super(i18nService);
     }
 
     @Override
-    public void accept(ContactEntry t, Contact u) {
-        if (!t.hasPhoneNumbers()) {
+    public void accept(Person person, Contact contact) {
+        List<PhoneNumber> phoneNumbers = person.getPhoneNumbers();
+        if (phoneNumbers == null || phoneNumbers.isEmpty()) {
             return;
         }
-        int count = 0;
-        for (PhoneNumber pn : t.getPhoneNumbers()) {
-            if (pn.getPrimary()) {
-                u.setTelephonePrimary(pn.getPhoneNumber());
-            }
-            // Unfortunately we do not have enough information
-            // about the type of the telephone number, nor we
-            // can make an educated guess. So we simply fetching
-            // as much as possible.
-            switch (count++) {
-                case 0:
-                    u.setTelephoneOther(pn.getPhoneNumber());
+        boolean firstPhoneNumberInNotes = true;
+        for (PhoneNumber phoneNumber : person.getPhoneNumbers()) {
+            switch (phoneNumber.getType()) {
+                case "home":
+                    firstPhoneNumberInNotes = setTelephoneHome(contact, phoneNumber, firstPhoneNumberInNotes);
                     break;
-                case 1:
-                    u.setTelephoneHome1(pn.getPhoneNumber());
+                case "work":
+                    firstPhoneNumberInNotes = setTelephoneBusiness(contact, phoneNumber, firstPhoneNumberInNotes);
                     break;
-                case 2:
-                    u.setTelephoneHome2(pn.getPhoneNumber());
+                case "mobile":
+                    firstPhoneNumberInNotes = setCellularTelephone(contact, phoneNumber, firstPhoneNumberInNotes);
                     break;
-                case 3:
-                    u.setTelephoneBusiness1(pn.getPhoneNumber());
+                case "homeFax":
+                    contact.setFaxHome(phoneNumber.getValue());
                     break;
-                case 4:
-                    u.setTelephoneBusiness2(pn.getPhoneNumber());
+                case "workFax":
+                    contact.setFaxBusiness(phoneNumber.getValue());
                     break;
-                case 5:
-                    u.setTelephoneAssistant(pn.getPhoneNumber());
+                case "otherFax":
+                    contact.setFaxOther(phoneNumber.getValue());
                     break;
-                case 6:
-                    u.setTelephoneCompany(pn.getPhoneNumber());
+                case "pager":
+                    contact.setTelephonePager(phoneNumber.getValue());
                     break;
-                case 7:
-                    u.setTelephoneCallback(pn.getPhoneNumber());
-                    break;
-                // Maybe add more?
+                case "workMobile":
+                case "workPager":
+                case "main":
+                case "googleVoice":
+                case "other":
                 default:
-                    return;
+                    firstPhoneNumberInNotes = addPhoneNumberToNote(contact, phoneNumber, firstPhoneNumberInNotes);
+                    break;
             }
         }
+    }
+
+    /**
+     * Sets the home phone number.
+     * 
+     * @param contact The {@link Contact}
+     * @param phoneNumber The {@link PhoneNumber}
+     */
+    private boolean setTelephoneHome(Contact contact, PhoneNumber phoneNumber, boolean firstPhoneNumberInNotes) {
+        if (!contact.containsTelephoneHome1()) {
+            contact.setTelephoneHome1(phoneNumber.getValue());
+            return firstPhoneNumberInNotes;
+        } else if (!contact.containsTelephoneHome2()) {
+            contact.setTelephoneHome2(phoneNumber.getValue());
+            return firstPhoneNumberInNotes;
+        } else {
+            return addPhoneNumberToNote(contact, phoneNumber, firstPhoneNumberInNotes);
+        }
+    }
+
+    /**
+     * Sets the business phone number.
+     * 
+     * @param contact The {@link Contact}
+     * @param phoneNumbner The phone number as {@link String}
+     */
+    private boolean setTelephoneBusiness(Contact contact, PhoneNumber phoneNumber, boolean firstPhoneNumberInNotes) {
+        if (!contact.containsTelephoneBusiness1()) {
+            contact.setTelephoneBusiness1(phoneNumber.getValue());
+            return firstPhoneNumberInNotes;
+        } else if (!contact.containsTelephoneBusiness2()) {
+            contact.setTelephoneBusiness2(phoneNumber.getValue());
+            return firstPhoneNumberInNotes;
+        } else {
+            return addPhoneNumberToNote(contact, phoneNumber, firstPhoneNumberInNotes);
+        }
+    }
+
+    /**
+     * Sets the mobile phone number.
+     * 
+     * @param contact The {@link Contact}
+     * @param phoneNumbner The phone number as {@link String}
+     */
+    private boolean setCellularTelephone(Contact contact, PhoneNumber phoneNumber, boolean firstPhoneNumberInNotes) {
+        if (!contact.containsCellularTelephone1()) {
+            contact.setCellularTelephone1(phoneNumber.getValue());
+            return firstPhoneNumberInNotes;
+        } else if (!contact.containsCellularTelephone2()) {
+            contact.setCellularTelephone2(phoneNumber.getValue());
+            return firstPhoneNumberInNotes;
+        } else {
+            return addPhoneNumberToNote(contact, phoneNumber, firstPhoneNumberInNotes);
+        }
+    }
+
+    /**
+     * Adds the phone number to the contact's note
+     * 
+     * @param contact The {@link Contact}
+     * @param phoneNumbner The phone number
+     */
+    private boolean addPhoneNumberToNote(Contact contact, PhoneNumber phoneNumber, boolean firstPhoneNumberInNotes) {
+        if (phoneNumber == null) {
+            return firstPhoneNumberInNotes;
+        }
+        return addValueToNote(contact, ContactNoteStrings.OTHER_PHONE_NUMBERS, phoneNumber.getFormattedType() + ": " + phoneNumber.getValue(), firstPhoneNumberInNotes);
     }
 }

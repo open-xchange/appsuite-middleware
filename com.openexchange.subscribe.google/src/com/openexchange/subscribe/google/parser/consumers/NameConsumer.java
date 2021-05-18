@@ -21,21 +21,21 @@
 
 package com.openexchange.subscribe.google.parser.consumers;
 
+import java.util.List;
 import java.util.function.BiConsumer;
-import com.google.gdata.data.contacts.ContactEntry;
-import com.google.gdata.data.extensions.FamilyName;
-import com.google.gdata.data.extensions.GivenName;
-import com.google.gdata.data.extensions.Name;
+import com.google.api.services.people.v1.model.Name;
+import com.google.api.services.people.v1.model.Person;
 import com.openexchange.groupware.container.Contact;
 
 /**
- * {@link NameConsumer} - Parses the given name, family name and full name of the specified contact
+ * {@link NameConsumer} - Parses the title, suffix, given name, middle name, family name and full name of the specified contact
  * along with their yomi representations if available.
  *
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
+ * @author <a href="mailto:philipp.schumacher@open-xchange.com">Philipp Schumacher</a>
  * @since v7.10.1
  */
-public class NameConsumer implements BiConsumer<ContactEntry, Contact> {
+public class NameConsumer implements BiConsumer<Person, Contact> {
 
     /**
      * Initialises a new {@link NameConsumer}.
@@ -45,27 +45,19 @@ public class NameConsumer implements BiConsumer<ContactEntry, Contact> {
     }
 
     @Override
-    public void accept(ContactEntry t, Contact u) {
-        if (!t.hasName()) {
+    public void accept(Person person, Contact contact) {
+        List<Name> names = person.getNames();
+        if (names == null || names.isEmpty()) {
             return;
         }
-        Name name = t.getName();
-        if (name.hasGivenName()) {
-            GivenName given = name.getGivenName();
-            u.setGivenName(t.getName().getGivenName().getValue());
-            if (given.hasYomi()) {
-                u.setYomiFirstName(given.getYomi());
-            }
-        }
-        if (name.hasFamilyName()) {
-            FamilyName familyName = name.getFamilyName();
-            u.setSurName(familyName.getValue());
-            if (familyName.hasYomi()) {
-                u.setYomiLastName(familyName.getYomi());
-            }
-        }
-        if (name.hasFullName()) {
-            u.setDisplayName(name.getFullName().getValue());
-        }
+        Name name = names.get(0);
+        contact.setTitle(name.getHonorificPrefix());
+        contact.setSuffix(name.getHonorificSuffix());
+        contact.setDisplayName(name.getDisplayName());
+        contact.setGivenName(name.getGivenName());
+        contact.setMiddleName(name.getMiddleName());
+        contact.setSurName(name.getFamilyName());
+        contact.setYomiFirstName(name.getPhoneticGivenName());
+        contact.setYomiLastName(name.getPhoneticFamilyName());
     }
 }

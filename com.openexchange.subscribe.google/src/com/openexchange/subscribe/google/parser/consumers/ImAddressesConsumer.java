@@ -21,10 +21,16 @@
 
 package com.openexchange.subscribe.google.parser.consumers;
 
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.List;
 import java.util.function.BiConsumer;
-import com.google.gdata.data.contacts.ContactEntry;
-import com.google.gdata.data.extensions.Im;
+import com.google.api.services.people.v1.model.ImClient;
+import com.google.api.services.people.v1.model.Person;
 import com.openexchange.groupware.container.Contact;
+import com.openexchange.i18n.I18nService;
+import com.openexchange.java.Strings;
+import com.openexchange.subscribe.google.parser.ContactNoteStrings;
 
 /**
  * {@link ImAddressesConsumer} - Parses the instant messaging addresses. Note that google
@@ -33,34 +39,72 @@ import com.openexchange.groupware.container.Contact;
  * therefore we only fetch the first two we encounter.
  *
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
+ * @author <a href="mailto:philipp.schumacher@open-xchange.com">Philipp Schumacher</a>
  * @since v7.10.1
  */
-public class ImAddressesConsumer implements BiConsumer<ContactEntry, Contact> {
+public class ImAddressesConsumer extends AbstractNoteConsumer implements BiConsumer<Person, Contact> {
+
+    private static final Comparator<ImClient> IMCLIENT_COMPARATOR = new Comparator<ImClient>() {
+
+        @Override
+        public int compare(ImClient imClient1, ImClient imClient2) {
+            String imClientString1 = Strings.concat("-", new String[] { imClient1.getType(), imClient1.getUsername() });
+            String imClientString2 = Strings.concat("-", new String[] { imClient2.getType(), imClient2.getUsername() });
+            return imClientString1.compareTo(imClientString2);
+        }
+    };
 
     /**
      * Initialises a new {@link ImAddressesConsumer}.
      */
-    public ImAddressesConsumer() {
-        super();
+    public ImAddressesConsumer(I18nService i18nService) {
+        super(i18nService);
     }
 
     @Override
-    public void accept(ContactEntry t, Contact u) {
-        if (!t.hasImAddresses()) {
+    public void accept(Person person, Contact contact) {
+        List<ImClient> imClients = person.getImClients();
+        if (imClients == null || imClients.isEmpty()) {
             return;
         }
-        int count = 0;
-        for (Im im : t.getImAddresses()) {
-            switch (count++) {
-                case 0:
-                    u.setInstantMessenger1(im.getAddress());
-                    break;
-                case 1:
-                    u.setInstantMessenger2(im.getAddress());
-                    break;
-                default:
-                    return;
-            }
+        boolean firstImClientInNotes = true;
+        Collections.sort(imClients, IMCLIENT_COMPARATOR);
+        for (ImClient imClient : imClients) {
+            firstImClientInNotes = setImAddress(imClient, contact, firstImClientInNotes);
         }
+    }
+
+    /**
+     * Adds the instant messenger address to the contact.
+     *
+     * @param imClient The {@link ImClient}
+     * @param contact The {@link Contact}
+     */
+    private boolean setImAddress(ImClient imClient, Contact contact, boolean firstImClientInNotes) {
+        if (contact.getInstantMessenger1() == null) {
+            contact.setInstantMessenger1(imClient.getFormattedProtocol() + ": " + imClient.getUsername());
+            return firstImClientInNotes;
+        } else if (contact.getInstantMessenger2() == null) {
+            contact.setInstantMessenger2(imClient.getFormattedProtocol() + ": " + imClient.getUsername());
+            return firstImClientInNotes;
+        } else {
+            return addImAddressToNote(imClient, contact, firstImClientInNotes);
+        }
+    }
+
+    /**
+     * Adds the instant messenger address to the contact's note
+     *
+     * @param imClient The {@link ImClient}
+     * @param contact The {@link Contact}
+     */
+    private boolean addImAddressToNote(ImClient imClient, Contact contact, boolean firstImClientInNotes) {
+        String imUsername = imClient.getUsername();
+        String imProtocol = imClient.getFormattedProtocol();
+        if (Strings.isEmpty(imUsername)) {
+            return firstImClientInNotes;
+        }
+        String imString = imProtocol == null ? imUsername : imClient.getFormattedProtocol() + ": " + imClient.getUsername();
+        return addValueToNote(contact, ContactNoteStrings.OTHER_IM_ADDRESSES, imString, firstImClientInNotes);
     }
 }
