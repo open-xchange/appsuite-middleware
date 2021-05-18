@@ -172,7 +172,6 @@ public class OpenCompositionSpaceParameters {
             this.type = type;
             this.referencedMails = referencedMails;
             this.mailSettings = mailSettings;
-            priority = Priority.NORMAL;
             sharedAttachmentsInfo = SharedAttachmentsInfo.DISABLED;
             security = Security.DISABLED;
         }
@@ -337,7 +336,7 @@ public class OpenCompositionSpaceParameters {
     /**
      * Gets the priority
      *
-     * @return The priority
+     * @return The priority or <code>null</code> if not set
      */
     public Priority getPriority() {
         return priority;
