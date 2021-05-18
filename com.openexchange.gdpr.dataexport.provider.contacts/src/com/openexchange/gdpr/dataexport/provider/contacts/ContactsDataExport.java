@@ -183,7 +183,7 @@ public class ContactsDataExport extends AbstractDataExportProviderTask {
             if (savepoint.isPresent()) {
                 JSONObject jSavePoint = savepoint.get();
                 int contactId = jSavePoint.optInt("id", 0);
-                startInfo = new StartInfo(contactId != 0 ? I(contactId) : null, jSavePoint.getString("folder"), jSavePoint.getString("root"));
+                startInfo = new StartInfo(contactId != 0 ? I(contactId) : null, jSavePoint.getString("folder"), jSavePoint.optString("path", null), jSavePoint.getString("root"));
             } else {
                 startInfo = null;
             }
@@ -225,11 +225,12 @@ public class ContactsDataExport extends AbstractDataExportProviderTask {
                         exportSingleUserContact = false;
                         String name = helper.getString(FolderStrings.SYSTEM_LDAP_FOLDER_NAME);
                         Folder folder = new Folder(Integer.toString(FolderObject.SYSTEM_LDAP_FOLDER_ID), name, false);
-                        if (!exportFolder(folder, null)) {
+                        String pathOfFolder = exportFolder(folder, null);
+                        if (pathOfFolder == null) {
                             return ExportResult.incomplete(Optional.empty(), Optional.empty());
                         }
 
-                        SavePointAndReason optSavePoint = exportContacts(GLOBAL_ADDRESS_BOOK_ID, folder, name + "/", null, session, neededServices);
+                        SavePointAndReason optSavePoint = exportContacts(GLOBAL_ADDRESS_BOOK_ID, folder, pathOfFolder, null, session, neededServices);
                         if (optSavePoint != null) {
                             return optSavePoint.result();
                         }
@@ -241,11 +242,12 @@ public class ContactsDataExport extends AbstractDataExportProviderTask {
 
                     String name = helper.getString(FolderStrings.SYSTEM_LDAP_FOLDER_NAME);
                     Folder folder = new Folder(Integer.toString(FolderObject.SYSTEM_LDAP_FOLDER_ID), name, false);
-                    if (!exportFolder(folder, null)) {
+                    String pathOfFolder = exportFolder(folder, null);
+                    if (pathOfFolder == null) {
                         return ExportResult.incomplete(Optional.empty(), Optional.empty());
                     }
 
-                    if (!exportSingleContact(userContact, folder, name + "/", session, neededServices)) {
+                    if (!exportSingleContact(userContact, folder, pathOfFolder, session, neededServices)) {
                         return ExportResult.incomplete(Optional.of(new JSONObject(4).putSafe("folder", GLOBAL_ADDRESS_BOOK_ID).putSafe("root", GLOBAL_ADDRESS_BOOK_ID)), Optional.empty());
                     }
                 }
@@ -319,10 +321,13 @@ public class ContactsDataExport extends AbstractDataExportProviderTask {
         }
     }
 
-    private SavePointAndReason traverseFolder(String root, Type type, Folder folder, String path, Options options, DecoratorProvider decoratorProvider, Session session, NeededServices neededServices) throws OXException, DataExportAbortedException {
+    private SavePointAndReason traverseFolder(String root, Type type, Folder folder, String parentPath, Options options, DecoratorProvider decoratorProvider, Session session, NeededServices neededServices) throws OXException, DataExportAbortedException {
         if (isPauseRequested()) {
             if (startInfo != null) {
                 JSONObject jSavePoint = new JSONObject(4).putSafe("folder", startInfo.folderId).putSafe("root", root);
+                if (startInfo.path != null) {
+                    jSavePoint.putSafe("path", startInfo.path);
+                }
                 if (startInfo.contactId != null) {
                     jSavePoint.putSafe("id", startInfo.contactId);
                 }
@@ -333,17 +338,20 @@ public class ContactsDataExport extends AbstractDataExportProviderTask {
         }
         checkAborted();
 
+        String pathOfFolder = null;
         if (startInfo == null || startInfo.folderId.equals(folder.getFolderId())) {
-            if (startInfo == null) {
-                if (!exportFolder(folder, path)) {
+            if (startInfo == null || startInfo.path == null) {
+                pathOfFolder = exportFolder(folder, parentPath);
+                if (pathOfFolder == null) {
                     return savePointFor(new JSONObject(2).putSafe("folder", folder.getFolderId()).putSafe("root", root));
                 }
                 LOG.debug("Exported contact directory {} for data export {} of user {} in context {}", folder.getName(), UUIDs.getUnformattedString(task.getId()), I(task.getUserId()), I(task.getContextId()));
+            } else {
+                pathOfFolder = startInfo.path;
             }
 
             if (!folder.isRootFolder() && !folder.getFolderId().startsWith(SHARED_PREFIX)) {
-                String newPath = (path == null ? "" : path) + sanitizeNameForZipEntry(folder.getName()) + "/";
-                SavePointAndReason jSavePoint = exportContacts(root, folder, newPath, startInfo == null ? null : startInfo.contactId, session, neededServices);
+                SavePointAndReason jSavePoint = exportContacts(root, folder, pathOfFolder, startInfo == null ? null : startInfo.contactId, session, neededServices);
                 if (jSavePoint != null) {
                     return jSavePoint;
                 }
@@ -382,6 +390,9 @@ public class ContactsDataExport extends AbstractDataExportProviderTask {
                 if (isRetryableExceptionAndMayFail(e, sink)) {
                     if (startInfo != null) {
                         JSONObject jSavePoint = new JSONObject(4).putSafe("folder", startInfo.folderId).putSafe("root", root);
+                        if (startInfo.path != null) {
+                            jSavePoint.putSafe("path", startInfo.path);
+                        }
                         if (startInfo.contactId != null) {
                             jSavePoint.putSafe("id", startInfo.contactId);
                         }
@@ -396,9 +407,11 @@ public class ContactsDataExport extends AbstractDataExportProviderTask {
             }
 
             if (!allVisible.isEmpty()) {
-                String newPath = (path == null ? "" : path) + sanitizeNameForZipEntry(folder.getName()) + "/";
+                if (pathOfFolder == null) {
+                    pathOfFolder = startInfo == null || startInfo.path == null ? (parentPath == null ? "" : parentPath) + sanitizeNameForZipEntry(folder.getName()) + "/" : startInfo.path;
+                }
                 for (Folder visibleFolder : allVisible) {
-                    SavePointAndReason jSavePoint = traverseFolder(root, type, visibleFolder, newPath, options, decoratorProvider, session, neededServices);
+                    SavePointAndReason jSavePoint = traverseFolder(root, type, visibleFolder, pathOfFolder, options, decoratorProvider, session, neededServices);
                     if (jSavePoint != null) {
                         return jSavePoint;
                     }
@@ -425,6 +438,7 @@ public class ContactsDataExport extends AbstractDataExportProviderTask {
         if (isPauseRequested()) {
             JSONObject jSavePoint = new JSONObject(4);
             jSavePoint.putSafe("folder", folder.getFolderId());
+            jSavePoint.putSafe("path", path);
             jSavePoint.putSafe("root", root);
             if (startContactId != null) {
                 jSavePoint.putSafe("id", startContactId);
@@ -447,7 +461,7 @@ public class ContactsDataExport extends AbstractDataExportProviderTask {
             }
 
             if (isPauseRequested()) {
-                JSONObject jSavePoint = new JSONObject(4).putSafe("folder", folder.getFolderId()).putSafe("root", root);
+                JSONObject jSavePoint = new JSONObject(4).putSafe("folder", folder.getFolderId()).putSafe("path", path).putSafe("root", root);
                 if (startContactId != null) {
                     jSavePoint.putSafe("id", startContactId);
                 }
@@ -480,7 +494,7 @@ public class ContactsDataExport extends AbstractDataExportProviderTask {
             throw e;
         } catch (Exception e) {
             if (isRetryableExceptionAndMayFail(e, sink)) {
-                JSONObject jSavePoint = new JSONObject(4).putSafe("folder", folder.getFolderId()).putSafe("root", root);
+                JSONObject jSavePoint = new JSONObject(4).putSafe("folder", folder.getFolderId()).putSafe("path", path).putSafe("root", root);
                 if (startContactId != null) {
                     jSavePoint.putSafe("id", startContactId);
                 }
@@ -505,6 +519,7 @@ public class ContactsDataExport extends AbstractDataExportProviderTask {
             if (isPauseRequested()) {
                 JSONObject jSavePoint = new JSONObject(4);
                 jSavePoint.putSafe("folder", folder.getFolderId());
+                jSavePoint.putSafe("path", path);
                 jSavePoint.putSafe("root", root);
                 jSavePoint.putSafe("id", I(contactId));
                 return savePointFor(jSavePoint);
@@ -512,7 +527,7 @@ public class ContactsDataExport extends AbstractDataExportProviderTask {
             int count = incrementAndGetCount();
             checkAborted((count % 100 == 0));
             if (count % 1000 == 0) {
-                sink.setSavePoint(new JSONObject(4).putSafe("folder", folder.getFolderId()).putSafe("root", root).putSafe("id", L(contactId)));
+                sink.setSavePoint(new JSONObject(4).putSafe("folder", folder.getFolderId()).putSafe("path", path).putSafe("root", root).putSafe("id", L(contactId)));
             }
             batchCount++;
 
@@ -541,13 +556,13 @@ public class ContactsDataExport extends AbstractDataExportProviderTask {
 
                     boolean exported = sink.export(vCardExport.getClosingStream(), new Item(path, contactId + ".vcf", null));
                     if (!exported) {
-                        return savePointFor(new JSONObject(4).putSafe("folder", folder.getFolderId()).putSafe("root", root).putSafe("id", L(contactId)));
+                        return savePointFor(new JSONObject(4).putSafe("folder", folder.getFolderId()).putSafe("path", path).putSafe("root", root).putSafe("id", L(contactId)));
                     }
                     LOG.debug("Exported contact {} ({} of {}) from directory {} for data export {} of user {} in context {}", I(contactId), I(batchCount), I(contacts.size()), folder.getName(), UUIDs.getUnformattedString(task.getId()), I(task.getUserId()), I(task.getContextId()));
                 }
             } catch (Exception e) {
                 if (isRetryableExceptionAndMayFail(e, sink)) {
-                    return savePointFor(new JSONObject(4).putSafe("folder", folder.getFolderId()).putSafe("root", root).putSafe("id", L(contactId)), e);
+                    return savePointFor(new JSONObject(4).putSafe("folder", folder.getFolderId()).putSafe("path", path).putSafe("root", root).putSafe("id", L(contactId)), e);
                 }
                 LOG.warn("Failed to export contact {} in folder \"{}\" from primary mail account of user {} in context {}", I(contactId), folder.getName(), I(task.getUserId()), I(task.getContextId()), e);
                 sink.addToReport(Message.builder().appendToMessage("Failed to export contact \"").appendToMessage(contactId).appendToMessage("\" in folder \"").appendToMessage(folder.getName()).appendToMessage("\": ").appendToMessage(e.getMessage()).withModuleId(ID_CONTACTS).withTimeStamp(new Date()).build());
@@ -660,13 +675,15 @@ public class ContactsDataExport extends AbstractDataExportProviderTask {
 
         final String root;
         final String folderId;
+        final String path;
         final Integer contactId;
 
-        StartInfo(Integer contactId, String folderId, String root) {
+        StartInfo(Integer contactId, String folderId, String path, String root) {
             super();
             this.root = root;
             this.contactId = contactId;
             this.folderId = folderId;
+            this.path = path;
         }
     }
 

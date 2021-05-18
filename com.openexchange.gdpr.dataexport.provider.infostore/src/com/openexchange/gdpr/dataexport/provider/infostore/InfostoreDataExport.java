@@ -194,7 +194,7 @@ public class InfostoreDataExport extends AbstractDataExportProviderTask {
             StartInfo startInfo;
             if (savepoint.isPresent()) {
                 JSONObject jSavePoint = savepoint.get();
-                startInfo = new StartInfo(jSavePoint.optString("version", null), jSavePoint.optString("id", null), jSavePoint.getString("folder"), jSavePoint.getString("root"));
+                startInfo = new StartInfo(jSavePoint.optString("version", null), jSavePoint.optString("id", null), jSavePoint.getString("folder"), jSavePoint.optString("path", null), jSavePoint.getString("root"));
             } else {
                 startInfo = null;
             }
@@ -278,10 +278,13 @@ public class InfostoreDataExport extends AbstractDataExportProviderTask {
         }
     }
 
-    private SavePointAndReason traverseFolder(Root root, Folder folder, String path, StartInfo startInfo, Options options, Session session, FileStorageAccountAccess infostoreAccountAccess) throws OXException, DataExportAbortedException {
+    private SavePointAndReason traverseFolder(Root root, Folder folder, String parentPath, StartInfo startInfo, Options options, Session session, FileStorageAccountAccess infostoreAccountAccess) throws OXException, DataExportAbortedException {
         if (isPauseRequested()) {
             if (startInfo != null) {
                 JSONObject jSavePoint = new JSONObject(4).putSafe("folder", startInfo.folderId).putSafe("root", root);
+                if (startInfo.path != null) {
+                    jSavePoint.putSafe("path", startInfo.path);
+                }
                 if (startInfo.fileId != null) {
                     jSavePoint.putSafe("id", startInfo.fileId);
                 }
@@ -295,18 +298,21 @@ public class InfostoreDataExport extends AbstractDataExportProviderTask {
         }
         checkAborted();
 
+        String pathOfFolder = null;
         StartInfo info = startInfo;
         if (info == null || info.folderId.equals(folder.getFolderId())) {
-            if (info == null) {
-                if (!exportFolder(folder, path)) {
+            if (info == null || info.path == null) {
+                pathOfFolder = exportFolder(folder, parentPath);
+                if (pathOfFolder == null) {
                     return savePointFor(new JSONObject(2).putSafe("folder", folder.getFolderId()).putSafe("root", root));
                 }
                 LOG.debug("Exported infostore directory {} for data export {} of user {} in context {}", folder.getName(), UUIDs.getUnformattedString(task.getId()), I(task.getUserId()), I(task.getContextId()));
+            } else {
+                pathOfFolder = startInfo.path;
             }
 
             if (!folder.isRootFolder() && !folder.getFolderId().startsWith(SHARED_PREFIX)) {
-                String newPath = (path == null ? "" : path) + sanitizeNameForZipEntry(folder.getName()) + "/";
-                SavePointAndReason jSavePoint = exportFiles(root, folder, newPath, info == null ? null : info.version, info == null ? null : info.fileId, options, infostoreAccountAccess);
+                SavePointAndReason jSavePoint = exportFiles(root, folder, pathOfFolder, info == null ? null : info.version, info == null ? null : info.fileId, options, infostoreAccountAccess);
                 if (jSavePoint != null) {
                     return jSavePoint;
                 }
@@ -383,6 +389,9 @@ public class InfostoreDataExport extends AbstractDataExportProviderTask {
             if (isRetryableExceptionAndMayFail(e, sink)) {
                 if (info != null) {
                     JSONObject jSavePoint = new JSONObject(4).putSafe("folder", info.folderId).putSafe("root", root);
+                    if (info.path != null) {
+                        jSavePoint.putSafe("path", startInfo.path);
+                    }
                     if (info.fileId != null) {
                         jSavePoint.putSafe("id", info.fileId);
                     }
@@ -400,9 +409,11 @@ public class InfostoreDataExport extends AbstractDataExportProviderTask {
         }
 
         if (!children.isEmpty()) {
-            String newPath = (path == null ? "" : path) + sanitizeNameForZipEntry(folder.getName()) + "/";
+            if (pathOfFolder == null) {
+                pathOfFolder = info == null || info.path == null ? (parentPath == null ? "" : parentPath) + sanitizeNameForZipEntry(folder.getName()) + "/" : info.path;
+            }
             for (Folder child : children) {
-                SavePointAndReason jSavePoint = traverseFolder(root, child, newPath, info, options, session, infostoreAccountAccess);
+                SavePointAndReason jSavePoint = traverseFolder(root, child, pathOfFolder, info, options, session, infostoreAccountAccess);
                 if (jSavePoint != null) {
                     return jSavePoint;
                 }
@@ -436,7 +447,7 @@ public class InfostoreDataExport extends AbstractDataExportProviderTask {
 
     private SavePointAndReason exportFiles(Root root, Folder folder, String path, String startVersion, String startFileId, Options options, FileStorageAccountAccess infostoreAccountAccess) throws OXException, DataExportAbortedException {
         if (isPauseRequested()) {
-            JSONObject jSavePoint = new JSONObject(4).putSafe("folder", folder.getFolderId()).putSafe("root", root);
+            JSONObject jSavePoint = new JSONObject(4).putSafe("folder", folder.getFolderId()).putSafe("path", path).putSafe("root", root);
             if (startFileId != null) {
                 jSavePoint.putSafe("id", startFileId);
             }
@@ -460,7 +471,7 @@ public class InfostoreDataExport extends AbstractDataExportProviderTask {
                 }
 
                 if (isPauseRequested()) {
-                    JSONObject jSavePoint = new JSONObject(4).putSafe("folder", folder.getFolderId()).putSafe("root", root);
+                    JSONObject jSavePoint = new JSONObject(4).putSafe("folder", folder.getFolderId()).putSafe("path", path).putSafe("root", root);
                     if (startFileId != null) {
                         jSavePoint.putSafe("id", startFileId);
                     }
@@ -503,7 +514,7 @@ public class InfostoreDataExport extends AbstractDataExportProviderTask {
                         }
 
                         if (isPauseRequested()) {
-                            JSONObject jSavePoint = new JSONObject(4).putSafe("folder", folder.getFolderId()).putSafe("root", root);
+                            JSONObject jSavePoint = new JSONObject(4).putSafe("folder", folder.getFolderId()).putSafe("path", path).putSafe("root", root);
                             if (startFileId != null) {
                                 jSavePoint.putSafe("id", startFileId);
                             }
@@ -564,7 +575,7 @@ public class InfostoreDataExport extends AbstractDataExportProviderTask {
                 throw e;
             } catch (Exception e) {
                 if (isRetryableExceptionAndMayFail(e, sink)) {
-                    JSONObject jSavePoint = new JSONObject(4).putSafe("folder", folder.getFolderId()).putSafe("root", root);
+                    JSONObject jSavePoint = new JSONObject(4).putSafe("folder", folder.getFolderId()).putSafe("path", path).putSafe("root", root);
                     if (startFileId != null) {
                         jSavePoint.putSafe("id", startFileId);
                     }
@@ -598,6 +609,7 @@ public class InfostoreDataExport extends AbstractDataExportProviderTask {
                 if (isPauseRequested()) {
                     JSONObject jSavePoint = new JSONObject(4);
                     jSavePoint.putSafe("folder", folder.getFolderId());
+                    jSavePoint.putSafe("path", path);
                     jSavePoint.putSafe("root", root);
                     jSavePoint.putSafe("id", version.getId());
                     jSavePoint.putSafe("version", version.getVersion());
@@ -606,7 +618,7 @@ public class InfostoreDataExport extends AbstractDataExportProviderTask {
                 int count = incrementAndGetCount();
                 checkAborted((count % 100 == 0));
                 if (count % 1000 == 0) {
-                    sink.setSavePoint(new JSONObject(4).putSafe("folder", folder.getFolderId()).putSafe("root", root).putSafe("id", version.getId()).putSafe("version", version.getVersion()));
+                    sink.setSavePoint(new JSONObject(4).putSafe("folder", folder.getFolderId()).putSafe("path", path).putSafe("root", root).putSafe("id", version.getId()).putSafe("version", version.getVersion()));
                 }
                 batchCount++;
 
@@ -621,12 +633,12 @@ public class InfostoreDataExport extends AbstractDataExportProviderTask {
 
                     boolean exported = sink.export(document, new Item(path, sanitizeNameForZipEntry(version.getFileName()), date));
                     if (!exported) {
-                        return savePointFor(new JSONObject(4).putSafe("folder", folder.getFolderId()).putSafe("root", root).putSafe("id", version.getId()).putSafe("version", version.getVersion()));
+                        return savePointFor(new JSONObject(4).putSafe("folder", folder.getFolderId()).putSafe("path", path).putSafe("root", root).putSafe("id", version.getId()).putSafe("version", version.getVersion()));
                     }
                     LOG.debug("Exported version {} of file {} ({} of {}) from directory {} for data export {} of user {} in context {}", version.getVersion(), version.getId(), I(batchCount), I(total), folder.getName(), UUIDs.getUnformattedString(task.getId()), I(task.getUserId()), I(task.getContextId()));
                 } catch (Exception e) {
                     if (isRetryableExceptionAndMayFail(e, sink)) {
-                        return savePointFor(new JSONObject(4).putSafe("folder", folder.getFolderId()).putSafe("root", root).putSafe("id", version.getId()).putSafe("version", version.getVersion()), e);
+                        return savePointFor(new JSONObject(4).putSafe("folder", folder.getFolderId()).putSafe("path", path).putSafe("root", root).putSafe("id", version.getId()).putSafe("version", version.getVersion()), e);
                     }
                     LOG.warn("Failed to export version {} of file {} in folder \"{}\" from primary mail account of user {} in context {}", version.getVersion(), version.getId(), folder.getName(), I(task.getUserId()), I(task.getContextId()), e);
                     sink.addToReport(Message.builder().appendToMessage("Failed to export version \"").appendToMessage(version.getVersion()).appendToMessage("\" of file \"").appendToMessage(version.getId()).appendToMessage("\" in folder \"").appendToMessage(folder.getName()).appendToMessage("\": ").appendToMessage(e.getMessage()).withModuleId(ID_INFOSTORE).withTimeStamp(new Date()).build());
@@ -661,15 +673,17 @@ public class InfostoreDataExport extends AbstractDataExportProviderTask {
 
         final String root;
         final String folderId;
+        final String path;
         final String fileId;
         final String version;
 
-        StartInfo(String version, String fileId, String folderId, String root) {
+        StartInfo(String version, String fileId, String folderId, String path, String root) {
             super();
             this.root = root;
             this.version = version;
             this.fileId = fileId;
             this.folderId = folderId;
+            this.path = path;
         }
     }
 

@@ -183,7 +183,7 @@ public class TaskDataExport extends AbstractDataExportProviderTask {
             if (savepoint.isPresent()) {
                 JSONObject jSavePoint = savepoint.get();
                 int taskId = jSavePoint.optInt("id", 0);
-                startInfo = new StartInfo(taskId > 0 ? I(taskId) : null, jSavePoint.getInt("folder"), jSavePoint.getInt("root"));
+                startInfo = new StartInfo(taskId > 0 ? I(taskId) : null, jSavePoint.getInt("folder"), jSavePoint.optString("path", null), jSavePoint.getInt("root"));
             } else {
                 startInfo = null;
             }
@@ -256,10 +256,13 @@ public class TaskDataExport extends AbstractDataExportProviderTask {
         }
     }
 
-    private SavePointAndReason traverseFolder(int root, Type type, Folder folder, String path, Options options, DecoratorProvider decoratorProvider, Session session, NeededServices neededServices) throws OXException, DataExportAbortedException {
+    private SavePointAndReason traverseFolder(int root, Type type, Folder folder, String parentPath, Options options, DecoratorProvider decoratorProvider, Session session, NeededServices neededServices) throws OXException, DataExportAbortedException {
         if (isPauseRequested()) {
             if (startInfo != null) {
                 JSONObject jSavePoint = new JSONObject(4).putSafe("folder", startInfo.folderId).putSafe("root", I(root));
+                if (startInfo.path != null) {
+                    jSavePoint.putSafe("path", startInfo.path);
+                }
                 if (startInfo.taskId != null) {
                     jSavePoint.putSafe("id", startInfo.taskId);
                 }
@@ -270,18 +273,21 @@ public class TaskDataExport extends AbstractDataExportProviderTask {
         }
         checkAborted();
 
+        String pathOfFolder = null;
         StartInfo info = startInfo;
         if (info == null || info.folderId.equals(folder.getFolderId())) {
-            if (info == null) {
-                if (!exportFolder(folder, path)) {
+            if (info == null || info.path == null) {
+                pathOfFolder = exportFolder(folder, parentPath);
+                if (pathOfFolder == null) {
                     return savePointFor(new JSONObject(2).putSafe("folder", folder.getFolderId()).putSafe("root", I(root)));
                 }
                 LOG.debug("Exported task directory {} for data export {} of user {} in context {}", folder.getName(), UUIDs.getUnformattedString(task.getId()), I(task.getUserId()), I(task.getContextId()));
+            } else {
+                pathOfFolder = info.path;
             }
 
             if (!folder.isRootFolder()) {
-                String newPath = (path == null ? "" : path) + sanitizeNameForZipEntry(folder.getName()) + "/";
-                SavePointAndReason jSavePoint = exportTasks(root, folder, newPath, info == null ? null : info.taskId, session, neededServices);
+                SavePointAndReason jSavePoint = exportTasks(root, folder, pathOfFolder, info == null ? null : info.taskId, session, neededServices);
                 if (jSavePoint != null) {
                     return jSavePoint;
                 }
@@ -318,6 +324,9 @@ public class TaskDataExport extends AbstractDataExportProviderTask {
                 if (isRetryableExceptionAndMayFail(e, sink)) {
                     if (info != null) {
                         JSONObject jSavePoint = new JSONObject(4).putSafe("folder", info.folderId).putSafe("root", I(root));
+                        if (startInfo.path != null) {
+                            jSavePoint.putSafe("path", startInfo.path);
+                        }
                         if (info.taskId != null) {
                             jSavePoint.putSafe("id", info.taskId);
                         }
@@ -332,9 +341,11 @@ public class TaskDataExport extends AbstractDataExportProviderTask {
             }
 
             if (!children.isEmpty()) {
-                String newPath = (path == null ? "" : path) + sanitizeNameForZipEntry(folder.getName()) + "/";
+                if (pathOfFolder == null) {
+                    pathOfFolder = info == null || info.path == null ? (parentPath == null ? "" : parentPath) + sanitizeNameForZipEntry(folder.getName()) + "/" : info.path;
+                }
                 for (Folder child : children) {
-                    SavePointAndReason jSavePoint = traverseFolder(root, type, child, newPath, options, decoratorProvider, session, neededServices);
+                    SavePointAndReason jSavePoint = traverseFolder(root, type, child, pathOfFolder, options, decoratorProvider, session, neededServices);
                     if (jSavePoint != null) {
                         return jSavePoint;
                     }
@@ -345,7 +356,7 @@ public class TaskDataExport extends AbstractDataExportProviderTask {
         return null;
     }
 
-    private boolean exportFolder(Folder folderInfo, String path) throws OXException {
+    private String exportFolder(Folder folderInfo, String path) throws OXException {
         return sink.export(new Directory(path, sanitizeNameForZipEntry(folderInfo.getName())));
     }
 
@@ -365,7 +376,7 @@ public class TaskDataExport extends AbstractDataExportProviderTask {
 
     private SavePointAndReason exportTasks(int root, Folder folder, String path, Integer startTaskId, Session session, NeededServices neededServices) throws OXException, DataExportAbortedException {
         if (isPauseRequested()) {
-            JSONObject jSavePoint = new JSONObject(4).putSafe("folder", folder.getFolderId()).putSafe("root", I(root));
+            JSONObject jSavePoint = new JSONObject(4).putSafe("folder", folder.getFolderId()).putSafe("path", path).putSafe("root", I(root));
             if (startTaskId != null) {
                 jSavePoint.putSafe("id", startTaskId);
             }
@@ -391,6 +402,7 @@ public class TaskDataExport extends AbstractDataExportProviderTask {
             if (isPauseRequested()) {
                 JSONObject jSavePoint = new JSONObject(4);
                 jSavePoint.putSafe("folder", folder.getFolderId());
+                jSavePoint.putSafe("path", path);
                 jSavePoint.putSafe("root", I(root));
                 jSavePoint.putSafe("id", startTaskId != null ? startTaskId : I(queriedTasks.next().getObjectID()));
                 return savePointFor(jSavePoint);
@@ -422,7 +434,7 @@ public class TaskDataExport extends AbstractDataExportProviderTask {
             throw e;
         } catch (Exception e) {
             if (isRetryableExceptionAndMayFail(e, sink)) {
-                JSONObject jSavePoint = new JSONObject(4).putSafe("folder", folder.getFolderId()).putSafe("root", I(root));
+                JSONObject jSavePoint = new JSONObject(4).putSafe("folder", folder.getFolderId()).putSafe("path", path).putSafe("root", I(root));
                 if (startTaskId != null) {
                     jSavePoint.putSafe("id", startTaskId);
                 }
@@ -449,6 +461,7 @@ public class TaskDataExport extends AbstractDataExportProviderTask {
             if (isPauseRequested()) {
                 JSONObject jSavePoint = new JSONObject(4);
                 jSavePoint.putSafe("folder", folder.getFolderId());
+                jSavePoint.putSafe("path", path);
                 jSavePoint.putSafe("root", I(root));
                 jSavePoint.putSafe("id", I(taskId));
                 return savePointFor(jSavePoint);
@@ -456,7 +469,7 @@ public class TaskDataExport extends AbstractDataExportProviderTask {
             int count = incrementAndGetCount();
             checkAborted((count % 100 == 0));
             if (count % 1000 == 0) {
-                sink.setSavePoint(new JSONObject(4).putSafe("folder", folder.getFolderId()).putSafe("root", I(root)).putSafe("id", I(taskId)));
+                sink.setSavePoint(new JSONObject(4).putSafe("folder", folder.getFolderId()).putSafe("path", path).putSafe("root", I(root)).putSafe("id", I(taskId)));
             }
             batchCount++;
 
@@ -500,7 +513,7 @@ public class TaskDataExport extends AbstractDataExportProviderTask {
                     icalEmitter.writeSession(iCalSession, out);
                     Boolean exported = exportedFlag.getUninterruptibly();
                     if (!exported.booleanValue()) {
-                        return savePointFor(new JSONObject(4).putSafe("folder", folder.getFolderId()).putSafe("root", I(root)).putSafe("id", I(taskId)));
+                        return savePointFor(new JSONObject(4).putSafe("folder", folder.getFolderId()).putSafe("path", path).putSafe("root", I(root)).putSafe("id", I(taskId)));
                     }
                     LOG.debug("Exported task {} ({} of {}) from directory {} for data export {} of user {} in context {}", I(taskId), I(batchCount), I(tasks.size()), folder.getName(), UUIDs.getUnformattedString(this.task.getId()), I(this.task.getUserId()), I(this.task.getContextId()));
                 } catch (Exception e) {
@@ -518,7 +531,7 @@ public class TaskDataExport extends AbstractDataExportProviderTask {
                 }
             } catch (Exception e) {
                 if (isRetryableExceptionAndMayFail(e, sink)) {
-                    return savePointFor(new JSONObject(4).putSafe("folder", folder.getFolderId()).putSafe("root", I(root)).putSafe("id", I(taskId)), e);
+                    return savePointFor(new JSONObject(4).putSafe("folder", folder.getFolderId()).putSafe("path", path).putSafe("root", I(root)).putSafe("id", I(taskId)), e);
                 }
                 LOG.warn("Failed to export task {} in folder \"{}\" from primary mail account of user {} in context {}", I(taskId), folder.getName(), I(this.task.getUserId()), I(this.task.getContextId()), e);
                 sink.addToReport(Message.builder().appendToMessage("Failed to export task \"").appendToMessage(taskId).appendToMessage("\" in folder \"").appendToMessage(folder.getName()).appendToMessage("\": ").appendToMessage(e.getMessage()).withModuleId(ID_TASKS).withTimeStamp(new Date()).build());
@@ -579,17 +592,19 @@ public class TaskDataExport extends AbstractDataExportProviderTask {
 
         final int root;
         final String folderId;
+        final String path;
         final Integer taskId;
 
-        StartInfo(Integer taskId, int folderId, int root) {
-            this(taskId, Integer.toString(folderId), root);
+        StartInfo(Integer taskId, int folderId, String path, int root) {
+            this(taskId, Integer.toString(folderId), path, root);
         }
 
-        StartInfo(Integer taskId, String folderId, int root) {
+        StartInfo(Integer taskId, String folderId, String path, int root) {
             super();
             this.root = root;
             this.taskId = taskId;
             this.folderId = folderId;
+            this.path = path;
         }
     }
 

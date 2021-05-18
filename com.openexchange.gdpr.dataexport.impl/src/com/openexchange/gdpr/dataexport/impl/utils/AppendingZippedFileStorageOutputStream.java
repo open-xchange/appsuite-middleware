@@ -52,7 +52,9 @@ package com.openexchange.gdpr.dataexport.impl.utils;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.HashSet;
 import java.util.Optional;
+import java.util.Set;
 import org.apache.commons.compress.archivers.ArchiveEntry;
 import org.apache.commons.compress.archivers.zip.ZipArchiveEntry;
 import org.apache.commons.compress.archivers.zip.ZipArchiveOutputStream;
@@ -67,6 +69,7 @@ import com.openexchange.filestore.FileStorage;
  */
 public class AppendingZippedFileStorageOutputStream extends ZippedFileStorageOutputStream {
 
+    private final Set<String> archiveEntryNames;
     private final AppendingFileStorageOutputStream out;
     private final ZipArchiveOutputStream zipOut;
 
@@ -82,6 +85,7 @@ public class AppendingZippedFileStorageOutputStream extends ZippedFileStorageOut
         super();
         out = new AppendingFileStorageOutputStream(bufferSize, fileStorage);
         zipOut = initZipArchiveOutputStream(out, compressionLevel);
+        archiveEntryNames = new HashSet<String>();
     }
 
     @Override
@@ -142,11 +146,17 @@ public class AppendingZippedFileStorageOutputStream extends ZippedFileStorageOut
 
     @Override
     public void addRawArchiveEntry(ZipArchiveEntry entry, InputStream rawStream) throws IOException {
+        if (false == archiveEntryNames.add(entry.getName())) {
+            throw new java.util.zip.ZipException("duplicate entry");
+        }
         zipOut.addRawArchiveEntry(entry, rawStream);
     }
 
     @Override
     public void putArchiveEntry(ArchiveEntry archiveEntry) throws IOException {
+        if (false == archiveEntryNames.add(archiveEntry.getName())) {
+            throw new java.util.zip.ZipException("duplicate entry");
+        }
         zipOut.putArchiveEntry(archiveEntry);
     }
 

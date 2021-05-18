@@ -182,7 +182,7 @@ public class MailDataExport extends AbstractDataExportProviderTask {
             StartInfo startInfo;
             if (savepoint.isPresent()) {
                 JSONObject jSavePoint = savepoint.get();
-                startInfo = new StartInfo(jSavePoint.optString("id", null), jSavePoint.getString("folder"));
+                startInfo = new StartInfo(jSavePoint.optString("id", null), jSavePoint.getString("folder"), jSavePoint.optString("path", null));
             } else {
                 startInfo = null;
             }
@@ -258,11 +258,14 @@ public class MailDataExport extends AbstractDataExportProviderTask {
         }
     }
 
-    private SavePointAndReason traverseFolder(Folder folder, String path, StartInfo startInfo, Options options, MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> mailAccess) throws OXException, DataExportAbortedException {
+    private SavePointAndReason traverseFolder(Folder folder, String parentPath, StartInfo startInfo, Options options, MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> mailAccess) throws OXException, DataExportAbortedException {
         if (isPauseRequested()) {
             if (startInfo != null) {
                 JSONObject jSavePoint = new JSONObject(4);
                 jSavePoint.putSafe("folder", startInfo.fullName);
+                if (startInfo.path != null) {
+                    jSavePoint.putSafe("path", startInfo.path);
+                }
                 if (startInfo.mailId != null) {
                     jSavePoint.putSafe("id", startInfo.mailId);
                 }
@@ -273,18 +276,21 @@ public class MailDataExport extends AbstractDataExportProviderTask {
         }
         checkAborted();
 
+        String pathOfFolder = null;
         StartInfo info = startInfo;
         if (info == null || info.fullName.equals(folder.getFullname())) {
-            if (info == null) {
-                if (!exportFolder(folder, path)) {
+            if (info == null || info.path == null) {
+                pathOfFolder = exportFolder(folder, parentPath);
+                if (pathOfFolder == null) {
                     return savePointFor(new JSONObject(2).putSafe("folder", folder.getFullname()));
                 }
                 LOG.debug("Exported mail directory {} for data export {} of user {} in context {}", folder.getFullname(), UUIDs.getUnformattedString(task.getId()), I(task.getUserId()), I(task.getContextId()));
+            } else {
+                pathOfFolder = info.path;
             }
 
             if (folder.isHoldsMessages()) {
-                String newPath = folder.isRootFolder() ? "" : (path == null ? "" : path) + sanitizeNameForZipEntry(folder.getName()) + "/";
-                SavePointAndReason jSavePoint = exportMessages(folder.getFullname(), newPath, info == null ? null : info.mailId, mailAccess);
+                SavePointAndReason jSavePoint = exportMessages(folder.getFullname(), pathOfFolder, info == null ? null : info.mailId, mailAccess);
                 if (jSavePoint != null) {
                     return jSavePoint;
                 }
@@ -301,6 +307,9 @@ public class MailDataExport extends AbstractDataExportProviderTask {
                 if (info != null) {
                     JSONObject jSavePoint = new JSONObject(4);
                     jSavePoint.putSafe("folder", info.fullName);
+                    if (info.path != null) {
+                        jSavePoint.putSafe("path", startInfo.path);
+                    }
                     if (info.mailId != null) {
                         jSavePoint.putSafe("id", info.mailId);
                     }
@@ -317,9 +326,15 @@ public class MailDataExport extends AbstractDataExportProviderTask {
         if (!children.isEmpty()) {
             children = children.stream().filter(new FolderPredicate(options)).sorted(new FolderFullNameComparator(locale)).collect(Collectors.toList());
 
-            String newPath = folder.isRootFolder() ? "" : (path == null ? "" : path) + sanitizeNameForZipEntry(folder.getName()) + "/";
+            if (pathOfFolder == null) {
+                if (startInfo == null || startInfo.path == null) {
+                    pathOfFolder = folder.isRootFolder() ? "" : (parentPath == null ? "" : parentPath) + sanitizeNameForZipEntry(folder.getName()) + "/";
+                } else {
+                    pathOfFolder = startInfo.path;
+                }
+            }
             for (Folder child : children) {
-                SavePointAndReason jSavePoint = traverseFolder(child, newPath, info, options, mailAccess);
+                SavePointAndReason jSavePoint = traverseFolder(child, pathOfFolder, info, options, mailAccess);
                 if (jSavePoint != null) {
                     return jSavePoint;
                 }
@@ -329,9 +344,9 @@ public class MailDataExport extends AbstractDataExportProviderTask {
         return null;
     }
 
-    private boolean exportFolder(Folder folderInfo, String path) throws OXException {
+    private String exportFolder(Folder folderInfo, String path) throws OXException {
         if (folderInfo.isRootFolder()) {
-            return true;
+            return "";
         }
 
         return sink.export(new Directory(path, sanitizeNameForZipEntry(folderInfo.getName())));
@@ -342,7 +357,7 @@ public class MailDataExport extends AbstractDataExportProviderTask {
     private SavePointAndReason exportMessages(String fullName, String path, String startMailId, MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> mailAccess) throws OXException, DataExportAbortedException {
         if (isPauseRequested()) {
             JSONObject jSavePoint = new JSONObject(4);
-            jSavePoint.putSafe("folder", fullName);
+            jSavePoint.putSafe("folder", fullName).putSafe("path", path);
             if (startMailId != null) {
                 jSavePoint.putSafe("id", startMailId);
             }
@@ -359,7 +374,7 @@ public class MailDataExport extends AbstractDataExportProviderTask {
             }
 
             if (isPauseRequested()) {
-                JSONObject jSavePoint = new JSONObject(4).putSafe("folder", fullName);
+                JSONObject jSavePoint = new JSONObject(4).putSafe("folder", fullName).putSafe("path", path);
                 if (startMailId != null) {
                     jSavePoint.putSafe("id", startMailId);
                 }
@@ -394,7 +409,7 @@ public class MailDataExport extends AbstractDataExportProviderTask {
             throw e;
         } catch (Exception e) {
             if (isRetryableExceptionAndMayFail(e, sink)) {
-                JSONObject jSavePoint = new JSONObject(4).putSafe("folder", fullName);
+                JSONObject jSavePoint = new JSONObject(4).putSafe("folder", fullName).putSafe("path", path);
                 if (startMailId != null) {
                     jSavePoint.putSafe("id", startMailId);
                 }
@@ -421,13 +436,14 @@ public class MailDataExport extends AbstractDataExportProviderTask {
             if (isPauseRequested()) {
                 JSONObject jSavePoint = new JSONObject(4);
                 jSavePoint.putSafe("folder", fullName);
+                jSavePoint.putSafe("path", path);
                 jSavePoint.putSafe("id", mailId);
                 return savePointFor(jSavePoint);
             }
             int count = incrementAndGetCount();
             checkAborted(count % 100 == 0);
             if (count % 1000 == 0) {
-                sink.setSavePoint(new JSONObject(4).putSafe("folder", fullName).putSafe("id", mailId));
+                sink.setSavePoint(new JSONObject(4).putSafe("folder", fullName).putSafe("path", path).putSafe("id", mailId));
             }
             batchCount++;
 
@@ -440,13 +456,13 @@ public class MailDataExport extends AbstractDataExportProviderTask {
                     stream = MimeMessageUtility.getStreamFromMailPart(m);
                     boolean exported = sink.export(stream, new Item(path, sanitizeNameForZipEntry(mailId + ".eml"), m.getSentDate()));
                     if (!exported) {
-                        return savePointFor(new JSONObject(4).putSafe("folder", fullName).putSafe("id", mailId));
+                        return savePointFor(new JSONObject(4).putSafe("folder", fullName).putSafe("path", path).putSafe("id", mailId));
                     }
                     LOG.debug("Exported mail {} ({} of {}) from directory {} for data export {} of user {} in context {}", mailId, I(batchCount), I(messages.length), fullName, UUIDs.getUnformattedString(task.getId()), I(task.getUserId()), I(task.getContextId()));
                 }
             } catch (Exception e) {
                 if (isRetryableExceptionAndMayFail(e, sink)) {
-                    return savePointFor(new JSONObject(4).putSafe("folder", fullName).putSafe("id", mailId), e);
+                    return savePointFor(new JSONObject(4).putSafe("folder", fullName).putSafe("path", path).putSafe("id", mailId), e);
                 }
                 LOG.warn("Failed to export message {} in folder \"{}\" from primary mail account of user {} in context {}", mailId, fullName, I(task.getUserId()), I(task.getContextId()), e);
                 sink.addToReport(Message.builder().appendToMessage("Failed to export message \"").appendToMessage(mailId).appendToMessage("\" in folder \"").appendToMessage(fullName).appendToMessage("\": ").appendToMessage(e.getMessage()).withModuleId(ID_MAIL).withTimeStamp(new Date()).build());
@@ -536,12 +552,14 @@ public class MailDataExport extends AbstractDataExportProviderTask {
     private static class StartInfo {
 
         final String fullName;
+        final String path;
         final String mailId;
 
-        StartInfo(String mailId, String fullName) {
+        StartInfo(String mailId, String fullName, String path) {
             super();
             this.mailId = mailId;
             this.fullName = fullName;
+            this.path = path;
         }
     }
 
