@@ -281,12 +281,12 @@ public abstract class AbstractDataExportProviderTask {
      * Exports specified folder as hierarchy delimiter to data export sink.
      *
      * @param folder The folder to export
-     * @param path The path
-     * @return <code>true</code> if folder has been successfully exported; otherwise <code>false</code>
+     * @param parentPath The path of the parent folder; e.g. <code>"INBOX/"</code>
+     * @return The actual path if folder has been successfully exported; otherwise <code>null</code>
      * @throws OXException If export fails
      */
-    protected boolean exportFolder(Folder folder, String path) throws OXException {
-        return sink.export(new Directory(path, sanitizeNameForZipEntry(folder.getName())));
+    protected String exportFolder(Folder folder, String parentPath) throws OXException {
+        return sink.export(new Directory(parentPath, sanitizeNameForZipEntry(folder.getName())));
     }
 
     /**
