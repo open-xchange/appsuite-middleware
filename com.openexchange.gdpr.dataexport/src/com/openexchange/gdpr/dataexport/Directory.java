@@ -57,28 +57,28 @@ package com.openexchange.gdpr.dataexport;
  */
 public class Directory {
 
-    private final String path;
+    private final String parentPath;
     private final String name;
 
     /**
      * Initializes a new {@link Directory}.
      *
-     * @param path The path prefix; e.g. <code>"INBOX/"</code>
+     * @param parentPath The path of the parent directory; e.g. <code>"INBOX/"</code>
      * @param name The directory's name (typically a unique identifier)
      */
-    public Directory(String path, String name) {
+    public Directory(String parentPath, String name) {
         super();
-        this.path = path == null ? "" : path;
+        this.parentPath = parentPath == null ? "" : parentPath;
         this.name = name;
     }
 
     /**
-     * Gets the path prefix; e.g. <code>"INBOX/"</code>
+     * Gets the path of the parent directory; e.g. <code>"INBOX/"</code>
      *
-     * @return The path prefix
+     * @return The path of the parent directory
      */
-    public String getPath() {
-        return path;
+    public String getParentPath() {
+        return parentPath;
     }
 
     /**
@@ -95,7 +95,7 @@ public class Directory {
         final int prime = 31;
         int result = 1;
         result = prime * result + ((name == null) ? 0 : name.hashCode());
-        result = prime * result + ((path == null) ? 0 : path.hashCode());
+        result = prime * result + ((parentPath == null) ? 0 : parentPath.hashCode());
         return result;
     }
 
@@ -118,11 +118,11 @@ public class Directory {
         } else if (!name.equals(other.name)) {
             return false;
         }
-        if (path == null) {
-            if (other.path != null) {
+        if (parentPath == null) {
+            if (other.parentPath != null) {
                 return false;
             }
-        } else if (!path.equals(other.path)) {
+        } else if (!parentPath.equals(other.parentPath)) {
             return false;
         }
         return true;
@@ -132,8 +132,8 @@ public class Directory {
     public String toString() {
         StringBuilder builder = new StringBuilder();
         builder.append("Directory [");
-        if (path != null) {
-            builder.append("path=").append(path).append(", ");
+        if (parentPath != null) {
+            builder.append("pathPrefix=").append(parentPath).append(", ");
         }
         if (name != null) {
             builder.append("name=").append(name);

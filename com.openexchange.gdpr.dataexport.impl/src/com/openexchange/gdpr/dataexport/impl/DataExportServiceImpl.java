@@ -417,10 +417,31 @@ public class DataExportServiceImpl implements DataExportService {
         task.setWorkItems(workItems);
         task.setArguments(args);
 
-        boolean created = storageService.createIfAbsent(task, userId, contextId);
-        if (created) {
-            LOG.info("Submitted data export task {} for user {} in context {}", stringFor(task.getId()), I(task.getUserId()), I(contextId));
-            return Optional.of(taskId);
+        boolean keepgoing = true;
+        while (keepgoing) {
+            boolean created = storageService.createIfAbsent(task, userId, contextId);
+            if (created) {
+                LOG.info("Submitted data export task {} for user {} in context {}", stringFor(task.getId()), I(task.getUserId()), I(contextId));
+                return Optional.of(taskId);
+            }
+
+            // Drop aborted ones
+            keepgoing = false;
+            try {
+                Optional<DataExportTask> optExisting = storageService.getDataExportTask(userId, contextId);
+                if (optExisting.isPresent()) {
+                    DataExportTask existing = optExisting.get();
+                    if (DataExportStatus.ABORTED == existing.getStatus()) {
+                        boolean deleted = storageService.deleteDataExportTask(userId, contextId);
+                        if (deleted) {
+                            keepgoing = true;
+                            LOG.info("Deleted aborted data export task {} (incl. all resources and artifacts) of user {} in context {} in order to submit a new task", stringFor(existing.getId()), I(task.getUserId()), I(contextId));
+                        }
+                    }
+                }
+            } catch (Exception e) {
+                LOG.error("Failed checking for existent aborted data export task of user {} in context {}", I(task.getUserId()), I(contextId));
+            }
         }
         return Optional.empty();
     }

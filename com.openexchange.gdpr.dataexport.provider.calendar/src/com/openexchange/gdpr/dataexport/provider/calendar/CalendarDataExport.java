@@ -146,7 +146,7 @@ public class CalendarDataExport extends AbstractDataExportProviderTask {
         if (savepoint.isPresent()) {
             JSONObject jSavePoint = savepoint.get();
             try {
-                startInfo = new StartInfo(jSavePoint.optString("uid", null), jSavePoint.getString("folder"), jSavePoint.getString("root"));
+                startInfo = new StartInfo(jSavePoint.optString("uid", null), jSavePoint.getString("folder"), jSavePoint.optString("path", null), jSavePoint.getString("root"));
             } catch (JSONException e) {
                 throw DataExportExceptionCode.UNEXPECTED_ERROR.create(e, e.getMessage());
             }
@@ -248,10 +248,13 @@ public class CalendarDataExport extends AbstractDataExportProviderTask {
         }
     }
 
-    private SavePointAndReason traverseFolder(String root, Type type, Folder folder, String path, Options options, DecoratorProvider decoratorProvider, Session session, NeededServices neededServices) throws OXException, DataExportAbortedException {
+    private SavePointAndReason traverseFolder(String root, Type type, Folder folder, String parentPath, Options options, DecoratorProvider decoratorProvider, Session session, NeededServices neededServices) throws OXException, DataExportAbortedException {
         if (isPauseRequested()) {
             if (startInfo != null) {
                 JSONObject jSavePoint = new JSONObject(4).putSafe("folder", startInfo.folderId).putSafe("root", root);
+                if (startInfo.path != null) {
+                    jSavePoint.putSafe("path", startInfo.path);
+                }
                 if (startInfo.eventUid != null) {
                     jSavePoint.putSafe("uid", startInfo.eventUid);
                 }
@@ -262,17 +265,20 @@ public class CalendarDataExport extends AbstractDataExportProviderTask {
         }
         checkAborted();
 
+        String pathOfFolder = null;
         if (startInfo == null || startInfo.folderId.equals(folder.getFolderId())) {
-            if (startInfo == null) {
-                if (!exportFolder(folder, path)) {
+            if (startInfo == null || startInfo.path == null) {
+                pathOfFolder = exportFolder(folder, parentPath);
+                if (pathOfFolder == null) {
                     return savePointFor(new JSONObject(2).putSafe("folder", folder.getFolderId()).putSafe("root", root));
                 }
                 LOG.debug("Exported calendar directory {} for data export {} of user {} in context {}", folder.getName(), UUIDs.getUnformattedString(task.getId()), I(task.getUserId()), I(task.getContextId()));
+            } else {
+                pathOfFolder = startInfo.path;
             }
 
             if (!folder.isRootFolder() && !folder.getFolderId().startsWith(SHARED_PREFIX)) {
-                String newPath = (path == null ? "" : path) + sanitizeNameForZipEntry(folder.getName()) + "/";
-                SavePointAndReason jSavePoint = exportEvents(root, folder, newPath, startInfo == null ? null : startInfo.eventUid, session, neededServices);
+                SavePointAndReason jSavePoint = exportEvents(root, folder, pathOfFolder, startInfo == null ? null : startInfo.eventUid, session, neededServices);
                 if (jSavePoint != null) {
                     return jSavePoint;
                 }
@@ -311,6 +317,9 @@ public class CalendarDataExport extends AbstractDataExportProviderTask {
                 if (isRetryableExceptionAndMayFail(e, sink)) {
                     if (startInfo != null) {
                         JSONObject jSavePoint = new JSONObject(4).putSafe("folder", startInfo.folderId).putSafe("root", root);
+                        if (startInfo.path != null) {
+                            jSavePoint.putSafe("path", startInfo.path);
+                        }
                         if (startInfo.eventUid != null) {
                             jSavePoint.putSafe("uid", startInfo.eventUid);
                         }
@@ -324,9 +333,11 @@ public class CalendarDataExport extends AbstractDataExportProviderTask {
             }
 
             if (!children.isEmpty()) {
-                String newPath = (path == null ? "" : path) + sanitizeNameForZipEntry(folder.getName()) + "/";
+                if (pathOfFolder == null) {
+                    pathOfFolder = startInfo == null || startInfo.path == null ? (parentPath == null ? "" : parentPath) + sanitizeNameForZipEntry(folder.getName()) + "/" : startInfo.path;
+                }
                 for (Folder child : children) {
-                    SavePointAndReason jSavePoint = traverseFolder(root, type, child, newPath, options, decoratorProvider, session, neededServices);
+                    SavePointAndReason jSavePoint = traverseFolder(root, type, child, pathOfFolder, options, decoratorProvider, session, neededServices);
                     if (jSavePoint != null) {
                         return jSavePoint;
                     }
@@ -339,7 +350,7 @@ public class CalendarDataExport extends AbstractDataExportProviderTask {
 
     private SavePointAndReason exportEvents(String root, Folder folder, String path, String startEventUid, Session session, NeededServices neededServices) throws OXException, DataExportAbortedException {
         if (isPauseRequested()) {
-            JSONObject jSavePoint = new JSONObject(4).putSafe("folder", folder.getFolderId()).putSafe("root", root);
+            JSONObject jSavePoint = new JSONObject(4).putSafe("folder", folder.getFolderId()).putSafe("path", path).putSafe("root", root);
             if (startEventUid != null) {
                 jSavePoint.putSafe("uid", startEventUid);
             }
@@ -364,7 +375,7 @@ public class CalendarDataExport extends AbstractDataExportProviderTask {
             eventsByUid = toMultiMap(partlyFilledEvents, new TreeMap<>(), Event::getUid);
 
             if (isPauseRequested()) {
-                JSONObject jSavePoint = new JSONObject(4).putSafe("folder", folder.getFolderId()).putSafe("root", root);
+                JSONObject jSavePoint = new JSONObject(4).putSafe("folder", folder.getFolderId()).putSafe("path", path).putSafe("root", root);
                 if (startEventUid != null) {
                     jSavePoint.putSafe("uid", startEventUid);
                 }
@@ -392,7 +403,7 @@ public class CalendarDataExport extends AbstractDataExportProviderTask {
             throw e;
         } catch (Exception e) {
             if (isRetryableExceptionAndMayFail(e, sink)) {
-                JSONObject jSavePoint = new JSONObject(4).putSafe("folder", folder.getFolderId()).putSafe("root", root);
+                JSONObject jSavePoint = new JSONObject(4).putSafe("folder", folder.getFolderId()).putSafe("path", path).putSafe("root", root);
                 if (startEventUid != null) {
                     jSavePoint.putSafe("uid", startEventUid);
                 }
@@ -427,6 +438,7 @@ public class CalendarDataExport extends AbstractDataExportProviderTask {
             if (isPauseRequested()) {
                 JSONObject jSavePoint = new JSONObject(4);
                 jSavePoint.putSafe("folder", folder.getFolderId());
+                jSavePoint.putSafe("path", path);
                 jSavePoint.putSafe("root", root);
                 jSavePoint.putSafe("uid", uid);
                 return savePointFor(jSavePoint);
@@ -434,7 +446,7 @@ public class CalendarDataExport extends AbstractDataExportProviderTask {
             int count = incrementAndGetCount();
             checkAborted((count % 100 == 0));
             if (count % 1000 == 0) {
-                sink.setSavePoint(new JSONObject(4).putSafe("folder", folder.getFolderId()).putSafe("root", root).putSafe("uid", uid));
+                sink.setSavePoint(new JSONObject(4).putSafe("folder", folder.getFolderId()).putSafe("path", path).putSafe("root", root).putSafe("uid", uid));
             }
             batchCount++;
 
@@ -447,12 +459,12 @@ public class CalendarDataExport extends AbstractDataExportProviderTask {
 
                 boolean exported = sink.export(calendarExport.getClosingStream(), new Item(path, sanitizeNameForZipEntry(uid + ".ics"), null));
                 if (!exported) {
-                    return savePointFor(new JSONObject(4).putSafe("folder", folder.getFolderId()).putSafe("root", root).putSafe("uid", uid));
+                    return savePointFor(new JSONObject(4).putSafe("folder", folder.getFolderId()).putSafe("path", path).putSafe("root", root).putSafe("uid", uid));
                 }
                 LOG.debug("Exported event {} ({} of {}) from directory {} for data export {} of user {} in context {}", uid, I(batchCount), I(eventsByUid.size()), folder.getName(), UUIDs.getUnformattedString(task.getId()), I(task.getUserId()), I(task.getContextId()));
             } catch (Exception e) {
                 if (isRetryableExceptionAndMayFail(e, sink)) {
-                    return savePointFor(new JSONObject(4).putSafe("folder", folder.getFolderId()).putSafe("root", root).putSafe("uid", uid), e);
+                    return savePointFor(new JSONObject(4).putSafe("folder", folder.getFolderId()).putSafe("path", path).putSafe("root", root).putSafe("uid", uid), e);
                 }
                 LOG.warn("Failed to export event {} in folder \"{}\" from primary mail account of user {} in context {}", uid, folder.getName(), I(task.getUserId()), I(task.getContextId()), e);
                 sink.addToReport(Message.builder().appendToMessage("Failed to export event \"").appendToMessage(uid).appendToMessage("\" in folder \"").appendToMessage(folder.getName()).appendToMessage("\": ").appendToMessage(e.getMessage()).withModuleId(ID_CALENDAR).withTimeStamp(new Date()).build());
@@ -534,13 +546,15 @@ public class CalendarDataExport extends AbstractDataExportProviderTask {
 
         final String root;
         final String folderId;
+        final String path;
         final String eventUid;
 
-        StartInfo(String uid, String folderId, String root) {
+        StartInfo(String uid, String folderId, String path, String root) {
             super();
             this.root = root;
             this.eventUid = uid;
             this.folderId = folderId;
+            this.path = path;
         }
     }
 
