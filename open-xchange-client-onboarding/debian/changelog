@@ -1,3 +1,9 @@
+open-xchange-client-onboarding (7.10.4-24) stable; urgency=medium
+
+  * Build for patch 2021-05-17 (5993)
+
+ -- Thorben Betten <thorben.betten@open-xchange.com>  Tue, 18 May 2021 12:24:44 +0000
+
 open-xchange-client-onboarding (7.10.4-23) stable; urgency=medium
 
   * Build for patch 2021-05-03 (5988)

@@ -1,3 +1,9 @@
+open-xchange-antivirus (7.10.4-24) stable; urgency=medium
+
+  * Build for patch 2021-05-17 (5993)
+
+ -- Ioannis Chouklis <ioannis.chouklis@open-xchange.com>  Tue, 18 May 2021 12:23:45 +0000
+
 open-xchange-antivirus (7.10.4-23) stable; urgency=medium
 
   * Build for patch 2021-05-03 (5988)
