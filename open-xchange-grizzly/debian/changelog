@@ -1,3 +1,9 @@
+open-xchange-grizzly (7.10.6-0) unstable; urgency=medium
+
+  * prepare for 7.10.6 release
+
+ -- Marc Arens <marc.arens@open-xchange.com>  Tue, 18 May 2021 09:06:10 +0200
+
 open-xchange-grizzly (7.10.5-5) stable; urgency=medium
 
   * Third candidate for 7.10.5 release

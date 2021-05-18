@@ -3,7 +3,7 @@ Bundle-ManifestVersion: 2
 Automatic-Module-Name: com.openexchange.oauth
 Bundle-Name: Open-Xchange Oauth Bundle
 Bundle-SymbolicName: com.openexchange.oauth
-Bundle-Version: 7.10.5
+Bundle-Version: 7.10.6
 Bundle-Vendor: OX Software GmbH
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Import-Package: com.google.common.collect,

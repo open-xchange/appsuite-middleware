@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: The provider for subscribed cross-context calendar accounts
 Bundle-SymbolicName: com.openexchange.chronos.provider.xctx
-Bundle-Version: 7.10.5
+Bundle-Version: 7.10.6
 Bundle-Vendor: OX Software GmbH
 Automatic-Module-Name: com.openexchange.chronos.provider.xctx
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
