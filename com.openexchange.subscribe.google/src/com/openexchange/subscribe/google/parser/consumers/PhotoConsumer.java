@@ -49,69 +49,91 @@
 
 package com.openexchange.subscribe.google.parser.consumers;
 
+import static com.openexchange.java.Autoboxing.b;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.List;
 import java.util.function.BiConsumer;
 import org.slf4j.Logger;
-import com.google.gdata.client.Service.GDataRequest;
-import com.google.gdata.client.contacts.ContactsService;
-import com.google.gdata.data.Link;
-import com.google.gdata.data.contacts.ContactEntry;
-import com.google.gdata.util.ServiceException;
+import com.google.api.client.http.GenericUrl;
+import com.google.api.client.http.HttpResponse;
+import com.google.api.services.people.v1.PeopleService;
+import com.google.api.services.people.v1.model.Person;
+import com.google.api.services.people.v1.model.Photo;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.tools.io.IOUtils;
 
 /**
- * {@link PhotoConsumer} - Parses the birthday of the contact
+ * {@link PhotoConsumer} - Parses the photo of the contact
  *
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
+ * @author <a href="mailto:philipp.schumacher@open-xchange.com">Philipp Schumacher</a>
  * @since v7.10.1
  */
-public class PhotoConsumer implements BiConsumer<ContactEntry, Contact> {
+public class PhotoConsumer implements BiConsumer<Person, Contact> {
 
     /** Simple class to delay initialization until needed */
     private static class LoggerHolder {
+
         static final Logger LOG = org.slf4j.LoggerFactory.getLogger(PhotoConsumer.class);
     }
 
-    private final ContactsService googleContactsService;
+    private final PeopleService googlePeopleService;
+
+    private final int maxImageSize;
 
     /**
      * Initialises a new {@link PhotoConsumer}.
      */
-    public PhotoConsumer(ContactsService googleContactsService) {
+    public PhotoConsumer(PeopleService googlePeopleService, int maxImageSize) {
         super();
-        this.googleContactsService = googleContactsService;
+        this.googlePeopleService = googlePeopleService;
+        this.maxImageSize = maxImageSize;
     }
 
     @Override
-    public void accept(ContactEntry t, Contact u) {
-        Link photoLink = t.getContactPhotoLink();
-        if (photoLink == null) {
+    public void accept(Person person, Contact contact) {
+        List<Photo> photos = person.getPhotos();
+        if (photos == null || photos.isEmpty()) {
             return;
         }
-        GDataRequest request = null;
+        Photo photo = photos.get(0);
+        Boolean photoDefault = photo.getDefault();
+        if (photoDefault == null || !b(photoDefault)) {
+            String url = photo.getUrl();
+            setPhoto(url, contact);
+        }
+    }
+
+    /**
+     * Fetches and sets the photo
+     *
+     * @param url The URL to fetch the photo from
+     * @param contact The {@link Contact}
+     */
+    private void setPhoto(String url, Contact contact) {
         InputStream resultStream = null;
         ByteArrayOutputStream out = null;
+        HttpResponse response = null;
         try {
-            request = googleContactsService.createLinkQueryRequest(photoLink);
-            request.execute();
-            resultStream = request.getResponseStream();
+            response = googlePeopleService.getRequestFactory().buildGetRequest(new GenericUrl(url)).execute();
+            resultStream = response.getContent();
             out = new ByteArrayOutputStream();
             int read = 0;
             byte[] buffer = new byte[4096];
             while ((read = resultStream.read(buffer)) != -1) {
                 out.write(buffer, 0, read);
+                if (out.size() > maxImageSize) {
+                    LoggerHolder.LOG.debug("Max image size exceeded. Ignoring image from google people api.");
+                    return; // image size exceeded. do not set an image
+                }
             }
-            u.setImage1(out.toByteArray());
-            u.setImageContentType(photoLink.getType());
-        } catch (IOException | ServiceException e) {
-            LoggerHolder.LOG.debug("Error fetching contact's image from '{}'", photoLink.getHref(), e);
+            contact.setImage1(out.toByteArray());
+            contact.setImageContentType(response.getContentType());
+        } catch (IOException e) {
+            LoggerHolder.LOG.debug("Error fetching contact's image from '{}'", url, e);
         } finally {
-            if (request != null) {
-                request.end();
-            }
             IOUtils.closeQuietly(resultStream);
             IOUtils.closeQuietly(out);
         }

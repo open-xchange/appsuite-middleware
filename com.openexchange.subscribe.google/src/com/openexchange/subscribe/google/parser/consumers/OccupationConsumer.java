@@ -49,17 +49,20 @@
 
 package com.openexchange.subscribe.google.parser.consumers;
 
+import java.util.List;
 import java.util.function.BiConsumer;
-import com.google.gdata.data.contacts.ContactEntry;
+import com.google.api.services.people.v1.model.Occupation;
+import com.google.api.services.people.v1.model.Person;
 import com.openexchange.groupware.container.Contact;
 
 /**
- * {@link OccupationConsumer}
+ * {@link OccupationConsumer} - Parses the occupations of the contact
  *
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
+ * @author <a href="mailto:philipp.schumacher@open-xchange.com">Philipp Schumacher</a>
  * @since v7.10.1
  */
-public class OccupationConsumer implements BiConsumer<ContactEntry, Contact> {
+public class OccupationConsumer implements BiConsumer<Person, Contact> {
 
     /**
      * Initialises a new {@link OccupationConsumer}.
@@ -69,9 +72,12 @@ public class OccupationConsumer implements BiConsumer<ContactEntry, Contact> {
     }
 
     @Override
-    public void accept(ContactEntry t, Contact u) {
-        if (t.hasOccupation()) {
-            u.setProfession(t.getOccupation().getValue());
+    public void accept(Person person, Contact contact) {
+        List<Occupation> occupations = person.getOccupations();
+        if (occupations == null || occupations.isEmpty()) {
+            return;
         }
+        Occupation occupation = occupations.get(0);
+        contact.setProfession(occupation.getValue());
     }
 }

@@ -50,23 +50,36 @@
 package com.openexchange.subscribe.google;
 
 import static com.openexchange.java.Autoboxing.I;
+import static com.openexchange.java.Autoboxing.i;
 import java.io.IOException;
-import java.net.URL;
+import java.security.GeneralSecurityException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.Locale;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeUnit;
+import java.util.function.Consumer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import com.google.gdata.client.Query;
-import com.google.gdata.client.contacts.ContactsService;
-import com.google.gdata.data.contacts.ContactFeed;
-import com.google.gdata.util.ServiceException;
+import com.google.api.client.googleapis.javanet.GoogleNetHttpTransport;
+import com.google.api.client.http.javanet.NetHttpTransport;
+import com.google.api.client.json.JsonFactory;
+import com.google.api.client.json.jackson2.JacksonFactory;
+import com.google.api.services.people.v1.PeopleService;
+import com.google.api.services.people.v1.model.ListConnectionsResponse;
+import com.google.common.cache.Cache;
+import com.google.common.cache.CacheBuilder;
+import com.google.common.util.concurrent.ExecutionError;
+import com.openexchange.config.ConfigurationService;
 import com.openexchange.exception.OXException;
 import com.openexchange.google.api.client.GoogleApiClients;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.generic.FolderUpdaterRegistry;
 import com.openexchange.groupware.generic.FolderUpdaterService;
+import com.openexchange.i18n.I18nService;
+import com.openexchange.i18n.I18nServiceRegistry;
 import com.openexchange.log.LogProperties;
 import com.openexchange.oauth.KnownApi;
 import com.openexchange.oauth.OAuthAccount;
@@ -85,6 +98,7 @@ import com.openexchange.tools.iterator.SearchIteratorDelegator;
  * {@link GoogleContactsSubscribeService}
  *
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
+ * @author <a href="mailto:philipp.schumacher@open-xchange.com">Philipp Schumacher</a>
  * @since v7.10.1
  */
 public class GoogleContactsSubscribeService extends AbstractOAuthSubscribeService {
@@ -93,13 +107,23 @@ public class GoogleContactsSubscribeService extends AbstractOAuthSubscribeServic
     static final Logger LOG = LoggerFactory.getLogger(GoogleContactsSubscribeService.class);
 
     public static final String SOURCE_ID = KnownApi.GOOGLE.getServiceId() + ".contact";
+    private static final int SELF_PROTECTION_LIMIT = 1000000;
 
-    /**
-     * The Google Contacts' feed URL
-     */
-    private static final String FEED_URL = "https://www.google.com/m8/feeds/contacts/default/full";
-    private static final String APP_NAME = "ox-appsuite";
-    private static final int CHUNK_SIZE = 25;
+    private final String APP_NAME = "ox-appsuite";
+    private final String RESSOURCE = "people/me";
+    private final String PERSON_FIELDS = PersonFields.create(
+        PersonFields.ADDRESSES,
+        PersonFields.BIRTHDAYS,
+        PersonFields.EMAIL_ADDRESSES,
+        PersonFields.IM_CLIENTS,
+        PersonFields.NAMES,
+        PersonFields.NICKNAMES,
+        PersonFields.OCCUPATIONS,
+        PersonFields.PHONE_NUMBERS,
+        PersonFields.PHOTOS);
+    private final int CHUNK_SIZE = 25;
+
+    private final Cache<String, PeopleService> peopleServiceCache;
 
     private final ServiceLookup services;
 
@@ -113,157 +137,202 @@ public class GoogleContactsSubscribeService extends AbstractOAuthSubscribeServic
     public GoogleContactsSubscribeService(OAuthServiceMetaData oauthServiceMetadata, ServiceLookup services) throws OXException {
         super(oauthServiceMetadata, SOURCE_ID, FolderObject.CONTACT, "Google", services);
         this.services = services;
-
+        this.peopleServiceCache = CacheBuilder.newBuilder().expireAfterWrite(30, TimeUnit.SECONDS).build();
     }
 
     @Override
     public Collection<?> getContent(Subscription subscription) throws OXException {
         Session session = subscription.getSession();
-        OAuthAccount oauthAccount = GoogleApiClients.reacquireIfExpired(session, true, getOAuthAccount(session, subscription));
-        ContactsService googleContactsService = createContactsService(session, oauthAccount);
-        ContactParser parser = new ContactParser(googleContactsService);
-
         try {
-            Query cQuery = new Query(new URL(FEED_URL));
-            cQuery.setMaxResults(CHUNK_SIZE);
-            ContactFeed feed = googleContactsService.query(cQuery, ContactFeed.class);
-            if (CHUNK_SIZE > feed.getTotalResults()) {
-                List<Contact> contacts = parser.parseFeed(feed);
-                LOG.debug("Parsed {} contacts for Google contact subscription for user {} in context {}", I(contacts.size()), I(subscription.getSession().getUserId()), I(subscription.getSession().getContextId()));
-                return contacts;
-            }
+            PeopleService googlePeopleService = getPeopleService(session, getOAuthAccount(session, subscription));
+            ConfigurationService configService = services.getServiceSafe(ConfigurationService.class);
+            int maxImageSize = configService.getIntProperty("max_image_size", 4194304);
+            Locale locale = subscription.getSession().getUser().getLocale();
+            I18nService i18nService = services.getServiceSafe(I18nServiceRegistry.class).getI18nService(locale);
+            ContactParser parser = new ContactParser(googlePeopleService, i18nService,  maxImageSize);
+            // @formatter:off
+            ListConnectionsResponse response = googlePeopleService.people()
+                                                                  .connections()
+                                                                  .list(RESSOURCE)
+                                                                  .setPageSize(I(CHUNK_SIZE))
+                                                                  .setPersonFields(PERSON_FIELDS)
+                                                                  .execute();
+            // @formatter:on
 
-            List<Contact> firstBatch = parser.parseFeed(feed);
-            int total = feed.getTotalResults();
-            int startOffset = firstBatch.size();
-            LOG.debug("Parsed first batch with size {} of {} contacts for Google contact subscription for user {} in context {}", I(firstBatch.size()), I(total), I(subscription.getSession().getUserId()), I(subscription.getSession().getContextId()));
+            Integer totalPeople = response.getTotalPeople();
+            String nextPageToken = response.getNextPageToken();
+            List<Contact> firstBatch = parser.parseListConnectionsResponse(response);
+            if (nextPageToken == null) {
+                return firstBatch;
+            }
+            LOG.debug("Parsed first batch with size {} of {} contacts for Google contact subscription for user {} in context {}", I(firstBatch.size()), totalPeople, I(subscription.getSession().getUserId()), I(subscription.getSession().getContextId()));
 
             FolderUpdaterRegistry folderUpdaterRegistry = services.getOptionalService(FolderUpdaterRegistry.class);
             ThreadPoolService threadPool = services.getOptionalService(ThreadPoolService.class);
             FolderUpdaterService<Contact> folderUpdater = null == folderUpdaterRegistry ? null : folderUpdaterRegistry.<Contact> getFolderUpdater(subscription);
             if (null == threadPool || null == folderUpdater) {
-                return fetchInForeground(cQuery, feed.getTotalResults(), firstBatch, googleContactsService, parser);
+                return fetchInForeground(googlePeopleService, subscription, firstBatch, totalPeople, nextPageToken, parser);
             }
-            scheduleInBackground(subscription, cQuery, total, startOffset, threadPool, folderUpdater, googleContactsService, parser);
+            scheduleInBackground(googlePeopleService, subscription, nextPageToken, threadPool, folderUpdater, parser);
             return firstBatch;
         } catch (IOException e) {
             LOG.error("", e);
             throw SubscriptionErrorMessage.IO_ERROR.create(e, e.getMessage());
-        } catch (ServiceException e) {
-            String responseBody = e.getResponseBody();
-            LOG.error(responseBody == null ? "" : responseBody, e);
-            throw SubscriptionErrorMessage.COMMUNICATION_PROBLEM.create(e, e.getMessage());
         }
     }
 
     /**
-     * Pings the contact service
+     * Pings the people service
      *
+     * @param session The {@link Session}
+     * @param oauthAccount The {@link OAuthAccount}
      * @throws OXException
      */
     public void ping(Session session, OAuthAccount account) throws OXException {
         try {
-            Query cQuery = new Query(new URL(FEED_URL));
-            cQuery.setMaxResults(1);
-            createContactsService(session, account).query(cQuery, ContactFeed.class);
+            getPeopleService(session, account)
+                .people()
+                .connections()
+                .list(RESSOURCE)
+                .setPageSize(I(1))
+                .setPersonFields(PersonFields.NAMES.getName())
+                .execute();
         } catch (IOException e) {
             LOG.error("", e);
             throw SubscriptionErrorMessage.IO_ERROR.create(e, e.getMessage());
-        } catch (ServiceException e) {
-            String responseBody = e.getResponseBody();
-            LOG.error(responseBody == null ? "" : responseBody, e);
-            throw SubscriptionErrorMessage.COMMUNICATION_PROBLEM.create(e, e.getMessage());
         }
 
     }
 
     /**
-     * Creates a new {@link ContactsService} for the specified oauth account
+     * Gets the {@link PeopleService} for the specified oauth account
      *
      * @param session The {@link Session}
      * @param oauthAccount The {@link OAuthAccount}
      * @return The {@link ContactsService}
-     * @throws OXException if the {@link ContactsService} cannot be initialised
+     * @throws OXException if the {@link ContactsService} cannot be initialized
      */
-    private ContactsService createContactsService(Session session, OAuthAccount oauthAccount) throws OXException {
-        ContactsService googleContactsService = new ContactsService(APP_NAME);
-        googleContactsService.setOAuth2Credentials(GoogleApiClients.getCredentials(oauthAccount, session));
-        return googleContactsService;
+    private PeopleService getPeopleService(Session session, OAuthAccount oauthAccount) throws OXException {
+        try {
+            return peopleServiceCache.get(getKey(session, oauthAccount), () -> createPeopleService(session, oauthAccount));
+        } catch (ExecutionError | ExecutionException e) {
+            if (e.getCause() != null) {
+                throw SubscriptionErrorMessage.UNEXPECTED_ERROR.create(e.getCause(), e.getCause().getMessage());
+            }
+            throw SubscriptionErrorMessage.UNEXPECTED_ERROR.create(e, e.getMessage());
+        }
+    }
+
+    /**
+     * Gets the cache key
+     *
+     * @return
+     */
+    private String getKey(Session session, OAuthAccount account) {
+        return session.getContextId() + "_" + session.getUserId() + "_" + account.getId();
+    }
+
+    /**
+     * Creates a new {@link PeopleService} for the specified oauth account
+     *
+     * @param session The {@link Session}
+     * @param oauthAccount The {@link OAuthAccount}
+     * @return The {@link ContactsService}
+     * @throws OXException if the {@link ContactsService} cannot be initialized
+     * @throws GeneralSecurityException In case an error occurred while creating the transport
+     * @throws IOException In case an error occurred while creating the transport
+     */
+    private PeopleService createPeopleService(Session session, OAuthAccount oauthAccount) throws OXException, GeneralSecurityException, IOException {
+        NetHttpTransport HTTP_TRANSPORT = GoogleNetHttpTransport.newTrustedTransport();
+        JsonFactory JSON_FACTORY = JacksonFactory.getDefaultInstance();
+        // @formatter:off
+        return new PeopleService.Builder(HTTP_TRANSPORT,
+                                         JSON_FACTORY,
+                                         GoogleApiClients.getCredentials(oauthAccount, session))
+                                .setApplicationName(APP_NAME)
+                                .build();
+        // @formatter:on
     }
 
     /**
      * Fetches all contacts in the foreground (blocking thread)
      *
-     * @param cQuery The {@link Query}
-     * @param total The amount of all contacts
+     * @param googlePeopleService The {@link PeopleService}
      * @param firstBatch The first batch of contacts
+     * @param totalPeople The amount of all contacts
+     * @param nextPageToken The token to fetch the next batch
+     * @param parser The {@link PeopleParser} to parse the response
      * @return A {@link List} with all fetched contacts
      * @throws IOException if an I/O error is occurred
-     * @throws ServiceException if a remote service error is occurred
      */
-    private List<Contact> fetchInForeground(Query cQuery, int total, List<Contact> firstBatch, ContactsService googleContactsService, ContactParser parser) throws IOException, ServiceException {
-        int offset = firstBatch.size();
-
-        List<Contact> contacts = new ArrayList<>(total);
+    private List<Contact> fetchInForeground(PeopleService googlePeopleService, Subscription subscription, List<Contact> firstBatch, Integer totalPeople, String nextPageToken, ContactParser parser) throws IOException {
+        List<Contact> contacts = new ArrayList<>(i(totalPeople));
         contacts.addAll(firstBatch);
-
-        while (total > offset) {
-            cQuery.setStartIndex(offset);
-            ContactFeed feed = googleContactsService.query(cQuery, ContactFeed.class);
-            List<Contact> batch = parser.parseFeed(feed);
-            contacts.addAll(batch);
-            offset += batch.size();
-        }
-
+        fetchContacts(googlePeopleService, nextPageToken, subscription, response -> {
+            contacts.addAll(parser.parseListConnectionsResponse(response));
+        });
         return contacts;
     }
 
     /**
      * Schedules a task to fetch all contacts and executes it in the background
      *
+     * @param googlePeopleService The {@link PeopleService}
      * @param subscription The {@link Subscription}
-     * @param cQuery The {@link Query}
-     * @param total The amount of all contacts
-     * @param startOffset The stating 1-based index offset
-     * @param threadPool the {@link ThreadPoolService}
+     * @param nextPageToken The token to fetch the next batch
+     * @param threadPool The {@link ThreadPoolService}
      * @param folderUpdater The {@link FolderUpdaterService}
-     * @param backgroundTaskMarker The background task marker
+     * @param parser The {@link PeopleParser} to parse the response
      */
-    private void scheduleInBackground(Subscription subscription, Query cQuery, int total, int startOffset, ThreadPoolService threadPool, FolderUpdaterService<Contact> folderUpdater, ContactsService googleContactsService, ContactParser parser) {
-        // Schedule task for remainder...
+    private void scheduleInBackground(PeopleService googlePeopleService, Subscription subscription, String nextPageToken, ThreadPoolService threadPool, FolderUpdaterService<Contact> folderUpdater, ContactParser parser) {
         threadPool.submit(new AbstractTask<Void>() {
-
             @Override
             public Void call() throws Exception {
                 Integer iUserId = I(subscription.getSession().getUserId());
                 Integer iContextId = I(subscription.getSession().getContextId());
-                Integer iTotal = I(total);
                 LogProperties.put(LogProperties.Name.SUBSCRIPTION_ADMIN, "true");
-                try {
-                    int offset = startOffset;
-                    while (total > offset) {
-                        cQuery.setStartIndex(offset);
-                        List<Contact> batch = parser.parseFeed(googleContactsService.query(cQuery, ContactFeed.class));
-                        folderUpdater.save(new SearchIteratorDelegator<>(batch), subscription);
-                        offset += batch.size();
-                        LOG.debug("Stored next batch with size {} ({} of {} contacts) for Google contact subscription for user {} in context {}", I(batch.size()), I(offset), iTotal, iUserId, iContextId);
+                fetchContacts(googlePeopleService, nextPageToken, subscription, response -> {
+                    List<Contact> nextBatch = parser.parseListConnectionsResponse(response);
+                    try {
+                        folderUpdater.save(new SearchIteratorDelegator<>(nextBatch), subscription);
+                        LOG.debug("Stored next batch with size {} for Google contact subscription for user {} in context {}", I(nextBatch.size()), iUserId, iContextId);
+                    } catch (Exception e) {
+                        LOG.error("Failed storing {} contacts for Google contact subscription for user {} in context {}", I(nextBatch.size()), iUserId, iContextId, e);
+                    } finally {
+                        LogProperties.remove(LogProperties.Name.SUBSCRIPTION_ADMIN);
                     }
-                    LOG.debug("Finished storing {} contacts for Google contact subscription for user {} in context {}", iTotal, iUserId, iContextId);
-                } catch (ServiceException e) {
-                    String responseBody = e.getResponseBody();
-                    if (responseBody == null) {
-                        LOG.error("Failed storing {} contacts for Google contact subscription for user {} in context {}", iTotal, iUserId, iContextId, e);
-                    } else {
-                        LOG.error("Failed storing {} contacts for Google contact subscription for user {} in context {}: {}", iTotal, iUserId, iContextId, responseBody, e);
-                    }
-                } catch (Exception e) {
-                    LOG.error("Failed storing {} contacts for Google contact subscription for user {} in context {}", iTotal, iUserId, iContextId, e);
-                } finally {
-                    LogProperties.remove(LogProperties.Name.SUBSCRIPTION_ADMIN);
-                }
+                });
                 return null;
             }
         });
+    }
+
+    /**
+     * Fetches all contacts
+     *
+     * @param googlePeopleService The {@link PeopleService}
+     * @param nextPageToken The token to fetch the next batch
+     * @param responseHandler A {@link Consumer} for handling the response
+     * @throws IOException if an I/O error is occurred
+     */
+    protected void fetchContacts(PeopleService googlePeopleService, String nextPageToken, Subscription subscription, Consumer<ListConnectionsResponse> responseHandler) throws IOException {
+        String pageToken = nextPageToken;
+        int contactCount = 0;
+        while (pageToken != null) {
+            if (contactCount > SELF_PROTECTION_LIMIT) {
+                LOG.warn("Stopped fetching google contacts for user {} in context {} because there are too many contacts.", I(subscription.getUserId()), I(subscription.getContext().getContextId()));
+                return;
+            }
+            ListConnectionsResponse response = googlePeopleService.people().connections()
+                .list(RESSOURCE)
+                .setPageSize(I(CHUNK_SIZE))
+                .setPageToken(pageToken)
+                .setPersonFields(PERSON_FIELDS)
+                .execute();
+            pageToken = response.getNextPageToken();
+            contactCount += response.size();
+            responseHandler.accept(response);
+        }
     }
 
     @Override

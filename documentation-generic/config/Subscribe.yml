@@ -13,50 +13,6 @@ properties:
       file: subscribe.properties
       packageName: open-xchange-core
       tags: ["Subscribe"]
-    - key: com.openexchange.subscribe.google.calendar.pageSize
-      description: |
-        Defines the amount of events to fetch in a single request.
-      defaultValue: 25
-      version:
-      reloadable: false
-      configcascadeAware: false
-      related: 
-      file: googlesubscribe.properties
-      packageName: open-xchange-subscribe
-      tags: ["Google", "Calendar", "Subscribe"]
-    - key: com.openexchange.subscribe.google.contact.pageSize
-      description: |
-        Defines the amount of contacts to fetch in a single request.
-      defaultValue: 25
-      version:
-      reloadable: false
-      configcascadeAware: false
-      related: 
-      file: googlesubscribe.properties
-      packageName: open-xchange-subscribe
-      tags: ["Google", "Contact", "Subscribe"]
-    - key: com.openexchange.subscribe.google.calendar.autorunInterval
-      description: |
-        Defines the subscription refresh autorun interval for Google calendars.
-      defaultValue: 1d
-      version:
-      reloadable: true
-      configcascadeAware: true
-      related: 
-      file: googlesubscribe.properties
-      packageName: open-xchange-subscribe
-      tags: ["Google", "Calendar", "Subscribe"]
-    - key: com.openexchange.subscribe.google.contact.autorunInterval
-      description: |
-        Defines the subscription refresh autorun interval for Google contacts.
-      defaultValue: 1d
-      version:
-      reloadable: true
-      configcascadeAware: true
-      related: 
-      file: googlesubscribe.properties
-      packageName: open-xchange-subscribe
-      tags: ["Google", "Contact", "Subscribe"]
     - key: com.openexchange.subscribe.mslive.contact.autorunInterval
       description: |
         Defines the subscription refresh autorun interval for MS Live.

@@ -47,55 +47,43 @@
  *
  */
 
-package com.openexchange.subscribe.google.parser.consumers;
+package com.openexchange.subscribe.google.parser;
 
-import java.util.function.BiConsumer;
-import com.google.gdata.data.contacts.ContactEntry;
-import com.google.gdata.data.extensions.PostalAddress;
-import com.openexchange.groupware.container.Contact;
+import com.openexchange.i18n.LocalizableStrings;
 
 /**
- * {@link UnstructuredPostalAddressConsumer} - Parses the contact's postal addresses. Note that google
- * can store an unlimited mount of postal addresses for a contact due to their different
- * data model (probably EAV). Our contacts API however can only store a home, business and other
- * address, therefore we only fetch the first three we encounter. Furthermore, we set as home
- * address the {@link PostalAddress} that is marked as primary.
+ * {@link ContactNoteStrings}
  *
- * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
- * @since v7.10.1
+ * @author <a href="mailto:philipp.schumacher@open-xchange.com">Philipp Schumacher</a>
+ * @since v7.10.6
  */
-public class UnstructuredPostalAddressConsumer implements BiConsumer<ContactEntry, Contact> {
+public class ContactNoteStrings implements LocalizableStrings {
 
     /**
-     * Initialises a new {@link UnstructuredPostalAddressConsumer}.
+     * Header for other e-mail addresses in the contact's note section
      */
-    public UnstructuredPostalAddressConsumer() {
+    public static final String OTHER_EMAIL_ADDRESSES = "Other e-mail addresses:";
+
+    /**
+     * Header for other instant messengers in the contact's note section
+     */
+    public static final String OTHER_IM_ADDRESSES = "Other instant messengers:";
+
+    /**
+     * Header for other phone numbers in the contact's note section
+     */
+    public static final String OTHER_PHONE_NUMBERS = "Other phone numbers:";
+
+    /**
+     * Header for other addresses in the contact's note section
+     */
+    public static final String OTHER_ADDRESSES = "Other addresses:";
+
+    /**
+     * Initializes a new {@link ContactNoteStrings}.
+     */
+    public ContactNoteStrings() {
         super();
     }
 
-    @Override
-    public void accept(ContactEntry t, Contact u) {
-        if (!t.hasPostalAddresses()) {
-            return;
-        }
-        int count = 0;
-        for (PostalAddress pa : t.getPostalAddresses()) {
-            if (pa.getPrimary()) {
-                u.setAddressHome(pa.getValue());
-            }
-            switch (count++) {
-                case 0:
-                    u.setAddressHome(pa.getValue());
-                    break;
-                case 1:
-                    u.setAddressBusiness(pa.getValue());
-                    break;
-                case 2:
-                    u.setAddressOther(pa.getValue());
-                    break;
-                default:
-                    return;
-            }
-        }
-    }
 }

@@ -49,49 +49,87 @@
 
 package com.openexchange.subscribe.google.parser.consumers;
 
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.List;
 import java.util.function.BiConsumer;
-import com.google.gdata.data.contacts.ContactEntry;
-import com.google.gdata.data.extensions.Email;
+import com.google.api.services.people.v1.model.EmailAddress;
+import com.google.api.services.people.v1.model.Person;
 import com.openexchange.groupware.container.Contact;
+import com.openexchange.i18n.I18nService;
+import com.openexchange.subscribe.google.parser.ContactNoteStrings;
 
 /**
  * {@link EmailAddressesConsumer} - Parses the contact's e-mail addresses. Note that google
  * can store an unlimited mount of e-mail addresses for a contact due to their different
  * data model (probably EAV). Our contacts API however can only store three, therefore
- * we only fetch the first three we encounter.
+ * more then three e-mail addresses are stored inside the contact's note field.
  *
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
+ * @author <a href="mailto:philipp.schumacher@open-xchange.com">Philipp Schumacher</a>
  * @since v7.10.1
  */
-public class EmailAddressesConsumer implements BiConsumer<ContactEntry, Contact> {
+public class EmailAddressesConsumer extends AbstractNoteConsumer implements BiConsumer<Person, Contact> {
+
+    private static final Comparator<EmailAddress> MAIL_COMPARATOR = new Comparator<EmailAddress>() {
+
+        @Override
+        public int compare(EmailAddress emailAddress1, EmailAddress emailAddress2) {
+            return emailAddress1.getType().compareTo(emailAddress2.getType());
+        }
+    };
 
     /**
      * Initialises a new {@link EmailAddressesConsumer}.
      */
-    public EmailAddressesConsumer() {
-        super();
+    public EmailAddressesConsumer(I18nService i18nService) {
+        super(i18nService);
     }
 
     @Override
-    public void accept(ContactEntry t, Contact u) {
-        if (!t.hasEmailAddresses()) {
+    public void accept(Person t, Contact u) {
+        List<EmailAddress> emailAddresses = t.getEmailAddresses();
+        if (emailAddresses == null || emailAddresses.isEmpty()) {
             return;
         }
-        int count = 0;
-        for (Email email : t.getEmailAddresses()) {
-            switch (count++) {
-                case 0:
-                    u.setEmail1(email.getAddress());
-                    break;
-                case 1:
-                    u.setEmail2(email.getAddress());
-                    break;
-                case 2:
-                    u.setEmail3(email.getAddress());
-                    break;
-                default:
-                    return;
-            }
+        boolean firstAddressInNotes = true;
+        Collections.sort(emailAddresses, MAIL_COMPARATOR);
+        for (EmailAddress email : emailAddresses) {
+            firstAddressInNotes = setEmailAddress(email, u, firstAddressInNotes);
         }
+    }
+
+    /**
+     * Sets the e-mail address {@link EmailAddress} to the contact
+     *
+     * @param email The e-mail address {@link EmailAddress}
+     * @param u The {@link Contact}
+     */
+    private boolean setEmailAddress(EmailAddress email, Contact u, boolean firstAddressInNotes) {
+        if (u.getEmail1() == null) {
+            u.setEmail1(email.getValue());
+            return firstAddressInNotes;
+        } else if (u.getEmail2() == null) {
+            u.setEmail2(email.getValue());
+            return firstAddressInNotes;
+        } else if (u.getEmail3() == null) {
+            u.setEmail3(email.getValue());
+            return firstAddressInNotes;
+        } else {
+            return addEmailAddressToNote(email, u, firstAddressInNotes);
+        }
+    }
+
+    /**
+     * Adds the e-mail address to the contact's note if it is formatted
+     *
+     * @param emailAddress The {@link EmailAddress}
+     * @param contact The {@link Contact}
+     */
+    private boolean addEmailAddressToNote(EmailAddress emailAddress, Contact contact, boolean firstAddressInNotes) {
+        if (emailAddress == null) {
+            return firstAddressInNotes;
+        }
+        return addValueToNote(contact, ContactNoteStrings.OTHER_EMAIL_ADDRESSES, emailAddress.getValue(), firstAddressInNotes);
     }
 }

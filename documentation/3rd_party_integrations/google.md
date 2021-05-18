@@ -121,7 +121,7 @@ in more detail. After doing that, the app was verified within a day and the warn
 
 The following Google APIs are required to enable contact synchronisation:
 
-  * Contacts API
+  * People API
   * Google Cloud SQL
   * Google Cloud Storage
   * Google Cloud Storage JSON API

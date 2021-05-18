@@ -49,50 +49,24 @@
 
 package com.openexchange.subscribe.google.parser.consumers;
 
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
-import java.util.Date;
+import static com.openexchange.java.Autoboxing.i;
+import java.time.LocalDate;
+import java.time.ZoneId;
+import java.util.List;
 import java.util.function.BiConsumer;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import com.google.gdata.data.contacts.Birthday;
-import com.google.gdata.data.contacts.ContactEntry;
+import com.google.api.services.people.v1.model.Birthday;
+import com.google.api.services.people.v1.model.Date;
+import com.google.api.services.people.v1.model.Person;
 import com.openexchange.groupware.container.Contact;
-import com.openexchange.java.util.TimeZones;
 
 /**
  * {@link BirthdayConsumer} - Parses the birthday of the contact
  *
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
+ * @author <a href="mailto:philipp.schumacher@open-xchange.com">Philipp Schumacher</a>
  * @since v7.10.1
  */
-public class BirthdayConsumer implements BiConsumer<ContactEntry, Contact> {
-
-    /** Simple class to delay initialization until needed */
-    private static class LoggerHolder {
-
-        static final Logger LOG = LoggerFactory.getLogger(BirthdayConsumer.class);
-    }
-
-    /**
-     * The birthday {@link Date} format
-     *
-     * @see <a href="https://developers.google.com/contacts/v3/reference#gcBirthday">gContact:birthday</a>
-     */
-    private final static String dateFormatPattern = "yyyy-MM-dd";
-
-    /**
-     * Thread local {@link SimpleDateFormat} using "yyyy-MM-dd" as pattern.
-     */
-    private static final ThreadLocal<SimpleDateFormat> BIRTHDAY_FORMAT = new ThreadLocal<SimpleDateFormat>() {
-
-        @Override
-        protected SimpleDateFormat initialValue() {
-            SimpleDateFormat dateFormat = new SimpleDateFormat(dateFormatPattern);
-            dateFormat.setTimeZone(TimeZones.UTC);
-            return dateFormat;
-        }
-    };
+public class BirthdayConsumer implements BiConsumer<Person, Contact> {
 
     /**
      * Initialises a new {@link BirthdayConsumer}.
@@ -102,15 +76,49 @@ public class BirthdayConsumer implements BiConsumer<ContactEntry, Contact> {
     }
 
     @Override
-    public void accept(ContactEntry t, Contact u) {
-        if (!t.hasBirthday()) {
+    public void accept(Person person, Contact contact) {
+        List<Birthday> birthdayList = person.getBirthdays();
+        if (birthdayList == null || birthdayList.isEmpty()) {
             return;
         }
-        Birthday birthday = t.getBirthday();
-        try {
-            u.setBirthday(BIRTHDAY_FORMAT.get().parse(birthday.getValue()));
-        } catch (@SuppressWarnings("unused") ParseException e) {
-            LoggerHolder.LOG.warn("Unable to parse '{}' as a birthday.", birthday.getValue());
+        Birthday birthday = birthdayList.get(0);
+        Date birthdayDate = birthday.getDate();
+        setBirthday(birthdayDate, contact);
+    }
+
+    /**
+     * Sets the birthday {@link Date} to the contact
+     * 
+     * Google uses their own Date class to support different types of Dates, i.e.
+     * 
+     * A: 'A full date, with non-zero year, month and day values'
+     * B: 'A month and day value, with a zero year, e.g. an anniversary'
+     * C: 'A year on its own, with zero month and day values'
+     * D: 'A year and month value, with a zero day, e.g. a credit card expiration date'
+     * 
+     * @see <a href="https://developers.google.com/resources/api-libraries/documentation/people/v1/java/latest/com/google/api/services/people/v1/model/Date.html">
+     * 
+     *      Therefore we need to parse this to a regular java.util.Date
+     *      Currently we only support case A and B
+     * 
+     * @param birthdayDate The birthday {@link Date}
+     * @param contact The {@link Contact}
+     */
+    private void setBirthday(Date birthdayDate, Contact contact) {
+        if (birthdayDate == null) {
+            return;
+        }
+        Integer year = birthdayDate.getYear();
+        Integer month = birthdayDate.getMonth();
+        Integer day = birthdayDate.getDay();
+        if (month != null && i(month) > 0 && day != null && i(day) > 0) {
+            LocalDate date;
+            if (year == null || i(year) == 0) {
+                date = LocalDate.of(1604, i(month), i(day));
+            } else {
+                date = LocalDate.of(i(year), i(month), i(day));
+            }
+            contact.setBirthday(java.util.Date.from(date.atStartOfDay().atZone(ZoneId.of("UTC")).toInstant()));
         }
     }
 }
