@@ -6,7 +6,7 @@ BuildRequires: ant
 BuildRequires: open-xchange-core
 BuildRequires: java-1.8.0-openjdk-devel
 Version:       @OXVERSION@
-%define        ox_release 5
+%define        ox_release 0
 Release:       %{ox_release}_<CI_CNT>.<B_CNT>
 Group:         Applications/Productivity
 License:       GPL-2.0
@@ -54,6 +54,8 @@ GLOBIGNORE='*'
 /opt/open-xchange/etc/security/geolocation_maxmind_binary.list
 
 %changelog
+* Tue May 18 2021 Thorben Betten <thorben.betten@open-xchange.com>
+prepare for 7.10.6 release
 * Fri Feb 05 2021 Thorben Betten <thorben.betten@open-xchange.com>
 Third candidate for 7.10.5 release
 * Mon Feb 01 2021 Thorben Betten <thorben.betten@open-xchange.com>
