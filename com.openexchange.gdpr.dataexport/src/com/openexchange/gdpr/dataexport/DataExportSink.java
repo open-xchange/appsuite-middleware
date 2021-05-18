@@ -78,11 +78,11 @@ public interface DataExportSink {
      *
      * @param data The item's data
      * @param directory The directory
-     * @return <code>true</code> if item's data has been successfully written to this sink;
-     *         otherwise <code>false</code> if write attempt has been denied (typically because task has been canceled meanwhile)
+     * @return The actual directory path if directory has been successfully written to this sink;
+     *         otherwise <code>null</code> if write attempt has been denied (typically because task has been canceled meanwhile)
      * @throws OXException If export fails
      */
-    boolean export(Directory directory) throws OXException;
+    String export(Directory directory) throws OXException;
 
     /**
      * Finishes the export and closes resources.
