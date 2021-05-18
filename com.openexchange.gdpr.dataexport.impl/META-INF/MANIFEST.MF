@@ -86,5 +86,3 @@ Import-Package: com.eaio.util.text,
  org.osgi.util.tracker,
  org.slf4j
 Bundle-Activator: com.openexchange.gdpr.dataexport.impl.osgi.DataExportActivator
-Bundle-ClassPath: lib/junidecode-0.4.1.jar,
- .
