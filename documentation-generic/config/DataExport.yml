@@ -385,14 +385,3 @@ properties:
       file: dataexport.properties
       packageName: open-xchange-gdpr-dataexport
       tags: ["Data Export"]
-    - key: com.openexchange.gdpr.dataexport.replaceUnicodeWithAscii
-      description: |
-        Whether to replace Unicode characters of ZIP archive entry names with somewhat reasonable ASCII7-only characters.
-      defaultValue: false
-      version: 7.10.4
-      reloadable: false
-      configcascadeAware: false
-      related: 
-      file: dataexport.properties
-      packageName: open-xchange-gdpr-dataexport
-      tags: ["Data Export"]

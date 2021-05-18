@@ -80,7 +80,6 @@ import com.openexchange.user.UserService;
 public class DataExportStorageServiceImpl implements DataExportStorageService {
 
     private final AbstractDataExportSql<?> sql;
-    private final DataExportConfig config;
     private final ServiceLookup services;
 
     /**
@@ -93,18 +92,12 @@ public class DataExportStorageServiceImpl implements DataExportStorageService {
      */
     public DataExportStorageServiceImpl(boolean useGlobalDb, DataExportConfig config, ServiceLookup services) throws OXException {
         super();
-        this.config = config;
         this.services = services;
         if (useGlobalDb) {
             this.sql = new GlobalDbDataExportSql(services.getServiceSafe(DatabaseService.class), services.getServiceSafe(ConfigViewFactory.class), config);
         } else {
             this.sql = new UserDbDataExportSql(services.getServiceSafe(DatabaseService.class), services.getServiceSafe(ContextService.class), config);
         }
-    }
-
-    @Override
-    public DataExportConfig getConfig() {
-        return config;
     }
 
     @Override

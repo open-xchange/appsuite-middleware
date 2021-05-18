@@ -212,9 +212,6 @@ public class DataExportActivator extends HousekeepingActivator {
             int maxFailCountForWorkItem = configService.getIntProperty("com.openexchange.gdpr.dataexport.maxFailCountForWorkItem", DataExportConstants.DEFAULT_MAX_FAIL_COUNT_FOR_WORK_ITEM);
             configBuilder.withMaxFailCountForWorkItem(maxFailCountForWorkItem);
 
-            boolean replaceUnicodeWithAscii = configService.getBoolProperty("com.openexchange.gdpr.dataexport.replaceUnicodeWithAscii", false);
-            configBuilder.withReplaceUnicodeWithAscii(replaceUnicodeWithAscii);
-
             config = configBuilder.build();
         }
 
