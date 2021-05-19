@@ -330,9 +330,9 @@ public class InternalContactsAccess implements com.openexchange.contact.provider
     }
 
     @Override
-    public <O> List<Contact> searchContacts(SearchTerm<O> term) throws OXException {
+    public <O> List<Contact> searchContacts(List<String> folderIds, SearchTerm<O> term) throws OXException {
         decorateSessionWithReadOnlyConnection();
-        return iterateContacts(getContactService().searchContacts(session.getSession(), term, getFields(), getSortOptions()));
+        return iterateContacts(getContactService().searchContacts(session.getSession(), folderIds, term, getFields(), getSortOptions()));
     }
 
     @Override
@@ -852,4 +852,5 @@ public class InternalContactsAccess implements com.openexchange.contact.provider
     private FolderService getFolderService() throws OXException {
         return services.getServiceSafe(FolderService.class);
     }
+
 }

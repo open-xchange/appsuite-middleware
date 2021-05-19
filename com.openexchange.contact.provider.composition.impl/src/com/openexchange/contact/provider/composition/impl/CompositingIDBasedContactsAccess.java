@@ -392,10 +392,6 @@ public class CompositingIDBasedContactsAccess extends AbstractCompositingIDBased
     }
     //////////////////////////////////// SEARCH ///////////////////////////////
 
-    @Override
-    public <O> List<Contact> searchContacts(SearchTerm<O> term) throws OXException {
-        return searchContacts((List<String>) null, term);
-    }
 
     @Override
     public List<Contact> searchContacts(ContactsSearchObject contactSearch) throws OXException {
@@ -436,6 +432,7 @@ public class CompositingIDBasedContactsAccess extends AbstractCompositingIDBased
         }
     }
 
+    @Override
     public <O> List<Contact> searchContacts(List<String> folderIds, SearchTerm<O> term) throws OXException {
         if (null == folderIds) {
             /*
@@ -446,7 +443,7 @@ public class CompositingIDBasedContactsAccess extends AbstractCompositingIDBased
                 return Collections.emptyList();
             }
             if (1 == accounts.size()) {
-                return searchContacts(accounts.get(0), folderIds, term);
+                return searchContacts(accounts.get(0), null, term);
             }
             CompletionService<List<Contact>> completionService = getCompletionService();
             for (ContactsAccount account : accounts) {
@@ -878,8 +875,7 @@ public class CompositingIDBasedContactsAccess extends AbstractCompositingIDBased
         try {
             ContactsAccess access = getAccess(account);
             if (FolderSearchAware.class.isInstance(access)) {
-                // TODO with folderids
-                return withUniqueIDs(((FolderSearchAware) access).searchContacts(term), account.getAccountId());
+                return withUniqueIDs(((FolderSearchAware) access).searchContacts(folderIds, term), account.getAccountId());
             }
             if (BasicSearchAware.class.isInstance(access)) {
                 checkBasicContactFolderIdsOnly(folderIds);
@@ -961,8 +957,7 @@ public class CompositingIDBasedContactsAccess extends AbstractCompositingIDBased
             if (FolderSearchAware.class.isInstance(access)) {
                 SearchTerm<?> hasDateTerm = new CompositeSearchTerm(CompositeOperation.NOT).addSearchTerm(
                     new SingleSearchTerm(SingleOperation.ISNULL).addOperand(new ContactFieldOperand(annualDateField)));
-                //TODO: add method with folder ids
-                return withUniqueIDs(filterByAnnualDate(((FolderSearchAware) access).searchContacts(hasDateTerm), annualDateField, from, until), account.getAccountId());
+                return withUniqueIDs(filterByAnnualDate(((FolderSearchAware) access).searchContacts(folderIds, hasDateTerm), annualDateField, from, until), account.getAccountId());
             }
             if (BasicSearchAware.class.isInstance(access)) {
                 checkBasicContactFolderIdsOnly(folderIds);

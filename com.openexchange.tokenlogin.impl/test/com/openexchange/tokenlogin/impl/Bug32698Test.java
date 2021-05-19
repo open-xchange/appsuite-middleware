@@ -283,13 +283,11 @@ public class Bug32698Test {
             }
         });
 
-        this.tokenLoginServiceImpl.setSessionId2tokenHzMapName("sessionId2tokenMapName");
-        this.tokenLoginServiceImpl.setToken2sessionIdMapNameHzMapName("token2sessionIdMapName");
-        this.tokenLoginServiceImpl2.setSessionId2tokenHzMapName("sessionId2tokenMapName");
-        this.tokenLoginServiceImpl2.setToken2sessionIdMapNameHzMapName("token2sessionIdMapName");
+        this.tokenLoginServiceImpl.setBackingHzMapName("sessionId2tokenMapName");
+        this.tokenLoginServiceImpl2.setBackingHzMapName("sessionId2tokenMapName");
 
         PowerMockito.when(tokenLoginServiceImpl, method(TokenLoginServiceImpl.class, "hzMap", String.class)).withArguments(org.mockito.ArgumentMatchers.eq("token2sessionIdMapName")).thenAnswer(new Answer<IMap<String, String>>() {
-            
+
             @Override
             public IMap<String, String> answer(InvocationOnMock invocation) throws Throwable {
                 return tokenIMap;

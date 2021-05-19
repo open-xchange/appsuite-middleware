@@ -46,10 +46,11 @@ public class AdvancedSearchTest extends AbstractManagedContactTest {
     @Test
     public void testSearchWithEquals() throws Exception {
         ContactField field = ContactField.GIVEN_NAME;
-        ContactField folderField = ContactField.FOLDER_ID;
-        JSONObject filter = new JSONObject("{'filter' : [ 'and', " + "['=' , {'field' : '" + field.getAjaxName() + "'} , 'Bob'], " + "['=' , {'field' : '" + folderField.getAjaxName() + "'}, " + folderID + "]" + "]})");
 
-        AdvancedSearchRequest request = new AdvancedSearchRequest(filter, new int[] { Contact.GIVEN_NAME }, -1, null);
+        JSONObject filter = new JSONObject("{'filter' : ['=' , {'field' : '" + field.getAjaxName() + "'} , 'Bob']}");
+
+        List<String> folders = Collections.singletonList(String.valueOf(folderID));
+        AdvancedSearchRequest request = new AdvancedSearchRequest(filter, folders, new int[] { Contact.GIVEN_NAME }, -1, null);
         CommonSearchResponse response = getClient().execute(request);
         assertFalse("Should work", response.hasError());
 
@@ -68,7 +69,7 @@ public class AdvancedSearchTest extends AbstractManagedContactTest {
         ContactField field = ContactField.SUR_NAME;
         JSONObject filter = new JSONObject("{'filter' : [ '=' , {'field' : '" + field.getAjaxName() + "'} , '" + BOB_LASTNAME + "']}");
 
-        AdvancedSearchRequest request = new AdvancedSearchRequest(filter, Contact.ALL_COLUMNS, -1, null);
+        AdvancedSearchRequest request = new AdvancedSearchRequest(filter, null, Contact.ALL_COLUMNS, -1, null);
         CommonSearchResponse response = getClient().execute(request);
         assertFalse("Should work", response.hasError());
 
@@ -92,7 +93,7 @@ public class AdvancedSearchTest extends AbstractManagedContactTest {
 
         JSONObject filter = new JSONObject("{'filter' : [ 'or', " + "['=' , {'field' : '" + field.getAjaxName() + "'} , '" + BOB_LASTNAME + "'], " + "['=' , {'field' : '" + field.getAjaxName() + "'}, '" + bobby + "']" + "]})");
 
-        AdvancedSearchRequest request = new AdvancedSearchRequest(filter, Contact.ALL_COLUMNS, -1, null);
+        AdvancedSearchRequest request = new AdvancedSearchRequest(filter, null, Contact.ALL_COLUMNS, -1, null);
         CommonSearchResponse response = getClient().execute(request);
         assertFalse("Should work", response.hasError());
 
@@ -109,9 +110,14 @@ public class AdvancedSearchTest extends AbstractManagedContactTest {
     @Test
     public void testSearchAlphabetRange() throws Exception {
         ContactField field = ContactField.GIVEN_NAME;
-        JSONObject filter = new JSONObject("{'filter' : [ 'and', " + "['>=' , {'field' : '" + field.getAjaxName() + "'} , 'A'], " + "['<' , {'field' : '" + field.getAjaxName() + "'}, 'C'], " + "['=' , {'field' : '" + ContactField.FOLDER_ID.getAjaxName() + "'}, " + folderID + "]" + "]})");
+        JSONObject filter = new JSONObject( // @formatter:off
+            "{'filter' : [ 'and', " +
+                "['>=' , {'field' : '" + field.getAjaxName() + "'} , 'A'], " +
+                "['<' , {'field' : '" + field.getAjaxName() + "'}, 'C'] " +
+            "]}"); // @formatter:off
 
-        AdvancedSearchRequest request = new AdvancedSearchRequest(filter, new int[] { field.getNumber() }, -1, null);
+        List<String> folders = Collections.singletonList(String.valueOf(folderID));
+        AdvancedSearchRequest request = new AdvancedSearchRequest(filter, folders, new int[] { field.getNumber() }, -1, null);
         CommonSearchResponse response = getClient().execute(request);
         assertFalse("Should work", response.hasError());
 
@@ -132,9 +138,15 @@ public class AdvancedSearchTest extends AbstractManagedContactTest {
     public void testSearchOrdering() throws Exception {
         cotm.newAction(ContactTestManager.generateContact(folderID, "Elvis"), ContactTestManager.generateContact(folderID, "Feelvis"), ContactTestManager.generateContact(folderID, "Gelvis"), ContactTestManager.generateContact(folderID, "Geena"), ContactTestManager.generateContact(folderID, "Hellvis"));
         ContactField field = ContactField.SUR_NAME;
-        JSONObject filter = new JSONObject("{'filter' : [ 'and', " + "['>=' , {'field' : '" + field.getAjaxName() + "'} , 'E'], " + "['<' , {'field' : '" + field.getAjaxName() + "'}, 'I'], " + "['NOT' , ['=' , {'field' : '" + field.getAjaxName() + "'}, 'Geena']], " + "['=' , {'field' : '" + ContactField.FOLDER_ID.getAjaxName() + "'}, " + folderID + "]" + "]})");
+        JSONObject filter = new JSONObject( // @formatter:off
+            "{'filter' : [ 'and', " +
+                "['>=' , {'field' : '" + field.getAjaxName() + "'} , 'E'], " +
+                "['<' , {'field' : '" + field.getAjaxName() + "'}, 'I'], " +
+                "['NOT' , ['=' , {'field' : '" + field.getAjaxName() + "'}, 'Geena']] " +
+            "]}"); // @formatter:on
 
-        AdvancedSearchRequest request = new AdvancedSearchRequest(filter, new int[] { field.getNumber() }, field.getNumber(), "asc");
+        List<String> folders = Collections.singletonList(String.valueOf(folderID));
+        AdvancedSearchRequest request = new AdvancedSearchRequest(filter, folders, new int[] { field.getNumber() }, field.getNumber(), "asc");
         CommonSearchResponse response = getClient().execute(request);
         assertFalse("Should work", response.hasError());
 
@@ -176,13 +188,18 @@ public class AdvancedSearchTest extends AbstractManagedContactTest {
         ContactField field = ContactField.SUR_NAME;
         LinkedList<JSONObject> filters = new LinkedList<JSONObject>();
         for (int i = 0; i < letters.length - 1; i++) {
-            filters.add(new JSONObject("{'filter' : [ 'and', " + "['>=' , {'field' : '" + field.getAjaxName() + "'} , '" + letters[i] + "'], " + "['<' , {'field' : '" + field.getAjaxName() + "'}, '" + letters[i + 1] + "'], " + "['=' , {'field' : '" + ContactField.FOLDER_ID.getAjaxName() + "'}, " + folderID + "]" + "]})"));
+            filters.add(new JSONObject( // @formatter:off
+                "{'filter' : [ 'and', " +
+                    "['>=' , {'field' : '" + field.getAjaxName() + "'} , '" + letters[i] + "'], " +
+                    "['<' , {'field' : '" + field.getAjaxName() + "'}, '" + letters[i + 1] + "'] " +
+            "]}")); // @formatter:on
         }
 
+        List<String> folders = Collections.singletonList(String.valueOf(folderID));
         int currentPosition = 0;
         for (JSONObject filter : filters) {
             String ident = "Step #" + currentPosition + " from " + letters[currentPosition] + " to " + letters[currentPosition + 1] + ": ";
-            AdvancedSearchRequest request = new AdvancedSearchRequest(filter, new int[] { field.getNumber() }, field.getNumber(), "asc");
+            AdvancedSearchRequest request = new AdvancedSearchRequest(filter, folders, new int[] { field.getNumber() }, field.getNumber(), "asc");
             CommonSearchResponse response = getClient().execute(request);
             assertFalse(ident + "Should work", response.hasError());
 
@@ -210,13 +227,18 @@ public class AdvancedSearchTest extends AbstractManagedContactTest {
         ContactField field = ContactField.SUR_NAME;
         LinkedList<JSONObject> filters = new LinkedList<JSONObject>();
         for (int i = 0; i < sinograph.size() - 1; i++) {
-            filters.add(new JSONObject("{'filter' : [ 'and', " + "['>=' , {'field' : '" + field.getAjaxName() + "'} , '" + sinograph.get(i) + "'], " + "['<' , {'field' : '" + field.getAjaxName() + "'}, '" + sinograph.get(i + 1) + "'], " + "['=' , {'field' : '" + ContactField.FOLDER_ID.getAjaxName() + "'}, " + folderID + "]" + "]})"));
+            filters.add(new JSONObject( // @formatter:off
+                "{'filter' : [ 'and', " +
+                    "['>=' , {'field' : '" + field.getAjaxName() + "'} , '" + sinograph.get(i) + "'], " +
+                    "['<' , {'field' : '" + field.getAjaxName() + "'}, '" + sinograph.get(i + 1) + "'] " +
+                "]}")); // @formatter:on
         }
 
+        List<String> folders = Collections.singletonList(String.valueOf(folderID));
         int currentPosition = 0;
         for (JSONObject filter : filters) {
             String ident = "Step #" + currentPosition + " from " + sinograph.get(currentPosition) + " to " + sinograph.get(currentPosition + 1) + ": ";
-            AdvancedSearchRequest request = new AdvancedSearchRequest(filter, new int[] { field.getNumber() }, field.getNumber(), "asc", "gb2312");
+            AdvancedSearchRequest request = new AdvancedSearchRequest(filter, folders, new int[] { field.getNumber() }, field.getNumber(), "asc", "gb2312");
             CommonSearchResponse response = getClient().execute(request);
             assertFalse(ident + "Should work", response.hasError());
 
@@ -245,7 +267,8 @@ public class AdvancedSearchTest extends AbstractManagedContactTest {
 
         JSONObject filter = new JSONObject("{'filter' : [ '>=' , {'field':'" + field.getAjaxName() + "'}, '\u963f' ]})");
 
-        AdvancedSearchRequest request = new AdvancedSearchRequest(filter, new int[] { field.getNumber() }, field.getNumber(), "asc", "gb2312");
+        List<String> folders = Collections.singletonList(String.valueOf(folderID));
+        AdvancedSearchRequest request = new AdvancedSearchRequest(filter, folders, new int[] { field.getNumber() }, field.getNumber(), "asc", "gb2312");
         CommonSearchResponse response = getClient().execute(request);
         assertFalse("Should work", response.hasError());
 
@@ -274,12 +297,17 @@ public class AdvancedSearchTest extends AbstractManagedContactTest {
 
         LinkedList<JSONObject> filters = new LinkedList<JSONObject>();
         for (int i = 0; i < sinograph.size() - 1; i++) {
-            filters.add(new JSONObject("{'filter' : [ 'and', " + "['>=' , {'field' : '" + field.getAjaxName() + "'} , '" + sinograph.get(i) + "'], " + "['<' , {'field' : '" + field.getAjaxName() + "'}, '" + sinograph.get(i + 1) + "'], " + "['=' , {'field' : '" + ContactField.FOLDER_ID.getAjaxName() + "'}, " + folderID + "]" + "]})"));
+            filters.add(new JSONObject( // @formatter:off
+                "{'filter' : [ 'and', " +
+                    "['>=' , {'field' : '" + field.getAjaxName() + "'} , '" + sinograph.get(i) + "'], " +
+                    "['<' , {'field' : '" + field.getAjaxName() + "'}, '" + sinograph.get(i + 1) + "'] " +
+            "]}")); // @formatter:on
         }
 
+        List<String> folders = Collections.singletonList(String.valueOf(folderID));
         int occurences = 0;
         for (JSONObject filter : filters) {
-            AdvancedSearchRequest request = new AdvancedSearchRequest(filter, new int[] { field.getNumber() }, field.getNumber(), "asc", "gb2312");
+            AdvancedSearchRequest request = new AdvancedSearchRequest(filter, folders, new int[] { field.getNumber() }, field.getNumber(), "asc", "gb2312");
             CommonSearchResponse response = getClient().execute(request);
             Object[][] resultTable = response.getArray();
             occurences += resultTable.length;
@@ -290,11 +318,10 @@ public class AdvancedSearchTest extends AbstractManagedContactTest {
     @Test
     public void testQuestionmarkWildcardInTheBeginning() throws Exception {
         ContactField field = ContactField.GIVEN_NAME;
-        ContactField folderField = ContactField.FOLDER_ID;
 
-        JSONObject filter = new JSONObject("{'filter' : [ 'and', " + "['=' , {'field' : '" + field.getAjaxName() + "'} , '?ob'], " + "['=' , {'field' : '" + folderField.getAjaxName() + "'}, " + folderID + "]" + "]})");
+        JSONObject filter = new JSONObject("{'filter' : ['=' , {'field' : '" + field.getAjaxName() + "'} , '?ob']}");
 
-        AdvancedSearchRequest request = new AdvancedSearchRequest(filter, new int[] { Contact.GIVEN_NAME }, -1, null);
+        AdvancedSearchRequest request = new AdvancedSearchRequest(filter, Collections.singletonList(String.valueOf(folderID)), new int[] { Contact.GIVEN_NAME }, -1, null);
         CommonSearchResponse response = getClient().execute(request);
         assertFalse("Should work", response.hasError());
 
@@ -311,11 +338,11 @@ public class AdvancedSearchTest extends AbstractManagedContactTest {
     @Test
     public void testQuestionmarkWildcardInTheEnd() throws Exception {
         ContactField field = ContactField.GIVEN_NAME;
-        ContactField folderField = ContactField.FOLDER_ID;
 
-        JSONObject filter = new JSONObject("{'filter' : [ 'and', " + "['=' , {'field' : '" + field.getAjaxName() + "'} , 'Bo?'], " + "['=' , {'field' : '" + folderField.getAjaxName() + "'}, " + folderID + "]" + "]})");
+        JSONObject filter = new JSONObject("{'filter' : ['=' , {'field' : '" + field.getAjaxName() + "'} , 'Bo?']}");
 
-        AdvancedSearchRequest request = new AdvancedSearchRequest(filter, new int[] { Contact.GIVEN_NAME }, -1, null);
+        List<String> folders = Collections.singletonList(String.valueOf(folderID));
+        AdvancedSearchRequest request = new AdvancedSearchRequest(filter, folders, new int[] { Contact.GIVEN_NAME }, -1, null);
         CommonSearchResponse response = getClient().execute(request);
         assertFalse("Should work", response.hasError());
 
@@ -332,11 +359,11 @@ public class AdvancedSearchTest extends AbstractManagedContactTest {
     @Test
     public void testAsteriskWildcardInTheBeginning() throws Exception {
         ContactField field = ContactField.GIVEN_NAME;
-        ContactField folderField = ContactField.FOLDER_ID;
 
-        JSONObject filter = new JSONObject("{'filter' : [ 'and', " + "['=' , {'field' : '" + field.getAjaxName() + "'} , '*b'], " + "['=' , {'field' : '" + folderField.getAjaxName() + "'}, " + folderID + "]" + "]})");
+        JSONObject filter = new JSONObject("{'filter' : ['=' , {'field' : '" + field.getAjaxName() + "'} , '*b']}");
 
-        AdvancedSearchRequest request = new AdvancedSearchRequest(filter, new int[] { Contact.GIVEN_NAME }, -1, null);
+        List<String> folders = Collections.singletonList(String.valueOf(folderID));
+        AdvancedSearchRequest request = new AdvancedSearchRequest(filter, folders, new int[] { Contact.GIVEN_NAME }, -1, null);
         CommonSearchResponse response = getClient().execute(request);
         assertFalse("Should work", response.hasError());
 
@@ -353,11 +380,11 @@ public class AdvancedSearchTest extends AbstractManagedContactTest {
     @Test
     public void testAsteriskWildcardInTheEnd() throws Exception {
         ContactField field = ContactField.GIVEN_NAME;
-        ContactField folderField = ContactField.FOLDER_ID;
 
-        JSONObject filter = new JSONObject("{'filter' : [ 'and', " + "['=' , {'field' : '" + field.getAjaxName() + "'} , 'B*'], " + "['=' , {'field' : '" + folderField.getAjaxName() + "'}, " + folderID + "]" + "]})");
+        JSONObject filter = new JSONObject("{'filter' : ['=' , {'field' : '" + field.getAjaxName() + "'} , 'B*']}");
 
-        AdvancedSearchRequest request = new AdvancedSearchRequest(filter, new int[] { Contact.GIVEN_NAME }, -1, null);
+        List<String> folders = Collections.singletonList(String.valueOf(folderID));
+        AdvancedSearchRequest request = new AdvancedSearchRequest(filter, folders, new int[] { Contact.GIVEN_NAME }, -1, null);
         CommonSearchResponse response = getClient().execute(request);
         assertFalse("Should work", response.hasError());
 
@@ -369,6 +396,39 @@ public class AdvancedSearchTest extends AbstractManagedContactTest {
         String actual = (String) resultTable[0][columnPos];
 
         assertEquals("Bob", actual);
+    }
+
+    @Test
+    public void testFolderInFilter() throws Exception {
+        /*
+         * prepare illegal filters containing a 'folder_id' operand
+         */
+        String field = ContactField.GIVEN_NAME.getAjaxName();
+        String folderField = ContactField.FOLDER_ID.getAjaxName();
+        String[] testedFilters = { // @formatter:off
+            "{'filter' : [ '<>' , {'field' : '" + folderField + "'} , '6']}",
+            "{'filter' : [ 'and', ['=' , {'field' : '" + field + "'} , 'Bob'], ['=' , {'field' : '" + folderField + "'}, " + folderID + "]]}",
+            "{'filter' : [ 'and', ['>=' , {'field' : '" + field + "'} , 'E'], ['NOT' , ['=' , {'field' : '" + folderField + "'}, '6']]]}"
+        }; // @formatter:on
+        /*
+         * try to search by each filter w/o specifying searched folder ids explicitly
+         */
+        for (String filter : testedFilters) {
+            AdvancedSearchRequest request = new AdvancedSearchRequest(new JSONObject(filter), null, new int[] { Contact.GIVEN_NAME }, -1, null);
+            request.setFailOnError(false);
+            CommonSearchResponse response = getClient().execute(request);
+            assertTrue("Should have an error", response.hasError());
+        }
+        /*
+         * try to search by each filter, specifying searched folder ids explicitly
+         */
+        List<String> folders = Collections.singletonList(String.valueOf(folderID));
+        for (String filter : testedFilters) {
+            AdvancedSearchRequest request = new AdvancedSearchRequest(new JSONObject(filter), folders, new int[] { Contact.GIVEN_NAME }, -1, null);
+            request.setFailOnError(false);
+            CommonSearchResponse response = getClient().execute(request);
+            assertTrue("Should have an error", response.hasError());
+        }
     }
 
     /*

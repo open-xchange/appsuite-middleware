@@ -210,6 +210,13 @@ public abstract class DefaultContactService implements ContactService {
     }
 
     @Override
+    public <O> SearchIterator<Contact> searchContacts(Session session, List<String> folderIds, SearchTerm<O> term, ContactField[] fields, SortOptions sortOptions) throws OXException {
+        Check.argNotNull(session, "session");
+        Check.argNotNull(term, "term");
+        return this.doSearchContacts(session, folderIds, term, fields, sortOptions);
+    }
+
+    @Override
     public SearchIterator<Contact> searchContacts(Session session, ContactSearchObject contactSearch, ContactField[] fields, SortOptions sortOptions) throws OXException {
         Check.argNotNull(session, "session");
         Check.argNotNull(contactSearch, "contactSearch");
@@ -458,7 +465,10 @@ public abstract class DefaultContactService implements ContactService {
 
     protected abstract <O> SearchIterator<Contact> doGetContacts(boolean deleted, Session session, String folderID, String[] ids, ContactField[] fields, SortOptions sortOptions, Date since) throws OXException;
 
+    @Deprecated
     protected abstract <O> SearchIterator<Contact> doSearchContacts(Session session, SearchTerm<O> term, ContactField[] fields, SortOptions sortOptions) throws OXException;
+
+    protected abstract <O> SearchIterator<Contact> doSearchContacts(Session session, List<String> folderIds, SearchTerm<O> term, ContactField[] fields, SortOptions sortOptions) throws OXException;
 
     protected abstract SearchIterator<Contact> doSearchContacts(Session session, ContactSearchObject contactSearch, ContactField[] fields, SortOptions sortOptions) throws OXException;
 

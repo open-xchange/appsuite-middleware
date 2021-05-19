@@ -719,8 +719,45 @@ public class ContactServiceImpl extends DefaultContactService {
     }
 
     @Override
-    protected <O> SearchIterator<Contact> doSearchContacts(final Session session, final SearchTerm<O> term, final ContactField[] fields,
-            SortOptions sortOptions) throws OXException {
+    protected <O> SearchIterator<Contact> doSearchContacts(Session session, List<String> folderIds, SearchTerm<O> term, ContactField[] fields, SortOptions sortOptions) throws OXException {
+        /*
+         * check that no folder operands are defined in term
+         */
+        if (new SearchTermAnalyzer(term).hasFolderIDs()) {
+            throw ContactExceptionCodes.UNEXPECTED_ERROR.create(new UnsupportedOperationException("no 'folder' operand in term allowed"));
+        }
+        /*
+         * determine queried storages according to searched folders
+         */
+        Map<ContactStorage, List<String>> queriedStorages = Tools.getStorages(session, null != folderIds ? folderIds : Tools.getSearchFolders(session.getContextId(), session.getUserId(), false));
+        Check.hasStorages(queriedStorages);
+        /*
+         * prepare fields and sort options
+         */
+        QueryFields queryFields = new QueryFields(fields);
+        SortOptions sOptions = null != sortOptions ? sortOptions : SortOptions.EMPTY;
+        /*
+         * create tasks, combining the term with extracted folder information for each storage
+         */
+        List<AbstractTask<SearchIterator<Contact>>> tasks = new ArrayList<AbstractTask<SearchIterator<Contact>>>(queriedStorages.size());
+        for (Entry<ContactStorage, List<String>> queriedStorage : queriedStorages.entrySet()) {
+            SearchTerm<?> searchTerm = new CompositeSearchTerm(CompositeOperation.AND).addSearchTerm(Tools.getFoldersTerm(queriedStorage.getValue())).addSearchTerm(term);
+            tasks.add(new AbstractTask<SearchIterator<Contact>>() {
+
+                @Override
+                public SearchIterator<Contact> call() throws Exception {
+                    return queriedStorage.getKey().search(session, searchTerm, queryFields.getFields(), sOptions);
+                }
+            });
+        }
+        /*
+         * get results, filtered respecting object permission restrictions, adding attachment info as needed
+         */
+        return perform(tasks, session, queryFields.needsAttachmentInfo(), sOptions);
+    }
+
+    @Override
+    protected <O> SearchIterator<Contact> doSearchContacts(Session session, SearchTerm<O> term, ContactField[] fields, SortOptions sortOptions) throws OXException {
         int userID = session.getUserId();
         int contextID = session.getContextId();
         /*
@@ -1192,4 +1229,5 @@ public class ContactServiceImpl extends DefaultContactService {
 
         return storage.supports(fields);
     }
+
 }

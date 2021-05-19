@@ -454,7 +454,7 @@ public final class MemorizerWorker {
         	SortOptions sortOptions = new SortOptions(ContactField.USE_COUNT, Order.DESCENDING);
         	sortOptions.setLimit(getSearchLimit(services));
 
-        	SearchIterator<Contact> iterator = contactService.searchContacts(session, orTerm, FIELDS, sortOptions);
+            SearchIterator<Contact> iterator = contactService.searchContacts(session, null, orTerm, FIELDS, sortOptions);
             try {
                 if (iterator.hasNext()) {
                     // At least one such contact found: If no use-count service was passed, then there is nothing to do.

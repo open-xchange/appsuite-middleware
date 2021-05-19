@@ -210,6 +210,11 @@ public class FilteringContactService implements ContactService {
     }
 
     @Override
+    public <O> SearchIterator<Contact> searchContacts(Session session, List<String> folderIds, SearchTerm<O> term, ContactField[] fields, SortOptions sortOptions) throws OXException {
+        return removeAdmin(session.getContextId(), delegate.searchContacts(session, folderIds, term, fields, sortOptions));
+    }
+
+    @Override
     public SearchIterator<Contact> searchContacts(Session session, ContactSearchObject contactSearch) throws OXException {
         return removeAdmin(session.getContextId(), delegate.searchContacts(session, contactSearch));
     }

@@ -312,7 +312,9 @@ public interface ContactService {
      * @param term the search term
      * @return the contacts found with the search
      * @throws OXException
+     * @deprecated Use {@link #searchContacts(Session, List, SearchTerm, ContactField[], SortOptions)} and explicitly specify the searched folders.
      */
+    @Deprecated
     <O> SearchIterator<Contact> searchContacts(Session session, SearchTerm<O> term) throws OXException;
 
     /**
@@ -323,7 +325,9 @@ public interface ContactService {
      * @param sortOptions the options to sort the results
      * @return the contacts found with the search
      * @throws OXException
+     * @deprecated Use {@link #searchContacts(Session, List, SearchTerm, ContactField[], SortOptions)} and explicitly specify the searched folders.
      */
+    @Deprecated
     <O> SearchIterator<Contact> searchContacts(Session session, SearchTerm<O> term, SortOptions sortOptions) throws OXException;
 
     /**
@@ -334,7 +338,9 @@ public interface ContactService {
      * @param fields the contact fields that should be retrieved
      * @return the contacts found with the search
      * @throws OXException
+     * @deprecated Use {@link #searchContacts(Session, List, SearchTerm, ContactField[], SortOptions)} and explicitly specify the searched folders.
      */
+    @Deprecated
     <O> SearchIterator<Contact> searchContacts(Session session, SearchTerm<O> term, ContactField[] fields) throws OXException;
 
     /**
@@ -346,8 +352,23 @@ public interface ContactService {
      * @param sortOptions the options to sort the results
      * @return the contacts found with the search
      * @throws OXException
+     * @deprecated Use {@link #searchContacts(Session, List, SearchTerm, ContactField[], SortOptions)} and explicitly specify the searched folders.
      */
+    @Deprecated
     <O> SearchIterator<Contact> searchContacts(Session session, SearchTerm<O> term, ContactField[] fields, SortOptions sortOptions) throws OXException;
+
+    /**
+     * Searches for contacts.
+     *
+     * @param folderIds The identifiers of the folders to perform the search in, or <code>null</code> to search in all folders
+     * @param session the session
+     * @param term the search term
+     * @param fields the contact fields that should be retrieved
+     * @param sortOptions the options to sort the results
+     * @return the contacts found with the search
+     * @throws OXException
+     */
+    <O> SearchIterator<Contact> searchContacts(Session session, List<String> folderIds, SearchTerm<O> term, ContactField[] fields, SortOptions sortOptions) throws OXException;
 
     /**
      * Searches for contacts.

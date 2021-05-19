@@ -303,11 +303,12 @@ public interface IDBasedContactsAccess extends TransactionAware, ContactsParamet
      * <li>{@link ContactsParameters#PARAMETER_ORDER_BY}</li>
      * </ul>
      *
-     * @param term the search term
-     * @return the contacts found with the search
+     * @param folderIds The identifiers of the folders to perform the search in, or <code>null</code> to search in all folders
+     * @param term The search term
+     * @return The contacts found with the search
      * @throws OXException if an error is occurred
      */
-    <O> List<Contact> searchContacts(SearchTerm<O> term) throws OXException;
+    <O> List<Contact> searchContacts(List<String> folderIds, SearchTerm<O> term) throws OXException;
 
     /**
      * Searches for contacts.

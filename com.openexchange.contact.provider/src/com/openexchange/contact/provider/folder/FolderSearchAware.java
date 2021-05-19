@@ -94,10 +94,11 @@ public interface FolderSearchAware extends SearchAware {
      * <li>{@link ContactsParameters#PARAMETER_ORDER_BY}</li>
      * </ul>
      *
+     * @param folderIds The identifiers of the folders to perform the search in, or <code>null</code> to search in all folders
      * @param term The search term
      * @return The found contacts
      */
-    <O> List<Contact> searchContacts(SearchTerm<O> term) throws OXException;
+    <O> List<Contact> searchContacts(List<String> folderIds, SearchTerm<O> term) throws OXException;
 
     /**
      * Searches for contacts.
