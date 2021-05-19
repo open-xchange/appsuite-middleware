@@ -79,6 +79,7 @@ import com.openexchange.java.Strings;
 import com.openexchange.java.util.UUIDs;
 import com.openexchange.lock.LockService;
 import com.openexchange.server.ServiceExceptionCode;
+import com.openexchange.session.ObfuscatorService;
 import com.openexchange.session.Session;
 import com.openexchange.sessiond.DefaultAddSessionParameter;
 import com.openexchange.sessiond.SessiondService;
@@ -111,7 +112,7 @@ public class TokenLoginServiceImpl implements TokenLoginService {
     /**
      * Initializes a new {@link TokenLoginServiceImpl}.
      *
-     * @param maxIdleTime The max idle time for the local cache
+     * @param maxIdleTime The max. idle time for the local cache
      * @param configService The configuration service
      */
     public TokenLoginServiceImpl(final int maxIdleTime, final ConfigurationService configService) throws OXException {
@@ -121,7 +122,7 @@ public class TokenLoginServiceImpl implements TokenLoginService {
     /**
      * Initializes a new {@link TokenLoginServiceImpl}.
      *
-     * @param maxIdleTime The max idle time for the local cache
+     * @param maxIdleTime The max. idle time for the local cache
      * @param configService The configuration service
      * @param notActiveExceptionHandler The {@link HazelcastInstanceNotActiveExceptionHandler}
      */
@@ -267,7 +268,7 @@ public class TokenLoginServiceImpl implements TokenLoginService {
     /**
      * Gets the Hazelcast map or <code>null</code> if unavailable.
      *
-     * @param mapIdentifier The Hazelcast map id
+     * @param mapIdentifier The Hazelcast map identifier
      */
     private IMap<String, String> hzMap(String mapIdentifier) {
         if (null == mapIdentifier) {
@@ -288,14 +289,14 @@ public class TokenLoginServiceImpl implements TokenLoginService {
     }
 
     /**
-     * Removes the key/value pair from the Hazelcast map with the given id
+     * Removes the key/value pair from the Hazelcast map with the given identifier
      *
-     * @param mapIdentifier The Hazelcast map id
+     * @param mapIdentifier The Hazelcast map identifier
      * @param key The key to remove
-     * @return The removed value or null
+     * @return The removed value or <code>null</code>
      */
     private String removeFromHzMap(String mapIdentifier, String key) {
-        final IMap<String, String> hzMap = hzMap(mapIdentifier);
+        IMap<String, String> hzMap = hzMap(mapIdentifier);
         String retval = null;
         if (null == hzMap) {
             LOG.trace("Hazelcast map for remote token logins is not available.");
@@ -307,34 +308,49 @@ public class TokenLoginServiceImpl implements TokenLoginService {
     }
 
     /**
-     * Puts the given key/value pair into the Hazelcast map with given id if absent
+     * Puts the given key/value pair into the Hazelcast map with given identifier if absent
      *
      * @param mapIdentifier The Hazelcast map identifier
      * @param key The key to add
      * @param value The value to add
-     * @return The already existing value or null
+     * @return The already existing value or <code>null</code>
+     * @throws OXException If Hazelcast map is not available
      */
-    private String putToHzMapIfAbsent(String mapIdentifier, String key, String value) {
-        final IMap<String, String> hzMap = hzMap(mapIdentifier);
-        String retval = null;
+    private String putToHzMapIfAbsent(String mapIdentifier, String key, String value) throws OXException {
+        IMap<String, String> hzMap = hzMap(mapIdentifier);
         if (null == hzMap) {
-            LOG.trace("Hazelcast map for remote token logins is not available.");
-        } else {
-            // This MUST be synchronous!
-            retval = hzMap.putIfAbsent(key, value);
+            throw OXException.general("Hazelcast map for remote token logins is not available.");
         }
-        return retval;
+        // This MUST be synchronous!
+        return hzMap.putIfAbsent(key, value);
+    }
+
+    /**
+     * Puts the given key/value pair into the Hazelcast map
+     *
+     * @param mapIdentifier The Hazelcast map identifier
+     * @param key The key to add
+     * @param value The value to add
+     * @throws OXException If Hazelcast map is not available
+     */
+    private void putToHzMap(String mapIdentifier, String key, String value) throws OXException {
+        IMap<String, String> hzMap = hzMap(mapIdentifier);
+        if (null == hzMap) {
+            throw OXException.general("Hazelcast map for remote token logins is not available.");
+        }
+        // This MUST be synchronous!
+        hzMap.put(key, value);
     }
 
     /**
      * Gets a value from a given Hazelcast map
      *
-     * @param mapIdentifier The Hazelcast map id
+     * @param mapIdentifier The Hazelcast map identifier
      * @param key The key to get
-     * @return The value for the given key or null
+     * @return The value for the given key or <code>null</code>
      */
     private String getFromHzMap(String mapIdentifier, String key) {
-        final IMap<String, String> hzMap = hzMap(mapIdentifier);
+        IMap<String, String> hzMap = hzMap(mapIdentifier);
         String retval = null;
         if (null == hzMap) {
             LOG.trace("Hazelcast map for remote token logins is not available.");
@@ -345,19 +361,22 @@ public class TokenLoginServiceImpl implements TokenLoginService {
     }
 
     @Override
-    public String acquireToken(Session session) {
+    public String acquireToken(Session session) throws OXException {
         Validate.notNull(session);
 
         // Only one token per session
-        final String sessionId = session.getSessionID();
+        String sessionId = session.getSessionID();
         String token = getToken(sessionId);
+
         // Check token is in correct format
         if (token != null && token.startsWith(sessionId) == false) {
             token = null;
             remove(sessionId);
         }
+
         if (null == token) {
-            final String newToken = createNewToken(sessionId);
+            // No such token or token is of invalid format
+            String newToken = createNewToken(sessionId);
             token = putIfAbsent(sessionId, newToken);
             return token == null ? newToken : token;
         }
@@ -365,58 +384,50 @@ public class TokenLoginServiceImpl implements TokenLoginService {
     }
 
     /**
-     * Creates a new token
+     * Creates a new token.
      *
-     * @param sessionId The session id
+     * @param sessionId The session identifier
      * @return The new token
+     * @throws OXException If required service is absent
      */
-    private String createNewToken(String sessionId) {
-        return new StringBuilder(sessionId).append("-").append(UUIDs.getUnformattedString(UUID.randomUUID())).toString();
+    private static String createNewToken(String sessionId) throws OXException {
+        ObfuscatorService obfuscatorService = Services.getService(ObfuscatorService.class);
+        if (null == obfuscatorService) {
+            throw ServiceExceptionCode.SERVICE_UNAVAILABLE.create(ObfuscatorService.class.getName());
+        }
+        return new StringBuilder(obfuscatorService.obfuscate(sessionId)).append('-').append(UUIDs.getUnformattedString(UUID.randomUUID())).toString();
     }
 
     @Override
     public Session redeemToken(String token, String appSecret, String optClientIdentifier, String optAuthId, String optHash, String optClientIp, String optUserAgent) throws OXException {
-        final TokenLoginSecret tokenLoginSecret = Strings.isEmpty(appSecret) ? null : getTokenLoginSecret(appSecret);
+        TokenLoginSecret tokenLoginSecret = Strings.isEmpty(appSecret) ? null : getTokenLoginSecret(appSecret);
         if (null == tokenLoginSecret) {
             throw TokenLoginExceptionCodes.TOKEN_REDEEM_DENIED.create();
         }
+
         // Check available services needed for session creation
-        final SessiondService sessiondService = Services.getService(SessiondService.class);
+        SessiondService sessiondService = Services.getService(SessiondService.class);
         if (null == sessiondService) {
             throw ServiceExceptionCode.SERVICE_UNAVAILABLE.create(SessiondService.class.getName());
         }
-        final ContextService contextService = Services.getService(ContextService.class);
+        ContextService contextService = Services.getService(ContextService.class);
         if (null == contextService) {
             throw ServiceExceptionCode.SERVICE_UNAVAILABLE.create(ContextService.class.getName());
         }
+        ObfuscatorService obfuscatorService = Services.getService(ObfuscatorService.class);
+        if (null == obfuscatorService) {
+            throw ServiceExceptionCode.SERVICE_UNAVAILABLE.create(ObfuscatorService.class.getName());
+        }
+
         // Look-up session identifier
-        final Lock lock;
-        {
-            final LockService lockService = Services.getService(LockService.class);
-            lock = null == lockService ? Session.EMPTY_LOCK : lockService.getLockFor(token);
-        }
-        // Get session identifier
-        String sessionId;
-        lock.lock();
-        try {
-            String[] splitedToken = token.split("-", 2);
-            if (splitedToken.length != 2) {
-                throw TokenLoginExceptionCodes.NO_SUCH_TOKEN.create(token);
-            }
-            sessionId = splitedToken[0];
-            String storedToken = getToken(sessionId);
-            if (storedToken == null || storedToken.equals(token) == false) {
-                throw TokenLoginExceptionCodes.NO_SUCH_TOKEN.create(token);
-            }
-            remove(sessionId);
-        } finally {
-            lock.unlock();
-        }
+        String sessionId = lookUpSessionIdByToken(token, obfuscatorService);
+
         // Create duplicate session
         Session session = sessiondService.peekSession(sessionId);
         if (null == session) {
             throw TokenLoginExceptionCodes.NO_SUCH_SESSION_FOR_TOKEN.create(token);
         }
+
         // Create parameter object
         final DefaultAddSessionParameter parameter = new DefaultAddSessionParameter().setUserId(session.getUserId());
         parameter.setClientIP(Strings.isEmpty(optClientIp) ? session.getLocalIp() : optClientIp);
@@ -436,14 +447,54 @@ public class TokenLoginServiceImpl implements TokenLoginService {
         return sessiondService.addSession(parameter);
     }
 
+    private String lookUpSessionIdByToken(String token, ObfuscatorService obfuscatorService) throws OXException {
+        Lock lock = getLockFor(token);
+        lock.lock();
+        try {
+            String[] splitToken = Strings.splitBy(token, '-', true);
+            if (splitToken.length != 2) {
+                // Token is of invalid format; expected: <obfuscated-session-id> + "-" + <UUID>
+                throw TokenLoginExceptionCodes.NO_SUCH_TOKEN.create(token);
+            }
+
+            // Get session identifier
+            String sessionId = obfuscatorService.unobfuscate(splitToken[0]);
+
+            // Fetch token for session identifier & validate it
+            String storedToken = remove(sessionId);
+            if (storedToken == null) {
+                // No such token at all
+                throw TokenLoginExceptionCodes.NO_SUCH_TOKEN.create(token);
+            }
+
+            // Check equality
+            if (storedToken.equals(token)) {
+                // All fine...
+                return sessionId;
+            }
+
+            // Client-given and stored token are different. Restore stored token & signal error.
+            put(sessionId, storedToken);
+            throw TokenLoginExceptionCodes.NO_SUCH_TOKEN.create(token);
+        } finally {
+            lock.unlock();
+        }
+    }
+
+    private static Lock getLockFor(String token) throws OXException {
+        LockService lockService = Services.getService(LockService.class);
+        return null == lockService ? Session.EMPTY_LOCK : lockService.getLockFor(token);
+    }
+
     /**
-     * Puts the given token into the map if not already present
+     * Puts the given token into the map if not already present.
      *
-     * @param sessionId The session id
+     * @param sessionId The session identifier
      * @param newToken The new token
-     * @return the existing value or null
+     * @return The existing value or <code>null</code>
+     * @throws OXException If put operation fails
      */
-    private String putIfAbsent(final String sessionId, final String newToken) {
+    private String putIfAbsent(String sessionId, String newToken) throws OXException {
         blocker.acquire();
         try {
             if (useHzMap) {
@@ -456,12 +507,32 @@ public class TokenLoginServiceImpl implements TokenLoginService {
     }
 
     /**
-     * Gets the token associated with the given session id
+     * Puts the given token into the map.
      *
-     * @param sessionId The session id
+     * @param sessionId The session identifier
+     * @param newToken The new token
+     * @throws OXException If put operation fails
+     */
+    private void put(String sessionId, String newToken) throws OXException {
+        blocker.acquire();
+        try {
+            if (useHzMap) {
+                putToHzMap(sessionId2tokenMapName, sessionId, newToken);
+            } else {
+                sessionId2token.asMap().put(sessionId, newToken);
+            }
+        } finally {
+            blocker.release();
+        }
+    }
+
+    /**
+     * Gets the token associated with the given session identifier.
+     *
+     * @param sessionId The session identifier
      * @return The token or null
      */
-    private String getToken(final String sessionId) {
+    private String getToken(String sessionId) {
         blocker.acquire();
         try {
             if (useHzMap) {
@@ -474,9 +545,9 @@ public class TokenLoginServiceImpl implements TokenLoginService {
     }
 
     /**
-     * Removes the token for the given session
+     * Removes the token for the given session identifier.
      *
-     * @param sessionId The session id
+     * @param sessionId The session identifier
      * @return The associated token or null
      */
     private String remove(String sessionId) {

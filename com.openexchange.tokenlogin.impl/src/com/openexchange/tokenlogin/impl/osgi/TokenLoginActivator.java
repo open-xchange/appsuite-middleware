@@ -68,6 +68,7 @@ import com.openexchange.exception.OXException;
 import com.openexchange.hazelcast.configuration.HazelcastConfigurationService;
 import com.openexchange.lock.LockService;
 import com.openexchange.osgi.HousekeepingActivator;
+import com.openexchange.session.ObfuscatorService;
 import com.openexchange.session.Session;
 import com.openexchange.sessiond.SessiondEventConstants;
 import com.openexchange.sessiond.SessiondService;
@@ -95,7 +96,8 @@ public final class TokenLoginActivator extends HousekeepingActivator implements 
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { ConfigurationService.class, HazelcastConfigurationService.class, SessiondService.class, ContextService.class, LockService.class };
+        return new Class<?>[] { ConfigurationService.class, HazelcastConfigurationService.class, SessiondService.class,
+            ContextService.class, LockService.class, ObfuscatorService.class };
     }
 
     @Override
