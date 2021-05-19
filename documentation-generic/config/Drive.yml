@@ -496,3 +496,14 @@ properties:
       file: drive.properties
       packageName: open-xchange-drive
       tags: ["Drive", "Limit"]
+    - key: com.openexchange.drive.listenTimeout
+      description: |
+        The default timeout in milliseconds to use for the long polling "listen" operation, if not overridden by clients. Defaults to 90000, and 
+        should be adjusted if there are event lowever timeouts in upfront proxies. 
+      defaultValue: 90000
+      version:
+      reloadable: true
+      configcascadeAware: false
+      file: drive.properties
+      packageName: open-xchange-drive
+      tags: ["Drive"]
