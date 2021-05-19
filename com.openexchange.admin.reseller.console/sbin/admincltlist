@@ -8,3 +8,4 @@ removerestrictions
 updatemoduleaccessrestrictions
 updaterestrictions
 getresellercapabilities
+getadmin
