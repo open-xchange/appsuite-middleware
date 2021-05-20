@@ -130,7 +130,7 @@ public class ContextSetConfigProvider extends AbstractContextBasedConfigProvider
         init();
     }
 
-    protected Set<String> getSpecification(Context context, UserPermissionBits perms) throws OXException {
+    protected Set<String> getSpecification(Context context, Optional<UserPermissionBits> optPerms) throws OXException {
         // Gather available tags
         final Set<String> tags = new HashSet<>(64);
 
@@ -158,11 +158,13 @@ public class ContextSetConfigProvider extends AbstractContextBasedConfigProvider
         }
 
         // The ones from user configuration
-        tags.addAll(userConfigAnalyzer.getTags(perms));
+        if (optPerms.isPresent()) {
+            tags.addAll(userConfigAnalyzer.getTags(optPerms.get()));
+        }
 
         // Now let's try modifications by cascade, first those below the contextSet level
         ConfigViewFactory configViews = services.getService(ConfigViewFactory.class);
-        final ConfigView view = configViews.getView(perms.getUserId(), context.getContextId());
+        final ConfigView view = configViews.getView(optPerms.isPresent() ? optPerms.get().getUserId() : NO_USER, context.getContextId());
 
         String[] searchPath = configViews.getSearchPath();
         for (String scope : searchPath) {
@@ -187,26 +189,20 @@ public class ContextSetConfigProvider extends AbstractContextBasedConfigProvider
     }
 
     @Override
-    protected BasicProperty get(String propertyName, Context context, int user) throws OXException {
-        if (user == NO_USER) {
-            return NO_PROPERTY;
-        }
-
-        Optional<UserPermissionBits> optionalUserPermissionBits = getUserPermissionBits(context, user);
-        if (optionalUserPermissionBits.isPresent() == false) {
-            return NO_PROPERTY;
-        }
-
-        List<Map<String, Object>> config = getConfigData(getSpecification(context, optionalUserPermissionBits.get()));
+    protected BasicProperty get(String propertyName, Context context, int userId) throws OXException {
+        List<Map<String, Object>> config = getConfigData(getSpecification(context, optUserPermissionBits(context, userId)));
 
         final String value = findFirst(config, propertyName);
         return new ContextSetBasicProperty(propertyName, value, SCOPE);
     }
 
-    private Optional<UserPermissionBits> getUserPermissionBits(Context ctx, int user) throws OXException {
+    private Optional<UserPermissionBits> optUserPermissionBits(Context ctx, int userId) throws OXException {
+        if (userId == NO_USER) {
+            return Optional.empty();
+        }
         try {
             UserPermissionService userPermissions = services.getService(UserPermissionService.class);
-            return Optional.ofNullable(userPermissions.getUserPermissionBits(user, ctx));
+            return Optional.ofNullable(userPermissions.getUserPermissionBits(userId, ctx));
         } catch (OXException e) {
             if (false == UserConfigurationCodes.NOT_FOUND.equals(e)) {
                 throw e;
@@ -219,16 +215,7 @@ public class ContextSetConfigProvider extends AbstractContextBasedConfigProvider
 
     @Override
     protected Collection<String> getAllPropertyNamesFor(Context context, int userId) throws OXException {
-        if (userId == NO_USER) {
-            return Collections.emptyList();
-        }
-
-        Optional<UserPermissionBits> optionalUserPermissionBits = getUserPermissionBits(context, userId);
-        if (optionalUserPermissionBits.isPresent() == false) {
-            return Collections.emptyList();
-        }
-
-        Set<String> tags = getSpecification(context, optionalUserPermissionBits.get());
+        Set<String> tags = getSpecification(context, optUserPermissionBits(context, userId));
         Set<String> allNames = new HashSet<>();
         boolean somethingAdded = false;
         for (ContextSetConfig c : contextSetConfigs) {

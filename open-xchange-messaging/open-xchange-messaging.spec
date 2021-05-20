@@ -9,7 +9,7 @@ BuildRequires:  open-xchange-oauth
 BuildRequires:  open-xchange-xerces
 BuildRequires: java-1.8.0-openjdk-devel
 Version:        @OXVERSION@
-%define         ox_release 10
+%define         ox_release 11
 Release:        %{ox_release}_<CI_CNT>.<B_CNT>
 Group:          Applications/Productivity
 License:        GPL-2.0
@@ -67,6 +67,8 @@ perl -pi -e 's;(^.*?)\s+(.*/(twitter)\.properties)$;$1 %%%attr(640,root,open-xch
 %dir /opt/open-xchange/etc/
 
 %changelog
+* Tue May 18 2021 Marcus Klein <marcus.klein@open-xchange.com>
+Build for patch 2021-05-17 (5994)
 * Mon Apr 26 2021 Marcus Klein <marcus.klein@open-xchange.com>
 Build for patch 2021-05-03 (5989)
 * Tue Apr 13 2021 Marcus Klein <marcus.klein@open-xchange.com>
