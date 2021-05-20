@@ -49,6 +49,7 @@
 
 package com.openexchange.contact.vcard.impl.internal;
 
+import static com.openexchange.java.Autoboxing.L;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
@@ -94,7 +95,7 @@ public class VCardImportIterator implements SearchIterator<VCardImport> {
         this.mapper = mapper;
         this.parameters = parameters;
         warnings = new ArrayList<OXException>();
-        vCardStream = new VCardInputStream(inputStream, parameters.getMaxVCardSize());
+        vCardStream = new VCardInputStream(inputStream);
         reader = new VCardReader(vCardStream);
     }
 
@@ -164,7 +165,11 @@ public class VCardImportIterator implements SearchIterator<VCardImport> {
      * @return The vCard import result, or <code>null</code> if there is none
      */
     private VCardImport readNext(Contact contact) throws OXException {
+        /*
+         * read next vCard
+         */
         List<OXException> warnings = new ArrayList<OXException>();
+        long vCardSize;
         VCard vCard = null;
         try {
             vCard = reader.readNext();
@@ -173,6 +178,8 @@ public class VCardImportIterator implements SearchIterator<VCardImport> {
                 throw (OXException) e.getCause();
             }
             throw VCardExceptionCodes.IO_ERROR.create(e, e.getMessage());
+        } finally {
+            vCardSize = vCardStream.resetCurrentSize();
         }
         warnings.addAll(VCardExceptionUtils.getParserWarnings(reader.getWarnings()));
         if (null == vCard) {
@@ -181,6 +188,22 @@ public class VCardImportIterator implements SearchIterator<VCardImport> {
              */
             this.addWarnings(warnings);
             return null;
+        }
+        /*
+         * check size
+         */
+        long maxSize = parameters.getMaxVCardSize();
+        if (0 < maxSize && vCardSize > maxSize) {
+            /*
+             * size exceeded, add import result with placeholder contact
+             */
+            OXException e = VCardExceptionCodes.MAXIMUM_SIZE_EXCEEDED.create(L(maxSize));
+            addWarning(e);
+            Contact placeholderContact = null != contact ? contact : new Contact();
+            placeholderContact.setUid(null != vCard.getUid() ? vCard.getUid().getValue() : placeholderContact.getUid());
+            placeholderContact.setDisplayName(null != vCard.getFormattedName() ? vCard.getFormattedName().getValue() : placeholderContact.getDisplayName());
+            placeholderContact.setProperty("com.openexchange.contact.vcard.importError", e);
+            return new DefaultVCardImport(placeholderContact, warnings, null);
         }
         /*
          * import vCard

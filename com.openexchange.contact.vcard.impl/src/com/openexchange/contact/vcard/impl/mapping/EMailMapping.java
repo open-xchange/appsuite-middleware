@@ -254,14 +254,14 @@ public class EMailMapping extends AbstractMapping {
         }
         if (null == email && fallbackToUnknownType) {
             /*
-             * if no distinguishing e-mail type found, use first non-distinguishing address as fallback
+             * if no distinguishing e-mail type found, use first non-distinguishing address as fallback, in case there are other distinguishing ones
              */
             List<Email> simpleEmails = getPropertiesWithoutTypes(emails,
                 EmailType.WORK.getValue(), EmailType.HOME.getValue(), TYPE_OTHER, EmailType.TLX.getValue());
-            if (0 < simpleEmails.size()) {
+            if (0 < simpleEmails.size() && simpleEmails.size() != emails.size()) {
                 sort(simpleEmails);
                 email = simpleEmails.get(0);
-            }            
+            }
         }
         return email;
     }

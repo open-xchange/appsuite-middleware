@@ -61,6 +61,9 @@ import com.openexchange.webdav.protocol.helpers.SingleXMLPropertyMixin;
  */
 public class BulkRequests extends SingleXMLPropertyMixin {
 
+    /** An integer value representing the maximum number of resources that can be specified in the bulk import request */
+    private static final int MAX_RESOURCES = 50;
+
 	private final GroupwareCarddavFactory factory;
 
     /**
@@ -76,10 +79,11 @@ public class BulkRequests extends SingleXMLPropertyMixin {
     @Override
     protected String getValue() {
         long maxUploadSize = factory.getState().getMaxUploadSize();
+        int maxResources = MAX_RESOURCES;
         return new StringBuilder()
             .append("<MM:simple>")
-                .append("<MM:max-resources/>")
-                .append(0 >= maxUploadSize ? "<MM:max-bytes/>" : "<MM:max-bytes>" + maxUploadSize + "</MM:max-bytes>")
+            .append(0 >= maxResources ? "<MM:max-resources/>" : "<MM:max-resources>" + maxResources + "</MM:max-resources>")
+            .append(0 >= maxUploadSize ? "<MM:max-bytes/>" : "<MM:max-bytes>" + maxUploadSize + "</MM:max-bytes>")
             .append("</MM:simple>")
         .toString();
     }
