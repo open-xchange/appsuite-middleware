@@ -50,6 +50,7 @@
 package com.openexchange.tokenlogin.impl;
 
 import static com.openexchange.java.Autoboxing.I;
+import static org.mockito.ArgumentMatchers.*;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -77,6 +78,7 @@ import com.openexchange.config.ConfigurationService;
 import com.openexchange.context.ContextService;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.Charsets;
+import com.openexchange.session.ObfuscatorService;
 import com.openexchange.session.Session;
 import com.openexchange.sessiond.AddSessionParameter;
 import com.openexchange.sessiond.SessiondService;
@@ -107,7 +109,7 @@ public class TokenLoginServiceImplTest {
     /**
      * Fake token for the tests
      */
-    private final String token = "067e61623b6f4ae2a1712470b63dff00";
+    private final String token = "8a07c5a2e4974a75ae70bd9a36198f03_obf-067e61623b6f4ae2a1712470b63dff00";
 
     /**
      * Mock of the {@link ConfigurationService}
@@ -133,6 +135,9 @@ public class TokenLoginServiceImplTest {
     @Mock
     private SessiondService sessiondService;
 
+    @Mock
+    private ObfuscatorService obfuscatorService;
+
     /**
      * A temporary folder that could be used by each mock.
      */
@@ -153,6 +158,11 @@ public class TokenLoginServiceImplTest {
     public void setUp() {
         MockitoAnnotations.initMocks(this);
         PowerMockito.mockStatic(Services.class);
+
+        PowerMockito.when(Services.getService(ObfuscatorService.class)).thenReturn(obfuscatorService);
+
+        PowerMockito.when(obfuscatorService.obfuscate(any(String.class))).thenAnswer(i -> i.getArgument(0) + "_obf");
+        PowerMockito.when(obfuscatorService.unobfuscate(any(String.class))).thenAnswer(i -> ((String) i.getArgument(0)).substring(0, ((String) i.getArgument(0)).length() - "_obf".length()));
 
         // BEHAVIOUR
         PowerMockito.when(I(session.getContextId())).thenReturn(I(424242669));
@@ -273,7 +283,7 @@ public class TokenLoginServiceImplTest {
             }
         };
 
-        MockUtils.injectValueIntoPrivateField(this.tokenLoginServiceImpl, "token2sessionId", createToken2SessionId());
+        MockUtils.injectValueIntoPrivateField(this.tokenLoginServiceImpl, "sessionId2token", createSessionId2Token());
 
         this.tokenLoginServiceImpl.redeemToken(this.token, "appSecret", "optClientId", "optAuthId", "optHash", "optClientIp", "optUserAgent");
     }
@@ -294,7 +304,7 @@ public class TokenLoginServiceImplTest {
             }
         };
 
-        MockUtils.injectValueIntoPrivateField(this.tokenLoginServiceImpl, "token2sessionId", createToken2SessionId());
+        MockUtils.injectValueIntoPrivateField(this.tokenLoginServiceImpl, "sessionId2token", createSessionId2Token());
 
         Session returnedSession = this.tokenLoginServiceImpl.redeemToken(this.token, "appSecret", "optClientId", "optAuthId", "optHash", "optClientIp", "optUserAgent");
 
@@ -385,27 +395,13 @@ public class TokenLoginServiceImplTest {
     }
 
     @Test
-    public void testRemoveTokenFor_TokenNotAvailable_TokenStillInMap() throws OXException {
-        this.tokenLoginServiceImpl = new TokenLoginServiceImpl(this.maxIdleTime, this.configService);
-        MockUtils.injectValueIntoPrivateField(this.tokenLoginServiceImpl, "token2sessionId", createToken2SessionId());
-
-        this.tokenLoginServiceImpl.removeTokenFor(this.session);
-
-        Mockito.verify(this.session, Mockito.times(1)).getSessionID();
-        Cache<String, String> token2sessionMap = (Cache<String, String>) MockUtils.getValueFromField(this.tokenLoginServiceImpl, "token2sessionId");
-        Assert.assertNotNull(token2sessionMap);
-        Assert.assertEquals(1, token2sessionMap.size());
-    }
-
-    @Test
     public void testRemoveTokenFor_TokenNotAvailadfdble_Return() throws OXException {
         this.tokenLoginServiceImpl = new TokenLoginServiceImpl(this.maxIdleTime, this.configService);
-        MockUtils.injectValueIntoPrivateField(this.tokenLoginServiceImpl, "token2sessionId", createToken2SessionId());
         MockUtils.injectValueIntoPrivateField(this.tokenLoginServiceImpl, "sessionId2token", createSessionId2Token());
 
         this.tokenLoginServiceImpl.removeTokenFor(this.session);
 
-        Cache<String, String> token2sessionMap = (Cache<String, String>) MockUtils.getValueFromField(this.tokenLoginServiceImpl, "token2sessionId");
+        Cache<String, String> token2sessionMap = (Cache<String, String>) MockUtils.getValueFromField(this.tokenLoginServiceImpl, "sessionId2token");
         Assert.assertNotNull(token2sessionMap);
         Assert.assertEquals(0, token2sessionMap.size());
     }
@@ -414,18 +410,6 @@ public class TokenLoginServiceImplTest {
         CacheBuilder<Object, Object> builder = CacheBuilder.newBuilder().concurrencyLevel(4).maximumSize(Integer.MAX_VALUE).initialCapacity(1024).expireAfterAccess(maxIdleTime, TimeUnit.MILLISECONDS);
         Cache<String, String> cache = builder.build();
         return cache;
-    }
-
-    /**
-     * Creates the token-session id map
-     *
-     * @return {@link ConcurrentMap<String, String>} with the desired mapping
-     */
-    private Cache<String, String> createToken2SessionId() {
-        Cache<String, String> token2sessionId = buildCache();
-        token2sessionId.put(this.token, "8a07c5a2e4974a75ae70bd9a36198f03");
-
-        return token2sessionId;
     }
 
     /**
