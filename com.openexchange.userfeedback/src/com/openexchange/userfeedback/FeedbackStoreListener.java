@@ -55,7 +55,7 @@ import com.openexchange.session.Session;
  * {@link FeedbackStoreListener}
  *
  * @author <a href="mailto:philipp.schumacher@open-xchange.com">Philipp Schumacher</a>
- * @since v8.0.0
+ * @since v7.10.6
  */
 public interface FeedbackStoreListener {
 
