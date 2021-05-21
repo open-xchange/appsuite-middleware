@@ -88,7 +88,7 @@ public final class SnippetUtils {
             return content;
         }
 
-        int s2 = content.indexOf('>');
+        int s2 = content.lastIndexOf('>');
         if (s2 < 0 || s2 < s1) {
             return content;
         }
