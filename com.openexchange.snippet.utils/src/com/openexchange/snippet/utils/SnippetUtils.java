@@ -54,7 +54,6 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.exception.OXException;
 import com.openexchange.html.HtmlService;
-import com.openexchange.java.HTMLDetector;
 import com.openexchange.snippet.utils.internal.Services;
 import com.openexchange.tools.servlet.OXJSONExceptionCodes;
 
@@ -79,7 +78,17 @@ public final class SnippetUtils {
      * @return The sanitized content
      */
     public static String sanitizeContent(String content) {
-        if (com.openexchange.java.Strings.isEmpty(content) || !HTMLDetector.containsHTMLTags(content, "<div")) {
+        if (com.openexchange.java.Strings.isEmpty(content)) {
+            return content;
+        }
+
+        int s1 = content.indexOf('<');
+        if (s1 < 0) {
+            return content;
+        }
+
+        int s2 = content.lastIndexOf('>');
+        if (s2 < 0 || s2 < s1) {
             return content;
         }
 
