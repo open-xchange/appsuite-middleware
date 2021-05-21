@@ -130,7 +130,6 @@ import com.openexchange.chronos.provider.caching.internal.handler.utils.EmptyUid
 import com.openexchange.chronos.provider.caching.internal.response.AccountResponseGenerator;
 import com.openexchange.chronos.provider.caching.internal.response.ChangeExceptionsResponseGenerator;
 import com.openexchange.chronos.provider.caching.internal.response.DedicatedEventsResponseGenerator;
-import com.openexchange.chronos.provider.caching.internal.response.SearchResponseGenerator;
 import com.openexchange.chronos.provider.caching.internal.response.SingleEventResponseGenerator;
 import com.openexchange.chronos.provider.extensions.BasicSearchAware;
 import com.openexchange.chronos.provider.extensions.BasicSyncAware;
