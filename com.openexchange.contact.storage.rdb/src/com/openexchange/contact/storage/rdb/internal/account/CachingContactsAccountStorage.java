@@ -54,7 +54,9 @@ import static com.openexchange.java.Autoboxing.I2i;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.caching.Cache;
@@ -144,14 +146,14 @@ public class CachingContactsAccountStorage implements ContactsAccountStorage {
             return delegate.loadAccounts(userId, accountIds);
         }
         List<Integer> accountsToLoad = new ArrayList<Integer>(accountIds.length);
-        ContactsAccount[] accounts = new ContactsAccount[accountIds.length];
+        Map<Integer, ContactsAccount> accounts = new HashMap<>(accountIds.length);
         for (int i = 0; i < accountIds.length; i++) {
             CacheKey key = getAccountKey(userId, accountIds[i]);
             ContactsAccount account = optClonedAccount(cache.get(key));
             if (null == account) {
                 accountsToLoad.add(I(accountIds[i]));
             } else {
-                accounts[i] = account;
+                accounts.put(I(accountIds[i]), account);
             }
         }
         if (0 < accountsToLoad.size()) {
@@ -160,15 +162,14 @@ public class CachingContactsAccountStorage implements ContactsAccountStorage {
                     continue;
                 }
                 cache.put(getAccountKey(userId, account.getAccountId()), clone(account), false);
-                for (int i = 0; i < accountIds.length; i++) {
-                    if (accountIds[i] == account.getAccountId()) {
-                        accounts[i] = account;
-                        break;
-                    }
-                }
+                accounts.put(I(account.getAccountId()), account);
             }
         }
-        return accounts;
+        ContactsAccount[] retval = new ContactsAccount[accountIds.length];
+        for (int i = 0; i < accountIds.length; i++) {
+            retval[i] = accounts.get(I(accountIds[i]));
+        }
+        return retval;
     }
 
     @Override
