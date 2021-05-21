@@ -62,6 +62,7 @@ import com.openexchange.filestore.FileStorage;
 import com.openexchange.filestore.FileStorageInfoService;
 import com.openexchange.filestore.FileStorageService;
 import com.openexchange.filestore.FileStorages;
+import com.openexchange.gdpr.dataexport.DataExportConfig;
 import com.openexchange.gdpr.dataexport.DataExportTask;
 import com.openexchange.java.Strings;
 import com.openexchange.java.util.UUIDs;
@@ -69,6 +70,7 @@ import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.tools.TimeZoneUtils;
 import com.openexchange.tools.filename.FileNameTools;
 import com.openexchange.user.User;
+import net.gcardone.junidecode.Junidecode;
 
 /**
  * {@link DataExportUtility} - Utility class for data export.
@@ -322,6 +324,27 @@ public class DataExportUtility {
             fileNameBuilder.append(ext);
         }
         return FileNameTools.sanitizeFilename(fileNameBuilder.toString());
+    }
+
+    /**
+     * Possibly converts any Unicode characters in given ZIP archive entry name to somewhat reasonable ASCII7-only characters in case given
+     * configuration advertises {@link DataExportConfig#isReplaceUnicodeWithAscii()} as <code>true</code>.
+     *
+     * @param name The ZIP archive entry name to examine
+     * @return The possibly converted ZIP archive entry name
+     */
+    public static String prepareEntryName(String name, DataExportConfig config) {
+        if (name == null || config == null || config.isReplaceUnicodeWithAscii() == false) {
+            // Return as-is
+            return name;
+        }
+
+        try {
+            return Junidecode.unidecode(name);
+        } catch (Exception e) {
+            LoggerHolder.LOG.error("Failed to convert ZIP archive entry name to somewhat reasonable ASCII7-only: {}. Using name as-is.", name, e);
+            return name;
+        }
     }
 
 }
