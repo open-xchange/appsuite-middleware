@@ -52,6 +52,7 @@ package com.openexchange.contact.storage.rdb.osgi;
 import java.rmi.Remote;
 import java.util.Dictionary;
 import java.util.Hashtable;
+import com.openexchange.caching.CacheService;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.config.Reloadable;
 import com.openexchange.config.cascade.ConfigViewFactory;
@@ -102,6 +103,11 @@ public class RdbContactStorageActivator extends HousekeepingActivator {
     }
 
     @Override
+    protected Class<?>[] getOptionalServices() {
+        return new Class<?>[] { CacheService.class };
+    }
+
+    @Override
     protected void startBundle() throws Exception {
         org.slf4j.Logger logger = org.slf4j.LoggerFactory.getLogger(RdbContactStorageActivator.class);
         try {
@@ -121,7 +127,7 @@ public class RdbContactStorageActivator extends HousekeepingActivator {
 
             registerService(UpdateTaskProviderService.class, new DefaultUpdateTaskProviderService(new AddFilenameColumnTask(), new CorrectNumberOfImagesTask()));
 
-            registerService(ContactsStorageFactory.class, new RdbContactStorageFactory(new DatabaseServiceDBProvider(getService(DatabaseService.class)), service));
+            registerService(ContactsStorageFactory.class, new RdbContactStorageFactory(this, new DatabaseServiceDBProvider(getService(DatabaseService.class)), service));
 
             registerService(QuotaProvider.class, new RdbContactQuotaProvider());
             registerService(Reloadable.class, FulltextAutocompleteAdapter.RELOADABLE);

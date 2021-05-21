@@ -118,7 +118,7 @@ public interface ContactsAccountStorage {
      * @return The loaded contacts accounts
      * @throws OXException if an error is occurred
      */
-    List<ContactsAccount> loadAccounts(int userId, List<Integer> accountIds) throws OXException;
+    ContactsAccount[] loadAccounts(int userId, int[] accountIds) throws OXException;
 
     /**
      * Loads a list of all contacts accounts stored for a specific user.

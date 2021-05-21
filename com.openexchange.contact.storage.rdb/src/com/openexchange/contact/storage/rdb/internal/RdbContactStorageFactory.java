@@ -55,6 +55,7 @@ import com.openexchange.database.provider.DBProvider;
 import com.openexchange.database.provider.DBTransactionPolicy;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
+import com.openexchange.server.ServiceLookup;
 
 /**
  * {@link RdbContactStorageFactory}
@@ -66,15 +67,18 @@ public class RdbContactStorageFactory implements ContactsStorageFactory {
 
     private final DBProvider dbProvider;
     private final RdbContactStorage delegate;
+    private final ServiceLookup services;
 
     /**
      * Initialises a new {@link RdbContactStorageFactory}.
      * 
+     * @param services A service lookup reference
      * @param dbProvider The db provider\
      * @param delegate The {@link RdbContactStorage} delegate
      */
-    public RdbContactStorageFactory(DBProvider dbProvider, RdbContactStorage delegate) {
+    public RdbContactStorageFactory(ServiceLookup services, DBProvider dbProvider, RdbContactStorage delegate) {
         super();
+        this.services = services;
         this.dbProvider = dbProvider;
         this.delegate = delegate;
     }
@@ -86,6 +90,6 @@ public class RdbContactStorageFactory implements ContactsStorageFactory {
 
     @Override
     public ContactStorages create(Context context, DBProvider dbProvider, DBTransactionPolicy txPolicy) throws OXException {
-        return new RdbContactsStorage(context, dbProvider, txPolicy, delegate);
+        return new RdbContactsStorage(services, context, dbProvider, txPolicy, delegate);
     }
 }

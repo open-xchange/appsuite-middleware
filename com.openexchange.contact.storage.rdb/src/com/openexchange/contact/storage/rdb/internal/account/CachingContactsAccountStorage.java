@@ -50,7 +50,7 @@
 package com.openexchange.contact.storage.rdb.internal.account;
 
 import static com.openexchange.java.Autoboxing.I;
-import static com.openexchange.java.Autoboxing.i;
+import static com.openexchange.java.Autoboxing.I2i;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -139,35 +139,32 @@ public class CachingContactsAccountStorage implements ContactsAccountStorage {
     }
 
     @Override
-    public List<ContactsAccount> loadAccounts(int userId, List<Integer> accountIds) throws OXException {
+    public ContactsAccount[] loadAccounts(int userId, int[] accountIds) throws OXException {
         if (bypassCache()) {
             return delegate.loadAccounts(userId, accountIds);
         }
-        List<Integer> accountsToLoad = new ArrayList<>(accountIds.size());
-        List<ContactsAccount> accounts = new ArrayList<>(accountIds.size());
-        int index = 0;
-        for (Integer id : accountIds) {
-            CacheKey key = getAccountKey(userId, i(id));
+        List<Integer> accountsToLoad = new ArrayList<Integer>(accountIds.length);
+        ContactsAccount[] accounts = new ContactsAccount[accountIds.length];
+        for (int i = 0; i < accountIds.length; i++) {
+            CacheKey key = getAccountKey(userId, accountIds[i]);
             ContactsAccount account = optClonedAccount(cache.get(key));
             if (null == account) {
-                accountsToLoad.add(id);
+                accountsToLoad.add(I(accountIds[i]));
             } else {
-                accounts.set(index, account);
+                accounts[i] = account;
             }
-            index++;
         }
-        if (accountsToLoad.size() == 0) {
-            return accounts;
-        }
-        for (ContactsAccount account : delegate.loadAccounts(userId, accountsToLoad)) {
-            if (null == account) {
-                continue;
-            }
-            cache.put(getAccountKey(userId, account.getAccountId()), clone(account), false);
-            for (int i = 0; i < accountIds.size(); i++) {
-                if (i(accountIds.get(i)) == account.getAccountId()) {
-                    accounts.set(i, account);
-                    break;
+        if (0 < accountsToLoad.size()) {
+            for (ContactsAccount account : delegate.loadAccounts(userId, I2i(accountsToLoad))) {
+                if (null == account) {
+                    continue;
+                }
+                cache.put(getAccountKey(userId, account.getAccountId()), clone(account), false);
+                for (int i = 0; i < accountIds.length; i++) {
+                    if (accountIds[i] == account.getAccountId()) {
+                        accounts[i] = account;
+                        break;
+                    }
                 }
             }
         }
@@ -179,14 +176,18 @@ public class CachingContactsAccountStorage implements ContactsAccountStorage {
         if (bypassCache()) {
             return delegate.loadAccounts(userId);
         }
-        // Try and get accounts via cached account id list for user
+        /*
+         * try and get accounts via cached account id list for user
+         */
         CacheKey accountIdsKey = getAccountIdsKey(userId);
-        List<Integer> accountIds = optClonedAccountIds(cache.get(accountIdsKey));
+        int[] accountIds = optClonedAccountIds(cache.get(accountIdsKey));
         if (null != accountIds) {
-            List<ContactsAccount> accounts = new ArrayList<>(accountIds.size());
+            List<ContactsAccount> accounts = new ArrayList<ContactsAccount>(accountIds.length);
             for (ContactsAccount account : loadAccounts(userId, accountIds)) {
                 if (null == account) {
-                    // Stale reference in cached user's account list, invalidate & try again
+                    /*
+                     * stale reference in cached user's account list, invalidate & try again
+                     */
                     LOG.warn("Detected stale reference in account list for user {} in context {}, invalidating cache.", I(userId), I(contextId));
                     cache.remove(accountIdsKey);
                     return loadAccounts(userId);
@@ -195,15 +196,17 @@ public class CachingContactsAccountStorage implements ContactsAccountStorage {
             }
             return accounts;
         }
-        // Get account list from storage & put into cache
+        /*
+         * get account list from storage & put into cache
+         */
         List<ContactsAccount> accounts = delegate.loadAccounts(userId);
-        accountIds = new ArrayList<>(accounts.size());
+        accountIds = new int[accounts.size()];
         for (int i = 0; i < accounts.size(); i++) {
             ContactsAccount account = accounts.get(i);
-            accountIds.set(i, I(account.getAccountId()));
+            accountIds[i] = account.getAccountId();
             cache.put(getAccountKey(userId, account.getAccountId()), clone(account), false);
         }
-        cache.put(accountIdsKey, Serializable.class.cast(accountIds), false);
+        cache.put(accountIdsKey, accountIds, false);
         return accounts;
     }
 
@@ -262,9 +265,8 @@ public class CachingContactsAccountStorage implements ContactsAccountStorage {
      * @param cachedAccountIds The cached account identifiers
      * @return The cloned account ids {@link List} or <code>null</code> if the cached accounts is <code>null</code>
      */
-    @SuppressWarnings("unchecked")
-    private List<Integer> optClonedAccountIds(Object cachedAccountIds) {
-        return null != cachedAccountIds && List.class.isInstance(cachedAccountIds) ? clone((List<Integer>) cachedAccountIds) : null;
+    private int[] optClonedAccountIds(Object cachedAccountIds) {
+        return null != cachedAccountIds && int[].class.isInstance(cachedAccountIds) ? clone((int[]) cachedAccountIds) : null;
     }
 
     /**
@@ -290,8 +292,8 @@ public class CachingContactsAccountStorage implements ContactsAccountStorage {
      * @param accountIds The account ids
      * @return The cloned List
      */
-    private List<Integer> clone(List<Integer> accountIds) {
-        return new ArrayList<>(accountIds);
+    private static int[] clone(int[] accountIds) {
+        return accountIds.clone();
     }
 
     /**

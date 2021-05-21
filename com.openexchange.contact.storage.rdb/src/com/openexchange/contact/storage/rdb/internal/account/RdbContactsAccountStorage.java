@@ -53,7 +53,6 @@ import static com.openexchange.database.Databases.getPlaceholders;
 import static com.openexchange.database.Databases.isPrimaryKeyConflictInMySQL;
 import static com.openexchange.java.Autoboxing.I;
 import static com.openexchange.java.Autoboxing.L;
-import static com.openexchange.java.Autoboxing.i;
 import java.io.InputStream;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -69,7 +68,6 @@ import com.openexchange.contact.common.DefaultContactsAccount;
 import com.openexchange.contact.provider.ContactsProviderExceptionCodes;
 import com.openexchange.contact.storage.ContactsAccountStorage;
 import com.openexchange.contact.storage.rdb.internal.RdbStorage;
-import com.openexchange.contact.storage.rdb.osgi.Services;
 import com.openexchange.database.provider.DBProvider;
 import com.openexchange.database.provider.DBTransactionPolicy;
 import com.openexchange.exception.OXException;
@@ -77,6 +75,7 @@ import com.openexchange.groupware.Types;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.impl.IDGenerator;
 import com.openexchange.java.Streams;
+import com.openexchange.server.ServiceLookup;
 
 /**
  * {@link RdbContactsAccountStorage}
@@ -91,23 +90,23 @@ public class RdbContactsAccountStorage extends RdbStorage implements ContactsAcc
     /**
      * Initialises a new contacts account storage for the specified context
      *
+     * @param services A service lookup reference
      * @param context The context
      * @param dbProvider The database provider to use
      * @param txPolicy The transaction policy
      * @return The initialized account storage
      */
-    public static ContactsAccountStorage init(Context context, DBProvider dbProvider, DBTransactionPolicy txPolicy) {
+    public static ContactsAccountStorage init(ServiceLookup services, Context context, DBProvider dbProvider, DBTransactionPolicy txPolicy) {
         RdbContactsAccountStorage accountStorage = new RdbContactsAccountStorage(context, dbProvider, txPolicy);
-        CacheService cacheService = Services.optService(CacheService.class);
-        if (null == cacheService) {
-            return accountStorage;
+        CacheService cacheService = services.getOptionalService(CacheService.class);
+        if (null != cacheService) {
+            try {
+                return new CachingContactsAccountStorage(accountStorage, context.getContextId(), cacheService);
+            } catch (OXException e) {
+                org.slf4j.LoggerFactory.getLogger(RdbContactsAccountStorage.class).warn("Error initiliazing contacts account cache", e);
+            }
         }
-        try {
-            return new CachingContactsAccountStorage(accountStorage, context.getContextId(), cacheService);
-        } catch (OXException e) {
-            org.slf4j.LoggerFactory.getLogger(RdbContactsAccountStorage.class).warn("Error initiliazing contacts account cache", e);
-        }
-        return null;
+        return accountStorage;
     }
 
     /**
@@ -117,7 +116,7 @@ public class RdbContactsAccountStorage extends RdbStorage implements ContactsAcc
      * @param dbProvider The database provider to use
      * @param txPolicy The transaction policy
      */
-    public RdbContactsAccountStorage(Context context, DBProvider dbProvider, DBTransactionPolicy txPolicy) {
+    private RdbContactsAccountStorage(Context context, DBProvider dbProvider, DBTransactionPolicy txPolicy) {
         super(context, dbProvider, txPolicy);
     }
 
@@ -214,16 +213,16 @@ public class RdbContactsAccountStorage extends RdbStorage implements ContactsAcc
     }
 
     @Override
-    public List<ContactsAccount> loadAccounts(int userId, List<Integer> accountIds) throws OXException {
+    public ContactsAccount[] loadAccounts(int userId, int[] accountIds) throws OXException {
         if (null == accountIds) {
             return null;
         }
         Connection connection = null;
         try {
             connection = dbProvider.getReadConnection(context);
-            List<ContactsAccount> accounts = new ArrayList<>(accountIds.size());
-            for (Integer id : accountIds) {
-                accounts.add(selectAccount(connection, context.getContextId(), i(id), userId));
+            ContactsAccount[] accounts = new ContactsAccount[accountIds.length];
+            for (int i = 0; i < accountIds.length; i++) {
+                accounts[i] = selectAccount(connection, context.getContextId(), accountIds[i], userId);
             }
             return accounts;
         } catch (SQLException e) {
