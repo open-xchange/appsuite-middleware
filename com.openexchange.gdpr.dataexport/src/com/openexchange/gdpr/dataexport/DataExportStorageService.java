@@ -67,6 +67,13 @@ import com.openexchange.osgi.annotation.SingletonService;
 public interface DataExportStorageService extends DataExportStatusChecker {
 
     /**
+     * Gets the data export configuration.
+     *
+     * @return The data export configuration
+     */
+    DataExportConfig getConfig();
+
+    /**
      * Creates given task if there is currently no task associated with given user.
      *
      * @param task The data export task to create
