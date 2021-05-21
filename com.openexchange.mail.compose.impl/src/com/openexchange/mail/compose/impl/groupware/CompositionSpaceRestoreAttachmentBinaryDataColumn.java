@@ -97,7 +97,7 @@ public class CompositionSpaceRestoreAttachmentBinaryDataColumn extends UpdateTas
 
     @Override
     public String[] getDependencies() {
-        return new String[] { CompositionSpaceAddReplyTo_2.class.getName() };
+        return new String[] { CompositionSpaceAddReplyTo.class.getName() };
     }
 
 }
