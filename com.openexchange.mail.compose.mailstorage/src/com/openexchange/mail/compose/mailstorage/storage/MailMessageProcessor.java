@@ -316,7 +316,7 @@ public class MailMessageProcessor {
         } else {
             usm = UserSettingMailStorage.getInstance().getUserSettingMail(session);
         }
-        Optional<Address> optPrimaryAddress = optDefaultSendAddress(usm);
+        Optional<Address> optPrimaryAddress = Optional.empty(); // optDefaultSendAddress(usm);
         MailMessageProcessor processor = new MailMessageProcessor(compositionSpaceId, session, services);
         processor.initEmptyMimeMessage(usm.getMsgFormat(), optPrimaryAddress, optionalSharedFolderRef, clientToken);
         return processor;
