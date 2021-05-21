@@ -5819,6 +5819,36 @@ msgstr ""
 msgid "Password was not changed."
 msgstr ""
 
+#. No encrypted data was found for decryption
+#: com.openexchange.pgp.core/src/com/openexchange/pgp/core/exceptions/PGPCoreExceptionMessages.java:63
+msgid "No encrypted items found."
+msgstr ""
+
+#. The right private key wasn't found to perform the action.  Key identity is listed
+#: com.openexchange.pgp.core/src/com/openexchange/pgp/core/exceptions/PGPCoreExceptionMessages.java:66
+msgid "The private key for the identity '%1$s' could not be found."
+msgstr ""
+
+#. Bad password used
+#: com.openexchange.pgp.core/src/com/openexchange/pgp/core/exceptions/PGPCoreExceptionMessages.java:69
+msgid "Bad password."
+msgstr ""
+
+#. No items that contain a signature were found
+#: com.openexchange.pgp.core/src/com/openexchange/pgp/core/exceptions/PGPCoreExceptionMessages.java:72
+msgid "No signature items found"
+msgstr ""
+
+#. Generic IO error with error specified
+#: com.openexchange.pgp.core/src/com/openexchange/pgp/core/exceptions/PGPCoreExceptionMessages.java:75
+msgid "An I/O error occurred: '%1$s'"
+msgstr ""
+
+#. Generic PGP error with error specified
+#: com.openexchange.pgp.core/src/com/openexchange/pgp/core/exceptions/PGPCoreExceptionMessages.java:78
+msgid "A PGP error occurred: '%1$s'"
+msgstr ""
+
 #: com.openexchange.pgp.keys/src/com/openexchange/pgp/keys/exceptions/PGPKeysExceptionMessages.java:62
 msgid "The master key for the given key ring could not be found."
 msgstr ""
