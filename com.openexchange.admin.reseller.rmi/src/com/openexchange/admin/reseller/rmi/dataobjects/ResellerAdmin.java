@@ -884,7 +884,7 @@ public class ResellerAdmin extends EnforceableDataObject implements PasswordMech
             try {
                 Object ob = f.get(this);
                 String tname = f.getName();
-                if (tname.equals("restrictions") && restrictionsset) {
+                if (tname.equals("restrictions") && restrictions != null) {
                     ret.append("  ");
                     ret.append(tname);
                     ret.append(": ");
