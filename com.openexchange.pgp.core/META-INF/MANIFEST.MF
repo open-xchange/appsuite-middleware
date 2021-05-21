@@ -7,6 +7,7 @@ Bundle-Activator: com.openexchange.pgp.core.osgi.PGPCoreActivator
 Bundle-Vendor: OX Software GmbH
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Import-Package: com.openexchange.exception,
+ com.openexchange.i18n,
  com.openexchange.java,
  com.openexchange.osgi,
  com.openexchange.pgp.keys.common,

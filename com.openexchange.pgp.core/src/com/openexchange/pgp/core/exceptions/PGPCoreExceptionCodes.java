@@ -66,27 +66,27 @@ public enum PGPCoreExceptionCodes implements DisplayableOXExceptionCode {
     /**
      * No encrypted items found.
      */
-    NO_PGP_DATA_FOUND("No encrypted items found.", CATEGORY_ERROR, 1),
+    NO_PGP_DATA_FOUND("No encrypted items found.", PGPCoreExceptionMessages.NO_PGP_DATA_FOUND, CATEGORY_ERROR, 1),
     /**
      * The private key for the identity '%1$s' could not be found.
      */
-    PRIVATE_KEY_NOT_FOUND("The private key for the identity '%1$s' could not be found.", CATEGORY_ERROR, 2),
+    PRIVATE_KEY_NOT_FOUND("The private key for the identity '%1$s' could not be found.", PGPCoreExceptionMessages.PRIVATE_KEY_NOT_FOUND, CATEGORY_ERROR, 2),
     /**
      * Bad password.
      */
-    BAD_PASSWORD("Bad password.", CATEGORY_USER_INPUT, 3),
+    BAD_PASSWORD("Bad password.", PGPCoreExceptionMessages.BAD_PASSWORD, CATEGORY_USER_INPUT, 3),
     /**
      * No signature items found
      */
-    NO_PGP_SIGNATURE_FOUND("No signature items found", CATEGORY_ERROR,4),
+    NO_PGP_SIGNATURE_FOUND("No signature items found", PGPCoreExceptionMessages.NO_PGP_SIGNATURE_FOUND, CATEGORY_ERROR, 4),
     /**
      * An I/O error occurred: '%1$s
      */
-    IO_EXCEPTION("An I/O error occurred: '%1$s'", CATEGORY_ERROR, 5),
+    IO_EXCEPTION("An I/O error occurred: '%1$s'", PGPCoreExceptionMessages.IO_EXCEPTION, CATEGORY_ERROR, 5),
     /**
      * A PGP error occurred: '%1$s'
      */
-    PGP_EXCEPTION("A PGP error occurred: '%1$s'", CATEGORY_ERROR, 6),
+    PGP_EXCEPTION("A PGP error occurred: '%1$s'", PGPCoreExceptionMessages.PGP_EXCEPTION, CATEGORY_ERROR, 6),
     ;
 
     /** The error code prefix for PGP-related errors */
