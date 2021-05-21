@@ -877,21 +877,51 @@ public class Contact extends CommonObject {
     // GET METHODS
 
     /**
-     * Gets the contact identifier
+     * Gets the contact's object identifier.
      *
-     * @return the contact identifier
+     * @return The object identifier, or <code>null</code> if not set
      */
     public String getId() {
         return id;
     }
 
     /**
-     * Gets the folderId
+     * Gets the contact's object identifier.
      *
-     * @return The folderId
+     * @param fallbackToObjectId <code>true</code> to fall back to the numerical object identifier if the id field is not set, <code>false</code>, otherwise
+     * @return The object identifier, or <code>null</code> if not set
+     */
+    public String getId(boolean fallbackToObjectId) {
+        String id = getId();
+        if (false == fallbackToObjectId || null != id) {
+            return id;
+        }
+        int objectId = getObjectID();
+        return 0 < objectId ? String.valueOf(objectId) : null;
+    }
+
+    /**
+     * Gets the identifier of the folder the contact is located in.
+     *
+     * @return The folder identifier, or <code>null</code> if not set
      */
     public String getFolderId() {
         return folderId;
+    }
+
+    /**
+     * Gets the identifier of the folder the contact is located in.
+     *
+     * @param fallbackToParentFolderId <code>true</code> to fall back to the numerical parent folder identifier if the id field is not set, <code>false</code>, otherwise
+     * @return The folder identifier, or <code>null</code> if not set
+     */
+    public String getFolderId(boolean fallbackToParentFolderId) {
+        String folderId = getFolderId();
+        if (false == fallbackToParentFolderId || null != folderId) {
+            return folderId;
+        }
+        int parentFolderId = getParentFolderID();
+        return 0 < parentFolderId ? String.valueOf(parentFolderId) : null;
     }
 
     public String getDisplayName() {
@@ -1896,9 +1926,33 @@ public class Contact extends CommonObject {
         b_id = false;
     }
 
+    /**
+     * Removes a previously set object identifier.
+     *
+     * @param removeObjectId <code>true</code> to also remove the numerical object identifier implicitly, <code>false</code>, otherwise
+     */
+    public void removeId(boolean removeObjectId) {
+        removeId();
+        if (removeObjectId) {
+            removeObjectID();
+        }
+    }
+
     public void removeFolderId() {
         folderId = null;
         b_folder_id = false;
+    }
+
+    /**
+     * Removes a previously set identifier of the folder the contact is located in.
+     *
+     * @param removeParentFolderId <code>true</code> to also remove the numerical parent folder identifier implicitly, <code>false</code>, otherwise
+     */
+    public void removeFolderId(boolean removeParentFolderId) {
+        removeFolderId();
+        if (removeParentFolderId) {
+            removeParentFolderID();
+        }
     }
 
     public void removeDisplayName() {
@@ -2451,8 +2505,30 @@ public class Contact extends CommonObject {
         return b_id;
     }
 
+    /**
+     * Gets a value indicating whether the contact's object identifier has previously been <i>set</i> or not.
+     *
+     * @param fallbackToObjectId <code>true</code> to also consider whether the numerical object identifier is set, <code>false</code>, otherwise
+     * @return <code>true</code> if the object identifier is set, <code>false</code>, otherwise
+     */
+    public boolean containsId(boolean fallbackToObjectId) {
+        boolean b_id = containsId();
+        return b_id || fallbackToObjectId && containsObjectID();
+    }
+
     public boolean containsFolderId() {
         return b_folder_id;
+    }
+
+    /**
+     * Gets a value indicating whether the identifier of the folder the contact is located in has previously been <i>set</i> or not.
+     *
+     * @param fallbackToParentFolderId <code>true</code> to also consider whether the numerical parent folder identifier is set, <code>false</code>, otherwise
+     * @return <code>true</code> if the folder identifier is set, <code>false</code>, otherwise
+     */
+    public boolean containsFolderId(boolean fallbackToObjectId) {
+        boolean b_folder_id = containsFolderId();
+        return b_folder_id || fallbackToObjectId && containsParentFolderID();
     }
 
     public boolean containsDisplayName() {

@@ -67,12 +67,16 @@ import org.apache.commons.io.output.FileWriterWithEncoding;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.junit.Assert;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import com.google.api.services.calendar.model.Event.Organizer;
 import com.openexchange.ajax.chronos.factory.AttendeeFactory;
 import com.openexchange.chronos.Event;
 import com.openexchange.chronos.ical.ImportedCalendar;
 import com.openexchange.chronos.ical.ical4j.mapping.ICalMapper;
 import com.openexchange.chronos.ical.impl.ICalUtils;
+import com.openexchange.chronos.itip.Messages;
 import com.openexchange.chronos.scheduling.SchedulingMethod;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.Streams;
@@ -107,6 +111,8 @@ import net.fortuna.ical4j.util.CompatibilityHints;
  * @since v7.10.3
  */
 public class ITipUtil {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(ITipUtil.class);
 
     private static final String NOTIFY_ACCEPTED_DECLINED_AS_CREATOR = "notifyAcceptedDeclinedAsCreator";
     private static final String NOTIFY_ACCEPTED_DECLINED_AS_PARTICIPANT = "notifyAcceptedDeclinedAsParticipant";
@@ -215,6 +221,63 @@ public class ITipUtil {
     }
 
     /**
+     * Constructs the mail subject of an iMIP message where the attendee
+     * has accepted an event (series)
+     * <p>
+     * <code>anton accepted the invitation: Foo</code>
+     *
+     * @param from The attendee replying
+     * @param summary The summary of the event
+     * @return The mail subject
+     */
+    public static String acceptSummary(String from, String summary) {
+        return constructActionSummary("accepted", from, summary);
+    }
+
+    /**
+     * Constructs the mail subject of an iMIP message where the attendee
+     * has tentatively accepted an event (series)
+     * <p>
+     * <code>anton tentatively accepted the invitation: Foo</code>
+     *
+     * @param from The attendee replying
+     * @param summary The summary of the event
+     * @return The mail subject
+     */
+    public static String tentativeSummary(String from, String summary) {
+        return constructActionSummary("tentatively accepted", from, summary);
+    }
+
+    /**
+     * Constructs the mail subject of an iMIP message where the attendee
+     * has declined an event (series)
+     * <p>
+     * <code>anton declined the invitation: Foo</code>
+     *
+     * @param from The attendee replying
+     * @param summary The summary of the event
+     * @return The mail subject
+     */
+    public static String declineSummary(String from, String summary) {
+        return constructActionSummary("declined", from, summary);
+    }
+
+    private static String constructActionSummary(String action, String from, String summary) {
+        return String.format(Messages.SUBJECT_STATE_CHANGED, from, action, summary);
+    }
+
+    /**
+     * Constructs the mail subject of an iMIP message where the
+     * event generically has changed
+     *
+     * @param summary The summary of the event
+     * @return The mail subject
+     */
+    public static String changedSummary(String summary) {
+        return String.format(Messages.SUBJECT_CHANGED_APPOINTMENT, summary);
+    }
+
+    /**
      * Receive a calendar notification from the inbox
      *
      * @param apiClient The {@link ApiClient} to use
@@ -233,14 +296,30 @@ public class ITipUtil {
      * @param apiClient The {@link ApiClient} to use
      * @param fromToMatch The mail of the originator of the message
      * @param subjectToMatch The summary of the event
-     * @param sequenceToMatch The sequence identifier of event
+     * @param sequenceToMatch The sequence identifier of event to match, or <code>-1</code> if not applicable
      * @param method The iTIP method that the mail must contain, or <code>null</code> to skip checking for the event data
      * @return The mail as {@link MailData}
      * @throws Exception If the mail can't be found or something mismatches
      */
     public static MailData receiveIMip(ApiClient apiClient, String fromToMatch, String subjectToMatch, int sequenceToMatch, SchedulingMethod method) throws Exception {
+        return receiveIMip(apiClient, fromToMatch, subjectToMatch, sequenceToMatch, null, method);
+    }
+
+    /**
+     * Receive the iMIP message from the inbox
+     *
+     * @param apiClient The {@link ApiClient} to use
+     * @param fromToMatch The mail of the originator of the message
+     * @param subjectToMatch The summary of the event
+     * @param sequenceToMatch The sequence identifier of the first event to match, or <code>-1</code> if not applicable
+     * @param uidToMatch The UID of the calendar object resource to match, or <code>null</code> if not applicable
+     * @param method The iTIP method that the mail must contain, or <code>null</code> to skip checking for the event data
+     * @return The mail as {@link MailData}
+     * @throws Exception If the mail can't be found or something mismatches
+     */
+    public static MailData receiveIMip(ApiClient apiClient, String fromToMatch, String subjectToMatch, int sequenceToMatch, String uidToMatch, SchedulingMethod method) throws Exception {
         for (int i = 0; i < 10; i++) {
-            MailData mailData = lookupMail(apiClient, FOLDER_MACHINE_READABLE, fromToMatch, subjectToMatch, sequenceToMatch, method);
+            MailData mailData = lookupMail(apiClient, FOLDER_MACHINE_READABLE, fromToMatch, subjectToMatch, sequenceToMatch, uidToMatch, method);
             if (null != mailData) {
                 return mailData;
             }
@@ -249,7 +328,7 @@ public class ITipUtil {
         throw new AssertionError("No mail with " + subjectToMatch + " from " + fromToMatch + " received");
     }
 
-    private static MailData lookupMail(ApiClient apiClient, String folder, String fromToMatch, String subjectToMatch, int sequenceToMatch, SchedulingMethod method) throws Exception {
+    private static MailData lookupMail(ApiClient apiClient, String folder, String fromToMatch, String subjectToMatch, int sequenceToMatch, String uidToMatch, SchedulingMethod method) throws Exception {
         MailApi mailApi = new MailApi(apiClient);
         MailsResponse mailsResponse = mailApi.getAllMails(folder, "600,601,607,610", null, null, null, "610", "desc", null, null, I(10), null);
         assertNull(mailsResponse.getError(), mailsResponse.getError());
@@ -273,8 +352,7 @@ public class ITipUtil {
             if (null == calendar) {
                 continue;
             }
-            Event matchingEvent = extractMatchingEvent(calendar.getEvents(), sequenceToMatch);
-            if (null == matchingEvent) {
+            if (null == extractMatchingEvent(calendar.getEvents(), sequenceToMatch, uidToMatch)) {
                 continue;
             }
             return mailData;
@@ -282,12 +360,16 @@ public class ITipUtil {
         return null;
     }
 
-    private static Event extractMatchingEvent(List<Event> events, int sequence) {
+    private static Event extractMatchingEvent(List<Event> events, int sequence, String uidToMatch) {
         if (null != events) {
             for (Event event : events) {
-                if (event.getSequence() == sequence) {
-                    return event;
+                if (-1 != sequence && event.getSequence() != sequence) {
+                    continue;
                 }
+                if (null != uidToMatch && false == uidToMatch.equals(event.getUid())) {
+                    continue;
+                }
+                return event;
             }
         }
         return null;
@@ -316,6 +398,25 @@ public class ITipUtil {
             }
         }
         throw new AssertionError("no itip attachment found");
+    }
+
+    /**
+     * Checks that there is no REPLY mail received from given attendee
+     *
+     * @param client The client to use
+     * @param replyingAttendee The attendee that replies
+     * @param summary The summary
+     * @throws Exception Error while fetching mail
+     */
+    public static void checkNoReplyMailReceived(ApiClient client, Attendee replyingAttendee, String summary) throws Exception {
+        Error error = null;
+        try {
+            MailData mail = receiveIMip(client, replyingAttendee.getEmail(), summary, 1, SchedulingMethod.REPLY);
+            LOGGER.error("Found reply mail: {}", mail.toString());
+        } catch (AssertionError ae) {
+            error = ae;
+        }
+        Assert.assertNotNull("Excpected an error", error);
     }
 
     /**

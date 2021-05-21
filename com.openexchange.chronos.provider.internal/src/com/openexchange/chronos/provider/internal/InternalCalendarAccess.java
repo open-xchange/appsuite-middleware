@@ -82,6 +82,7 @@ import com.openexchange.ajax.fileholder.IFileHolder;
 import com.openexchange.chronos.Alarm;
 import com.openexchange.chronos.AlarmTrigger;
 import com.openexchange.chronos.Attendee;
+import com.openexchange.chronos.CalendarObjectResource;
 import com.openexchange.chronos.Event;
 import com.openexchange.chronos.ExtendedProperties;
 import com.openexchange.chronos.ExtendedProperty;
@@ -317,6 +318,11 @@ public class InternalCalendarAccess implements com.openexchange.chronos.provider
     @Override
     public CalendarResult createEvent(String folderId, Event event) throws OXException {
         return getCalendarService().createEvent(session, folderId, event);
+    }
+
+    @Override
+    public CalendarResult putResource(String folderId, CalendarObjectResource resource, boolean replace) throws OXException {
+        return getCalendarService().putResource(session, folderId, resource, replace);
     }
 
     @Override

@@ -59,11 +59,11 @@ import com.openexchange.groupware.contact.helpers.ContactField;
  */
 enum SearchFields {
 
-    PICTURE(ContactField.OBJECT_ID, ContactField.FOLDER_ID, ContactField.LAST_MODIFIED, ContactField.IMAGE1, ContactField.IMAGE1_CONTENT_TYPE),
+    PICTURE(ContactField.OBJECT_ID, ContactField.FOLDER_ID, ContactField.LAST_MODIFIED, ContactField.IMAGE1, ContactField.IMAGE1_CONTENT_TYPE, ContactField.NUMBER_OF_IMAGES),
 
-    ETAG(ContactField.OBJECT_ID, ContactField.FOLDER_ID, ContactField.LAST_MODIFIED),
+    ETAG(ContactField.OBJECT_ID, ContactField.FOLDER_ID, ContactField.LAST_MODIFIED, ContactField.NUMBER_OF_IMAGES),
 
-    LAST_MODIFIED(ContactField.LAST_MODIFIED);
+    LAST_MODIFIED(ContactField.LAST_MODIFIED, ContactField.NUMBER_OF_IMAGES);
 
     private final ContactField[] fields;
 

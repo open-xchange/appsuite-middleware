@@ -89,6 +89,9 @@ import com.openexchange.testing.httpclient.modules.FoldersApi;
  * @since v7.10.0
  */
 public class AbstractChronosTest extends AbstractEnhancedApiClientSession {
+    
+    /** The {@value #THIS_AND_FUTURE} recurrence ID*/
+    public static final String THIS_AND_FUTURE = "THISANDFUTURE";
 
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(AbstractChronosTest.class);
 

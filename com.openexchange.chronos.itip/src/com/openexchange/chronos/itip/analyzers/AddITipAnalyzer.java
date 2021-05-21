@@ -63,6 +63,7 @@ import com.openexchange.chronos.itip.ITipChange.Type;
 import com.openexchange.chronos.itip.ITipIntegrationUtility;
 import com.openexchange.chronos.itip.ITipMessage;
 import com.openexchange.chronos.itip.ITipMethod;
+import com.openexchange.chronos.itip.LegacyAnalyzing;
 import com.openexchange.chronos.itip.Messages;
 import com.openexchange.chronos.itip.generators.TypeWrapper;
 import com.openexchange.chronos.service.CalendarSession;
@@ -75,7 +76,7 @@ import com.openexchange.user.User;
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
-public class AddITipAnalyzer extends AbstractITipAnalyzer {
+public class AddITipAnalyzer extends AbstractITipAnalyzer implements LegacyAnalyzing {
 
     public AddITipAnalyzer(ITipIntegrationUtility util) {
         super(util);

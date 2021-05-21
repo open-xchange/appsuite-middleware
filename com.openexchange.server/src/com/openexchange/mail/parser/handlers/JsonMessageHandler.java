@@ -50,6 +50,7 @@
 package com.openexchange.mail.parser.handlers;
 
 import static com.openexchange.java.Autoboxing.I;
+import static com.openexchange.java.Autoboxing.L;
 import static com.openexchange.java.Strings.isEmpty;
 import static com.openexchange.mail.mime.utils.MimeMessageUtility.decodeMultiEncodedHeader;
 import static com.openexchange.mail.parser.MailMessageParser.generateFilename;
@@ -1056,7 +1057,7 @@ public final class JsonMessageHandler implements MailMessageHandler {
             if (cause instanceof MaxBytesExceededIOException) {
                 MaxBytesExceededIOException mbe = (MaxBytesExceededIOException) cause;
                 if (plainText != null) {
-                    OXException e = HtmlExceptionCodes.TOO_BIG.create(x, mbe.getMaxSize(), mbe.getSize());
+                    OXException e = HtmlExceptionCodes.TOO_BIG.create(x, L(mbe.getMaxSize()), L(mbe.getSize()));
                     warnings.add(e.setCategory(Category.CATEGORY_WARNING).setDisplayMessage(HtmlExceptionMessages.PARSING_FAILED_WITH_FAILOVERMSG, e.getDisplayArgs()));
                     asRawContent(plainText.id, plainText.contentType, new HtmlSanitizeResult(plainText.content));
                     textAppended = true;
@@ -1763,22 +1764,29 @@ public final class JsonMessageHandler implements MailMessageHandler {
         final ContentType contentType = part.getContentType();
         if (isVCalendar(baseContentType) && !contentType.containsParameter("method")) {
             /*
-             * Check ICal part for a valid METHOD and its presence in Content-Type header
+             * Check if file is marked as attachment
+             * see https://datatracker.ietf.org/doc/html/rfc6047#section-5
              */
-            final ICalService iCalService = ServerServiceRegistry.getInstance().getService(ICalService.class);
-            if (iCalService != null) {
-                try {
-                    final String method = iCalService.getUtilities().parsePropertyValue(part.getInputStream(), "METHOD", null);
-                    if (null != method) {
-                        /*
-                         * Assume an iTIP response or request
-                         */
-                        contentType.setParameter("method", method.toUpperCase(Locale.US));
+            String[] header = part.getHeader("Content-ID");
+            if (null == header || header.length <= 0) {
+                /*
+                 * Check ICal part for a valid METHOD and its presence in Content-Type header
+                 */
+                final ICalService iCalService = ServerServiceRegistry.getInstance().getService(ICalService.class);
+                if (iCalService != null) {
+                    try {
+                        final String method = iCalService.getUtilities().parsePropertyValue(part.getInputStream(), "METHOD", null);
+                        if (null != method) {
+                            /*
+                             * Assume an iTIP response or request
+                             */
+                            contentType.setParameter("method", method.toUpperCase(Locale.US));
+                        }
+                    } catch (RuntimeException e) {
+                        LOG.warn("A runtime error occurred.", e);
+                    } catch (OXException e) {
+                        LOG.debug("Unable to parse special part: {}", e.getMessage(), e);
                     }
-                } catch (RuntimeException e) {
-                    LOG.warn("A runtime error occurred.", e);
-                } catch (OXException e) {
-                    LOG.debug("Unable to parse special part: {}", e.getMessage(), e);
                 }
             }
         }

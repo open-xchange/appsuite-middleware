@@ -50,6 +50,7 @@
 package com.openexchange.caldav.resources;
 
 import static com.openexchange.dav.DAVProtocol.protocolException;
+import static javax.servlet.http.HttpServletResponse.SC_FORBIDDEN;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
@@ -67,6 +68,7 @@ import com.openexchange.caldav.GroupwareCaldavFactory;
 import com.openexchange.caldav.PhantomMaster;
 import com.openexchange.caldav.Tools;
 import com.openexchange.caldav.mixins.ScheduleTag;
+import com.openexchange.chronos.CalendarObjectResource;
 import com.openexchange.chronos.CalendarUser;
 import com.openexchange.chronos.CalendarUserType;
 import com.openexchange.chronos.Event;
@@ -404,8 +406,11 @@ public class EventResource extends DAVObjectResource<Event> {
 
     @Override
     public void create() throws WebdavProtocolException {
+        if (exists()) {
+            throw protocolException(getUrl(), HttpServletResponse.SC_CONFLICT);
+        }
         try {
-            createEvent(caldavImport);
+            putEvents(caldavImport);
         } catch (OXException e) {
             throw getProtocolException(e);
         }
@@ -422,8 +427,11 @@ public class EventResource extends DAVObjectResource<Event> {
 
     @Override
     public void save() throws WebdavProtocolException {
+        if (false == exists()) {
+            throw protocolException(getUrl(), HttpServletResponse.SC_NOT_FOUND);
+        }
         try {
-            updateEvent(caldavImport);
+            putEvents(caldavImport);
         } catch (OXException e) {
             throw getProtocolException(e);
         }
@@ -455,80 +463,20 @@ public class EventResource extends DAVObjectResource<Event> {
         }.execute(factory.getSession());
     }
 
-    private void updateEvent(CalDAVImport caldavImport) throws OXException {
-        if (false == exists()) {
-            throw protocolException(getUrl(), HttpServletResponse.SC_NOT_FOUND);
-        }
-        CalDAVImport patchedImport = EventPatches.Incoming(parent.getFactory()).applyAll(this, caldavImport);
-        new CalendarAccessOperation<Void>(factory) {
-
-            @Override
-            protected Void perform(IDBasedCalendarAccess access) throws OXException {
-                long clientTimestamp = object.getTimestamp();
-                if (null != patchedImport.getEvent() && false == Tools.isPhantomMaster(object)) {
-                    /*
-                     * update event
-                     */
-                    EventID eventID = new EventID(parent.folderID, object.getId());
-                    CalendarResult result = access.updateEvent(eventID, patchedImport.getEvent(), clientTimestamp);
-                    if (result.getUpdates().isEmpty()) {
-                        LOG.debug("{}: Master event {} not updated.", getUrl(), eventID);
-                    } else {
-                        clientTimestamp = result.getTimestamp();
-                    }
-                }
-                /*
-                 * update exceptions
-                 */
-                for (Event changeException : patchedImport.getChangeExceptions()) {
-                    EventID eventID = new EventID(parent.folderID, object.getId(), changeException.getRecurrenceId());
-                    CalendarResult result = access.updateEvent(eventID, changeException, clientTimestamp);
-                    if (result.getUpdates().isEmpty()) {
-                        LOG.debug("{}: Exception {} not updated.", getUrl(), eventID);
-                    } else {
-                        clientTimestamp = result.getTimestamp();
-                    }
-                }
-                return null;
-            }
-        }.execute(factory.getSession());
-    }
-
-    private Event createEvent(CalDAVImport caldavImport) throws OXException {
-        if (exists()) {
-            throw protocolException(getUrl(), HttpServletResponse.SC_CONFLICT);
-        }
-        if (null == caldavImport.getEvent()) {
-            throw new PreconditionException(DAVProtocol.CAL_NS.getURI(), "valid-calendar-object-resource", url, HttpServletResponse.SC_FORBIDDEN);
-        }
+    private CalendarResult putEvents(CalDAVImport caldavImport) throws OXException {
         /*
-         * create event
+         * add imported event(s) to calendar
          */
+        if (null == caldavImport.getEvent() && caldavImport.getChangeExceptions().isEmpty()) {
+            throw new PreconditionException(DAVProtocol.CAL_NS.getURI(), "valid-calendar-object-resource", url, SC_FORBIDDEN);
+        }
         CalDAVImport patchedImport = EventPatches.Incoming(parent.getFactory()).applyAll(this, caldavImport);
-        return new CalendarAccessOperation<Event>(factory) {
+        CalendarObjectResource resource = patchedImport.asCalendarObjectResource();
+        return new CalendarAccessOperation<CalendarResult>(factory) {
 
             @Override
-            protected Event perform(IDBasedCalendarAccess access) throws OXException {
-                CalendarResult result = access.createEvent(parent.folderID, patchedImport.getEvent());
-                if (result.getCreations().isEmpty()) {
-                    LOG.warn("{}: No event created.", getUrl());
-                    throw new PreconditionException(DAVProtocol.CAL_NS.getURI(), "valid-calendar-object-resource", url, HttpServletResponse.SC_FORBIDDEN);
-                }
-                Event createdEvent = result.getCreations().get(0).getCreatedEvent();
-                long clientTimestamp = result.getTimestamp();
-                /*
-                 * create exceptions
-                 */
-                for (Event changeException : patchedImport.getChangeExceptions()) {
-                    EventID eventID = new EventID(createdEvent.getFolderId(), createdEvent.getId(), changeException.getRecurrenceId());
-                    result = access.updateEvent(eventID, changeException, clientTimestamp);
-                    if (result.getCreations().isEmpty()) {
-                        LOG.warn("{}: No exception created.", getUrl());
-                        throw new PreconditionException(DAVProtocol.CAL_NS.getURI(), "valid-calendar-object-resource", url, HttpServletResponse.SC_FORBIDDEN);
-                    }
-                    clientTimestamp = result.getTimestamp();
-                }
-                return createdEvent;
+            protected CalendarResult perform(IDBasedCalendarAccess access) throws OXException {
+                return access.putResource(parent.folderID, resource, true);
             }
         }.execute(factory.getSession());
     }

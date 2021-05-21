@@ -78,6 +78,7 @@ import com.openexchange.chronos.itip.ITipIntegrationUtility;
 import com.openexchange.chronos.itip.ITipMessage;
 import com.openexchange.chronos.itip.ITipMethod;
 import com.openexchange.chronos.itip.ITipSpecialHandling;
+import com.openexchange.chronos.itip.LegacyAnalyzing;
 import com.openexchange.chronos.itip.Messages;
 import com.openexchange.chronos.itip.generators.TypeWrapper;
 import com.openexchange.chronos.service.CalendarSession;
@@ -94,7 +95,7 @@ import com.openexchange.user.User;
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
-public class UpdateITipAnalyzer extends AbstractITipAnalyzer {
+public class UpdateITipAnalyzer extends AbstractITipAnalyzer implements LegacyAnalyzing {
 
     private final static Logger LOGGER = LoggerFactory.getLogger(UpdateITipAnalyzer.class);
 
@@ -141,15 +142,20 @@ public class UpdateITipAnalyzer extends AbstractITipAnalyzer {
         if (null == update) {
             if (null == original) {
                 if (message.numberOfExceptions() > 0) {
-                    analysis.addAnnotation(new ITipAnnotation(Messages.ADD_TO_UNKNOWN, locale));
-                    analysis.recommendAction(ITipAction.IGNORE);
-                    return analysis;
+                    /*
+                     * Add to single orphaned series exception
+                     */
+                    analysis.setUid(uid);
+                } else {
+                    throw new OXException(new IllegalArgumentException("No appointment instance given"));
                 }
-                throw new OXException(new IllegalArgumentException("No appointment instance given"));
+            } else {
+                update = original;
+                analysis.setUid(original.getUid());
             }
-            update = original;
+        } else {
+            analysis.setUid(update.getUid());
         }
-        analysis.setUid(update.getUid());
 
         List<Event> exceptions = Collections.emptyList();
         boolean differ = true;
@@ -255,10 +261,32 @@ public class UpdateITipAnalyzer extends AbstractITipAnalyzer {
                 change.setType(ITipChange.Type.CREATE);
             }
             if (master == null) {
-                final ITipAnnotation annotation = new ITipAnnotation(Messages.COUNTER_UNKNOWN_APPOINTMENT, locale); // FIXME: Choose better message once we can introduce new sentences again.
-                annotation.setEvent(exception);
-                analysis.addAnnotation(annotation);
-                break;
+                change.setNewEvent(exception);
+                if (CalendarUtils.hasExternalOrganizer(exception)) {
+                    Event savedEventException = util.resolveUid(uid, exception.getRecurrenceId(), session);
+                    if (null != savedEventException) {
+                        /*
+                         * Update of orphaned exception
+                         */
+                        exception.setSeriesId(savedEventException.getSeriesId());
+                        session.getUtilities().adjustTimeZones(session.getSession(), owner, exception, savedEventException);
+                        change.setType(ITipChange.Type.UPDATE);
+                        change.setCurrentEvent(savedEventException);
+                        ensureParticipant(savedEventException, exception, session, owner);
+                        differ = doAppointmentsDiffer(exception, savedEventException, session);
+                    } else {
+                        /*
+                         * Orphaned exception is not yet created
+                         */
+                        session.getUtilities().adjustTimeZones(session.getSession(), owner, exception, null);
+                        ensureParticipant(null, exception, session, owner);
+                        change.setType(ITipChange.Type.CREATE);
+                    }
+                } else {
+                    // FIXME: Choose better message once we can introduce new sentences again.
+                    analysis.addAnnotation(new ITipAnnotation(Messages.COUNTER_UNKNOWN_APPOINTMENT, locale));
+                    break;
+                }
             } else if (differ) {
                 if (original != null) {
                     exception.setFolderId(original.getFolderId());

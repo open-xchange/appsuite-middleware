@@ -63,6 +63,7 @@ import com.openexchange.ajax.fileholder.IFileHolder;
 import com.openexchange.chronos.Alarm;
 import com.openexchange.chronos.AlarmTrigger;
 import com.openexchange.chronos.Attendee;
+import com.openexchange.chronos.CalendarObjectResource;
 import com.openexchange.chronos.Event;
 import com.openexchange.chronos.Organizer;
 import com.openexchange.chronos.ParticipationStatus;
@@ -81,6 +82,7 @@ import com.openexchange.chronos.impl.performer.ImportPerformer;
 import com.openexchange.chronos.impl.performer.ListPerformer;
 import com.openexchange.chronos.impl.performer.MovePerformer;
 import com.openexchange.chronos.impl.performer.NeedsActionPerformer;
+import com.openexchange.chronos.impl.performer.PutPerformer;
 import com.openexchange.chronos.impl.performer.SearchPerformer;
 import com.openexchange.chronos.impl.performer.SequenceNumberPerformer;
 import com.openexchange.chronos.impl.performer.SplitPerformer;
@@ -324,6 +326,20 @@ public class CalendarServiceImpl implements CalendarService {
             @Override
             protected InternalCalendarResult execute(CalendarSession session, CalendarStorage storage) throws OXException {
                 return new CreatePerformer(storage, session, getFolder(session, folderId)).perform(new UnmodifiableEvent(event));
+            }
+        }.executeUpdate(), true).getUserizedResult();
+    }
+
+    @Override
+    public CalendarResult putResource(CalendarSession session, String folderId, CalendarObjectResource resource, boolean replace) throws OXException {
+        /*
+         * put event(s), trigger post-processing & return userized result
+         */
+        return postProcess(services, new InternalCalendarStorageOperation<InternalCalendarResult>(session) {
+
+            @Override
+            protected InternalCalendarResult execute(CalendarSession session, CalendarStorage storage) throws OXException {
+                return new PutPerformer(storage, session, getFolder(session, folderId)).perform(resource, replace);
             }
         }.executeUpdate(), true).getUserizedResult();
     }

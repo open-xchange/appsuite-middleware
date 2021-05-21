@@ -59,9 +59,12 @@ import java.util.Date;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.Mockito;
 import org.mockito.junit.MockitoJUnitRunner;
-import com.openexchange.contact.ContactService;
+import com.openexchange.contact.ContactID;
 import com.openexchange.contact.picture.ContactPicture;
+import com.openexchange.contact.provider.composition.IDBasedContactsAccess;
+import com.openexchange.contact.provider.composition.IDBasedContactsAccessFactory;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.contexts.Context;
@@ -203,8 +206,10 @@ public class ContactDataSourceTest {
 
         query.withMergedContacts(Arrays.asList(c));
 
-        ContactService cs = services.mock(ContactService.class);
-        when(cs.getContact(session, "37", "12")).thenReturn(c2);
+        IDBasedContactsAccessFactory af = services.mock(IDBasedContactsAccessFactory.class);
+        IDBasedContactsAccess ca = Mockito.mock(IDBasedContactsAccess.class);
+        when(af.createAccess(session)).thenReturn(ca);
+        when(ca.getContact(new ContactID("37", "12"))).thenReturn(c2);
 
         ContactPicture picture = dataSource.getPicture(query.build(), session);
 

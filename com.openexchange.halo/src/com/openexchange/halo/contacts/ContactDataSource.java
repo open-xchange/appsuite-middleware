@@ -58,10 +58,12 @@ import java.util.List;
 import com.openexchange.ajax.container.ByteArrayFileHolder;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
-import com.openexchange.contact.ContactService;
+import com.openexchange.contact.ContactID;
 import com.openexchange.contact.picture.ContactPicture;
 import com.openexchange.contact.picture.ContactPictureService;
 import com.openexchange.contact.picture.PictureSearchData;
+import com.openexchange.contact.provider.composition.IDBasedContactsAccess;
+import com.openexchange.contact.provider.composition.IDBasedContactsAccessFactory;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.halo.HaloContactDataSource;
@@ -106,7 +108,7 @@ public class ContactDataSource implements HaloContactDataSource, HaloContactImag
     public ContactPicture getPicture(HaloContactQuery contactQuery, ServerSession session) throws OXException {
         final ContactPicture picture = getPicture0(contactQuery, session, true);
         if (null == picture) {
-            return services.getServiceSafe(ContactPictureService.class).getPicture(session, new PictureSearchData(null == contactQuery.getUser() ? null : I(contactQuery.getUser().getId()), null, null, I(contactQuery.getContact().getObjectID()), null));
+            return services.getServiceSafe(ContactPictureService.class).getPicture(session, getPictureSearchData(contactQuery));
         }
         return picture;
     }
@@ -115,7 +117,7 @@ public class ContactDataSource implements HaloContactDataSource, HaloContactImag
     public String getPictureETag(HaloContactQuery contactQuery, ServerSession session) throws OXException {
         final ContactPicture picture = getPicture0(contactQuery, session, true);
         if (null == picture) {
-            return services.getServiceSafe(ContactPictureService.class).getETag(session, new PictureSearchData(null == contactQuery.getUser() ? null : I(contactQuery.getUser().getId()), null, null, I(contactQuery.getContact().getObjectID()), null));
+            return services.getServiceSafe(ContactPictureService.class).getETag(session, getPictureSearchData(contactQuery));
         }
         return picture.getETag();
     }
@@ -144,7 +146,7 @@ public class ContactDataSource implements HaloContactDataSource, HaloContactImag
 
         // Try with explicit load
         for (Contact c : mergedContacts) {
-            final Contact contact = getContact(session, Integer.toString(c.getParentFolderID()), Integer.toString(c.getObjectID()));
+            final Contact contact = getContact(session, c.getFolderId(true), c.getId(true));
             if (contact.getImage1() != null) {
                 final ByteArrayFileHolder holder;
                 if (withBytes) {
@@ -163,11 +165,16 @@ public class ContactDataSource implements HaloContactDataSource, HaloContactImag
     }
 
     private Contact getContact(ServerSession session, String folderId, String id) throws OXException {
-        return services.getService(ContactService.class).getContact(session, folderId, id);
+        IDBasedContactsAccess contactsAccess = services.getServiceSafe(IDBasedContactsAccessFactory.class).createAccess(session);
+        try {
+            return contactsAccess.getContact(new ContactID(folderId, id));
+        } finally {
+            contactsAccess.finish();
+        }
     }
 
     private static String buildETagFor(final Contact contact) {
-        return null == contact ? null : new StringBuilder(512).append(contact.getParentFolderID()).append('/').append(contact.getObjectID()).append('/').append(contact.getLastModified().getTime()).toString();
+        return null == contact ? null : new StringBuilder(512).append(contact.getFolderId(true)).append('/').append(contact.getId(true)).append('/').append(contact.getLastModified().getTime()).toString();
     }
 
     private static class ImagePrecedence implements Comparator<Contact> {
@@ -198,6 +205,15 @@ public class ContactDataSource implements HaloContactDataSource, HaloContactImag
             }
             return lastModified2.compareTo(lastModified1);
         }
+    }
+
+    private static PictureSearchData getPictureSearchData(HaloContactQuery contactQuery) {
+        Integer userId = null != contactQuery.getUser() ? I(contactQuery.getUser().getId()) : null;
+        Contact contact = contactQuery.getContact();
+        if (null == contact) {
+            return new PictureSearchData(userId, null, null, null);
+        }
+        return new PictureSearchData(userId, contact.getFolderId(true), contact.getId(true), null);
     }
 
 }

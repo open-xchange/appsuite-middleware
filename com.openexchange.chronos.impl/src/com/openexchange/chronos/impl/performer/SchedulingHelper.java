@@ -301,7 +301,7 @@ public class SchedulingHelper {
      * @param eventUpdates The list of performed event updates
      * @param consideredRecipients The recipients to consider, or <code>null</code> to consider all possible recipients
      */
-    private void trackUpdate(CalendarObjectResource updatedResource, Event seriesMaster, List<EventUpdate> eventUpdates, List<? extends CalendarUser> consideredRecipients) {
+    public void trackUpdate(CalendarObjectResource updatedResource, Event seriesMaster, List<EventUpdate> eventUpdates, List<? extends CalendarUser> consideredRecipients) {
         try {
             CalendarUser originator = getOriginator(lookupCalendarUser(updatedResource));
             LOG.trace("Tracking 'update' scheduling messages and notifications [originator={}, updatedResource={}, seriesMaster={}, eventUpdates={}]",

@@ -51,6 +51,7 @@ package com.openexchange.dav.caldav;
 
 import java.io.IOException;
 import java.util.List;
+import java.util.Objects;
 import com.openexchange.dav.caldav.ical.ICalUtils;
 import com.openexchange.dav.caldav.ical.SimpleICal;
 import com.openexchange.dav.caldav.ical.SimpleICal.Component;
@@ -94,6 +95,15 @@ public class ICalResource {
     public Component getVEvent() {
         List<Component> components = vCalendar.getComponents(VEVENT);
         return 0 < components.size() ? components.get(0) : null;
+    }
+
+    public Component getVEvent(String recurrenceId) {
+        for (Component component : vCalendar.getComponents(VEVENT)) {
+            if (Objects.equals(recurrenceId, component.getPropertyValue("RECURRENCE-ID"))) {
+                return component;
+            }
+        }
+        return null;
     }
 
     public Component getVTodo() {

@@ -86,6 +86,7 @@ public class ITipEventUpdate implements EventUpdate {
         IGNOREES.add(AttendeeField.RSVP);
         IGNOREES.add(AttendeeField.HIDDEN);
         IGNOREES.add(AttendeeField.TRANSP);
+        IGNOREES.add(AttendeeField.TIMESTAMP);
     }
 
     private EventUpdate delegate;

@@ -65,12 +65,11 @@ import com.openexchange.mail.config.MailProperties;
 import com.openexchange.mail.dataobjects.MailFolder;
 import com.openexchange.mail.dataobjects.MailPart;
 import com.openexchange.mail.mime.ContentType;
-import com.openexchange.mail.mime.MimeTypes;
 import com.openexchange.mail.permission.MailPermission;
 import com.openexchange.session.Session;
 
 /**
- * {@link AttachmentMailPartDataSource} - The {@link MailPartDataSource} for additional attachments on ICal mails
+ * {@link AttachmentMailPartDataSource} - The {@link MailPartDataSource} for additional attachments on iCal mails
  *
  * @author <a href="mailto:daniel.becker@open-xchange.com">Daniel Becker</a>
  * @since v7.10.0
@@ -111,7 +110,7 @@ public final class AttachmentMailPartDataSource extends MailPartDataSource {
                 MailPart part = mail.getEnclosedMailPart(i);
                 ContentType contentType = part.getContentType();
                 // Skip calendar files
-                if (null != contentType && false == contentType.isMimeType(MimeTypes.MIME_TEXT_ALL_CALENDAR)) {
+                if (null != contentType /*&& false == contentType.isMimeType(MimeTypes.MIME_TEXT_ALL_CALENDAR)*/) {
                     String contentId = part.getContentId();
                     if (Strings.isNotEmpty(contentId) && cid.equals(contentId)) {
                         // Found attachment, set additional data for the stream

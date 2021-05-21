@@ -726,11 +726,11 @@ public abstract class AbstractUpdatePerformer extends AbstractQueryPerformer {
      * @throws OXException {@link CalendarExceptionCodes#EVENT_NOT_FOUND}
      */
     protected Event loadEventData(String id) throws OXException {
-        Event event = storage.getEventStorage().loadEvent(id, null);
+        Event event = optEventData(id);
         if (null == event) {
             throw CalendarExceptionCodes.EVENT_NOT_FOUND.create(id);
         }
-        return new UnmodifiableEvent(storage.getUtilities().loadAdditionalEventData(-1, event, null));
+        return event;
     }
 
     /**
@@ -1360,5 +1360,4 @@ public abstract class AbstractUpdatePerformer extends AbstractQueryPerformer {
         }
         return attachments;
     }
-
 }

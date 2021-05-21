@@ -53,6 +53,7 @@ import java.util.Collection;
 import java.util.LinkedHashSet;
 import java.util.Set;
 import java.util.stream.Collectors;
+import com.openexchange.java.Strings;
 
 /**
  * {@link PictureSearchData} - The object containing information about the contact to find a picture for.
@@ -63,8 +64,8 @@ import java.util.stream.Collectors;
 public class PictureSearchData {
 
     private final Integer userId;
-    private final Integer folderId;
-    private final Integer contactId;
+    private final String folderId;
+    private final String contactId;
     private final String accountId;
     private final Set<String> emails;
 
@@ -82,7 +83,7 @@ public class PictureSearchData {
      * @param emails The email addresses
      *
      */
-    public PictureSearchData(Integer userId, Integer folderId, Integer contactId, Collection<String> emails) {
+    public PictureSearchData(Integer userId, String folderId, String contactId, Collection<String> emails) {
         this(userId, null, folderId, contactId, emails);
     }
 
@@ -96,7 +97,7 @@ public class PictureSearchData {
      * @param emails The email addresses
      *
      */
-    public PictureSearchData(Integer userId, String accountId, Integer folderId, Integer contactId, Collection<String> emails) {
+    public PictureSearchData(Integer userId, String accountId, String folderId, String contactId, Collection<String> emails) {
         this.userId = userId;
         this.folderId = folderId;
         this.contactId = contactId;
@@ -147,7 +148,7 @@ public class PictureSearchData {
      *
      * @return The identifier or <code>null</code>
      */
-    public final Integer getFolderId() {
+    public final String getFolderId() {
         return folderId;
     }
 
@@ -158,7 +159,7 @@ public class PictureSearchData {
      *         <code>false</code> otherwise
      */
     public boolean hasFolder() {
-        return null != folderId && folderId.intValue() > 0;
+        return Strings.isNotEmpty(folderId);
     }
 
     /**
@@ -166,7 +167,7 @@ public class PictureSearchData {
      *
      * @return The identifier or <code>null</code>
      */
-    public final Integer getContactId() {
+    public final String getContactId() {
         return contactId;
     }
 
@@ -177,7 +178,7 @@ public class PictureSearchData {
      *         <code>false</code> otherwise
      */
     public boolean hasContact() {
-        return null != contactId && contactId.intValue() > 0;
+        return Strings.isNotEmpty(contactId);
     }
 
     /**

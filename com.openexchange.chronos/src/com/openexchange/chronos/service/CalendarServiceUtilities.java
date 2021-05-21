@@ -94,6 +94,37 @@ public interface CalendarServiceUtilities {
     String resolveByUID(CalendarSession session, String uid, int calendarUserId) throws OXException;
 
     /**
+     * Resolves an UID to all events belonging to the corresponding calendar object resource. The lookup is performed case-sensitive,
+     * within the scope of a specific calendar user. I.e., the unique identifier is resolved to events residing in the user's
+     * <i>personal</i>, as well as <i>public</i> calendar folders.
+     * <p/>
+     * The events will be <i>userized</i> to reflect the view of the calendar user on the events.
+     * The following calendar parameters are evaluated:
+     * <ul>
+     * <li>{@link CalendarParameters#PARAMETER_FIELDS}</li>
+     * </ul>
+     * 
+     * @param session The calendar session
+     * @param uid The UID to resolve
+     * @param calendarUserId The identifier of the calendar user the unique identifier should be resolved for
+     * @return The <i>userized</i> events, or an empty list if no events were found
+     */
+    List<Event> resolveEventsByUID(CalendarSession session, String uid, int calendarUserId) throws OXException;
+
+    /**
+     * Resolves an UID to the identifier of the folder where the corresponding calendar object resource is located in. The lookup is
+     * performed case-sensitive, within the scope of a specific calendar user. I.e., the unique identifier is resolved to the folder view
+     * on the events residing in the user's <i>personal</i>, as well as <i>public</i> calendar folders.
+     * 
+     * @param session The calendar session
+     * @param uid The UID to resolve
+     * @param calendarUserId The identifier of the calendar user the unique identifier should be resolved for
+     * @param fallbackToDefault <code>true</code> to fall back to the calendar user's default folder, <code>false</code>, otherwise
+     * @return The folder id where the events are located in, or <code>null</code> respectively the default folder as fallback if no such events were found
+     */
+    String resolveFolderIdByUID(CalendarSession session, String uid, int calendarUserId, boolean fallbackToDefault) throws OXException;
+
+    /**
      * Resolves an UID and optional recurrence identifier pair to the identifier of an existing event. The lookup is performed case-
      * sensitive and context-wise, independently of the current session user's access rights, within the scope of a specific calendar user.
      * I.e., the unique identifier and recurrence identifier are resolved to events residing in the user's <i>personal</i>, as well as

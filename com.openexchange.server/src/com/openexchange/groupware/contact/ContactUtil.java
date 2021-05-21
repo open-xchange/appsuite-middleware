@@ -74,7 +74,7 @@ public class ContactUtil {
      * The default contacts account prefix.
      */
     public static final String DEFAULT_ACCOUNT_PREFIX = "con://0/";
-    
+
     /** A timestamp in the distant future as substitute for the client timestamp when circumventing concurrent modification checks */
     public static final long DISTANT_FUTURE = Long.MAX_VALUE;
 
@@ -217,7 +217,7 @@ public class ContactUtil {
             if (FolderObject.SYSTEM_LDAP_FOLDER_ID == con.getParentFolderID() && con.containsInternalUserId()) {
                 return service.getUserPictureUrl(con.getInternalUserId(), session, lastModified == null ? null : L(lastModified.getTime()), true);
             }
-            return service.getContactPictureUrl(con.getObjectID(), con.getParentFolderID(), session, lastModified == null ? null : L(lastModified.getTime()), true);
+            return service.getContactPictureUrl(con.getId(true), con.getFolderId(true), session, lastModified == null ? null : L(lastModified.getTime()), true);
         }
         return null;
     }

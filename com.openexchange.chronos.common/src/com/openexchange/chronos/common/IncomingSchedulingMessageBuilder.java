@@ -81,6 +81,11 @@ public class IncomingSchedulingMessageBuilder {
      */
     private IncomingSchedulingMessageBuilder() {}
 
+    /**
+     * Initializes a new {@link IncomingSchedulingMessageBuilder}.
+     *
+     * @return This instance for chaining
+     */
     public static IncomingSchedulingMessageBuilder newBuilder() {
         return new IncomingSchedulingMessageBuilder();
     }
@@ -183,11 +188,11 @@ class Incoming implements IncomingSchedulingMessage {
     @SuppressWarnings("null")
     public Incoming(IncomingSchedulingMessageBuilder builder) throws IllegalStateException {
         this.method = notNull(builder.method);
-        this.schedulingObject = notNull(builder.schedulingObject);
         this.targetUser = builder.targetUser;
         if (targetUser <= 0) {
             throw new IllegalStateException("Target user must be set");
         }
+        this.schedulingObject = notNull(builder.schedulingObject);
         this.resource = notNull(builder.resource);
         this.timestamp = null == builder.timestamp ? new Date() : builder.timestamp;
         this.additionals = builder.additionals;

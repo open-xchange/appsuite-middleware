@@ -1,0 +1,28 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: Open-Xchange Test Contacts Provider
+Bundle-SymbolicName: com.openexchange.contact.provider.test
+Bundle-Version: 8.0.0
+Bundle-Vendor: OX Software GmbH
+Automatic-Module-Name: com.openexchange.contact.provider.test
+Bundle-RequiredExecutionEnvironment: JavaSE-1.8
+Import-Package: com.openexchange.annotation,
+ com.openexchange.contact,
+ com.openexchange.contact.common,
+ com.openexchange.contact.provider,
+ com.openexchange.contact.provider.basic,
+ com.openexchange.contact.provider.folder,
+ com.openexchange.contact.provider.groupware,
+ com.openexchange.exception,
+ com.openexchange.groupware.contact.helpers,
+ com.openexchange.groupware.container,
+ com.openexchange.groupware.contexts,
+ com.openexchange.groupware.search,
+ com.openexchange.java,
+ com.openexchange.osgi,
+ com.openexchange.search,
+ com.openexchange.session,
+ org.json,
+ org.osgi.framework,
+ org.slf4j
+Bundle-Activator: com.openexchange.contact.provider.test.osgi.ContactTestActivator

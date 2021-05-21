@@ -55,6 +55,7 @@ import org.dmfs.rfc5545.DateTime;
 import com.openexchange.ajax.fileholder.IFileHolder;
 import com.openexchange.chronos.Alarm;
 import com.openexchange.chronos.Attendee;
+import com.openexchange.chronos.CalendarObjectResource;
 import com.openexchange.chronos.Event;
 import com.openexchange.chronos.Organizer;
 import com.openexchange.chronos.exception.CalendarExceptionCodes;
@@ -84,6 +85,11 @@ public abstract class FallbackGroupwareCalendarAccess extends FallbackFolderCale
 
     @Override
     public CalendarResult createEvent(String folderId, Event event) throws OXException {
+        throw CalendarExceptionCodes.NO_WRITE_PERMISSION.create(folderId);
+    }
+
+    @Override
+    public CalendarResult putResource(String folderId, CalendarObjectResource resource, boolean replace) throws OXException {
         throw CalendarExceptionCodes.NO_WRITE_PERMISSION.create(folderId);
     }
 

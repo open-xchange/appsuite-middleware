@@ -50,11 +50,13 @@ package com.openexchange.contact.provider.groupware;
  */
 
 import java.util.List;
+import com.openexchange.contact.ContactService;
 import com.openexchange.contact.common.ContactsParameters;
 import com.openexchange.contact.common.GroupwareContactsFolder;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.search.ContactsSearchObject;
+import com.openexchange.search.SearchTerm;
 
 /**
  * {@link InternalContactsAccess}
@@ -121,5 +123,103 @@ public interface InternalContactsAccess extends GroupwareContactsAccess {
      * @return The contacts found with the search
      */
     List<Contact> searchContacts(ContactsSearchObject contactSearch) throws OXException;
+
+    /**
+     * Gets contact information associated with internal users.
+     * <p/>
+     * If the current user has no adequate permissions for the global address book folder where contact data for internal users is stored,
+     * no exception is thrown, but the queried contact fields are limited to the fields defined by
+     * {@link ContactService#LIMITED_USER_FIELDS} or {@link ContactService#LIMITED_USER_FIELDS_NO_MAIL} respectively.
+     * <p/>
+     * The following contacts parameters are evaluated:
+     * <ul>
+     * <li>{@link ContactsParameters#PARAMETER_FIELDS}</li>
+     * </ul>
+     *
+     * @param userIds The identifiers of the users to get the contact data for
+     * @return The user contacts
+     */
+    List<Contact> getUserContacts(int[] userIds) throws OXException;
+
+    /**
+     * Gets contact information associated with a specific internal user.
+     * <p/>
+     * If the current user has no adequate permissions for the global address book folder where contact data for internal users is stored,
+     * no exception is thrown, but the queried contact fields are limited to the fields defined by
+     * {@link ContactService#LIMITED_USER_FIELDS} or {@link ContactService#LIMITED_USER_FIELDS_NO_MAIL} respectively.
+     * <p/>
+     * The following contacts parameters are evaluated:
+     * <ul>
+     * <li>{@link ContactsParameters#PARAMETER_FIELDS}</li>
+     * </ul>
+     *
+     * @param userId The identifier of the user to get the contact data for
+     * @return The user contact
+     */
+    default Contact getUserContact(int userId) throws OXException {
+        return getUserContacts(new int[userId]).get(0);
+    }
+
+    /**
+     * Gets contact information associated with all internal users.
+     * <p/>
+     * If the current user has no adequate permissions for the global address book folder where contact data for internal users is stored,
+     * no exception is thrown, but the queried contact fields are limited to the fields defined by
+     * {@link ContactService#LIMITED_USER_FIELDS} or {@link ContactService#LIMITED_USER_FIELDS_NO_MAIL} respectively.
+     * <p/>
+     * The following contacts parameters are evaluated:
+     * <ul>
+     * <li>{@link ContactsParameters#PARAMETER_FIELDS}</li>
+     * <li>{@link ContactsParameters#PARAMETER_ORDER}</li>
+     * <li>{@link ContactsParameters#PARAMETER_ORDER_BY}</li>
+     * </ul>
+     *
+     * @return The user contacts
+     */
+    List<Contact> getUserContacts() throws OXException;
+
+    /**
+     * Searches for user contacts.
+     * <p/>
+     * If the current user has no adequate permissions for the global address book folder where contact data for internal users is stored,
+     * no exception is thrown, but the queried contact fields are limited to the fields defined by
+     * {@link ContactService#LIMITED_USER_FIELDS} or {@link ContactService#LIMITED_USER_FIELDS_NO_MAIL} respectively.
+     * <p/>
+     * <b>Note:</b> The folder-related parameters in the passed {@link ContactsSearchObject} have no effect.
+     * <p/>
+     * The following contacts parameters are evaluated:
+     * <ul>
+     * <li>{@link ContactsParameters#PARAMETER_FIELDS}</li>
+     * <li>{@link ContactsParameters#PARAMETER_ORDER}</li>
+     * <li>{@link ContactsParameters#PARAMETER_ORDER_BY}</li>
+     * </ul>
+     *
+     * @param contactSearch The contact search object
+     * @return The found user contacts
+     */
+    List<Contact> searchUserContacts(ContactsSearchObject contactSearch) throws OXException;
+
+    /**
+     * Searches for user contacts.
+     * <p/>
+     * If the current user has no adequate permissions for the global address book folder where contact data for internal users is stored,
+     * no exception is thrown, but the queried contact fields are limited to the fields defined by
+     * {@link ContactService#LIMITED_USER_FIELDS} or {@link ContactService#LIMITED_USER_FIELDS_NO_MAIL} respectively.
+     * <p/>
+     * <b>Note:</b> The folder-related parameters in the passed {@link ContactsSearchObject} have no effect.
+     * <p/>
+     * The following contacts parameters are evaluated:
+     * <ul>
+     * <li>{@link ContactsParameters#PARAMETER_FIELDS}</li>
+     * <li>{@link ContactsParameters#PARAMETER_ORDER}</li>
+     * <li>{@link ContactsParameters#PARAMETER_ORDER_BY}</li>
+     * <li>{@link ContactsParameters#PARAMETER_LEFT_HAND_LIMIT}</li>
+     * <li>{@link ContactsParameters#PARAMETER_RIGHT_HAND_LIMIT}</li>
+     * </ul>
+     *
+     * @param searchTerm The search term
+     * @return The found user contacts
+     */
+    List<Contact> searchUserContacts(SearchTerm<?> searchTerm) throws OXException;
 
 }

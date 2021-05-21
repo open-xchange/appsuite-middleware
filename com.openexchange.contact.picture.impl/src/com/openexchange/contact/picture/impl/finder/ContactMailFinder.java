@@ -49,23 +49,23 @@
 
 package com.openexchange.contact.picture.impl.finder;
 
+import static com.openexchange.java.Autoboxing.I;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Set;
-import com.openexchange.contact.ContactService;
-import com.openexchange.contact.SortOptions;
-import com.openexchange.contact.SortOrder;
+import com.openexchange.contact.common.ContactsParameters;
 import com.openexchange.contact.picture.PictureSearchData;
 import com.openexchange.contact.picture.impl.ContactPictureUtil;
+import com.openexchange.contact.provider.composition.IDBasedContactsAccess;
+import com.openexchange.contact.provider.composition.IDBasedContactsAccessFactory;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contact.helpers.ContactField;
 import com.openexchange.groupware.container.Contact;
-import com.openexchange.groupware.search.ContactSearchObject;
+import com.openexchange.groupware.search.ContactsSearchObject;
 import com.openexchange.groupware.search.Order;
-import com.openexchange.java.Streams;
 import com.openexchange.java.Strings;
 import com.openexchange.session.Session;
 import com.openexchange.tools.arrays.Arrays;
-import com.openexchange.tools.iterator.SearchIterator;
 
 /**
  * {@link ContactMailFinder} - Finds picture based on the provided mail addresses
@@ -78,10 +78,10 @@ public class ContactMailFinder extends AbstractContactFinder {
     /**
      * Initializes a new {@link ContactMailFinder}.
      *
-     * @param contactService The {@link ContactService}
+     * @param idBasedContactsAccessFactory The {@link IDBasedContactsAccessFactory}
      */
-    public ContactMailFinder(ContactService contactService) {
-        super(contactService);
+    public ContactMailFinder(IDBasedContactsAccessFactory idBasedContactsAccessFactory) {
+        super(idBasedContactsAccessFactory);
     }
     // ---------------------------------------------------------------------------------------------
 
@@ -131,28 +131,26 @@ public class ContactMailFinder extends AbstractContactFinder {
                 continue;
             }
 
-            ContactSearchObject cso = new ContactSearchObject();
+            ContactsSearchObject cso = new ContactsSearchObject();
             cso.setAllEmail(email);
             cso.setOrSearch(true);
             cso.setHasImage(true);
             cso.setExactMatch(true);
 
-            SearchIterator<Contact> result = null;
+            // Search from system folder (e.g. GAB, if accessible) to private folders, by oldest contacts first
+            List<Contact> result;
+            IDBasedContactsAccess contactsAccess = idBasedContactsAccessFactory.createAccess(session);
             try {
-                // Search from system folder (e.g. GAB, if accessible) to private folders, by oldest contacts first
-                result = contactService.searchContacts(session, cso, fields, new SortOptions(new SortOrder(ContactField.FOLDER_ID, Order.ASCENDING), new SortOrder(ContactField.OBJECT_ID, Order.ASCENDING)));
-                if (result == null) {
-                    continue;
-                }
-
-                while (result.hasNext()) {
-                    Contact contact = result.next();
-                    return contact;
-                }
+                contactsAccess.set(ContactsParameters.PARAMETER_FIELDS, fields);
+                contactsAccess.set(ContactsParameters.PARAMETER_ORDER_BY, ContactField.FOLDER_ID);
+                contactsAccess.set(ContactsParameters.PARAMETER_ORDER, Order.ASCENDING);
+                contactsAccess.set(ContactsParameters.PARAMETER_RIGHT_HAND_LIMIT, I(1));
+                result = contactsAccess.searchContacts(cso);
             } finally {
-                Streams.close(result);
+                contactsAccess.finish();
             }
 
+            return null != result && 0 < result.size() ? result.get(0) : null;
         }
         return null;
     }

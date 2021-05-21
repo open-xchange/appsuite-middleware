@@ -65,6 +65,7 @@ import com.openexchange.groupware.contact.ContactExceptionCodes;
 import com.openexchange.groupware.contact.ContactPictureURLService;
 import com.openexchange.groupware.notify.hostname.HostData;
 import com.openexchange.groupware.notify.hostname.HostnameService;
+import com.openexchange.java.Strings;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.session.Session;
 import com.openexchange.session.Sessions;
@@ -89,8 +90,8 @@ public class ContactPictureURLServiceImpl implements ContactPictureURLService {
     }
 
     @Override
-    public String getContactPictureUrl(int contactId, int folderId, Session session, Long timestamp, boolean preferRelativeUrl) throws OXException {
-        if (contactId < 0 || folderId < 0) {
+    public String getContactPictureUrl(String contactId, String folderId, Session session, Long timestamp, boolean preferRelativeUrl) throws OXException {
+        if (Strings.isEmpty(contactId) || Strings.isEmpty(folderId)) {
             throw ContactExceptionCodes.UNEXPECTED_ERROR.create("The contactId and the folderId must be set!");
         }
         return getPictureUrl(contactId, folderId, -1, session, timestamp, preferRelativeUrl);
@@ -101,7 +102,7 @@ public class ContactPictureURLServiceImpl implements ContactPictureURLService {
         if (userId < 0) {
             throw ContactExceptionCodes.UNEXPECTED_ERROR.create("The userId must be set!");
         }
-        return getPictureUrl(-1, -1, userId, session, timestamp, preferRelativeUrl);
+        return getPictureUrl(null,null, userId, session, timestamp, preferRelativeUrl);
     }
 
     /**
@@ -117,7 +118,7 @@ public class ContactPictureURLServiceImpl implements ContactPictureURLService {
      * @throws OXException
      */
     @SuppressWarnings("deprecation")
-    private String getPictureUrl(int contactId, int folderId, int userId, final Session session, Long timestamp, final boolean preferRelativeUrl) throws OXException {
+    private String getPictureUrl(String contactId, String folderId, int userId, final Session session, Long timestamp, final boolean preferRelativeUrl) throws OXException {
         URIBuilder builder = new URIBuilder();
         if (false == preferRelativeUrl) {
             final HostData hostData;
@@ -150,9 +151,9 @@ public class ContactPictureURLServiceImpl implements ContactPictureURLService {
         builder.setPath(sb.toString());
         builder.setParameter("action", "get");
 
-        if (contactId > -1 && folderId > -1) {
-            builder.setParameter(CONTACT.getParameter(), String.valueOf(contactId));
-            builder.setParameter(CONTACT_FOLDER.getParameter(), String.valueOf(folderId));
+        if (contactId != null && folderId != null) {
+            builder.setParameter(CONTACT.getParameter(), contactId);
+            builder.setParameter(CONTACT_FOLDER.getParameter(), folderId);
         } else {
             builder.setParameter(USER.getParameter(), String.valueOf(userId));
         }

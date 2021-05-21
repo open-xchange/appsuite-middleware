@@ -94,6 +94,15 @@ public class DeletePerformer extends AbstractUpdatePerformer {
     }
 
     /**
+     * Initializes a new {@link DeletePerformer}, taking over the settings from another update performer.
+     *
+     * @param updatePerformer The update performer to take over the settings from
+     */
+    protected DeletePerformer(AbstractUpdatePerformer updatePerformer) {
+        super(updatePerformer);
+    }
+
+    /**
      * Performs the deletion of an event.
      *
      * @param objectId The identifier of the event to delete
@@ -121,41 +130,63 @@ public class DeletePerformer extends AbstractUpdatePerformer {
 
     /**
      * Deletes a single event.
+     * <p/>
+     * Besides the deletion through {@link AbstractUpdatePerformer#deleteException} or {@link AbstractUpdatePerformer#delete}, associated
+     * scheduling messages are tracked in the performer's {@link ResultTracker} instance implicitly.
      *
      * @param originalEvent The original event to delete
      */
     private void deleteEvent(Event originalEvent) throws OXException {
+        Event originalSeriesMaster = isSeriesException(originalEvent) ? optEventData(originalEvent.getSeriesId()) : null;
         if (deleteRemovesEvent(originalEvent)) {
             /*
              * deletion of not group-scheduled event / by organizer / last user attendee
              */
-            requireDeletePermissions(originalEvent);
-            if (isSeriesException(originalEvent)) {
-                Event originalSeriesMaster = optEventData(originalEvent.getSeriesId());
-                List<Event> deletedEvents = deleteException(originalSeriesMaster, originalEvent);
-                schedulingHelper.trackDeletion(new DefaultCalendarObjectResource(deletedEvents), originalSeriesMaster, null);
-            } else {
-                List<Event> deletedEvents = delete(originalEvent);
-                schedulingHelper.trackDeletion(new DefaultCalendarObjectResource(deletedEvents));
-            }
+            schedulingHelper.trackDeletion(new DefaultCalendarObjectResource(deleteEvent(originalEvent, originalSeriesMaster)), originalSeriesMaster, null);
         } else {
             /*
              * deletion as one of the attendees
              */
             Attendee userAttendee = find(originalEvent.getAttendees(), calendarUserId);
-            if (null == userAttendee) {
-                throw CalendarExceptionCodes.NO_DELETE_PERMISSION.create(folder.getId());
-            }
-            requireDeletePermissions(originalEvent, userAttendee);
-            if (isSeriesException(originalEvent)) {
-                Event originalSeriesMaster = loadEventData(originalEvent.getSeriesId());
-                List<EventUpdate> attendeeEventUpdates = deleteException(originalSeriesMaster, originalEvent, userAttendee);
-                schedulingHelper.trackReply(userAttendee, getUpdatedResource(attendeeEventUpdates), originalSeriesMaster, attendeeEventUpdates);
-            } else {
-                List<EventUpdate> attendeeEventUpdates = delete(originalEvent, userAttendee);
-                schedulingHelper.trackReply(userAttendee, getUpdatedResource(attendeeEventUpdates), attendeeEventUpdates);
-            }
+            List<EventUpdate> attendeeEventUpdates = deleteEvent(originalEvent, originalSeriesMaster, userAttendee);
+            schedulingHelper.trackReply(userAttendee, getUpdatedResource(attendeeEventUpdates), originalSeriesMaster, attendeeEventUpdates);
         }
+    }
+    
+    /**
+     * Deletes a single event or change exception after checking necessary permissions. The plain results are tracked internally, however, no
+     * scheduling messages are prepared implicitly.
+     * 
+     * @param originalEvent The original event to delete
+     * @param originalSeriesMaster The original series master event, or <code>null</code> if not applicable
+     * @return The deleted events
+     */
+    protected List<Event> deleteEvent(Event originalEvent, Event originalSeriesMaster) throws OXException {
+        requireDeletePermissions(originalEvent);
+        if (isSeriesException(originalEvent)) {
+            return deleteException(originalSeriesMaster, originalEvent);
+        }
+        return delete(originalEvent);
+    }
+    
+    /**
+     * Deletes an attendee from a single event or change exception after checking necessary permissions. The plain results are tracked
+     * internally, however, no scheduling messages are prepared implicitly.
+     * 
+     * @param originalEvent The original event to delete the attendee from
+     * @param originalSeriesMaster The original series master event, or <code>null</code> if not applicable
+     * @param userAttendee The user attendee to delete
+     * @return The performed attendee event updates
+     */
+    protected List<EventUpdate> deleteEvent(Event originalEvent, Event originalSeriesMaster, Attendee userAttendee) throws OXException {
+        if (null == userAttendee) {
+            throw CalendarExceptionCodes.NO_DELETE_PERMISSION.create(folder.getId());
+        }
+        requireDeletePermissions(originalEvent, userAttendee);
+        if (isSeriesException(originalEvent)) {
+            return deleteException(originalSeriesMaster, originalEvent, userAttendee);
+        }
+        return delete(originalEvent, userAttendee);
     }
 
     /**

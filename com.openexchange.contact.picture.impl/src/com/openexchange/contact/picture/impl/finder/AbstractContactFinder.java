@@ -53,11 +53,14 @@ import static com.openexchange.java.Autoboxing.I;
 import java.util.concurrent.atomic.AtomicInteger;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import com.openexchange.contact.ContactID;
+import com.openexchange.contact.ContactIDUtil;
 import com.openexchange.contact.ContactService;
 import com.openexchange.contact.picture.PictureSearchData;
 import com.openexchange.contact.picture.finder.ContactPictureFinder;
 import com.openexchange.contact.picture.finder.PictureResult;
 import com.openexchange.contact.picture.impl.ContactPictureUtil;
+import com.openexchange.contact.provider.composition.IDBasedContactsAccessFactory;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contact.helpers.ContactField;
 import com.openexchange.groupware.container.Contact;
@@ -76,7 +79,7 @@ public abstract class AbstractContactFinder implements ContactPictureFinder {
 
     protected final static Logger LOGGER = LoggerFactory.getLogger(AbstractContactFinder.class);
 
-    protected final ContactService contactService;
+    protected final IDBasedContactsAccessFactory idBasedContactsAccessFactory;
 
     private final static AtomicInteger childCount = new AtomicInteger(20);
 
@@ -87,12 +90,22 @@ public abstract class AbstractContactFinder implements ContactPictureFinder {
     /**
      * Initializes a new {@link AbstractContactFinder}.
      *
-     * @param contactService The {@link ContactService}
+     * @param idBasedContactsAccessFactory The {@link IDBasedContactsAccessFactory}
      */
-    protected AbstractContactFinder(ContactService contactService) {
+    protected AbstractContactFinder(IDBasedContactsAccessFactory idBasedContactsAccessFactory) {
         super();
-        this.contactService = contactService;
+        this.idBasedContactsAccessFactory = idBasedContactsAccessFactory;
         this.child = childCount.decrementAndGet();
+    }
+
+    /**
+     * Creates a {@link ContactID} for the given {@link PicuteSearchData}
+     *
+     * @param data The data to create the {@link ContactID} for
+     * @return The {@link ContactID} for the given data
+     */
+    protected ContactID createContactID(PictureSearchData data) {
+        return ContactIDUtil.createContactID(data.getFolderId(), data.getContactId());
     }
 
     // ---------------------------------------------------------------------------------------------
@@ -130,7 +143,7 @@ public abstract class AbstractContactFinder implements ContactPictureFinder {
         Contact contact = getContact0(session, data, SearchFields.PICTURE);
         if (null == contact) {
             return new PictureResult(data);
-        } else if (false == ContactPictureUtil.hasValidImage(I(session.getContextId()), contact, data)) {
+        } else if (0 == contact.getNumberOfImages() || false == ContactPictureUtil.hasValidImage(I(session.getContextId()), contact, data)) {
             return new PictureResult(modfiyResult(contact));
         }
         return new PictureResult(ContactPictureUtil.fromContact(contact));
@@ -141,6 +154,8 @@ public abstract class AbstractContactFinder implements ContactPictureFinder {
         Contact contact = getContact0(session, data, SearchFields.ETAG);
         if (null == contact) {
             return new PictureResult(data);
+        } else if (0 == contact.getNumberOfImages()) {
+            return new PictureResult(modfiyResult(contact));
         }
         return new PictureResult(ContactPictureUtil.fromContact(contact));
     }
@@ -150,6 +165,8 @@ public abstract class AbstractContactFinder implements ContactPictureFinder {
         Contact contact = getContact0(session, data, SearchFields.LAST_MODIFIED);
         if (null == contact) {
             return new PictureResult(data);
+        } else if (0 == contact.getNumberOfImages()) {
+            return new PictureResult(modfiyResult(contact));
         }
         return new PictureResult(ContactPictureUtil.fromContact(contact));
     }

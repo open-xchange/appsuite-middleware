@@ -191,7 +191,7 @@ public class ConflictCheckPerformer extends AbstractFreeBusyPerformer {
             /*
              * skip checks with event itself or any other event from same series
              */
-            if (eventInPeriod.getId().equals(event.getId()) || null != event.getSeriesId() && event.getSeriesId().equals(eventInPeriod.getSeriesId())) {
+            if (isSameEventGroup(event, eventInPeriod)) {
                 continue;
             }
             /*
@@ -293,7 +293,7 @@ public class ConflictCheckPerformer extends AbstractFreeBusyPerformer {
             /*
              * skip checks with event itself or any other event from same series
              */
-            if (eventInPeriod.getId().equals(masterEvent.getId()) || null != eventInPeriod.getSeriesId() && eventInPeriod.getSeriesId().equals(masterEvent.getSeriesId())) {
+            if (isSameEventGroup(masterEvent, eventInPeriod)) {
                 continue;
             }
             /*
@@ -351,6 +351,23 @@ public class ConflictCheckPerformer extends AbstractFreeBusyPerformer {
         }
         return conflicts;
     }
+    
+
+    /**
+     * Gets a value indicating whether two events can be considered the same
+     * by either comparing their internal IDs or their UID
+     * 
+     * @param eventToCheck The event to perform the conflict check for
+     * @param eventInPeriod The event from the DB that is in the same period as the other event
+     * @return <code>true</code> if the events can be considered to be the same (group), <code>false</code> otherwise
+     */
+    private boolean isSameEventGroup(Event eventToCheck, Event eventInPeriod) {
+        if (null != eventToCheck.getId()) {
+            return eventToCheck.getId().equals(eventInPeriod.getId()) || 
+                null != eventInPeriod.getSeriesId() && eventInPeriod.getSeriesId().equals(eventToCheck.getSeriesId());
+        }
+        return null != eventToCheck.getUid() && eventToCheck.getUid().equals(eventInPeriod.getUid());
+    }
 
     /**
      * Creates an event conflict for a single event.
@@ -404,7 +421,7 @@ public class ConflictCheckPerformer extends AbstractFreeBusyPerformer {
      * @return The overlapping events of the attendees, or an empty list if there are none
      */
     private List<Event> getOverlappingEvents(Date from, Date until, List<Attendee> attendeesToCheck) throws OXException {
-        EventField[] fields = getFields(new EventField[] { EventField.TRANSP, EventField.SUMMARY, EventField.LOCATION, EventField.ORGANIZER });
+        EventField[] fields = getFields(new EventField[] { EventField.TRANSP, EventField.SUMMARY, EventField.LOCATION, EventField.ORGANIZER, EventField.UID });
         List<Event> eventsInPeriod = storage.getEventStorage().searchOverlappingEvents(attendeesToCheck, false, new SearchOptions().setRange(from, until), fields);
         if (0 == eventsInPeriod.size()) {
             return Collections.emptyList();

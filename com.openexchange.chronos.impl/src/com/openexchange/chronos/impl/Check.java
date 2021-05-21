@@ -62,7 +62,6 @@ import java.util.Collection;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Objects;
 import java.util.Set;
 import org.dmfs.rfc5545.DateTime;
 import com.openexchange.chronos.Alarm;
@@ -83,6 +82,7 @@ import com.openexchange.chronos.RecurrenceRange;
 import com.openexchange.chronos.ResourceId;
 import com.openexchange.chronos.common.CalendarUtils;
 import com.openexchange.chronos.common.SelfProtectionFactory.SelfProtection;
+import com.openexchange.chronos.common.mapping.EventMapper;
 import com.openexchange.chronos.exception.CalendarExceptionCodes;
 import com.openexchange.chronos.impl.performer.ConflictCheckPerformer;
 import com.openexchange.chronos.impl.performer.ResolvePerformer;
@@ -97,6 +97,7 @@ import com.openexchange.folderstorage.Permission;
 import com.openexchange.folderstorage.type.PrivateType;
 import com.openexchange.folderstorage.type.PublicType;
 import com.openexchange.groupware.tools.alias.UserAliasUtility;
+import com.openexchange.groupware.tools.mappings.Mapping;
 import com.openexchange.i18n.tools.StringHelper;
 import com.openexchange.java.Strings;
 import com.openexchange.quota.Quota;
@@ -200,21 +201,6 @@ public class Check extends com.openexchange.chronos.common.Check {
     }
 
     /**
-     * Checks that an incoming event update has no sequence number smaller than the original event's sequence number.
-     *
-     * @param originalEvent The original event being updated
-     * @param eventUpdate The updated event data
-     * @return The passed event update, after the sequence number was checked
-     * @throws OXException {@link CalendarExceptionCodes#OUT_OF_SEQUENCE}
-     */
-    public static Event requireInSequence(Event originalEvent, Event eventUpdate) throws OXException {
-        if (eventUpdate.containsSequence() && eventUpdate.getSequence() < originalEvent.getSequence()) {
-            throw CalendarExceptionCodes.OUT_OF_SEQUENCE.create(originalEvent.getId(), I(eventUpdate.getSequence()), I(originalEvent.getSequence()));
-        }
-        return eventUpdate;
-    }
-
-    /**
      * Checks that the incoming update does not contain outdated participant status
      * <p>
      * Note: Due the fact that some clients will receive the timestamp in DateTime format <code>ISO.8601.2004</code>,
@@ -229,7 +215,7 @@ public class Check extends com.openexchange.chronos.common.Check {
         if (original.getTimestamp() > 0 && updated.getTimestamp() > 0
             && original.getTimestamp() > updated.getTimestamp()
             && original.getTimestamp() - updated.getTimestamp() >= 1000) {
-            throw CalendarExceptionCodes.CONCURRENT_MODIFICATION.create(I(original.getEntity()), L(original.getTimestamp()), L(updated.getTimestamp()));
+            throw CalendarExceptionCodes.CONCURRENT_MODIFICATION.create(I(original.getEntity()), L(updated.getTimestamp()), L(original.getTimestamp()));
         }
     }
 
@@ -435,27 +421,6 @@ public class Check extends com.openexchange.chronos.common.Check {
     }
 
     /**
-     * Checks that the unique identifier (UID) matches in all events from a calendar object resource, i.e. it is either undefined, or
-     * equal in all events.
-     *
-     * @param event The primary event to check the UID in, or <code>null</code> to just check the further events
-     * @param events Further events to check the UID for equality, or <code>null</code> to just check the first event
-     * @return The event's common unique identifier, after it was checked to be equal in all events, or <code>null</code> if not assigned
-     * @throws OXException {@link CalendarExceptionCodes#INVALID_DATA}
-     */
-    public static String uidMatches(Event event, Event... events) throws OXException {
-        String uid = null != event ? event.getUid() : null != events && 0 < events.length ? events[0].getUid() : null;
-        if (null != events) {
-            for (Event e : events) {
-                if (false == Objects.equals(uid, e.getUid())) {
-                    throw CalendarExceptionCodes.INVALID_DATA.create(EventField.UID, "UID mismatch");
-                }
-            }
-        }
-        return uid;
-    }
-
-    /**
      * Checks that the unique identifier (UID) matches in all events within the supplied collection, i.e. it is either undefined, or
      * equal in all events.
      *
@@ -464,17 +429,44 @@ public class Check extends com.openexchange.chronos.common.Check {
      * @throws OXException {@link CalendarExceptionCodes#INVALID_DATA}
      */
     public static String uidMatches(Collection<Event> events) throws OXException {
+        return Check.fieldMatches(events, EventField.UID, String.class);
+    }
+
+    /**
+     * Checks that the filename property matches in all events within the supplied collection, i.e. it is either undefined, or
+     * equal in all events.
+     *
+     * @param events The events to check the filename for equality
+     * @return The event's common filename, after it was checked to be equal in all events, or <code>null</code> if not assigned
+     * @throws OXException {@link CalendarExceptionCodes#INVALID_DATA}
+     */
+    public static String filenameMatches(Collection<Event> events) throws OXException {
+        return Check.fieldMatches(events, EventField.FILENAME, String.class);
+    }
+
+    /**
+     * Checks that a specific property matches in all events within the supplied collection, i.e. it is either undefined, or equal in
+     * all events.
+     *
+     * @param events The events to check the property for equality
+     * @param field The event field denoting the property to check
+     * @return The property value, after it was checked to be equal in all events, or <code>null</code> if not assigned
+     * @throws OXException {@link CalendarExceptionCodes#INVALID_DATA}
+     */
+    private static <T> T fieldMatches(Collection<Event> events, EventField field, Class<T> clazz) throws OXException {
         if (null == events || events.isEmpty()) {
             return null;
         }
         Iterator<Event> iterator = events.iterator();
-        String uid = iterator.next().getUid();
+        Mapping<? extends Object, Event> mapping = EventMapper.getInstance().get(field);
+        Event firstEvent = iterator.next();
         while (iterator.hasNext()) {
-            if (false == Objects.equals(uid, iterator.next().getUid())) {
-                throw CalendarExceptionCodes.INVALID_DATA.create(EventField.UID, "UID mismatch");
+            Event nextEvent = iterator.next();
+            if (false == mapping.equals(firstEvent, nextEvent)) {
+                throw CalendarExceptionCodes.INVALID_DATA.create(field, "Mismatching values: \"" + mapping.get(firstEvent) + "\" vs. \"" + mapping.get(nextEvent) + '"');
             }
         }
-        return uid;
+        return clazz.cast(mapping.get(firstEvent));
     }
 
     /**
@@ -487,12 +479,12 @@ public class Check extends com.openexchange.chronos.common.Check {
      * @throws OXException {@link CalendarExceptionCodes#DIFFERENT_ORGANIZER}
      * @see CalendarUtils#matches(CalendarUser, CalendarUser)
      */
-    public static Organizer organizerMatches(Event event, Event... events) throws OXException {
-        Organizer organizer = null != event ? event.getOrganizer() : null != events && 0 < events.length ? events[0].getOrganizer() : null;
+    public static Organizer organizerMatches(Event event, List<Event> events) throws OXException {
+        Organizer organizer = null != event ? event.getOrganizer() : null != events && 0 < events.size() ? events.get(0).getOrganizer() : null;
         if (null != events) {
             for (Event e : events) {
                 if (false == CalendarUtils.matches(organizer, e.getOrganizer())) {
-                    String id = null != event ? event.getId() : 0 < events.length ? events[0].getId() : null;
+                    String id = null != event ? event.getId() : 0 < events.size() ? events.get(0).getId() : null;
                     throw CalendarExceptionCodes.DIFFERENT_ORGANIZER.create(id, organizer, e.getOrganizer());
                 }
             }

@@ -68,6 +68,7 @@ import static com.openexchange.folderstorage.Permission.READ_FOLDER;
 import static com.openexchange.java.Autoboxing.L;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import com.openexchange.chronos.Alarm;
@@ -86,6 +87,7 @@ import com.openexchange.chronos.impl.Check;
 import com.openexchange.chronos.impl.InternalCalendarResult;
 import com.openexchange.chronos.impl.Utils;
 import com.openexchange.chronos.service.CalendarSession;
+import com.openexchange.chronos.service.EventID;
 import com.openexchange.chronos.service.EventUpdate;
 import com.openexchange.chronos.storage.CalendarStorage;
 import com.openexchange.exception.OXException;
@@ -111,6 +113,15 @@ public class UpdateAttendeePerformer extends AbstractUpdatePerformer {
     }
 
     /**
+     * Initializes a new {@link UpdateAttendeePerformer}.
+     *
+     * @param performer The existing instance
+     */
+    public UpdateAttendeePerformer(AbstractUpdatePerformer performer) {
+        super(performer);
+    }
+
+    /**
      * Performs the attendee update in an event.
      *
      * @param eventId The identifier of the event to update the attendee in
@@ -122,19 +133,82 @@ public class UpdateAttendeePerformer extends AbstractUpdatePerformer {
      */
     public InternalCalendarResult perform(String eventId, RecurrenceId recurrenceId, Attendee attendee, List<Alarm> alarms, Long clientTimestamp) throws OXException {
         /*
-         * load original event data & check permissions
+         * load original event data & update the attendee
          */
         Event originalEvent = loadEventData(eventId);
+        Event originalSeriesMaster = optSeriesMaster(originalEvent, recurrenceId);
+        Attendee resolvedAttendee = session.getEntityResolver().prepare(AttendeeMapper.getInstance().copy(attendee, null, (AttendeeField[]) null), attendee.getCuType());
+        List<AttendeeEventUpdate> attendeeEventUpdates = updateAttendee(originalEvent, recurrenceId, attendee, clientTimestamp);
+        /*
+         * also update alarms as needed
+         */
+        if (null != alarms) {
+            if (false == isInternal(resolvedAttendee)) {
+                throw CalendarExceptionCodes.FORBIDDEN_ATTENDEE_CHANGE.create(originalEvent.getId(), resolvedAttendee, EventField.ALARMS);
+            }
+            new UpdateAlarmsPerformer(this).perform(originalEvent.getId(), recurrenceId, alarms.isEmpty() ? null : alarms, L(timestamp.getTime()));
+        }
+        /*
+         * handle scheduling & return result
+         */
+        handleScheduling(resolvedAttendee, originalSeriesMaster, attendeeEventUpdates);
+        return resultTracker.getResult();
+    }
+
+    /**
+     * Performs the attendee update in multiple existing events in the underlying folder.
+     *
+     * @param eventIds The identifiers of the event toTpdate the attendee in, belonging to the same calendar object resource
+     * @param attendee The attendee data to update
+     * @param clientTimestamp The client timestamp to catch concurrent modifications, or <code>null</code> to skip checks
+     * @return The result
+     */
+    public InternalCalendarResult perform(List<EventID> eventIds, Attendee attendee, Long clientTimestamp) throws OXException {
+        if (null == eventIds || eventIds.isEmpty()) {
+            return resultTracker.getResult();
+        }
+        /*
+         * resolve attendee, load original events & map by UID
+         */
+        Attendee resolvedAttendee = session.getEntityResolver().prepare(AttendeeMapper.getInstance().copy(attendee, null, (AttendeeField[]) null), attendee.getCuType());
+        Map<String, List<Event>> eventsByUid = new LinkedHashMap<String, List<Event>>();
+        for (EventID eventId : eventIds) {
+            Check.folderMatches(eventId.getFolderID(), folder.getId());
+            Event originalEvent = loadEventData(eventId.getObjectID());
+            com.openexchange.tools.arrays.Collections.put(eventsByUid, originalEvent.getUid(), originalEvent);
+        }
+        for (List<Event> originalEvents : eventsByUid.values()) {
+            /*
+             * update attendee in targeted events of calendar object resource & handle aggregated scheduling
+             */
+            Event originalSeriesMaster = null;
+            List<AttendeeEventUpdate> attendeeEventUpdates = new ArrayList<AttendeeEventUpdate>(originalEvents.size());
+            for (EventID eventId : eventIds) {
+                Event originalEvent = find(originalEvents, eventId.getObjectID());
+                if (null == originalEvent) {
+                    continue; // other calendar object resource
+                }
+                if (null == originalSeriesMaster) {
+                    originalSeriesMaster = optSeriesMaster(originalEvent, eventId.getRecurrenceID());
+                }
+                attendeeEventUpdates.addAll(updateAttendee(originalEvent, eventId.getRecurrenceID(), attendee, clientTimestamp));
+            }
+            handleScheduling(resolvedAttendee, originalSeriesMaster, attendeeEventUpdates);
+        }
+        return resultTracker.getResult();
+    }
+
+    private List<AttendeeEventUpdate> updateAttendee(Event originalEvent, RecurrenceId recurrenceId, Attendee attendee, Long clientTimestamp) throws OXException {
+        /*
+         * check permissions & targeted attendee
+         */
         Check.eventIsVisible(folder, originalEvent);
         Check.eventIsInFolder(originalEvent, folder);
-        requireWritePermissions(originalEvent, attendee);
         if (null != clientTimestamp) {
             requireUpToDateTimestamp(originalEvent, clientTimestamp.longValue());
         }
-        /*
-         * check targeted attendee
-         */
         Attendee resolvedAttendee = session.getEntityResolver().prepare(AttendeeMapper.getInstance().copy(attendee, null, (AttendeeField[]) null), attendee.getCuType());
+        requireWritePermissions(originalEvent, resolvedAttendee);
         Attendee originalAttendee = Check.attendeeExists(originalEvent, resolvedAttendee);
         if (0 < originalAttendee.getEntity() && calendarUserId != originalAttendee.getEntity() && session.getUserId() != originalAttendee.getEntity()) {
             // TODO: even allowed for proxy user? calendarUserId != originalAttendee.getEntity()
@@ -145,23 +219,43 @@ public class UpdateAttendeePerformer extends AbstractUpdatePerformer {
         }
         Check.requireUpToDateTimestamp(originalAttendee, attendee);
         /*
-         * perform update
+         * perform update & return results
          */
         if (null == recurrenceId) {
-            updateAttendee(originalEvent, originalAttendee, attendee);
-        } else {
-            updateAttendee(originalEvent, originalAttendee, attendee, recurrenceId);
+            return updateAttendee(originalEvent, originalAttendee, attendee);
         }
-        /*
-         * also update alarms as needed
-         */
-        if (null != alarms) {
-            if (false == isInternal(originalAttendee)) {
-                throw CalendarExceptionCodes.FORBIDDEN_ATTENDEE_CHANGE.create(eventId, originalAttendee, EventField.ALARMS);
+        return updateAttendee(originalEvent, originalAttendee, attendee, recurrenceId);
+    }
+
+    /**
+     * Handles any necessary scheduling after an attendee update has been performed, i.e. tracks suitable scheduling messages and
+     * notifications.
+     * 
+     * @param attendee The attendee that replies
+     * @param seriesMaster The series master event in case an instance of an event series is replied, or <code>null</code> if not available
+     * @param attendeeEventUpdates The performed event updates
+     */
+    private void handleScheduling(Attendee attendee, Event seriesMaster, List<AttendeeEventUpdate> attendeeEventUpdates) {
+        List<EventUpdate> replies = new ArrayList<EventUpdate>();
+        EventUpdate masterReply = null;
+        for (AttendeeEventUpdate attendeeEventUpdate : attendeeEventUpdates) {
+            if (isReply(attendeeEventUpdate.getAttendeeUpdates(), attendee)) {
+                replies.add(attendeeEventUpdate);
+                if (isSeriesMaster(attendeeEventUpdate.getOriginal())) {
+                    masterReply = attendeeEventUpdate;
+                }
             }
-            new UpdateAlarmsPerformer(this).perform(eventId, recurrenceId, alarms.isEmpty() ? null : alarms, L(timestamp.getTime()));
         }
-        return resultTracker.getResult();
+        if (0 < replies.size()) {
+            /*
+             * track reply message from calendar user to organizer
+             */
+            if (null != masterReply) {
+                schedulingHelper.trackReply(attendee, getUpdatedResource(replies), replies);
+            } else {
+                schedulingHelper.trackReply(attendee, getUpdatedResource(replies), seriesMaster, replies);
+            }
+        }
     }
 
     /**
@@ -188,83 +282,6 @@ public class UpdateAttendeePerformer extends AbstractUpdatePerformer {
             return true;
         }
         return false;
-    }
-
-    /**
-     * Updates an attendee in an event.
-     *
-     * @param originalEvent The original event
-     * @param originalAttendee The original attendee
-     * @param attendee The updated attendee
-     */
-    private void updateAttendee(Event originalEvent, Attendee originalAttendee, Attendee attendee) throws OXException {
-        /*
-         * store & track attendee update
-         */
-        Event updatedEvent = storeAttendeeUpdate(originalEvent, originalAttendee, attendee);
-        Attendee updatedAttendee = find(updatedEvent.getAttendees(), originalAttendee);
-        if (isSeriesException(originalEvent)) {
-            /*
-             * also 'touch' the series master in case of an exception update
-             */
-            Event originalSeriesMaster = optEventData(originalEvent.getSeriesId());
-            if (null != originalSeriesMaster) {
-                resultTracker.rememberOriginalEvent(originalSeriesMaster);
-                touch(originalEvent.getSeriesId());
-                Event updatedMasterEvent = loadEventData(originalEvent.getSeriesId());
-                resultTracker.trackUpdate(originalSeriesMaster, updatedMasterEvent);
-            }
-            /*
-             * track single 'reply' message for occurrence if applicable
-             */
-            if (isReply(originalAttendee, updatedAttendee)) {
-                schedulingHelper.trackReply(updatedEvent, originalSeriesMaster, originalAttendee, updatedAttendee);
-            }
-        } else if (isSeriesMaster(originalEvent)) {
-            /*
-             * prepare attendee event update for series master event
-             */
-            List<EventUpdate> attendeeEventUpdates = new ArrayList<EventUpdate>();
-            attendeeEventUpdates.add(new AttendeeEventUpdate(updatedEvent, originalAttendee, updatedAttendee));
-            /*
-             * also check if attendee's partstat is unchanged in existing change exceptions that are not re-scheduled
-             */
-            for (Event changeException : loadExceptionData(originalEvent)) {
-                Attendee matchingAttendee = find(changeException.getAttendees(), originalAttendee);
-                if (null != matchingAttendee && AttendeeMapper.getInstance().get(AttendeeField.PARTSTAT).equals(originalAttendee, matchingAttendee)) {
-                    Event originalOccurrence = prepareException(originalEvent, changeException.getRecurrenceId(), changeException.getId());
-                    if (false == Utils.isReschedule(originalOccurrence, changeException)) {
-                        /*
-                         * propagate update to this change exception, too, including attendee comment if also unchanged from master
-                         */
-                        Attendee attendeeUpdate = AttendeeMapper.getInstance().copy(matchingAttendee, null, (AttendeeField[]) null);
-                        attendeeUpdate.setPartStat(attendee.getPartStat());
-                        if (AttendeeMapper.getInstance().get(AttendeeField.COMMENT).equals(originalAttendee, matchingAttendee)) {
-                            attendeeUpdate.setComment(attendee.getComment());
-                        }
-                        Event updatedChangeException = storeAttendeeUpdate(changeException, matchingAttendee, attendeeUpdate);
-                        /*
-                         * add appropriate attendee update
-                         */
-                        Attendee updatedAttendeeInException = find(updatedChangeException.getAttendees(), originalAttendee);
-                        attendeeEventUpdates.add(new AttendeeEventUpdate(updatedChangeException, matchingAttendee, updatedAttendeeInException));
-                    }
-                }
-            }
-            /*
-             * track 'reply' message for updated scheduling object resource if applicable
-             */
-            if (isReply(originalAttendee, updatedAttendee)) {
-                schedulingHelper.trackReply(updatedAttendee, getUpdatedResource(attendeeEventUpdates), attendeeEventUpdates);
-            }
-        } else {
-            /*
-             * just track 'reply' message for single event if applicable, otherwise
-             */
-            if (isReply(originalAttendee, updatedAttendee)) {
-                schedulingHelper.trackReply(updatedEvent, originalAttendee, updatedAttendee);
-            }
-        }
     }
 
     /**
@@ -298,7 +315,77 @@ public class UpdateAttendeePerformer extends AbstractUpdatePerformer {
         return updatedEvent;
     }
 
-    private void updateAttendee(Event originalEvent, Attendee originalAttendee, Attendee attendee, RecurrenceId recurrenceId) throws OXException {
+    /**
+     * Updates an attendee in an existing event. Results are tracked, but no scheduling messages are prepared yet.
+     *
+     * @param originalEvent The original event
+     * @param originalAttendee The original attendee
+     * @param attendee The updated attendee
+     * @return The performed attendee updates
+     */
+    private List<AttendeeEventUpdate> updateAttendee(Event originalEvent, Attendee originalAttendee, Attendee attendee) throws OXException {
+        /*
+         * store & remember attendee update
+         */
+        List<AttendeeEventUpdate> attendeeEventUpdates = new ArrayList<AttendeeEventUpdate>();
+        Event updatedEvent = storeAttendeeUpdate(originalEvent, originalAttendee, attendee);
+        Attendee updatedAttendee = find(updatedEvent.getAttendees(), originalAttendee);
+        attendeeEventUpdates.add(new AttendeeEventUpdate(updatedEvent, originalAttendee, updatedAttendee));
+        if (isSeriesException(originalEvent)) {
+            /*
+             * also 'touch' the series master in case of an exception update
+             */
+            Event originalSeriesMaster = optEventData(originalEvent.getSeriesId());
+            if (null != originalSeriesMaster) {
+                resultTracker.rememberOriginalEvent(originalSeriesMaster);
+                touch(originalEvent.getSeriesId());
+                Event updatedMasterEvent = loadEventData(originalEvent.getSeriesId());
+                resultTracker.trackUpdate(originalSeriesMaster, updatedMasterEvent);
+            }
+        } else if (isSeriesMaster(originalEvent)) {
+            /*
+             * also check if attendee's partstat is unchanged in existing change exceptions that are not re-scheduled
+             */
+            for (Event changeException : loadExceptionData(originalEvent)) {
+                Attendee matchingAttendee = find(changeException.getAttendees(), originalAttendee);
+                if (null != matchingAttendee && AttendeeMapper.getInstance().get(AttendeeField.PARTSTAT).equals(originalAttendee, matchingAttendee)) {
+                    Event originalOccurrence = prepareException(originalEvent, changeException.getRecurrenceId(), changeException.getId());
+                    if (false == Utils.isReschedule(originalOccurrence, changeException)) {
+                        /*
+                         * propagate update to this change exception, too, including attendee comment if also unchanged from master
+                         */
+                        Attendee attendeeUpdate = AttendeeMapper.getInstance().copy(matchingAttendee, null, (AttendeeField[]) null);
+                        attendeeUpdate.setPartStat(attendee.getPartStat());
+                        if (AttendeeMapper.getInstance().get(AttendeeField.COMMENT).equals(originalAttendee, matchingAttendee)) {
+                            attendeeUpdate.setComment(attendee.getComment());
+                        }
+                        Event updatedChangeException = storeAttendeeUpdate(changeException, matchingAttendee, attendeeUpdate);
+                        /*
+                         * add appropriate attendee update
+                         */
+                        Attendee updatedAttendeeInException = find(updatedChangeException.getAttendees(), originalAttendee);
+                        attendeeEventUpdates.add(new AttendeeEventUpdate(updatedChangeException, matchingAttendee, updatedAttendeeInException));
+                    }
+                }
+            }
+        }
+        /*
+         * return collected results
+         */
+        return attendeeEventUpdates;
+    }
+
+    /**
+     * Updates an attendee in a specific occurrence of a recurring event series. Results are tracked, but no scheduling messages are
+     * prepared yet.
+     * 
+     * @param originalEvent The original event occurrence, or the series master event
+     * @param originalAttendee The original attendee
+     * @param attendee The updated attendee
+     * @param recurrenceId The recurrence identifier pointing to the occurrence to update the attendee in
+     * @return The performed attendee updates
+     */
+    private List<AttendeeEventUpdate> updateAttendee(Event originalEvent, Attendee originalAttendee, Attendee attendee, RecurrenceId recurrenceId) throws OXException {
         if (isSeriesMaster(originalEvent)) {
             Event originalSeriesMaster = originalEvent;
             recurrenceId = Check.recurrenceIdExists(session.getRecurrenceService(), originalEvent, recurrenceId);
@@ -308,56 +395,56 @@ public class UpdateAttendeePerformer extends AbstractUpdatePerformer {
                  */
                 Event originalExceptionEvent = loadExceptionData(originalEvent, recurrenceId);
                 Attendee originalExceptionAttendee = Check.attendeeExists(originalExceptionEvent, attendee);
-                updateAttendee(originalExceptionEvent, originalExceptionAttendee, attendee);
-            } else {
-                /*
-                 * update for new change exception; prepare & insert a plain exception first, based on the original data from the master
-                 */
-                Map<Integer, List<Alarm>> seriesMasterAlarms = storage.getAlarmStorage().loadAlarms(originalSeriesMaster);
-                Event newExceptionEvent = prepareException(originalSeriesMaster, recurrenceId);
-                Map<Integer, List<Alarm>> newExceptionAlarms = prepareExceptionAlarms(seriesMasterAlarms);
-                Check.quotaNotExceeded(storage, session);
-                storage.getEventStorage().insertEvent(newExceptionEvent);
-                storage.getAttendeeStorage().insertAttendees(newExceptionEvent.getId(), originalSeriesMaster.getAttendees());
-                storage.getAttachmentStorage().insertAttachments(session.getSession(), folder.getId(), newExceptionEvent.getId(), originalSeriesMaster.getAttachments());
-                storage.getConferenceStorage().insertConferences(newExceptionEvent.getId(), prepareConferences(originalSeriesMaster.getConferences()));
-                insertAlarms(newExceptionEvent, newExceptionAlarms, true);
-                newExceptionEvent = loadEventData(newExceptionEvent.getId());
-                resultTracker.trackCreation(newExceptionEvent, originalSeriesMaster);
-                /*
-                 * perform the attendee update & track results
-                 */
-                resultTracker.rememberOriginalEvent(newExceptionEvent);
-                Attendee attendeeUpdate = prepareAttendeeUpdate(newExceptionEvent, originalAttendee, attendee);
-                if (null != attendeeUpdate) {
-                    storage.getAttendeeStorage().updateAttendee(newExceptionEvent.getId(), attendeeUpdate);
-                }
-                Event updatedExceptionEvent = loadEventData(newExceptionEvent.getId());
-                Attendee updatedAttendee = find(updatedExceptionEvent.getAttendees(), originalAttendee);
-                resultTracker.trackUpdate(newExceptionEvent, updatedExceptionEvent);
-                if (isReply(originalAttendee, updatedAttendee)) {
-                    schedulingHelper.trackReply(updatedExceptionEvent, originalSeriesMaster, originalAttendee, updatedAttendee);
-                }
-                /*
-                 * add change exception date to series master & track results
-                 */
-                resultTracker.rememberOriginalEvent(originalSeriesMaster);
-                addChangeExceptionDate(originalSeriesMaster, recurrenceId, false);
-                Event updatedMasterEvent = loadEventData(originalSeriesMaster.getId());
-                resultTracker.trackUpdate(originalSeriesMaster, updatedMasterEvent);
-                /*
-                 * reset alarm triggers for series master event and new change exception
-                 */
-                storage.getAlarmTriggerStorage().deleteTriggers(updatedMasterEvent.getId());
-                storage.getAlarmTriggerStorage().insertTriggers(updatedMasterEvent, seriesMasterAlarms);
-                storage.getAlarmTriggerStorage().deleteTriggers(updatedExceptionEvent.getId());
-                storage.getAlarmTriggerStorage().insertTriggers(updatedExceptionEvent, storage.getAlarmStorage().loadAlarms(updatedExceptionEvent));
+                return updateAttendee(originalExceptionEvent, originalExceptionAttendee, attendee);
             }
+            /*
+             * update for new change exception; prepare & insert a plain exception first, based on the original data from the master
+             */
+            Map<Integer, List<Alarm>> seriesMasterAlarms = storage.getAlarmStorage().loadAlarms(originalSeriesMaster);
+            Event newExceptionEvent = prepareException(originalSeriesMaster, recurrenceId);
+            Map<Integer, List<Alarm>> newExceptionAlarms = prepareExceptionAlarms(seriesMasterAlarms);
+            Check.quotaNotExceeded(storage, session);
+            storage.getEventStorage().insertEvent(newExceptionEvent);
+            storage.getAttendeeStorage().insertAttendees(newExceptionEvent.getId(), originalSeriesMaster.getAttendees());
+            storage.getAttachmentStorage().insertAttachments(session.getSession(), folder.getId(), newExceptionEvent.getId(), originalSeriesMaster.getAttachments());
+            storage.getConferenceStorage().insertConferences(newExceptionEvent.getId(), prepareConferences(originalSeriesMaster.getConferences()));
+            insertAlarms(newExceptionEvent, newExceptionAlarms, true);
+            newExceptionEvent = loadEventData(newExceptionEvent.getId());
+            resultTracker.trackCreation(newExceptionEvent, originalSeriesMaster);
+            /*
+             * perform the attendee update & track results
+             */
+            resultTracker.rememberOriginalEvent(newExceptionEvent);
+            Attendee attendeeUpdate = prepareAttendeeUpdate(newExceptionEvent, originalAttendee, attendee);
+            if (null != attendeeUpdate) {
+                storage.getAttendeeStorage().updateAttendee(newExceptionEvent.getId(), attendeeUpdate);
+            }
+            Event updatedExceptionEvent = loadEventData(newExceptionEvent.getId());
+            Attendee updatedAttendee = find(updatedExceptionEvent.getAttendees(), originalAttendee);
+            resultTracker.trackUpdate(newExceptionEvent, updatedExceptionEvent);
+            /*
+             * add change exception date to series master & track results
+             */
+            resultTracker.rememberOriginalEvent(originalSeriesMaster);
+            addChangeExceptionDate(originalSeriesMaster, recurrenceId, false);
+            Event updatedMasterEvent = loadEventData(originalSeriesMaster.getId());
+            resultTracker.trackUpdate(originalSeriesMaster, updatedMasterEvent);
+            /*
+             * reset alarm triggers for series master event and new change exception
+             */
+            storage.getAlarmTriggerStorage().deleteTriggers(updatedMasterEvent.getId());
+            storage.getAlarmTriggerStorage().insertTriggers(updatedMasterEvent, seriesMasterAlarms);
+            storage.getAlarmTriggerStorage().deleteTriggers(updatedExceptionEvent.getId());
+            storage.getAlarmTriggerStorage().insertTriggers(updatedExceptionEvent, storage.getAlarmStorage().loadAlarms(updatedExceptionEvent));
+            /*
+             * return attendee update
+             */
+            return Collections.singletonList(new AttendeeEventUpdate(updatedExceptionEvent, originalAttendee, updatedAttendee));
         } else if (isSeriesException(originalEvent)) {
             /*
              * update for existing change exception
              */
-            updateAttendee(originalEvent, originalAttendee, attendee);
+            return updateAttendee(originalEvent, originalAttendee, attendee);
         } else {
             /*
              * unsupported, otherwise
@@ -442,4 +529,12 @@ public class UpdateAttendeePerformer extends AbstractUpdatePerformer {
             requireCalendarPermission(folder, READ_FOLDER, NO_PERMISSIONS, NO_PERMISSIONS, DELETE_ALL_OBJECTS);
         }
     }
+
+    private Event optSeriesMaster(Event originalEvent, RecurrenceId recurrenceId) throws OXException {
+        if (null == recurrenceId) {
+            return isSeriesException(originalEvent) ? optEventData(originalEvent.getSeriesId()) : null;
+        }
+        return isSeriesMaster(originalEvent) ? originalEvent : optEventData(originalEvent.getSeriesId());
+    }
+
 }

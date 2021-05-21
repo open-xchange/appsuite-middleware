@@ -51,32 +51,26 @@ package com.openexchange.chronos.itip.json.action;
 
 import static com.openexchange.chronos.itip.json.action.Utils.convertToResult;
 import java.util.ArrayList;
-import java.util.LinkedList;
 import java.util.List;
-import java.util.Optional;
 import java.util.TimeZone;
 import org.json.JSONException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.chronos.Attendee;
-import com.openexchange.chronos.AttendeeField;
 import com.openexchange.chronos.Event;
-import com.openexchange.chronos.Organizer;
-import com.openexchange.chronos.common.CalendarUtils;
-import com.openexchange.chronos.common.DefaultCalendarObjectResource;
-import com.openexchange.chronos.common.IncomingSchedulingMessageBuilder;
-import com.openexchange.chronos.common.mapping.AttendeeMapper;
-import com.openexchange.chronos.exception.CalendarExceptionCodes;
-import com.openexchange.chronos.ical.ImportedCalendar;
+import com.openexchange.chronos.ParticipationStatus;
+import com.openexchange.chronos.scheduling.IncomingSchedulingMessage;
 import com.openexchange.chronos.scheduling.SchedulingBroker;
 import com.openexchange.chronos.scheduling.SchedulingMethod;
 import com.openexchange.chronos.scheduling.SchedulingSource;
+import com.openexchange.chronos.service.CalendarParameters;
 import com.openexchange.chronos.service.CalendarResult;
 import com.openexchange.chronos.service.CalendarSession;
 import com.openexchange.chronos.service.CreateResult;
 import com.openexchange.chronos.service.UpdateResult;
 import com.openexchange.exception.OXException;
-import com.openexchange.java.Strings;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
 
@@ -87,6 +81,8 @@ import com.openexchange.tools.servlet.AjaxExceptionCodes;
  * @since v7.10.4
  */
 public class IncomingSchedulingAction {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(IncomingSchedulingAction.class);
 
     private final ServiceLookup services;
     private final SchedulingMethod method;
@@ -104,20 +100,20 @@ public class IncomingSchedulingAction {
     }
 
     /**
-     * Gets a value indicating whether this instance can handle a calendar update
+     * Gets a value indicating whether this instance can handle a specific message or not
      *
-     * @param calendar The calendar with the update
+     * @param message The incoming message to get the method from
      * @return <code>true</code> if this instance can handle the update, <code>false</code> otherwise
      */
-    public boolean canPerform(ImportedCalendar calendar) {
-        return method.name().equalsIgnoreCase(calendar.getMethod());
+    public boolean canPerform(IncomingSchedulingMessage message) {
+        return method.equals(message.getMethod());
     }
 
     /**
      * Tries to apply the designated method by applying updates to the calendar.
      *
      * @param request The request
-     * @param calendar The calendar
+     * @param message The incoming message
      * @param session The session
      * @param tz The timezone for the user
      * @return Either an result for the client or
@@ -125,12 +121,14 @@ public class IncomingSchedulingAction {
      *         in the calendar doesn't match the expected method to handle
      * @throws OXException In case of an error while updating
      */
-    public AJAXRequestResult perform(AJAXRequestData request, ImportedCalendar calendar, CalendarSession session, TimeZone tz) throws OXException {
-        CalendarResult result = perform(request, calendar, session);
+    public AJAXRequestResult perform(AJAXRequestData request, IncomingSchedulingMessage message, CalendarSession session, TimeZone tz) throws OXException {
+        /*
+         * patch imported calendar & perform scheduling operation
+         */
+        CalendarResult result = perform(request, message, session);
         if (null == result) {
             return null;
         }
-
         /*
          * Transform results to align with expected API output
          */
@@ -153,109 +151,64 @@ public class IncomingSchedulingAction {
      * the corresponding update in the calendar.
      *
      * @param request The request to get the information from
+     * @param message The incoming message
      * @param session The session
      * @return A {@link CalendarResult} of the update or
      *         <code>null</code> to indicate that no processing has been performed
      * @throws OXException In case of error
      * @see <a href="https://tools.ietf.org/html/rfc5546">RFC 5546</a>
      */
-    private CalendarResult perform(AJAXRequestData request, ImportedCalendar calendar, CalendarSession session) throws OXException {
-        /*
-         * Build message and send to scheduling broker for processing
-         */
-        IncomingSchedulingMessageBuilder builder = IncomingSchedulingMessageBuilder.newBuilder();
-        builder.setMethod(method);
-        builder.setTargetUser(session.getUserId());
-        builder.setResource(new DefaultCalendarObjectResource(purifyEvents(calendar)));
-        builder.setSchedulingObject(new IncomingSchedulingMail(services, request, session.getSession()));
+    private CalendarResult perform(AJAXRequestData request, IncomingSchedulingMessage message, CalendarSession session) throws OXException {
+        setCalendarParameters(request, session);
 
         SchedulingBroker schedulingBroker = services.getServiceSafe(SchedulingBroker.class);
-        return schedulingBroker.handleIncomingScheduling(session, SchedulingSource.API, builder.build());
+        return schedulingBroker.handleIncomingScheduling(session, SchedulingSource.API, message, getAttendee(request, message));
     }
 
     /**
-     * Purifies the calendar events based on known client flaws that need to be treated before further
-     * processing.
+     * Set required calendar parameters for the further operations
      *
-     * @param calendar The calendar to process
-     * @return A list of purified events
-     * @throws OXException In case no events are found
+     * @param request The request
+     * @param session The calendar session to modify
      */
-    private static List<Event> purifyEvents(ImportedCalendar calendar) throws OXException {
-        if (null == calendar.getEvents() || calendar.getEvents().isEmpty()) {
-            throw CalendarExceptionCodes.UNEXPECTED_ERROR.create("There are no eventes to process.");
+    private void setCalendarParameters(AJAXRequestData request, CalendarSession session) {
+        if ("accept_and_ignore_conflicts".equalsIgnoreCase(request.getAction())) {
+            session.set(CalendarParameters.PARAMETER_CHECK_CONFLICTS, Boolean.FALSE);
         }
-        List<Event> events = CalendarUtils.sortSeriesMasterFirst(new LinkedList<>(calendar.getEvents()));
-        if (looksLikeMicrosoft(calendar)) {
-            /*
-             * Special handling for Microsoft behavior
-             */
-            ensureOrganizer(events);
-            ensureAtteendees(events);
-        }
-
-        return events;
     }
 
-    /**
-     * Adds (if at least present once) the organizer instance to all given events
-     *
-     * @param events The events to add the organizer to
-     */
-    private static void ensureOrganizer(List<Event> events) {
-        /*
-         * Check that the organizer value can and must be added to some events
-         */
-        if (1 == events.size()) {
-            return;
+    private Attendee getAttendee(AJAXRequestData request, IncomingSchedulingMessage message) {
+        if (SchedulingMethod.ADD.equals(message.getMethod()) || SchedulingMethod.REQUEST.equals(message.getMethod())) {
+            Attendee update = new Attendee();
+            update.setEntity(message.getTargetUser());
+            update.setPartStat(getPartStat(request.getAction()));
+            update.setComment(getComment(request));
+            return update;
         }
-        Optional<Event> organizerEvent = events.stream().filter(e -> null != e.getOrganizer()).findFirst();
-        if (false == organizerEvent.isPresent()) {
-            return;
-        }
-        /*
-         * Add organizer to events that have no organizer
-         */
-        Organizer organizer = organizerEvent.get().getOrganizer();
-        events.stream().filter(e -> null == e.getOrganizer()).forEach((e) -> e.setOrganizer(new Organizer(organizer)));
-    }
-    
-    /**
-     * Adds (if at least present once) attendees(s) to all given events
-     *
-     * @param events The events to add the attendee(s) to
-     * @throws OXException If attendees can't be copied
-     */
-    private static void ensureAtteendees(List<Event> events) throws OXException {
-        /*
-         * Check that the attendee value can and must be added to some events
-         */
-        if (1 == events.size()) {
-            return;
-        }
-        Optional<Event> attendeeEvent = events.stream().filter(e -> null != e.getAttendees() && false == e.getAttendees().isEmpty()).findFirst();
-        if (false == attendeeEvent.isPresent()) {
-            return;
-        }
-        /*
-         * Add attendees to events that have no attendees
-         */
-        List<Attendee> attendees = attendeeEvent.get().getAttendees();
-        List<Attendee> copy = AttendeeMapper.getInstance().copy(attendees, (AttendeeField[]) null);
-        events.stream().filter(e -> null == e.getAttendees()).forEach((e) -> e.setAttendees(copy));
+        return null;
     }
 
-    /**
-     * Gets a value indicating whether the imported calendar looks like it was
-     * generated by a Microsoft software or not
-     *
-     * @param calendar The imported calendar
-     * @return <code>true</code> if the calendar looks like it was generated with a Microsoft software,
-     *         <code>false</code> otherwise
-     */
-    private static boolean looksLikeMicrosoft(ImportedCalendar calendar) {
-        String property = calendar.getProdId();
-        return Strings.isNotEmpty(property) && Strings.toLowerCase(property).indexOf("microsoft") >= 0;
+    private static ParticipationStatus getPartStat(String action) {
+        switch (action.toLowerCase()) {
+            case "accept_and_ignore_conflicts":
+            case "accept":
+                return ParticipationStatus.ACCEPTED;
+            case "tentative":
+                return ParticipationStatus.TENTATIVE;
+            case "decline":
+                return ParticipationStatus.DECLINED;
+            default:
+                return null;
+        }
+    }
+
+    private static String getComment(AJAXRequestData request) {
+        try {
+            return request.getParameter("message", String.class);
+        } catch (OXException e) {
+            LOGGER.debug("Unable to get comment", e);
+        }
+        return null;
     }
 
 }

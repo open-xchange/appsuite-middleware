@@ -49,17 +49,25 @@
 
 package com.openexchange.ajax.chronos.itip;
 
+import static com.openexchange.ajax.chronos.itip.ITipAssertion.assertAttendeePartStat;
+import static com.openexchange.ajax.chronos.itip.ITipAssertion.assertEvents;
+import static com.openexchange.ajax.chronos.itip.ITipAssertion.assertSingleChange;
+import static com.openexchange.ajax.chronos.itip.ITipAssertion.assertSingleEvent;
+import static com.openexchange.ajax.chronos.itip.ITipUtil.constructBody;
 import static com.openexchange.ajax.chronos.itip.ITipUtil.receiveIMip;
+import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
 import java.util.List;
 import java.util.UUID;
 import org.junit.Test;
 import com.openexchange.ajax.chronos.factory.EventFactory;
 import com.openexchange.chronos.scheduling.SchedulingMethod;
+import com.openexchange.testing.httpclient.models.AnalysisChangeNewEvent;
 import com.openexchange.testing.httpclient.models.AnalyzeResponse;
 import com.openexchange.testing.httpclient.models.Attendee;
 import com.openexchange.testing.httpclient.models.CalendarUser;
@@ -112,6 +120,7 @@ public class ITipSeriesExceptionTest extends AbstractITipAnalyzeTest {
         String recurrenceId = allEvents.get(2).getRecurrenceId();
 
         EventData deltaEvent = prepareDeltaEvent(createdEvent);
+        replyingAttendee.setPartStat(PartStat.NEEDS_ACTION.getStatus());
         deltaEvent.getAttendees().add(replyingAttendee);
 
         UpdateEventBody body = getUpdateBody(deltaEvent);
@@ -136,35 +145,39 @@ public class ITipSeriesExceptionTest extends AbstractITipAnalyzeTest {
         AnalyzeResponse analyzeResponse = analyze(apiClientC2, iMip);
         assertNull("error during analysis: " + analyzeResponse.getError(), analyzeResponse.getCode());
         assertEquals("unexpected analysis number in response", 1, analyzeResponse.getData().size());
-        analyze(analyzeResponse, CustomConsumers.IGNORE);
+        analyze(analyzeResponse, CustomConsumers.ACTIONS);
 
-        //        XXX Use code below once the server can accept to single event occurrences
-//        AnalysisChangeNewEvent newEvent = assertSingleChange(analyzeResponse).getNewEvent();
-//        assertNotNull(newEvent);
-//        assertEquals(createdEvent.getUid(), newEvent.getUid());
-//        assertAttendeePartStat(newEvent.getAttendees(), replyingAttendee.getEmail(), PartStat.NEEDS_ACTION);
-//
-//        /*
-//         * reply with "accepted"
-//         */
-//        EventData attendeeEvent = assertSingleEvent(accept(apiClientC2, constructBody(iMip)), createdEvent.getUid());
-//        assertAttendeePartStat(attendeeEvent.getAttendees(), replyingAttendee.getEmail(), PartStat.ACCEPTED);
-//        rememberForCleanup(apiClientC2, attendeeEvent);
-//
-//        /*
-//         * Receive mail as organizer and check actions
-//         */
-//        MailData reply = receiveIMip(apiClient, replyingAttendee.getEmail(), summary, 0, SchedulingMethod.REPLY);
-//        rememberMail(reply);
-//        analyze(reply.getId());
-//
-//        /*
-//         * Take over accept and check in calendar
-//         */
-//        EventData event = assertSingleEvent(update(constructBody(reply)));
-//        rememberForCleanup(event);
-//        for (Attendee attendee : event.getAttendees()) {
-//            assertThat("Participant status is not correct.", PartStat.ACCEPTED.status, is(attendee.getPartStat()));
-//        }
+        AnalysisChangeNewEvent newEvent = assertSingleChange(analyzeResponse).getNewEvent();
+        assertNotNull(newEvent);
+        assertEquals(createdEvent.getUid(), newEvent.getUid());
+        assertAttendeePartStat(newEvent.getAttendees(), replyingAttendee.getEmail(), PartStat.NEEDS_ACTION);
+
+        /*
+         * reply with "accept"
+         */
+        EventData attendeeEvent = assertSingleEvent(accept(apiClientC2, constructBody(iMip), null), createdEvent.getUid());
+        assertAttendeePartStat(attendeeEvent.getAttendees(), replyingAttendee.getEmail(), PartStat.ACCEPTED);
+
+        /*
+         * Receive mail as organizer and check actions
+         */
+        MailData reply = receiveIMip(apiClient, replyingAttendee.getEmail(), summary, 1, SchedulingMethod.REPLY);
+        analyze(reply.getId());
+
+        /*
+         * Take over accept and check in calendar, expect master and one exception do be returned
+         */
+        for (EventData event : assertEvents(update(constructBody(reply)), createdEvent.getUid(), 2)) {
+            for (Attendee attendee : event.getAttendees()) {
+                assertThat("Participant status is not correct.", PartStat.ACCEPTED.status, is(attendee.getPartStat()));
+            }
+        }
+
+        /*
+         * TODO Add to another exception
+         */
+        /*
+         * TODO Add to series
+         */
     }
 }

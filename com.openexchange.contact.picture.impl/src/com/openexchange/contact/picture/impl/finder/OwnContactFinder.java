@@ -49,8 +49,10 @@
 
 package com.openexchange.contact.picture.impl.finder;
 
-import com.openexchange.contact.ContactService;
+import com.openexchange.contact.common.ContactsParameters;
 import com.openexchange.contact.picture.PictureSearchData;
+import com.openexchange.contact.provider.composition.IDBasedContactsAccess;
+import com.openexchange.contact.provider.composition.IDBasedContactsAccessFactory;
 import com.openexchange.contact.storage.ContactUserStorage;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contact.helpers.ContactField;
@@ -73,13 +75,13 @@ public class OwnContactFinder extends AbstractContactFinder {
 
     /**
      * Initializes a new {@link OwnContactFinder}.
-     * 
-     * @param contactService The {@link ContactService}
+     *
+     * @param idBasedContactsAccessFactory The {@link IDBasedContactsAccessFactory}
      * @param userService The {@link UserService}
      * @param contactUserStorage The {@link ContactUserStorage}
      */
-    public OwnContactFinder(ContactService contactService, UserService userService, ContactUserStorage contactUserStorage) {
-        super(contactService);
+    public OwnContactFinder(IDBasedContactsAccessFactory idBasedContactsAccessFactory, UserService userService, ContactUserStorage contactUserStorage) {
+        super(idBasedContactsAccessFactory);
         this.userService = userService;
         this.contactUserStorage = contactUserStorage;
     }
@@ -92,7 +94,13 @@ public class OwnContactFinder extends AbstractContactFinder {
             if (user.isGuest()) {
                 contact = contactUserStorage.getGuestContact(session.getContextId(), session.getUserId(), fields);
             } else {
-                contact = contactService.getUser(session, session.getUserId(), fields);
+                IDBasedContactsAccess contactsAccess = idBasedContactsAccessFactory.createAccess(session);
+                try {
+                    contactsAccess.set(ContactsParameters.PARAMETER_FIELDS, fields);
+                    contact = contactsAccess.getUserAccess().getUserContact(session.getUserId());
+                } finally {
+                    contactsAccess.finish();
+                }
             }
             return contact;
         }
@@ -101,7 +109,7 @@ public class OwnContactFinder extends AbstractContactFinder {
 
     /**
      * Checks if the own contact is a valid option for the search
-     * 
+     *
      * @param user The current user
      * @param data The search data
      * @return true if it is applicable, false otherwise

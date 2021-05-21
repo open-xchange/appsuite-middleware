@@ -49,9 +49,7 @@
 
 package com.openexchange.chronos.scheduling;
 
-import java.util.Optional;
 import com.openexchange.annotation.NonNull;
-import com.openexchange.chronos.Attachment;
 import com.openexchange.chronos.CalendarUser;
 import com.openexchange.exception.OXException;
 
@@ -71,15 +69,5 @@ public interface IncomingSchedulingObject {
      */
     @NonNull
     CalendarUser getOriginator() throws OXException;
-
-    /**
-     * Get an attachment for the supplied identifier that was received
-     * along the incoming scheduling change
-     * 
-     * @param attachmentIdentifier The attachment identifier. Can be e.g.
-     *            the URL of the attachment in the corresponding mail
-     * @return An optional that may contain the parsed attachment
-     */
-    Optional<Attachment> getAttachment(String attachmentIdentifier);
 
 }

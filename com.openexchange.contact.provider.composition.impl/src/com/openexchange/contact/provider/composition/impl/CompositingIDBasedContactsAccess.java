@@ -104,6 +104,7 @@ import com.openexchange.contact.provider.basic.BasicContactsProvider;
 import com.openexchange.contact.provider.basic.BasicSearchAware;
 import com.openexchange.contact.provider.basic.ContactsSettings;
 import com.openexchange.contact.provider.composition.IDBasedContactsAccess;
+import com.openexchange.contact.provider.composition.IDBasedUserAccess;
 import com.openexchange.contact.provider.composition.impl.idmangling.IDMangler;
 import com.openexchange.contact.provider.folder.AnnualDateFolderSearchAware;
 import com.openexchange.contact.provider.folder.FolderContactsAccess;
@@ -134,7 +135,7 @@ import com.openexchange.tools.session.ServerSessionAdapter;
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  * @since v7.10.5
  */
-public class CompositingIDBasedContactsAccess extends AbstractCompositingIDBasedContactsAccess implements IDBasedContactsAccess {
+public class CompositingIDBasedContactsAccess extends AbstractCompositingIDBasedContactsAccess implements IDBasedContactsAccess, IDBasedUserAccess {
 
     private static final Logger LOG = LoggerFactory.getLogger(CompositingIDBasedContactsAccess.class);
 
@@ -158,6 +159,11 @@ public class CompositingIDBasedContactsAccess extends AbstractCompositingIDBased
     @Override
     public List<OXException> getWarnings() {
         return warnings;
+    }
+
+    @Override
+    public IDBasedUserAccess getUserAccess() {
+        return this;
     }
 
     @Override
@@ -563,6 +569,46 @@ public class CompositingIDBasedContactsAccess extends AbstractCompositingIDBased
                 completionService.submit(() -> searchByAnnualDate(entry.getKey(), entry.getValue(), annualDateField, from, until));
             }
             return sortResults(collectContacts(completionService, folderIdsPerAccount.size()));
+        }
+    }
+
+    @Override
+    public List<Contact> getUserContacts(int[] userIds) throws OXException {
+        ContactsAccount account = getAccount(ContactsAccount.DEFAULT_ACCOUNT.getAccountId());
+        try {
+            return withUniqueIDs(getAccess(account, InternalContactsAccess.class).getUserContacts(userIds), account.getAccountId());
+        } catch (OXException e) {
+            throw withUniqueIDs(e, account.getAccountId());
+        }
+    }
+
+    @Override
+    public List<Contact> getUserContacts() throws OXException {
+        ContactsAccount account = getAccount(ContactsAccount.DEFAULT_ACCOUNT.getAccountId());
+        try {
+            return withUniqueIDs(getAccess(account, InternalContactsAccess.class).getUserContacts(), account.getAccountId());
+        } catch (OXException e) {
+            throw withUniqueIDs(e, account.getAccountId());
+        }
+    }
+
+    @Override
+    public List<Contact> searchUserContacts(ContactsSearchObject contactSearch) throws OXException {
+        ContactsAccount account = getAccount(ContactsAccount.DEFAULT_ACCOUNT.getAccountId());
+        try {
+            return withUniqueIDs(getAccess(account, InternalContactsAccess.class).searchUserContacts(contactSearch), account.getAccountId());
+        } catch (OXException e) {
+            throw withUniqueIDs(e, account.getAccountId());
+        }
+    }
+
+    @Override
+    public List<Contact> searchUserContacts(SearchTerm<?> searchTerm) throws OXException {
+        ContactsAccount account = getAccount(ContactsAccount.DEFAULT_ACCOUNT.getAccountId());
+        try {
+            return withUniqueIDs(getAccess(account, InternalContactsAccess.class).searchUserContacts(searchTerm), account.getAccountId());
+        } catch (OXException e) {
+            throw withUniqueIDs(e, account.getAccountId());
         }
     }
 

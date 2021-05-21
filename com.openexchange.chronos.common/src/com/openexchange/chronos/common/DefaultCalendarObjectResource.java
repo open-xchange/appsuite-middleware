@@ -72,7 +72,7 @@ import com.openexchange.chronos.RecurrenceId;
  */
 public class DefaultCalendarObjectResource implements CalendarObjectResource {
 
-    private final List<Event> events;
+    protected final List<Event> events;
 
     /**
      * Initializes a new {@link DefaultCalendarObjectResource} for a single event.

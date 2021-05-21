@@ -51,10 +51,15 @@ package com.openexchange.chronos.scheduling.impl.osgi;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import com.openexchange.chronos.ical.ICalService;
+import com.openexchange.chronos.itip.IncomingSchedulingMailFactory;
 import com.openexchange.chronos.scheduling.SchedulingBroker;
 import com.openexchange.chronos.scheduling.TransportProvider;
 import com.openexchange.chronos.scheduling.impl.SchedulingBrokerImpl;
+import com.openexchange.chronos.scheduling.impl.incoming.IncomingSchedulingMailFactoryImpl;
 import com.openexchange.config.ConfigurationService;
+import com.openexchange.context.ContextService;
+import com.openexchange.mail.api.crypto.CryptographicAwareMailAccessFactory;
 import com.openexchange.osgi.HousekeepingActivator;
 
 /**
@@ -71,7 +76,12 @@ public class SchedulingActivator extends HousekeepingActivator {
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class[] { ConfigurationService.class };
+        return new Class[] { ConfigurationService.class, ContextService.class, ICalService.class };
+    }
+
+    @Override
+    protected Class<?>[] getOptionalServices() {
+        return new Class[] { CryptographicAwareMailAccessFactory.class };
     }
 
     @Override
@@ -89,6 +99,11 @@ public class SchedulingActivator extends HousekeepingActivator {
          * Register broker as service
          */
         registerService(SchedulingBroker.class, broker);
+
+        /*
+         * Register factory
+         */
+        registerService(IncomingSchedulingMailFactory.class, new IncomingSchedulingMailFactoryImpl(this));
     }
 
     @Override

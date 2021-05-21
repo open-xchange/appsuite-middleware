@@ -50,14 +50,19 @@
 package com.openexchange.ajax.chronos.itip;
 
 import static com.openexchange.ajax.chronos.itip.ITipAssertion.assertAttendeePartStat;
+import static com.openexchange.ajax.chronos.itip.ITipAssertion.assertChanges;
+import static com.openexchange.ajax.chronos.itip.ITipAssertion.assertEvents;
 import static com.openexchange.ajax.chronos.itip.ITipAssertion.assertSingleChange;
 import static com.openexchange.ajax.chronos.itip.ITipAssertion.assertSingleDescription;
 import static com.openexchange.ajax.chronos.itip.ITipAssertion.assertSingleEvent;
+import static com.openexchange.ajax.chronos.itip.ITipUtil.acceptSummary;
 import static com.openexchange.ajax.chronos.itip.ITipUtil.constructBody;
 import static com.openexchange.ajax.chronos.itip.ITipUtil.receiveIMip;
+import static org.hamcrest.Matchers.empty;
 import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertThat;
@@ -68,10 +73,12 @@ import java.util.UUID;
 import org.junit.Test;
 import com.openexchange.ajax.chronos.factory.EventFactory;
 import com.openexchange.chronos.scheduling.SchedulingMethod;
+import com.openexchange.java.Strings;
 import com.openexchange.testing.httpclient.models.AnalysisChange;
 import com.openexchange.testing.httpclient.models.AnalysisChangeNewEvent;
 import com.openexchange.testing.httpclient.models.AnalyzeResponse;
 import com.openexchange.testing.httpclient.models.Attendee;
+import com.openexchange.testing.httpclient.models.CalendarResult;
 import com.openexchange.testing.httpclient.models.ChronosCalendarResultResponse;
 import com.openexchange.testing.httpclient.models.ChronosMultipleCalendarResultResponse;
 import com.openexchange.testing.httpclient.models.DeleteEventBody;
@@ -95,7 +102,7 @@ public class ITipSeriesTest extends AbstractITipAnalyzeTest {
 
     private String summary;
 
-    /** User B from context 2*/
+    /** User B from context 2 */
     private Attendee replyingAttendee;
 
     @Override
@@ -110,7 +117,7 @@ public class ITipSeriesTest extends AbstractITipAnalyzeTest {
         /*
          * Receive mail as attendee
          */
-        MailData inviteMail = receiveIMip(apiClientC2, userResponseC1.getData().getEmail1(), summary, 0, SchedulingMethod.REQUEST);
+        MailData inviteMail = receiveIMip(apiClientC2, testUser.getLogin(), summary, 0, SchedulingMethod.REQUEST);
         AnalysisChangeNewEvent newEvent = assertSingleChange(analyze(apiClientC2, inviteMail)).getNewEvent();
         assertNotNull(newEvent);
         assertEquals(createdEvent.getUid(), newEvent.getUid());
@@ -166,15 +173,16 @@ public class ITipSeriesTest extends AbstractITipAnalyzeTest {
         assertThat(result.getData().get(0).getUpdated().get(0).getDeleteExceptionDates().get(0), is(recurrenceId));
 
         /*
-         * Receive deletion as attendee
+         * Receive deletion as attendee and delete
          */
-        MailData iMip = receiveIMip(apiClientC2, userResponseC1.getData().getEmail1(), "Appointment canceled: " + summary, 1, SchedulingMethod.CANCEL);
+        MailData iMip = receiveIMip(apiClientC2, testUser.getLogin(), "Appointment canceled: " + summary, 1, SchedulingMethod.CANCEL);
         AnalyzeResponse analyzeResponse = analyze(apiClientC2, iMip);
         analyze(analyzeResponse, CustomConsumers.CANCEL);
+        cancel(apiClientC2, constructBody(iMip), null, true);
     }
 
     @Test
-    public void testChangeSingleOccurrence() throws Exception {
+    public void testChangeSingleOccurrenceAndSplit() throws Exception {
         /*
          * Update a single occurrence as organizer
          */
@@ -186,28 +194,124 @@ public class ITipSeriesTest extends AbstractITipAnalyzeTest {
 
         UpdateEventBody body = getUpdateBody(deltaEvent);
         ChronosCalendarResultResponse result = chronosApi.updateEvent(defaultFolderId, createdEvent.getId(), now(), body, recurrenceId, null, null, null, null, null, null, null, null, null, null);
-
         /*
          * Check result
          */
         assertNotNull(result);
-        assertNull(result.getError());
-        assertNotNull(result.getData());
-        assertNotNull(result.getData().getCreated());
-        assertTrue(result.getData().getCreated().size() == 1);
-        assertFalse(createdEvent.getId().equals(result.getData().getCreated().get(0).getId()));
-        assertTrue(createdEvent.getId().equals(result.getData().getCreated().get(0).getSeriesId()));
-
+        CalendarResult calendarResult = checkResponse(result.getError(), result.getErrorDesc(), result.getData());
+        assertNotNull(calendarResult.getCreated());
+        assertTrue(calendarResult.getCreated().size() == 1);
+        assertTrue(calendarResult.getUpdated().size() == 1);
+        assertFalse(createdEvent.getId().equals(calendarResult.getCreated().get(0).getId()));
+        assertTrue(createdEvent.getId().equals(calendarResult.getCreated().get(0).getSeriesId()));
+        String exceptionId = calendarResult.getCreated().get(0).getId();
+        createdEvent = calendarResult.getUpdated().get(0);
         /*
-         * Receive update as attendee
+         * Receive update as attendee, no rescheduling
          */
-        MailData iMip = receiveIMip(apiClientC2, userResponseC1.getData().getEmail1(), summary, 1, SchedulingMethod.REQUEST);
+        MailData iMip = receiveIMip(apiClientC2, testUser.getLogin(), summary, 1, SchedulingMethod.REQUEST);
         AnalyzeResponse analyzeResponse = analyze(apiClientC2, iMip);
-        AnalysisChangeNewEvent newEvent = assertSingleChange(analyzeResponse).getNewEvent();
+        AnalysisChange change = assertSingleChange(analyzeResponse);
+        AnalysisChangeNewEvent newEvent = change.getNewEvent();
         assertNotNull(newEvent);
         assertAttendeePartStat(newEvent.getAttendees(), replyingAttendee.getEmail(), PartStat.ACCEPTED.getStatus());
         analyze(analyzeResponse, CustomConsumers.ALL);
-        AnalysisChange change = assertSingleChange(analyzeResponse);
         assertSingleDescription(change, "The appointment description has changed");
+        /*
+         * Tentative accept for attendee and check in calendar
+         */
+        tentative(apiClientC2, constructBody(iMip), null);
+        EventData attendeeMaster = eventManagerC2.getEvent(null, change.getCurrentEvent().getSeriesId());
+        assertTrue("No exception", attendeeMaster.getChangeExceptionDates().size() == 1);
+        assertAttendeePartStat(attendeeMaster.getAttendees(), replyingAttendee.getEmail(), PartStat.ACCEPTED.getStatus());
+        EventData attendeeException = eventManagerC2.getRecurringEvent(null, attendeeMaster.getId(), attendeeMaster.getChangeExceptionDates().get(0), false);
+        assertAttendeePartStat(attendeeException.getAttendees(), replyingAttendee.getEmail(), PartStat.TENTATIVE.getStatus());
+        /*
+         * Update calendar object with the tentative accepted event as organizer
+         */
+        MailData reply = receiveIMip(apiClient, replyingAttendee.getEmail(), summary, 1, SchedulingMethod.REPLY);
+        assertEvents(update(constructBody(reply)), createdEvent.getUid(), 2);
+        EventResponse eventResponse = chronosApi.getEvent(exceptionId, createdEvent.getFolder(), null, null, null);
+        assertNull(eventResponse.getError(), eventResponse.getError());
+        assertAttendeePartStat(eventResponse.getData().getAttendees(), replyingAttendee.getEmail(), PartStat.TENTATIVE.getStatus());
+        /*
+         * Split series by changing location and summary at fifth occurrence
+         */
+        recurrenceId = allEvents.get(5).getRecurrenceId();
+        String location = "Olpe";
+        String updatedSummary = this.getClass().getName() + " " + UUID.randomUUID().toString();
+        deltaEvent = prepareDeltaEvent(createdEvent);
+        deltaEvent.setLocation(location);
+        deltaEvent.setSummary(updatedSummary);
+        body = getUpdateBody(deltaEvent);
+        result = chronosApi.updateEvent(defaultFolderId, createdEvent.getId(), now(), body, recurrenceId, THIS_AND_FUTURE, null, null, null, null, null, null, null, null, null);
+        /*
+         * Check result
+         */
+        assertNotNull(result);
+        calendarResult = checkResponse(result.getError(), result.getErrorDesc(), result.getData());
+        assertNotNull(calendarResult.getCreated());
+        assertTrue(calendarResult.getCreated().size() == 1);
+        assertFalse(createdEvent.getUid().equals(calendarResult.getCreated().get(0).getUid()));
+        assertTrue(calendarResult.getUpdated().size() == 2);
+        assertTrue(createdEvent.getUid().equals(calendarResult.getUpdated().get(0).getUid()) || createdEvent.getUid().equals(calendarResult.getUpdated().get(1).getUid()));
+        createdEvent = eventManager.getEvent(createdEvent.getFolder(), createdEvent.getSeriesId());
+        assertThat("Should have no exception", createdEvent.getChangeExceptionDates(), is(empty()));
+        /*
+         * Get mails as attendee
+         * a) Update with existing UID of event, updated summary
+         * b) Invitation to detached series with the existing change exception, old summary
+         */
+        /*--------- a) --------*/
+        /*
+         * Get update to existing event as attendee and decline
+         */
+        MailData updatedSeriersIMip = receiveIMip(apiClientC2, testUser.getLogin(), updatedSummary, 1, SchedulingMethod.REQUEST);
+        analyzeResponse = analyze(apiClientC2, updatedSeriersIMip);
+        change = assertSingleChange(analyzeResponse);
+        AnalysisChangeNewEvent updatedEvent = change.getNewEvent();
+        assertNotNull(updatedEvent);
+        assertAttendeePartStat(updatedEvent.getAttendees(), replyingAttendee.getEmail(), PartStat.ACCEPTED.getStatus());
+        assertEquals("Updated series must have the same UID as before", createdEvent.getUid(), updatedEvent.getUid());
+        analyze(analyzeResponse, CustomConsumers.ACTIONS);
+        ITipAssertion.assertMultipleDescription(change, "recurrence rule has changed", "appointment was rescheduled", "new subject", "takes place in a new location");
+        String updatedEventSeriesId = assertSingleEvent(decline(apiClientC2, constructBody(updatedSeriersIMip), null)).getSeriesId();
+        assertTrue(Strings.isNotEmpty(updatedEventSeriesId));
+        assertTrue(attendeeMaster.getSeriesId().equals(updatedEventSeriesId));
+        /*
+         * Check event in attendees calendar
+         */
+        EventData attendeeSeriesMaster = eventManagerC2.getEvent(null, updatedEventSeriesId);
+        assertAttendeePartStat(attendeeSeriesMaster.getAttendees(), replyingAttendee.getEmail(), PartStat.DECLINED.getStatus());
+        assertAttendeePartStat(attendeeSeriesMaster.getAttendees(), testUser.getLogin(), PartStat.ACCEPTED.getStatus());
+        assertThat(attendeeSeriesMaster.getChangeExceptionDates(), is(empty())); // TODO BUG?!
+        /*
+         * Check reply in organizers inbox
+         */
+        reply = receiveIMip(apiClient, replyingAttendee.getEmail(), updatedSummary, 1, SchedulingMethod.REPLY);
+        analyze(reply.getId());
+
+        /*--------- b) --------*/
+        /*
+         * Get invitation to new series, wit new UID and a existing change exception. Expect unchanged part stat
+         */
+        MailData newSeriersIMip = receiveIMip(apiClientC2, testUser.getLogin(), summary, 1, SchedulingMethod.REQUEST);
+        newEvent = assertChanges(analyze(apiClientC2, newSeriersIMip), 2, 0).getNewEvent();
+        assertNotNull(newEvent);
+        assertNotEquals("New series must NOT have the same UID as before", createdEvent.getUid(), newEvent.getUid());
+        assertAttendeePartStat(newEvent.getAttendees(), replyingAttendee.getEmail(), null == newEvent.getRrule() ? PartStat.TENTATIVE.getStatus() : PartStat.ACCEPTED.getStatus());
+
+        /*
+         * Accept and check that master and exception are accepted
+         */
+        for (EventData attendeeEvent : ITipAssertion.assertEvents(accept(apiClientC2, constructBody(newSeriersIMip), null), newEvent.getUid(), 2)) {
+            assertAttendeePartStat(attendeeEvent.getAttendees(), replyingAttendee.getEmail(), PartStat.ACCEPTED.status);
+        }
+
+        /*
+         * Check reply in organizers inbox
+         */
+        reply = receiveIMip(apiClient, replyingAttendee.getEmail(), acceptSummary(replyingAttendee.getCn(), summary), 1, SchedulingMethod.REPLY);
+        analyze(reply.getId());
     }
 }

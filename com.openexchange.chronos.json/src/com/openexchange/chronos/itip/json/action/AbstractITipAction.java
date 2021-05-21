@@ -49,7 +49,6 @@
 
 package com.openexchange.chronos.itip.json.action;
 
-import static com.openexchange.chronos.itip.json.action.Utils.getIcalFromMail;
 import static com.openexchange.chronos.itip.json.action.Utils.initCalendarSession;
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
@@ -65,12 +64,11 @@ import com.google.common.collect.ImmutableSet;
 import com.openexchange.ajax.requesthandler.AJAXActionService;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
-import com.openexchange.chronos.Calendar;
-import com.openexchange.chronos.ical.ICalParameters;
-import com.openexchange.chronos.ical.ICalService;
-import com.openexchange.chronos.ical.ImportedCalendar;
 import com.openexchange.chronos.itip.ITipAnalysis;
 import com.openexchange.chronos.itip.ITipAnalyzerService;
+import com.openexchange.chronos.itip.IncomingSchedulingMailData;
+import com.openexchange.chronos.itip.IncomingSchedulingMailFactory;
+import com.openexchange.chronos.scheduling.IncomingSchedulingMessage;
 import com.openexchange.chronos.scheduling.SchedulingMethod;
 import com.openexchange.chronos.service.CalendarSession;
 import com.openexchange.config.ConfigurationService;
@@ -116,8 +114,10 @@ public abstract class AbstractITipAction implements AJAXActionService {
         this.services = services;
         this.analyzerListing = analyzerListing;
         ImmutableSet.Builder<IncomingSchedulingAction> builder = ImmutableSet.builder();
-        builder.add(new IncomingSchedulingAction(SchedulingMethod.REPLY, services));
+        builder.add(new IncomingSchedulingAction(SchedulingMethod.ADD, services));
         builder.add(new IncomingSchedulingAction(SchedulingMethod.CANCEL, services));
+        builder.add(new IncomingSchedulingAction(SchedulingMethod.REPLY, services));
+        builder.add(new IncomingSchedulingAction(SchedulingMethod.REQUEST, services));
         this.schedulingActions = builder.build();
     }
 
@@ -234,13 +234,16 @@ public abstract class AbstractITipAction implements AJAXActionService {
         if (ITipActionFactory.ANALYZE.equals(requestData.getAction())) {
             return null;
         }
-        if (false == isLegacyScheduling()) {
-            CalendarSession calendarSession = Utils.initCalendarSession(services, session);
-            ImportedCalendar calendar = getCalendar(requestData, calendarSession);
-            for (IncomingSchedulingAction action : schedulingActions) {
-                if (action.canPerform(calendar)) {
-                    return action.perform(requestData, calendar, calendarSession, Utils.getTimeZone(requestData, session));
-                }
+        if (isLegacyScheduling()) {
+            return null;
+        }
+
+        CalendarSession calendarSession = Utils.initCalendarSession(services, session);
+        IncomingSchedulingMailFactory factory = services.getServiceSafe(IncomingSchedulingMailFactory.class);
+        IncomingSchedulingMessage message = factory.createPatched(calendarSession, IncomingSchedulingMailData.fromRequest(requestData));
+        for (IncomingSchedulingAction action : schedulingActions) {
+            if (action.canPerform(message)) {
+                return action.perform(requestData, message, calendarSession, Utils.getTimeZone(requestData, session));
             }
         }
         return null;
@@ -251,23 +254,4 @@ public abstract class AbstractITipAction implements AJAXActionService {
         return null == configurationService || configurationService.getBoolProperty("com.openexchange.calendar.useLegacyScheduling", false);
     }
 
-    /**
-     * Get the iCAL file from the mail as-is and parses it into an {@link Calendar} object
-     *
-     * @param request The request
-     * @param session The session
-     * @return A {@link Calendar} containing the iCAL from the mail
-     * @throws OXException If service is missing, iCAL can't be obtained or importing fails
-     */
-    private ImportedCalendar getCalendar(AJAXRequestData request, CalendarSession session) throws OXException {
-        InputStream iCal = null;
-        try {
-            iCal = getIcalFromMail(session.getSession(), request, services.getServiceSafe(ConversionService.class));
-            ICalService iCalService = services.getServiceSafe(ICalService.class);
-            ICalParameters calParameters = iCalService.initParameters();
-            return iCalService.importICal(iCal, calParameters);
-        } finally {
-            Streams.close(iCal);
-        }
-    }
 }

@@ -131,6 +131,8 @@ public class ITipRequestTests extends AbstractITipTest {
 
     private String uniqueSummary;
 
+    private EventData createEvent;
+
     @Override
     public void setUp() throws Exception {
         super.setUp();
@@ -160,7 +162,7 @@ public class ITipRequestTests extends AbstractITipTest {
         event.setSummary(uniqueSummary);
 
         /* Create event as user B */
-        eventManagerC2.createEvent(event, true);
+        createEvent = eventManagerC2.createEvent(event, true);
 
         mailData = receiveIMip(apiClient, organizer.getEmail(), uniqueSummary, 0, SchedulingMethod.REQUEST);
     }
@@ -205,6 +207,13 @@ public class ITipRequestTests extends AbstractITipTest {
         assertThat("Only one object should have been handled", Integer.valueOf(iTipReply.getEvents().size()), is(Integer.valueOf(1)));
         Event replyEvent = iTipReply.getEvents().get(0);
         assertAttendeePartStat(replyEvent.getAttendees(), attendee.getEmail(), partStat);
+        
+        /*
+         * Apply changes and validate again
+         */
+        update(apiClientC2, constructBody(replyMail));
+        EventData organizerEvent = eventManagerC2.getEvent(createEvent.getFolder(), createEvent.getId());
+        assertAttendeePartStat(organizerEvent.getAttendees(), attendee.getEmail(), partStat.getValue());
     }
 
 }

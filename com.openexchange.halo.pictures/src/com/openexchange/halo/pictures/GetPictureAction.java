@@ -56,9 +56,7 @@ import com.openexchange.ajax.requesthandler.DispatcherNotes;
 import com.openexchange.contact.picture.ContactPictureService;
 import com.openexchange.contact.picture.PictureSearchData;
 import com.openexchange.exception.OXException;
-import com.openexchange.groupware.container.Contact;
 import com.openexchange.halo.ContactHalo;
-import com.openexchange.java.Strings;
 import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.tools.session.ServerSession;
@@ -90,61 +88,55 @@ public class GetPictureAction extends AbstractGetPictureAction {
             throw ServiceExceptionCode.absentService(ContactHalo.class);
         }
 
-        Contact contact = new Contact();
-        boolean hadCriterium = false;
+        Integer userId = null;
+        String objectId = null;
+        String folderId = null;
         ArrayList<String> emails = new ArrayList<>(3);
+        boolean hadCriterium = false;
         if (req.isSet("internal_userid")) {
             hadCriterium = true;
-            contact.setInternalUserId(req.getIntParameter("internal_userid"));
+            userId = I(req.getIntParameter("internal_userid"));
         } else if (req.isSet("userid")) {
             hadCriterium = true;
-            contact.setInternalUserId(req.getIntParameter("userid"));
+            userId = I(req.getIntParameter("userid"));
         } else if (req.isSet("user_id")) {
             hadCriterium = true;
-            contact.setInternalUserId(req.getIntParameter("user_id"));
+            userId = I(req.getIntParameter("user_id"));
         }
 
         if (req.isSet("id") && !hadCriterium) {
-            int id = Strings.parsePositiveInt(req.getParameter("id"));
-            if (id > 0) {
-                contact.setObjectID(req.getIntParameter("id"));
-            }
-
+            objectId = req.getParameter("id");
             if (req.isSet("folder")) {
                 hadCriterium = true;
-                contact.setParentFolderID(req.getIntParameter("folder"));
+                folderId = req.getParameter("folder");
             }
         }
 
         if (req.isSet("email")) {
             hadCriterium = true;
-            contact.setEmail1(req.getParameter("email"));
-            emails.add(contact.getEmail1());
+            emails.add(req.getParameter("email"));
         } else if (req.isSet("email1")) {
             hadCriterium = true;
-            contact.setEmail1(req.getParameter("email1"));
-            emails.add(contact.getEmail1());
+            emails.add(req.getParameter("email1"));
         }
 
         if (req.isSet("email2")) {
             hadCriterium = true;
-            contact.setEmail2(req.getParameter("email2"));
-            emails.add(contact.getEmail2());
+            emails.add(req.getParameter("email2"));
         }
 
         if (req.isSet("email3")) {
             hadCriterium = true;
-            contact.setEmail3(req.getParameter("email3"));
-            emails.add(contact.getEmail3());
+            emails.add(req.getParameter("email3"));
         }
 
         if (!hadCriterium && eTagOnly) {
             return null;
         }
         String accountId = req.getParameter("account_id");
-        
 
-        PictureSearchData data = new PictureSearchData(I(contact.getInternalUserId()), accountId, I(contact.getParentFolderID()), I(contact.getObjectID()), emails);
+
+        PictureSearchData data = new PictureSearchData(userId, accountId, folderId, objectId, emails);
         try {
             if (eTagOnly) {
                 return (V) services.getServiceSafe(ContactPictureService.class).getETag(session, data);

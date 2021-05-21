@@ -316,6 +316,30 @@ public class InternalContactsAccess implements com.openexchange.contact.provider
     }
 
     @Override
+    public List<Contact> getUserContacts(int[] userIds) throws OXException {
+        decorateSessionWithReadOnlyConnection();
+        return iterateContacts(getContactService().getUsers(session.getSession(), userIds, getFields()));
+    }
+
+    @Override
+    public List<Contact> getUserContacts() throws OXException {
+        decorateSessionWithReadOnlyConnection();
+        return iterateContacts(getContactService().getAllUsers(session.getSession(), getFields(), getSortOptions()));
+    }
+
+    @Override
+    public List<Contact> searchUserContacts(ContactsSearchObject contactSearch) throws OXException {
+        decorateSessionWithReadOnlyConnection();
+        return iterateContacts(getContactService().searchUsers(session.getSession(), convert(contactSearch), getFields(), getSortOptions()));
+    }
+
+    @Override
+    public List<Contact> searchUserContacts(SearchTerm<?> searchTerm) throws OXException {
+        decorateSessionWithReadOnlyConnection();
+        return iterateContacts(getContactService().searchUsers(session.getSession(), searchTerm, getFields(), getSortOptions()));
+    }
+
+    @Override
     public boolean supports(String folderId, ContactField... fields) throws OXException {
         decorateSessionWithReadOnlyConnection();
         return getContactService().supports(session.getSession(), folderId, fields);
@@ -819,6 +843,7 @@ public class InternalContactsAccess implements com.openexchange.contact.provider
         cso.setEmailAutoComplete(contactSearch.isEmailAutoComplete());
         cso.setOrSearch(contactSearch.isOrSearch());
         cso.setExactMatch(contactSearch.isExactMatch());
+        cso.setHasImage(contactSearch.isHasImage());
         cso.setSurname(contactSearch.getSurname());
         cso.setDisplayName(contactSearch.getDisplayName());
         cso.setGivenName(contactSearch.getGivenName());

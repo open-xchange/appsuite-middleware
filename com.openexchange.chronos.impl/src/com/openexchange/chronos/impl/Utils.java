@@ -664,25 +664,6 @@ public class Utils {
     }
 
     /**
-     * Get the calendar folder to use based on the first event obtained from the scheduled resource provided by the message
-     *
-     * @param session The session to use
-     * @param storage The storage to lookup the event from
-     * @param uid The UID of the event to get the folder for
-     * @param recurrenceId The recurrence identifier of the event, can be <code>null</code>
-     * @param calendarUserId The identifier of the calendar user the unique identifier should be resolved for
-     * @return The {@link CalendarFolder}
-     * @throws OXException If folder can't be determined or is not visible for the user
-     */
-    public static CalendarFolder getCalendarFolder(CalendarSession session, CalendarStorage storage, String uid, RecurrenceId recurrenceId, int calendarUserId) throws OXException {
-        EventID eventID = resolveEventId(session, storage, uid, recurrenceId, calendarUserId);
-        if (Strings.isEmpty(eventID.getFolderID())) {
-            throw CalendarExceptionCodes.FOLDER_NOT_FOUND.create();
-        }
-        return getFolder(session, eventID.getFolderID(), true);
-    }
-
-    /**
      * Gets a value indicating whether a specific event is actually present in the supplied folder. Based on the folder type, the
      * event's public folder identifier or the attendee's personal calendar folder is checked, as well as the attendee's <i>hidden</i>
      * marker.
@@ -895,6 +876,7 @@ public class Utils {
      * @param originalAttendee The original attendee
      * @param updatedAttendee The updated attendee
      * @return <code>true</code> if the changed properties represent a reply, <code>false</code>, otherwise
+     * @throws OXException In case field mapping is not found
      * @see <a href="https://tools.ietf.org/html/rfc6638#section-3.2.2.3">RFC 6638, section 3.2.2.3</a>
      */
     public static boolean isReply(Attendee originalAttendee, Attendee updatedAttendee) throws OXException {
@@ -904,6 +886,9 @@ public class Utils {
         if (null == updatedAttendee) {
             return true;
         }
+        if (false == isTrackableReply(updatedAttendee)) {
+            return false;
+        }
         return false == AttendeeMapper.getInstance().get(AttendeeField.PARTSTAT).equals(originalAttendee, updatedAttendee) ||
             false == AttendeeMapper.getInstance().get(AttendeeField.COMMENT).equals(originalAttendee, updatedAttendee);
     }
@@ -912,15 +897,49 @@ public class Utils {
      * Gets a value indicating whether the applied changes represent an attendee reply of a specific calendar user for the associated
      * calendar object resource or not, depending on the modified attendee fields.
      *
+     * @param attendeeUpdates The attendee updates to check
+     * @param calendarUser The calendar user to check the reply for
      * @return <code>true</code> if the underlying calendar resource is replied to along with the update, <code>false</code>, otherwise
      */
     public static boolean isReply(CollectionUpdate<Attendee, AttendeeField> attendeeUpdates, CalendarUser calendarUser) {
         for (ItemUpdate<Attendee, AttendeeField> itemUpdate : attendeeUpdates.getUpdatedItems()) {
             if (matches(itemUpdate.getOriginal(), calendarUser)) {
-                return itemUpdate.containsAnyChangeOf(REPLY_FIELDS);
+                if (itemUpdate.containsAnyChangeOf(REPLY_FIELDS) && isTrackableReply(itemUpdate.getUpdate())) {
+                    return true;
+                }
             }
         }
         return false;
+    }
+
+    /**
+     * Gets a value indicating whether one of the applied changes represent an attendee reply of a specific calendar user for the associated
+     * calendar object resource or not, depending on the modified attendee fields.
+     * 
+     * @param eventUpdates The event updates to check
+     * @param calendarUser The calendar user to check the reply for
+     * @return <code>true</code> if the underlying calendar resource is replied to along with the update, <code>false</code>, otherwise
+     */
+    public static boolean isReply(List<? extends EventUpdate> eventUpdates, CalendarUser calendarUser) {
+        if (null != eventUpdates && 0 < eventUpdates.size()) {
+            for (EventUpdate eventUpdate : eventUpdates) {
+                if (isReply(eventUpdate.getAttendeeUpdates(), calendarUser)) {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
+    /**
+     * Gets a value indicating whether the participant status of the attendee can
+     * be tracked or not.
+     *
+     * @param attendee The attendee to check
+     * @return <code>true</code> if the status can be tracked, <code>false</code> otherwise
+     */
+    private static boolean isTrackableReply(Attendee attendee) {
+        return false == ParticipationStatus.NEEDS_ACTION.matches(attendee.getPartStat());
     }
 
     /**
@@ -942,6 +961,28 @@ public class Utils {
         }
         if (0 < eventUpdate.getAttendeeUpdates().getAddedItems().size() || 0 < eventUpdate.getAttendeeUpdates().getRemovedItems().size()) {
             return true; // attendee lineup changed
+        }
+        return false;
+    }
+
+    /**
+     * Gets a value indicating whether at least one of the supplied event updates represents a <i>re-scheduling</i> of the calendar object
+     * resource or not, depending on the modified event fields.
+     * <p/>
+     * Besides changes to an event's recurrence, start- or end-time, this also includes further important event properties, or changes
+     * in the attendee line-up.
+     *
+     * @param eventUpdates The event updates to check
+     * @return <code>true</code> if one of the updated events is considered as re-scheduled, <code>false</code>, otherwise
+     * @see #RESCHEDULE_FIELDS
+     */
+    public static boolean isReschedule(List<? extends EventUpdate> eventUpdates) {
+        if (null != eventUpdates && 0 < eventUpdates.size()) {
+            for (EventUpdate eventUpdate : eventUpdates) {
+                if (isReschedule(eventUpdate)) {
+                    return true;
+                }
+            }
         }
         return false;
     }
@@ -1638,7 +1679,7 @@ public class Utils {
         Organizer organizer;
         if (null != organizerData) {
             organizer = session.getEntityResolver().prepare(organizerData, CalendarUserType.INDIVIDUAL, resolvableEntities);
-            if (0 < organizer.getEntity()) {
+            if (isInternal(organizer, CalendarUserType.INDIVIDUAL)) {
                 /*
                  * internal organizer must match the actual calendar user if specified
                  */

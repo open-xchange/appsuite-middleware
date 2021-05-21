@@ -123,8 +123,8 @@ public class GetAction implements ETagAwareAJAXActionService, LastModifiedAwareA
         if (null == requestData) {
             throw AjaxExceptionCodes.BAD_REQUEST.create();
         }
-        Integer contactId = requestData.getParameter(CONTACT.getParameter(), Integer.class, true);
-        Integer folderId = requestData.getParameter(CONTACT_FOLDER.getParameter(), Integer.class, true);
+        String contactId = requestData.getParameter(CONTACT.getParameter(), String.class, true);
+        String folderId = requestData.getParameter(CONTACT_FOLDER.getParameter(), String.class, true);
         if (folderId == null && contactId != null) {
             throw AjaxExceptionCodes.MISSING_PARAMETER.create(CONTACT_FOLDER.getParameter());
         }

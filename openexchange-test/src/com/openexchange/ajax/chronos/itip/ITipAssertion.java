@@ -56,6 +56,7 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 import java.util.LinkedList;
 import java.util.List;
 import com.openexchange.ajax.chronos.itip.AbstractITipTest.PartStat;
@@ -87,10 +88,10 @@ public class ITipAssertion {
         assertNull("error during analysis: " + analyzeResponse.getError(), analyzeResponse.getCode());
         assertEquals("unexpected analysis number in response", 1, analyzeResponse.getData().size());
         Analysis analysis = analyzeResponse.getData().get(0);
-        assertEquals("unexpected number of changes in analysis", 1, analysis.getChanges().size());
+        assertEquals("unexpected number of changes in analysis. Changes: " + analysis.getChanges().toString(), 1, analysis.getChanges().size());
         return analysis.getChanges().get(0);
     }
-    
+
     /**
      * Asserts that only one analyze with exact one change was provided in the response
      *
@@ -200,9 +201,9 @@ public class ITipAssertion {
      * @return The {@link EventData} of the handled event
      */
     public static List<EventData> assertEvents(ActionResponse actionResponse, String uid, int size) {
-        List<EventData> events = new LinkedList<>();
         assertNotNull(actionResponse.getData());
         assertThat("Only one object should have been handled", Integer.valueOf(actionResponse.getData().size()), is(I(size)));
+        List<EventData> events = new LinkedList<>();
         for (EventData eventData : actionResponse.getData()) {
             if (null != uid) {
                 assertEquals(uid, eventData.getUid());
@@ -221,6 +222,24 @@ public class ITipAssertion {
     public static void assertSingleDescription(AnalysisChange change, String descriptionToMatch) {
         assertTrue(change.getDiffDescription().size() == 1);
         assertTrue("Description does not contain expected update: (" + change.getDiffDescription().get(0) + ")", change.getDiffDescription().get(0).contains(descriptionToMatch));
+    }
+
+    /**
+     * Asserts that a single description is given
+     *
+     * @param change The change to check
+     * @param descriptionsToMatch The strings that must be part of the change description
+     */
+    public static void assertMultipleDescription(AnalysisChange change, String... descriptionsToMatch) {
+        assertTrue(change.getDiffDescription().size() == descriptionsToMatch.length);
+        Outter: for (String desc : descriptionsToMatch) {
+            for (String diff : change.getDiffDescription()) {
+                if (diff.contains(desc)) {
+                    break Outter;
+                }
+            }
+            fail("Unable to find desired description \"" + desc + "\" in: " + change.getDiffDescription());
+        }
     }
 
 }

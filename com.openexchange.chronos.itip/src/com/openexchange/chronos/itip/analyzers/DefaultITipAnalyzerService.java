@@ -51,7 +51,8 @@ package com.openexchange.chronos.itip.analyzers;
 
 import java.io.InputStream;
 import java.util.ArrayList;
-import java.util.EnumMap;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import org.slf4j.Logger;
@@ -64,8 +65,11 @@ import com.openexchange.chronos.itip.ITipIntegrationUtility;
 import com.openexchange.chronos.itip.ITipMessage;
 import com.openexchange.chronos.itip.ITipMethod;
 import com.openexchange.chronos.itip.ITipSpecialHandling;
+import com.openexchange.chronos.itip.LegacyAnalyzing;
 import com.openexchange.chronos.itip.ical.ICal4JITipParser;
+import com.openexchange.chronos.itip.osgi.Services;
 import com.openexchange.chronos.service.CalendarSession;
+import com.openexchange.config.ConfigurationService;
 import com.openexchange.exception.OXException;
 
 /**
@@ -79,26 +83,23 @@ public class DefaultITipAnalyzerService implements ITipAnalyzerService {
     
     private final static Logger LOGGER = LoggerFactory.getLogger(DeclineCounterITipAnalyzer.class);
 
-    private final Map<ITipMethod, ITipAnalyzer> analyzers = new EnumMap<ITipMethod, ITipAnalyzer>(ITipMethod.class);
-
     private final ITipAnalyzer internalAnalyzer;
+    private final List<ITipAnalyzer> analyzers;
 
     public DefaultITipAnalyzerService(ITipIntegrationUtility util) {
-        add(new AddITipAnalyzer(util));
-        add(new CancelITipAnalyzer(util));
-        add(new DeclineCounterITipAnalyzer(util));
-        add(new RefreshITipAnalyzer(util));
-        add(new ReplyITipAnalyzer(util));
-        add(new UpdateITipAnalyzer(util));
-
+        super();
+        this.analyzers = Collections.unmodifiableList(Arrays.<ITipAnalyzer> asList(
+            new CancelAnalyzer(util),
+            new RequestAnalyzer(util),
+            new ReplyAnalyzer(util),
+            new AddITipAnalyzer(util),
+            new CancelITipAnalyzer(util),
+            new DeclineCounterITipAnalyzer(util),
+            new RefreshITipAnalyzer(util),
+            new ReplyITipAnalyzer(util),
+            new UpdateITipAnalyzer(util)
+        ));
         internalAnalyzer = new InternalITipAnalyzer(util);
-    }
-
-    private void add(ITipAnalyzer analyzer) {
-        List<ITipMethod> methods = analyzer.getMethods();
-        for (ITipMethod method : methods) {
-            analyzers.put(method, analyzer);
-        }
     }
 
     @Override
@@ -121,11 +122,27 @@ public class DefaultITipAnalyzerService implements ITipAnalyzerService {
                 message.addFeature(ITipSpecialHandling.MICROSOFT);
             }
 
-            ITipAnalyzer analyzer;
+            /*
+             * Get analyzer to use
+             */
+            boolean isLegacyScheduling = isLegacyScheduling();
+            ITipAnalyzer analyzer = null;
             if (mailHeader.containsKey("X-Open-Xchange-Object")) {
                 analyzer = internalAnalyzer;
             } else {
-                analyzer = analyzers.get(method);
+                for (ITipAnalyzer iTipAnalyzer : analyzers) {
+                    if (iTipAnalyzer.getMethods().contains(method)) {
+                        if (isLegacyScheduling) {
+                            if (LegacyAnalyzing.class.isAssignableFrom(iTipAnalyzer.getClass())) {
+                                analyzer = iTipAnalyzer;
+                                break;
+                            }
+                        } else {
+                            analyzer = iTipAnalyzer;
+                            break;
+                        }
+                    }
+                }
             }
 
             if (analyzer == null) {
@@ -136,6 +153,11 @@ public class DefaultITipAnalyzerService implements ITipAnalyzerService {
         }
 
         return result;
+    }
+
+    private boolean isLegacyScheduling() {
+        ConfigurationService configurationService = Services.getService(ConfigurationService.class);
+        return null == configurationService || configurationService.getBoolProperty("com.openexchange.calendar.useLegacyScheduling", false);
     }
 
 }

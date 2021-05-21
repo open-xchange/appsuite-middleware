@@ -50,8 +50,10 @@
 package com.openexchange.contact.picture.impl.finder;
 
 import java.util.LinkedHashSet;
-import com.openexchange.contact.ContactService;
+import com.openexchange.contact.common.ContactsParameters;
 import com.openexchange.contact.picture.PictureSearchData;
+import com.openexchange.contact.provider.composition.IDBasedContactsAccess;
+import com.openexchange.contact.provider.composition.IDBasedContactsAccessFactory;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contact.helpers.ContactField;
 import com.openexchange.groupware.container.Contact;
@@ -70,10 +72,10 @@ public class ContactIDFinder extends AbstractContactFinder {
     /**
      * Initializes a new {@link ContactUserFinder}.
      *
-     * @param contactService The {@link ContactService}
+     * @param idBasedContactsAccessFactory The {@link IDBasedContactsAccessFactory}
      */
-    public ContactIDFinder(ContactService contactService) {
-        super(contactService);
+    public ContactIDFinder(IDBasedContactsAccessFactory idBasedContactsAccessFactory) {
+        super(idBasedContactsAccessFactory);
     }
 
     private static final ContactField[] FIELDS = new ContactField[] { ContactField.EMAIL1, ContactField.EMAIL2, ContactField.EMAIL3 };
@@ -81,7 +83,13 @@ public class ContactIDFinder extends AbstractContactFinder {
     @Override
     public Contact getContact(Session session, PictureSearchData data, ContactField... fields) throws OXException {
         if (data.hasContact() && data.hasFolder()) {
-            return contactService.getContact(session, String.valueOf(data.getFolderId()), String.valueOf(data.getContactId()), Arrays.add(fields, FIELDS));
+            IDBasedContactsAccess contactsAccess = idBasedContactsAccessFactory.createAccess(session);
+            try {
+                contactsAccess.set(ContactsParameters.PARAMETER_FIELDS, Arrays.add(fields, FIELDS));
+                return contactsAccess.getContact(createContactID(data));
+            } finally {
+                contactsAccess.finish();
+            }
         }
         return null;
     }

@@ -49,12 +49,17 @@
 
 package com.openexchange.chronos.impl;
 
-import static com.openexchange.chronos.impl.Utils.getCalendarFolder;
 import static com.openexchange.chronos.impl.Utils.postProcess;
-import com.openexchange.chronos.Event;
+import com.openexchange.chronos.Attendee;
+import com.openexchange.chronos.exception.CalendarExceptionCodes;
+import com.openexchange.chronos.impl.performer.ResolvePerformer;
+import com.openexchange.chronos.impl.scheduling.AddProcessor;
+import com.openexchange.chronos.impl.scheduling.AttendeeUpdateProcessor;
 import com.openexchange.chronos.impl.scheduling.CancelProcessor;
 import com.openexchange.chronos.impl.scheduling.ReplyProcessor;
+import com.openexchange.chronos.impl.scheduling.RequestProcessor;
 import com.openexchange.chronos.scheduling.IncomingSchedulingMessage;
+import com.openexchange.chronos.scheduling.SchedulingMethod;
 import com.openexchange.chronos.scheduling.SchedulingSource;
 import com.openexchange.chronos.service.CalendarResult;
 import com.openexchange.chronos.service.CalendarSession;
@@ -88,13 +93,25 @@ public class SchedulingUtilitiesImpl implements SchedulingUtilities {
     }
 
     @Override
+    public CalendarResult processAdd(CalendarSession session, SchedulingSource source, IncomingSchedulingMessage message, Attendee attendee) throws OXException {
+        return postProcess(serviceLookup, new InternalCalendarStorageOperation<InternalCalendarResult>(session) {
+
+            @Override
+            protected InternalCalendarResult execute(CalendarSession session, CalendarStorage storage) throws OXException {
+                AddProcessor addProcessor = new AddProcessor(storage, session, getTargetFolder(session, storage, message));
+                addProcessor.process(message);
+                return new AttendeeUpdateProcessor(addProcessor, message.getMethod()).process(attendee);
+            }
+        }.executeUpdate()).getUserizedResult();
+    }
+
+    @Override
     public CalendarResult processCancel(CalendarSession session, SchedulingSource source, IncomingSchedulingMessage message) throws OXException {
         return postProcess(serviceLookup, new InternalCalendarStorageOperation<InternalCalendarResult>(session) {
 
             @Override
             protected InternalCalendarResult execute(CalendarSession session, CalendarStorage storage) throws OXException {
-                Event event = message.getResource().getFirstEvent();
-                return new CancelProcessor(storage, session, getCalendarFolder(session, storage, event.getUid(), event.getRecurrenceId(), message.getTargetUser())).process(message);
+                return new CancelProcessor(storage, session, getTargetFolder(session, storage, message)).process(message);
             }
         }.executeUpdate()).getUserizedResult();
     }
@@ -105,9 +122,36 @@ public class SchedulingUtilitiesImpl implements SchedulingUtilities {
 
             @Override
             protected InternalCalendarResult execute(CalendarSession session, CalendarStorage storage) throws OXException {
-                Event event = message.getResource().getFirstEvent();
-                return new ReplyProcessor(storage, session, getCalendarFolder(session, storage, event.getUid(), event.getRecurrenceId(), message.getTargetUser()), source).process(message);
+                return new ReplyProcessor(storage, session, getTargetFolder(session, storage, message), source).process(message);
             }
         }.executeUpdate()).getUserizedResult();
+    }
+
+    @Override
+    public CalendarResult processRequest(CalendarSession session, SchedulingSource source, IncomingSchedulingMessage message, Attendee attendee) throws OXException {
+        return postProcess(serviceLookup, new InternalCalendarStorageOperation<InternalCalendarResult>(session) {
+
+            @Override
+            protected InternalCalendarResult execute(CalendarSession session, CalendarStorage storage) throws OXException {
+                RequestProcessor requestProcessor = new RequestProcessor(session, storage, getTargetFolder(session, storage, message));
+                requestProcessor.process(message.getResource());
+                return new AttendeeUpdateProcessor(requestProcessor, message.getMethod()).process(attendee);
+            }
+        }.executeUpdate()).getUserizedResult();
+    }
+
+    /*
+     * ============================== HELPERS ==============================
+     */
+
+    static CalendarFolder getTargetFolder(CalendarSession session, CalendarStorage storage, IncomingSchedulingMessage message) throws OXException {
+        String uid = message.getResource().getUid();
+        int calendarUserId = message.getTargetUser();
+        boolean fallbackToDefault = SchedulingMethod.REQUEST.equals(message.getMethod());
+        String folderId = new ResolvePerformer(session, storage).resolveFolderIdByUID(uid, calendarUserId, fallbackToDefault);
+        if (null == folderId) {
+            throw CalendarExceptionCodes.EVENT_NOT_FOUND.create(uid);
+        }
+        return Utils.getFolder(session, folderId);
     }
 }

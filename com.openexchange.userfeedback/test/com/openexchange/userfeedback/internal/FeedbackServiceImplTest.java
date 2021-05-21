@@ -61,7 +61,6 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentSkipListSet;
 import org.json.JSONObject;
 import org.junit.Before;
 import org.junit.Test;
@@ -70,6 +69,8 @@ import org.mockito.ArgumentMatchers;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
+import org.osgi.framework.Constants;
+import org.osgi.framework.ServiceReference;
 import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
@@ -284,10 +285,11 @@ public class FeedbackServiceImplTest {
 
         FeedbackTypeRegistryImpl.getInstance().registerType(feedbackType);
         
-        ServiceSet<FeedbackStoreListener> serviceSetWithFeedbackStoreListener = new ServiceSet<FeedbackStoreListener>();
-        ConcurrentSkipListSet<FeedbackStoreListener> entries = new ConcurrentSkipListSet<FeedbackStoreListener>();
-        entries.add(storeListener);
-        MockUtils.injectValueIntoPrivateField(serviceSetWithFeedbackStoreListener, "entries", entries);
+        ServiceSet<FeedbackStoreListener> serviceSetWithFeedbackStoreListener = PowerMockito.spy(new ServiceSet<FeedbackStoreListener>());
+        ServiceReference<FeedbackStoreListener> ref = PowerMockito.mock(ServiceReference.class);
+        Mockito.when(ref.getProperty(Constants.SERVICE_ID)).thenReturn(L(1));
+        Mockito.when(ref.getProperty(Constants.SERVICE_RANKING)).thenReturn(I(1));
+        serviceSetWithFeedbackStoreListener.added(ref, storeListener);
         
         feedbackService = Mockito.spy(new FeedbackServiceImpl(serviceSetWithFeedbackStoreListener));
         

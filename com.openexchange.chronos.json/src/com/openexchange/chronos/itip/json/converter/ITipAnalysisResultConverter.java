@@ -62,6 +62,7 @@ import com.openexchange.ajax.requesthandler.Converter;
 import com.openexchange.ajax.requesthandler.ResultConverter;
 import com.openexchange.chronos.Attendee;
 import com.openexchange.chronos.Event;
+import com.openexchange.chronos.EventField;
 import com.openexchange.chronos.common.CalendarUtils;
 import com.openexchange.chronos.itip.ITipAction;
 import com.openexchange.chronos.itip.ITipAnalysis;
@@ -72,6 +73,7 @@ import com.openexchange.chronos.json.fields.ChronosEventConflictJsonFields;
 import com.openexchange.chronos.json.fields.ChronosGeneralJsonFields;
 import com.openexchange.chronos.service.EventConflict;
 import com.openexchange.exception.OXException;
+import com.openexchange.tools.arrays.Collections;
 import com.openexchange.tools.servlet.OXJSONExceptionCodes;
 import com.openexchange.tools.session.ServerSession;
 
@@ -195,8 +197,7 @@ public class ITipAnalysisResultConverter implements ResultConverter {
             changeObject.put("newEvent", EventMapper.getInstance().serialize(newEvent, EventMapper.getInstance().getAssignedFields(newEvent), tz, session));
         }
 
-        Event currentEvent = change.getCurrentEvent();
-        adjustFolderIdForClient(currentEvent);
+        Event currentEvent = adjustFolderIdForClient(change.getCurrentEvent());
         if (currentEvent != null) {
             changeObject.put("currentEvent", EventMapper.getInstance().serialize(currentEvent, EventMapper.getInstance().getAssignedFields(currentEvent), tz, session));
         }
@@ -236,10 +237,13 @@ public class ITipAnalysisResultConverter implements ResultConverter {
         }
     }
 
-    private void adjustFolderIdForClient(Event event) {
+    private Event adjustFolderIdForClient(Event event) throws OXException {
         if (event != null) {
-            event.setFolderId(CalendarUtils.prependDefaultAccount(event.getFolderId()));
+            Event copy = EventMapper.getInstance().copy(event, null, (EventField[]) null);
+            copy.setFolderId(CalendarUtils.prependDefaultAccount(event.getFolderId()));
+            return copy;
         }
+        return event;
     }
 
     private JSONArray convertAttendees(List<Attendee> attendees) throws JSONException {
@@ -258,7 +262,13 @@ public class ITipAnalysisResultConverter implements ResultConverter {
         JSONArray array = new JSONArray();
         for (ITipAnnotation annotation : annotations) {
             JSONObject annotationObject = new JSONObject();
-            annotationObject.put("message", annotation.getMessage());
+            String message = annotation.getMessage();
+            List<Object> args = annotation.getArgs();
+            if (Collections.isNullOrEmpty(args)) {
+                annotationObject.put("message", message);
+            } else {
+                annotationObject.put("message", String.format(message, args.toArray(new Object[args.size()])));
+            }
             Event event = annotation.getEvent();
             if (event != null) {
                 annotationObject.put("event", EventMapper.getInstance().serialize(event, EventMapper.getInstance().getAssignedFields(event), tz, session));
