@@ -1,3 +1,9 @@
+open-xchange-spamhandler-spamassassin (7.10.5-12) stable; urgency=medium
+
+  * Build for patch 2021-05-21 (5997)
+
+ -- Marcus Klein <marcus.klein@open-xchange.com>  Fri, 21 May 2021 08:31:35 +0000
+
 open-xchange-spamhandler-spamassassin (7.10.5-11) stable; urgency=medium
 
   * Build for patch 2021-05-17 (5994)
