@@ -55,6 +55,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 import com.openexchange.capabilities.CapabilityService;
 import com.openexchange.capabilities.CapabilitySet;
 import com.openexchange.drive.DriveExceptionCodes;
@@ -64,8 +65,10 @@ import com.openexchange.drive.checksum.rdb.RdbChecksumStore;
 import com.openexchange.drive.impl.DriveUtils;
 import com.openexchange.drive.impl.checksum.ChecksumProvider;
 import com.openexchange.drive.impl.checksum.ChecksumStore;
+import com.openexchange.drive.impl.checksum.ChecksumSupplier;
 import com.openexchange.drive.impl.checksum.DirectoryChecksum;
 import com.openexchange.drive.impl.checksum.FileChecksum;
+import com.openexchange.drive.impl.comparison.LazyServerDirectoryVersion;
 import com.openexchange.drive.impl.comparison.ServerDirectoryVersion;
 import com.openexchange.drive.impl.comparison.ServerFileVersion;
 import com.openexchange.drive.impl.management.DriveConfig;
@@ -91,6 +94,7 @@ public class SyncSession {
     private final DriveSession session;
     private final Tracer tracer;
     private final DriveConfig config;
+    private final long maxProcessingTime;
     private ChecksumStore checksumStore;
     private DriveStorage storage;
     private DirectLinkGenerator linkGenerator;
@@ -98,22 +102,44 @@ public class SyncSession {
     private DriveTemp temp;
     private PermissionResolver permissionResolver;
 
-
     /**
      * Initializes a new {@link SyncSession}.
      *
      * @param session The underlying drive session
      */
     public SyncSession(DriveSession session) {
+        this(session, -1L);
+    }
+
+    /**
+     * Initializes a new {@link SyncSession}.
+     *
+     * @param session The underlying drive session
+     * @param maxProcessingTime The maximum processing time (in milliseconds) to check against regularly, or <code>-1</code> if unrestricted
+     */
+    public SyncSession(DriveSession session, long maxProcessingTime) {
         super();
         this.session = session;
         this.config = new DriveConfig(session.getServerSession().getContextId(), session.getServerSession().getUserId());
         this.tracer = new Tracer(session.isDiagnostics());
+        this.maxProcessingTime = 0 < maxProcessingTime ? (System.nanoTime() + TimeUnit.MILLISECONDS.toNanos(maxProcessingTime)) : Long.MAX_VALUE;
         if (isTraceEnabled()) {
             trace("Initializing sync session for user " + session.getServerSession().getLoginName() + " (" +
                 session.getServerSession().getUserId() + ") in context " + session.getServerSession().getContextId() +
                 ", root folder ID is " + session.getRootFolderID() +
                 " via client " + session.getClientType() + " v" + session.getClientVersion());
+        }
+    }
+
+    /**
+     * Checks whether a configured maximum processing time is elapsed since this synch session was initialized. If this is the case, a
+     * corresponding exception is thrown to prematurely abort the current synchronization request.
+     *
+     * @throws OXException In case the maximum sync processing time is elapsed
+     */
+    private void checkMaxSyncProcessingTime() throws OXException {
+        if (System.nanoTime() > maxProcessingTime) {
+            throw DriveExceptionCodes.SERVER_BUSY.create(new Exception("Maximum processing time for current sync operation is exceeded."));
         }
     }
 
@@ -140,7 +166,8 @@ public class SyncSession {
      *
      * @return The drive storage
      */
-    public DriveStorage getStorage() {
+    public DriveStorage getStorage() throws OXException {
+        checkMaxSyncProcessingTime();
         if (null == storage) {
             storage = new DriveStorage(this);
         }
@@ -183,6 +210,7 @@ public class SyncSession {
      * @return The checksum store
      */
     public ChecksumStore getChecksumStore() throws OXException {
+        checkMaxSyncProcessingTime();
         if (null == checksumStore) {
             checksumStore = new RdbChecksumStore(getServerSession().getContextId());
         }
@@ -394,16 +422,30 @@ public class SyncSession {
             return Collections.emptyList();
         }
         StringBuilder stringBuilder = isTraceEnabled() ? new StringBuilder("Server directories:\n") : null;
-        List<DirectoryChecksum> checksums = ChecksumProvider.getChecksums(this, folderIDs);
         List<ServerDirectoryVersion> serverDirectories = new ArrayList<ServerDirectoryVersion>(folderIDs.size());
-        for (int i = 0; i < folderIDs.size(); i++) {
-            ServerDirectoryVersion directoryVersion = new ServerDirectoryVersion(
-                getStorage().getPath(folderIDs.get(i)), checksums.get(i));
-            serverDirectories.add(directoryVersion);
-            if (null != stringBuilder) {
-                stringBuilder.append(" [").append(directoryVersion.getDirectoryChecksum().getFolderID()).append("] ")
-                    .append(directoryVersion.getPath()).append(" | ").append(directoryVersion.getChecksum())
-                    .append(" (").append(directoryVersion.getDirectoryChecksum().getSequenceNumber()).append(")\n");
+        int lazyDirectoryChecksumChunkSize = 2 + getConfig().getMaxDirectoryActions();
+        if (lazyDirectoryChecksumChunkSize < folderIDs.size() && getConfig().isLazyDirectoryChecksumCalculation()) {
+            ChecksumSupplier checksumSupplier = new ChecksumSupplier(this, folderIDs, lazyDirectoryChecksumChunkSize);
+            for (String folderID : folderIDs) {
+                LazyServerDirectoryVersion directoryVersion = new LazyServerDirectoryVersion(getStorage().getPath(folderID), folderID, checksumSupplier);
+                serverDirectories.add(directoryVersion);
+                if (null != stringBuilder) {
+                    DirectoryChecksum checksum = directoryVersion.optDirectoryChecksum();
+                    stringBuilder.append(" [").append(folderID).append("] ")
+                        .append(directoryVersion.getPath()).append(" | ").append(null != checksum ? checksum.getChecksum() : "<pending>")
+                        .append(" (").append(null != checksum ? checksum.getSequenceNumber() : 0L).append(")\n");
+                }
+            }
+        } else {
+            List<DirectoryChecksum> checksums = ChecksumProvider.getChecksums(this, folderIDs);
+            for (int i = 0; i < folderIDs.size(); i++) {
+                ServerDirectoryVersion directoryVersion = new ServerDirectoryVersion(getStorage().getPath(folderIDs.get(i)), checksums.get(i));
+                serverDirectories.add(directoryVersion);
+                if (null != stringBuilder) {
+                    stringBuilder.append(" [").append(directoryVersion.getDirectoryChecksum().getFolderID()).append("] ")
+                        .append(directoryVersion.getPath()).append(" | ").append(directoryVersion.getChecksum())
+                        .append(" (").append(directoryVersion.getDirectoryChecksum().getSequenceNumber()).append(")\n");
+                }
             }
         }
         if (null != stringBuilder) {

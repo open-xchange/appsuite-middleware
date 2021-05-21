@@ -237,7 +237,6 @@ public class FileCopyOptimizer extends FileActionOptimizer {
     private static Map<String, ServerFileVersion> searchMatchingFileVersions(final SyncSession session, final List<String> folderIDs, final List<String> checksums) throws OXException {
         Map<String, ServerFileVersion> matchingFileVersions = new HashMap<String, ServerFileVersion>();
         if (0 < checksums.size() && session.getStorage().supports(new FolderID(session.getRootFolderID()), FileStorageCapability.SEARCH_BY_TERM)) {
-            List<FileChecksum> checksumsToInsert = new ArrayList<FileChecksum>();
             SearchIterator<File> searchIterator = null;
             try {
                 searchIterator = session.getStorage().wrapInTransaction(new StorageOperation<SearchIterator<File>>() {
@@ -255,15 +254,11 @@ public class FileCopyOptimizer extends FileActionOptimizer {
                     if (Strings.isNotEmpty(md5)) {
                         FileChecksum fileChecksum = new FileChecksum(
                             DriveUtils.getFileID(file), file.getVersion(), file.getSequenceNumber(), md5);
-                        checksumsToInsert.add(fileChecksum);
                         matchingFileVersions.put(fileChecksum.getChecksum(), new ServerFileVersion(file, fileChecksum));
                     }
                 }
             } finally {
                 SearchIterators.close(searchIterator);
-            }
-            if (0 < checksumsToInsert.size()) {
-                session.getChecksumStore().insertFileChecksums(checksumsToInsert);
             }
         }
         return matchingFileVersions;

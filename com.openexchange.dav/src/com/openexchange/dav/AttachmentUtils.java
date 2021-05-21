@@ -49,9 +49,12 @@
 
 package com.openexchange.dav;
 
+import static com.openexchange.dav.DAVProtocol.CAL_NS;
+import static com.openexchange.dav.DAVProtocol.SC_INSUFFICIENT_STORAGE;
 import static com.openexchange.dav.DAVTools.getExternalPath;
 import static com.openexchange.dav.DAVTools.removePathPrefixFromPath;
 import static com.openexchange.dav.DAVTools.removePrefixFromPath;
+import static com.openexchange.webdav.protocol.Protocol.DAV_NS;
 import java.io.InputStream;
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -236,13 +239,16 @@ public class AttachmentUtils {
     }
 
     public static WebdavProtocolException protocolException(OXException e, WebdavPath url) {
+        if ("ATT-0001".equals(e.getErrorCode())) {
+            return new PreconditionException(DAV_NS.getURI(), "quota-not-exceeded", url, SC_INSUFFICIENT_STORAGE);
+        }
         if (Category.CATEGORY_PERMISSION_DENIED.equals(e.getCategory())) {
             return WebdavProtocolException.generalError(e, url, HttpServletResponse.SC_FORBIDDEN);
         }
         if ("ATT-0405".equals(e.getErrorCode())) {
             return WebdavProtocolException.generalError(e, url, HttpServletResponse.SC_NOT_FOUND);
         }
-        return WebdavProtocolException.generalError(e, url, HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+        return DAVProtocol.protocolException(url, e);
     }
 
     /**
@@ -288,7 +294,7 @@ public class AttachmentUtils {
         long maxSize = AttachmentConfig.getMaxUploadSize();
         if (0 < maxSize) {
             if (maxSize < size) {
-                throw new PreconditionException(DAVProtocol.CAL_NS.getURI(), "max-attachment-size", collection.getUrl(), HttpServletResponse.SC_FORBIDDEN);
+                throw new PreconditionException(CAL_NS.getURI(), "max-attachment-size", collection.getUrl(), SC_INSUFFICIENT_STORAGE);
             }
             inputStream = new CountingInputStream(inputStream, maxSize);
         }

@@ -170,6 +170,15 @@ public class DriveMetadata extends DefaultFile {
         return md5sum;
     }
 
+    /**
+     * Optionally gets the pre-calculated md5sum of this .drive-meta file's binary contents.
+     *
+     * @return The md5 sum, or <code>null</code> if not yet available
+     */
+    public String optFileMD5Sum() {
+        return md5sum;
+    }
+
     @Override
     public long getFileSize() {
         if (null == fileSize) {
@@ -252,7 +261,7 @@ public class DriveMetadata extends DefaultFile {
             try {
                 return new JsonDirectoryMetadata(session, folder).build();
             } catch (OXException e) {
-                if (retryCount < DriveConstants.MAX_RETRIES) {
+                if (false == DriveExceptionCodes.SERVER_BUSY.equals(e) && retryCount < DriveConstants.MAX_RETRIES) {
                     retryCount++;
                     int delay = DriveConstants.RETRY_BASEDELAY * retryCount;
                     session.trace("Got exception during generation of .drive-meta file (" + e.getMessage() + "), trying again in " +

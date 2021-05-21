@@ -51,13 +51,15 @@ package com.openexchange.contact.account.service.impl;
 
 import static com.openexchange.contact.common.ContactsParameters.PARAMETER_CONNECTION;
 import static com.openexchange.java.Autoboxing.I;
+import static com.openexchange.java.Autoboxing.I2i;
 import static com.openexchange.java.Autoboxing.L;
-import static com.openexchange.java.Autoboxing.i;
 import static com.openexchange.osgi.Tools.requireService;
 import static com.openexchange.session.Sessions.isGuest;
 import java.sql.Connection;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
@@ -205,22 +207,31 @@ public class ContactsAccountServiceImpl implements ContactsAccountService {
     }
 
     @Override
-    public List<ContactsAccount> getAccounts(Session session, List<Integer> ids, ContactsParameters parameters) throws OXException {
-        List<ContactsAccount> storedAccounts = initAccountStorage(session.getContextId(), parameters).loadAccounts(session.getUserId(), ids);
-        int index = 0;
-        for (ContactsAccount account : storedAccounts) {
-            if (null == account && ContactsAccount.DEFAULT_ACCOUNT.getAccountId() == i(ids.get(index))) {
-                // Return a virtual default contacts account for guest users or
-                // get default account from list to implicitly trigger pending
-                // auto-provisioning tasks of the default account.
-                storedAccounts.set(index, isGuest(session) ? getVirtualDefaultAccount(session) : find(getAccounts(session, parameters), ContactsAccount.DEFAULT_ACCOUNT.getProviderId()));
-            }
-            if (null == storedAccounts.get(index)) {
-                throw ContactsProviderExceptionCodes.ACCOUNT_NOT_FOUND.create(ids.get(index));
-            }
-            index++;
+    public List<ContactsAccount> getAccounts(Session session, List<Integer> accountIds, ContactsParameters parameters) throws OXException {
+        if (null == accountIds || accountIds.isEmpty()) {
+            return Collections.emptyList();
         }
-        return storedAccounts;
+        int[] ids = I2i(accountIds);
+        ContactsAccount[] storedAccounts = initAccountStorage(session.getContextId(), parameters).loadAccounts(session.getUserId(), ids);
+        for (int i = 0; i < storedAccounts.length; i++) {
+            if (null == storedAccounts[i] && ContactsAccount.DEFAULT_ACCOUNT.getAccountId() == ids[i]) {
+                if (isGuest(session)) {
+                    /*
+                     * return a virtual default calendar account for guest users
+                     */
+                    storedAccounts[i] = getVirtualDefaultAccount(session);
+                } else {
+                    /*
+                     * get default account from list to implicitly trigger pending auto-provisioning tasks of the default account
+                     */
+                    storedAccounts[i] = find(getAccounts(session, parameters), ContactsAccount.DEFAULT_ACCOUNT.getProviderId());
+                }
+            }
+            if (null == storedAccounts[i]) {
+                throw ContactsProviderExceptionCodes.ACCOUNT_NOT_FOUND.create(I(ids[i]));
+            }
+        }
+        return Arrays.asList(storedAccounts);
     }
 
     @Override

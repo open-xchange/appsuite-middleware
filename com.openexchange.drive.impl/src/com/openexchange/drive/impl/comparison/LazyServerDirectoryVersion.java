@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH. group of companies.
+ *    trademarks of the OX Software GmbH group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -47,69 +47,78 @@
  *
  */
 
-package com.openexchange.contact.storage.rdb.osgi;
+package com.openexchange.drive.impl.comparison;
 
-import java.util.concurrent.atomic.AtomicReference;
-import com.openexchange.server.ServiceLookup;
+import com.openexchange.drive.impl.checksum.ChecksumSupplier;
+import com.openexchange.drive.impl.checksum.DirectoryChecksum;
+import com.openexchange.drive.impl.internal.PathNormalizer;
+import com.openexchange.exception.OXException;
 
 /**
- * {@link Services}
+ * {@link LazyServerDirectoryVersion}
  *
- * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
- * @since v7.10.5
+ * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
+ * @since 8.0.0
  */
-public class Services {
+public class LazyServerDirectoryVersion extends ServerDirectoryVersion {
 
-    private static final AtomicReference<ServiceLookup> REF = new AtomicReference<ServiceLookup>();
+    private final String normalizedPath;
+    private final String folderID;
+    private final ChecksumSupplier checksumSupplier;
+
+    private DirectoryChecksum knownChecksum;
 
     /**
-     * Initializes a new {@link Services}.
+     * Initializes a new {@link LazyServerDirectoryVersion}.
+     *
+     * @param path The path
+     * @param folderID The folder identifier
+     * @param checksumSupplier The checksum supplier
      */
-    private Services() {
-        super();
+    public LazyServerDirectoryVersion(String path, String folderID, ChecksumSupplier checksumSupplier) {
+        super(path, null);
+        this.normalizedPath = PathNormalizer.normalize(path);
+        this.folderID = folderID;
+        this.checksumSupplier = checksumSupplier;
     }
 
-    /**
-     * Sets the service lookup.
-     *
-     * @param serviceLookup The service lookup or <code>null</code>
-     */
-    public static void setServiceLookup(ServiceLookup serviceLookup) {
-        REF.set(serviceLookup);
+    @Override
+    public String getChecksum() {
+        return getDirectoryChecksum().getChecksum();
     }
 
-    /**
-     * Gets the service lookup.
-     *
-     * @return The service lookup or <code>null</code>
-     */
-    public static ServiceLookup getServiceLookup() {
-        return REF.get();
+    @Override
+    public String getPath() {
+        return normalizedPath;
     }
 
-    /**
-     * Gets the service of specified type
-     *
-     * @param clazz The service's class
-     * @return The service
-     * @throws IllegalStateException If an error occurs while returning the demanded service
-     */
-    public static <S extends Object> S getService(final Class<? extends S> clazz) {
-        final com.openexchange.server.ServiceLookup serviceLookup = REF.get();
-        if (null == serviceLookup) {
-            throw new IllegalStateException("Missing ServiceLookup instance.");
+    @Override
+    public DirectoryChecksum getDirectoryChecksum() {
+        if (null == knownChecksum) {
+            try {
+                knownChecksum = checksumSupplier.getChecksum(folderID);
+            } catch (OXException e) {
+                throw new IllegalStateException(e);
+            }
         }
-        return serviceLookup.getService(clazz);
+        return knownChecksum;
     }
 
     /**
-     * (Optionally) Gets the service of specified type
+     * Optionally gets the known directory checksum, if already available.
      *
-     * @param clazz The service's class
-     * @return The service or <code>null</code> if absent
+     * @return The directory checksum, or <code>null</code> if not yet retrieved
      */
-    public static <S extends Object> S optService(final Class<? extends S> clazz) {
-        ServiceLookup serviceLookup = REF.get();
-        return null == serviceLookup ? null : serviceLookup.getOptionalService(clazz);
+    public DirectoryChecksum optDirectoryChecksum() {
+        if (null == knownChecksum) {
+            knownChecksum = checksumSupplier.optChecksum(folderID);
+        }
+        return knownChecksum;
     }
+
+    @Override
+    public String toString() {
+        return getPath() + " | " + (null != knownChecksum ? knownChecksum.getChecksum() : "<pending>") + " [" + folderID + ']';
+    }
+
 }

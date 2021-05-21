@@ -50,14 +50,15 @@
 package com.openexchange.contact.storage.rdb.internal;
 
 import com.openexchange.contact.storage.ContactStorage;
+import com.openexchange.contact.storage.ContactStorages;
 import com.openexchange.contact.storage.ContactTombstoneStorage;
 import com.openexchange.contact.storage.ContactUserStorage;
 import com.openexchange.contact.storage.ContactsAccountStorage;
-import com.openexchange.contact.storage.ContactStorages;
 import com.openexchange.contact.storage.rdb.internal.account.RdbContactsAccountStorage;
 import com.openexchange.database.provider.DBProvider;
 import com.openexchange.database.provider.DBTransactionPolicy;
 import com.openexchange.groupware.contexts.Context;
+import com.openexchange.server.ServiceLookup;
 
 /**
  * {@link RdbContactsStorage}
@@ -67,21 +68,22 @@ import com.openexchange.groupware.contexts.Context;
  */
 public class RdbContactsStorage implements ContactStorages {
 
-    private final RdbContactsAccountStorage contactsAccountStorage;
+    private final ContactsAccountStorage contactsAccountStorage;
     private final RdbContactStorage delegate;
 
     /**
      * Initializes a new {@link RdbContactsStorage}.
      * 
+     * @param services A service lookup reference
      * @param context The context
      * @param dbProvider The database provider to use
      * @param txPolicy The transaction policy
      * @param delegaate The delegate {@link RdbContactsStorage}
      */
-    public RdbContactsStorage(Context context, DBProvider dbProvider, DBTransactionPolicy txPolicy, RdbContactStorage delegate) {
+    public RdbContactsStorage(ServiceLookup services, Context context, DBProvider dbProvider, DBTransactionPolicy txPolicy, RdbContactStorage delegate) {
         super();
         this.delegate = delegate;
-        this.contactsAccountStorage = new RdbContactsAccountStorage(context, dbProvider, txPolicy);
+        this.contactsAccountStorage = RdbContactsAccountStorage.init(services, context, dbProvider, txPolicy);
     }
 
     @Override

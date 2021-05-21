@@ -460,7 +460,27 @@ public enum DriveProperty implements Property {
      * temporary upload file first.
      * Default: 64kB
      */
-    OPTIMISTIC_SAVE_THRESHOLD_MOBILE("optimisticSaveThresholdMobile", "64kB")
+    OPTIMISTIC_SAVE_THRESHOLD_MOBILE("optimisticSaveThresholdMobile", "64kB"),
+
+    /**
+     * Configures whether directory checksums should be calculated in a lazy way or not. If enabled, server directory checksums will be
+     * retrieved in chunks according to the configured "maxDirectoryActions", which may reduce the processing time for the initial sync of
+     * large directory subtrees.
+     * <p/>
+     * Default: true
+     */
+    LAZY_DIRECTORY_CHECKSUM_CALCULATION("lazyDirectoryChecksumCalculation", Boolean.TRUE),
+
+    /**
+     * Configures the processing time (in seconds) after a running syncFiles- or syncFolders-operation is cancelled. This can be helpful
+     * during initial synchronizations where no previously calculated checksums are available, and a long running request would otherwise be
+     * interrupted by a proxy timeout. The value can be defined using units of measurement: "m" (=minutes), "s" (=seconds) and "ms"
+     * (=milliseconds).
+     * <p/>
+     * Default: 90s
+     */
+    MAX_SYNC_PROCESSING_TIME("maxSyncProcessingTime", "90s"),
+
     ;
 
     private static final String PREFIX = "com.openexchange.drive.";

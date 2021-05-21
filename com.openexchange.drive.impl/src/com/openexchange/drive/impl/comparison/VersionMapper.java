@@ -58,6 +58,7 @@ import java.util.Set;
 import java.util.SortedMap;
 import java.util.TreeMap;
 import com.openexchange.drive.DriveVersion;
+import com.openexchange.drive.impl.checksum.DirectoryChecksum;
 import com.openexchange.drive.impl.internal.PathNormalizer;
 import com.openexchange.drive.impl.internal.Tracer;
 import com.openexchange.java.Strings;
@@ -237,7 +238,12 @@ public abstract class VersionMapper<T extends DriveVersion> implements Iterable<
             stringBuilder.append(null != comparison.getClientVersion() ? comparison.getClientVersion().getChecksum() : "                                ");
             stringBuilder.append(Change.NONE == comparison.getClientChange() ? "  " : ' ' + comparison.getClientChange().toString().substring(0, 1));
             stringBuilder.append(" | ");
-            stringBuilder.append(null != comparison.getServerVersion() ? comparison.getServerVersion().getChecksum() : "                                ");
+            if (LazyServerDirectoryVersion.class.isInstance(comparison.getServerVersion())) {
+                DirectoryChecksum serverDirectoryChecksum = ((LazyServerDirectoryVersion) comparison.getServerVersion()).optDirectoryChecksum();
+                stringBuilder.append(null != serverDirectoryChecksum ? serverDirectoryChecksum.getChecksum() : "<pending>                       ");
+            } else {
+                stringBuilder.append(null != comparison.getServerVersion() ? comparison.getServerVersion().getChecksum() : "                                ");
+            }
             stringBuilder.append(Change.NONE == comparison.getServerChange() ? "  " : ' ' + comparison.getServerChange().toString().substring(0, 1));
             stringBuilder.append('\n');
             if (Tracer.MAX_SIZE < stringBuilder.length()) {

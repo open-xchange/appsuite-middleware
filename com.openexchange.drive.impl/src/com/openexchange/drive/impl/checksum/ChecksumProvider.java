@@ -69,6 +69,7 @@ import com.openexchange.drive.impl.DriveUtils;
 import com.openexchange.drive.impl.comparison.MappingProblems;
 import com.openexchange.drive.impl.internal.PathNormalizer;
 import com.openexchange.drive.impl.internal.SyncSession;
+import com.openexchange.drive.impl.metadata.DriveMetadata;
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.File;
 import com.openexchange.file.storage.FileStorageCapability;
@@ -86,9 +87,9 @@ import jonelo.jacksum.algorithm.MD;
 public class ChecksumProvider {
 
     /**
-     * Gets the MD5 checksum for the current document version of the supplied file. The checksum is retrieved by first querying the
-     * checksum storage, and, if not yet known, by calculating the checksum on demand. Newly calculated checksums are pushed back
-     * automatically to the storage.
+     * Gets the MD5 checksum for the current document version of the supplied file. Unless already present in the file's metadata,
+     * the checksum is retrieved by first querying the checksum storage, and, if not yet known, by calculating the checksum on demand.
+     * Newly calculated checksums are pushed back automatically to the storage.
      *
      * @param session The sync session
      * @param file The file
@@ -96,18 +97,20 @@ public class ChecksumProvider {
      * @throws OXException
      */
     public static FileChecksum getChecksum(SyncSession session, File file) throws OXException {
-        FileChecksum fileChecksum = session.getChecksumStore().getFileChecksum(
-            DriveUtils.getFileID(file), file.getVersion(), file.getSequenceNumber());
+        FileChecksum fileChecksum = optFileChecksum(file);
         if (null == fileChecksum) {
-            fileChecksum = session.getChecksumStore().insertFileChecksum(calculateFileChecksum(session, file));
+            fileChecksum = session.getChecksumStore().getFileChecksum(DriveUtils.getFileID(file), file.getVersion(), file.getSequenceNumber());
+            if (null == fileChecksum) {
+                fileChecksum = session.getChecksumStore().insertFileChecksum(calculateFileChecksum(session, file));
+            }
         }
         return fileChecksum;
     }
 
     /**
-     * Gets the MD5 checksums for a list of files in a folder. The checksums are retrieved by first querying the checksum storage, and, if
-     * not yet known, by calculating the missing checksums on demand. Newly calculated checksums are pushed back automatically to the
-     * storage.
+     * Gets the MD5 checksums for a list of files in a folder. Unless already present in the file's metadata, the checksums are
+     * retrieved by first querying the checksum storage, and, if not yet known, by calculating the missing checksums on demand.
+     * Newly calculated checksums are pushed back automatically to the storage.
      *
      * @param session The sync session
      * @param folderID The ID of all file's parent folder
@@ -116,17 +119,26 @@ public class ChecksumProvider {
      * @throws OXException
      */
     public static List<FileChecksum> getChecksums(SyncSession session, String folderID, List<File> files) throws OXException {
+        List<File> filesWithoutMD5Sum = new ArrayList<File>();
+        for (File file : files) {
+            if (Strings.isEmpty(optMD5(file))) {
+                filesWithoutMD5Sum.add(file);
+            }
+        }
         List<FileChecksum> checksums = new ArrayList<FileChecksum>(files.size());
-        List<FileChecksum> storedChecksums = session.getChecksumStore().getFileChecksums(new FolderID(folderID));
+        List<FileChecksum> storedChecksums = filesWithoutMD5Sum.isEmpty() ? Collections.emptyList() : session.getChecksumStore().getFileChecksums(new FolderID(folderID));
         List<FileChecksum> newChecksums = new ArrayList<FileChecksum>();
         for (File file : files) {
             if (false == folderID.equals(file.getFolderId())) {
                 throw new IllegalArgumentException("files must all have the same folder ID");
             }
-            FileChecksum fileChecksum = find(storedChecksums, file);
+            FileChecksum fileChecksum = optFileChecksum(file);
             if (null == fileChecksum) {
-                fileChecksum = calculateFileChecksum(session, file);
-                newChecksums.add(fileChecksum);
+                fileChecksum = find(storedChecksums, file);
+                if (null == fileChecksum) {
+                    fileChecksum = calculateFileChecksum(session, file);
+                    newChecksums.add(fileChecksum);
+                }
             }
             checksums.add(fileChecksum);
         }
@@ -156,7 +168,7 @@ public class ChecksumProvider {
      * @param session The sync session
      * @param folderID The folder ID to get the checksum for
      * @param view The client view to use when determining the directory checksum
-     * @param <code>true</code> to consider <code>.drive-meta</code> files, <code>false</code>, otherwise
+     * @param useDriveMeta <code>true</code> to consider <code>.drive-meta</code> files, <code>false</code>, otherwise
      * @return The checksum
      */
     public static DirectoryChecksum getChecksum(SyncSession session, String folderID, int view, boolean useDriveMeta) throws OXException {
@@ -172,9 +184,9 @@ public class ChecksumProvider {
      * @param session The sync session
      * @param folderIDs The list of folder IDs to get the checksum for
      * @param view The client view to use when determining the directory checksums
-     * @param <code>true</code> to consider <code>.drive-meta</code> files, <code>false</code>, otherwise
+     * @param useDriveMeta <code>true</code> to consider <code>.drive-meta</code> files, <code>false</code>, otherwise
      * @return The list of checksums, in an equal order as the passed folder IDs
-    */
+     */
     public static List<DirectoryChecksum> getChecksums(SyncSession session, List<String> folderIDs, int view, boolean useDriveMeta) throws OXException {
         StringBuilder trace = session.isTraceEnabled() ? new StringBuilder("Directory checksums:\n") : null;
         /*
@@ -243,18 +255,30 @@ public class ChecksumProvider {
                     newChecksums.add(directoryChecksum);
                 }
                 checksums.add(directoryChecksum);
+                /*
+                 * flush so-far calculated checksums to storage
+                 */
+                if (100 < newChecksums.size() + updatedChecksums.size()) {
+                    storeCalculatedChecksums(session, newChecksums, updatedChecksums);
+                    newChecksums.clear();
+                    updatedChecksums.clear();
+                }
             }
-            if (0 < updatedChecksums.size()) {
-                session.getChecksumStore().updateDirectoryChecksums(updatedChecksums);
-            }
-            if (0 < newChecksums.size()) {
-                session.getChecksumStore().insertDirectoryChecksums(newChecksums);
-            }
+            storeCalculatedChecksums(session, newChecksums, updatedChecksums);
         }
         if (null != trace) {
             session.trace(trace);
         }
         return checksums;
+    }
+
+    private static void storeCalculatedChecksums(SyncSession session, List<DirectoryChecksum> newChecksums, List<DirectoryChecksum> updatedChecksums) throws OXException {
+        if (0 < updatedChecksums.size()) {
+            session.getChecksumStore().updateDirectoryChecksums(updatedChecksums);
+        }
+        if (0 < newChecksums.size()) {
+            session.getChecksumStore().insertDirectoryChecksums(newChecksums);
+        }
     }
 
     /**
@@ -288,6 +312,7 @@ public class ChecksumProvider {
                 trace.append(" no files in folder, using empty MD5\n");
             }
         } else {
+            List<File> filesWithoutMD5Sum = new ArrayList<File>();
             Set<File> files = new TreeSet<File>(FILENAME_COMPARATOR);
             {
                 MappingProblems<File> mappingProblems = new MappingProblems<File>();
@@ -302,6 +327,9 @@ public class ChecksumProvider {
                         String existingKey = PathNormalizer.normalize(existingFile.getFileName());
                         file = mappingProblems.chooseServerVersion(existingFile, existingKey, file, normalizedKey);
                     }
+                    if (Strings.isEmpty(optMD5(file))) {
+                        filesWithoutMD5Sum.add(file);
+                    }
                     filesByName.put(normalizedKey, file);
                 }
                 if (null != trace && false == mappingProblems.isEmpty()) {
@@ -310,34 +338,41 @@ public class ChecksumProvider {
                 files.addAll(filesByName.values());
             }
             MD md5 = session.newMD5();
-            List<FileChecksum> knownChecksums = session.getChecksumStore().getFileChecksums(folderID);
+            List<FileChecksum> knownChecksums = filesWithoutMD5Sum.isEmpty() ? Collections.emptyList() : session.getChecksumStore().getFileChecksums(folderID);
             List<FileChecksum> newChecksums = new ArrayList<FileChecksum>();
             List<FileChecksum> updatedChecksums = new ArrayList<FileChecksum>();
             for (File file : files) {
-                FileChecksum fileChecksum = find(knownChecksums, file, false);
-                long sequenceNumber = file.getSequenceNumber();
+                FileChecksum fileChecksum = optFileChecksum(file);
                 if (null != fileChecksum) {
-                    if (sequenceNumber != fileChecksum.getSequenceNumber()) {
-                        if (null != trace) {
-                            trace.append(" Stored, invalid ( != " + sequenceNumber + " ): ").append(fileChecksum).append('\n');
-                        }
-                        fileChecksum.setChecksum(calculateFileChecksum(session, file).getChecksum());
-                        fileChecksum.setSequenceNumber(sequenceNumber);
-                        updatedChecksums.add(fileChecksum);
-                        if (null != trace) {
-                            trace.append(" Re-calculated: ").append(fileChecksum).append('\n');
-                        }
-                    } else {
-                        if (null != trace) {
-                            trace.append(" Stored, valid: ").append(fileChecksum).append('\n');
-                        }
+                    if (null != trace) {
+                        trace.append(" From metadata: ").append(fileChecksum).append('\n');
                     }
                 } else {
-                    fileChecksum = calculateFileChecksum(session, file);
-                    if (null != trace) {
-                        trace.append(" Newly calculated: ").append(fileChecksum).append('\n');
+                    fileChecksum = find(knownChecksums, file, false);
+                    long sequenceNumber = file.getSequenceNumber();
+                    if (null != fileChecksum) {
+                        if (sequenceNumber != fileChecksum.getSequenceNumber()) {
+                            if (null != trace) {
+                                trace.append(" Stored, invalid ( != " + sequenceNumber + " ): ").append(fileChecksum).append('\n');
+                            }
+                            fileChecksum.setChecksum(calculateFileChecksum(session, file).getChecksum());
+                            fileChecksum.setSequenceNumber(sequenceNumber);
+                            updatedChecksums.add(fileChecksum);
+                            if (null != trace) {
+                                trace.append(" Re-calculated: ").append(fileChecksum).append('\n');
+                            }
+                        } else {
+                            if (null != trace) {
+                                trace.append(" Stored, valid: ").append(fileChecksum).append('\n');
+                            }
+                        }
+                    } else {
+                        fileChecksum = calculateFileChecksum(session, file);
+                        if (null != trace) {
+                            trace.append(" Newly calculated: ").append(fileChecksum).append('\n');
+                        }
+                        newChecksums.add(fileChecksum);
                     }
-                    newChecksums.add(fileChecksum);
                 }
                 md5.update(PathNormalizer.normalize(file.getFileName()).getBytes(Charsets.UTF_8));
                 md5.update(fileChecksum.getChecksum().getBytes(Charsets.UTF_8));
@@ -371,6 +406,35 @@ public class ChecksumProvider {
         fileChecksum.setVersion(file.getVersion());
         fileChecksum.setChecksum(md5);
         return fileChecksum;
+    }
+
+    /**
+     * Optionally gets the file checksum if the md5 sum is present in the file's metadata.
+     *
+     * @param file The file to optionally get the checksum for
+     * @return The file checksum, or <code>null</code> if not available in the file's metadata
+     */
+    private static FileChecksum optFileChecksum(File file) {
+        String md5 = optMD5(file);
+        if (Strings.isEmpty(md5)) {
+            return null;
+        }
+        FileChecksum fileChecksum = new FileChecksum();
+        fileChecksum.setFileID(DriveUtils.getFileID(file));
+        fileChecksum.setSequenceNumber(file.getSequenceNumber());
+        fileChecksum.setVersion(file.getVersion());
+        fileChecksum.setChecksum(md5);
+        return fileChecksum;
+    }
+
+    /**
+     * Optionally gets a file's md5 sum if present in the file's metadata.
+     *
+     * @param file The file to optionally get the md5 sum for
+     * @return The md5 checksum, or <code>null</code> if not available in the file's metadata
+     */
+    private static String optMD5(File file) {
+        return DriveMetadata.class.isInstance(file) ? ((DriveMetadata) file).optFileMD5Sum() : file.getFileMD5Sum();
     }
 
     private static String calculateMD5(SyncSession session, File file) throws OXException {
