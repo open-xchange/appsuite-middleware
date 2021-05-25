@@ -52,8 +52,8 @@ spec:
           env: &as-mw-env
             - name: RELEASE_NAMESPACE
               value: {{ .Release.Name }}
-            - name: OX_DISABLED_BUNDLES
-              value: '/disabled.bundles'
+            - name: OX_BLACKLISTED_PACKAGES
+              value:  {{ include "core-mw.blacklistedPackages" . }}
             - name: OX_HOSTNAME
               value: {{ .Values.hostname }}
             - name: OX_DISABLE_DOCUMENTS
