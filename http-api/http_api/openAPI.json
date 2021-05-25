@@ -16060,12 +16060,25 @@
           "content" : {
             "application/json" : {
               "schema" : {
-                "type" : "string"
+                "type" : "object",
+                "title" : "advancedSearchBody",
+                "properties" : {
+                  "filter" : {
+                    "type" : "string",
+                    "description" : "A JSON object describing the search term as introducted in [Advanced search](https://documentation.open-xchange.com/latest/middleware/http_api/5_advanced_search.html). Example: `[\"and\",[\"=\", {\"field\":\"last_name\"},\"Mustermann\"],[\"=\",{\"field\":\"first_name\"},\"Max\"]]` which represents 'last_name = \"Mustermann\" AND first_name = \"Max\"'.\nValid fields are the ones specified in [Contact data](#/definitions/ContactData) model. The field 'folder' is not allowed as operand.\n"
+                  },
+                  "folders" : {
+                    "type" : "array",
+                    "description" : "The identifiers of the folders to restrict the search to.",
+                    "items" : {
+                      "type" : "string"
+                    }
+                  }
+                },
+                "required" : [ "filter" ]
               }
             }
-          },
-          "description" : "A JSON object describing the search term as introducted in [Advanced search](https://documentation.open-xchange.com/latest/middleware/http_api/5_advanced_search.html). Example:\n`{\"filter\":[\"and\",[\"=\", {\"field\":\"last_name\"},\"Mustermann\"],[\"=\",{\"field\":\"first_name\"},\"Max\"]]}`\nwhich represents 'last_name = \"Mustermann\" AND first_name = \"Max\"'. Valid fields are the ones specified in [Contact data](#/definitions/ContactData) model.\n",
-          "required" : true
+          }
         }
       }
     },
@@ -25763,6 +25776,7 @@
                       },
                       "event" : {
                         "type" : "array",
+                        "title" : "Event",
                         "description" : "Additional events, set e.g. if an new exception is created but master can't be found.",
                         "items" : {
                           "type" : "object",
@@ -29278,7 +29292,7 @@
                     },
                     "unique_id" : {
                       "type" : "String",
-                      "description" : "Lifetime unique identifier of the file that do not change after move or rename operations.",
+                      "description" : "Lifetime unique identifier of the file that does not change e.g. after move or rename operations.",
                       "readOnly" : true
                     },
                     "id" : {
@@ -30549,7 +30563,7 @@
           },
           "unique_id" : {
             "type" : "String",
-            "description" : "Lifetime unique identifier of the file that do not change after move or rename operations.",
+            "description" : "Lifetime unique identifier of the file that does not change e.g. after move or rename operations.",
             "readOnly" : true
           },
           "id" : {
