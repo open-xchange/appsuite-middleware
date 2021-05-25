@@ -179,6 +179,22 @@ public interface File {
     void setModifiedFrom(EntityInfo modifiedFrom);
 
     /**
+     * 
+     * Gets the lifetime unique identifier of the file that does not change e.g. after move or rename operations.
+     *
+     * @return The lifetime unique identifier.
+     */
+    String getUniqueId();
+
+    /**
+     * 
+     * Sets the lifetime unique identifier of the file that does not change e.g. after move or rename operations.
+     *
+     * @param uniqueId The lifetime unique identifier.
+     */
+    void setUniqueId(String uniqueId);
+
+    /**
      * Checks whether {@link #getFileSize()} returns the exact size w/o any encodings (e.g. base64) applied.
      *
      * @return <code>true</code> for exact size; otherwise <code>false</code>
@@ -487,6 +503,7 @@ public interface File {
         MEDIA_DATE("media_date", 725),
         CREATED_FROM("created_from", 51),
         MODIFIED_FROM("modified_from", 52),
+        UNIQUE_ID("unique_id", 726)
         ;
 
         /** The set containing all media-associated fields */
@@ -611,6 +628,8 @@ public interface File {
                 return switcher.created_from(args);
             case MODIFIED_FROM:
                 return switcher.modified_from(args);
+            case UNIQUE_ID:
+                return switcher.unique_id(args);
             default:
                 throw new IllegalArgumentException("Don't know field: " + getName());
             }

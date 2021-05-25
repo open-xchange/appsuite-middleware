@@ -377,4 +377,10 @@ public class FileFieldSet extends AbstractFileFieldSwitcher {
         return args[0];
     }
 
+    @Override
+    public Object unique_id(Object[] args) {
+        md(args).setUniqueId(string(1, args));
+        return ret(args);
+    }
+
 }

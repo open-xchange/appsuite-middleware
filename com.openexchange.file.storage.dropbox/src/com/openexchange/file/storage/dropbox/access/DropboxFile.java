@@ -96,6 +96,7 @@ public class DropboxFile extends DefaultFile {
         setFileMIMEType(DropboxServices.getService(MimeTypeMap.class).getContentType(metadata.getName()));
         setFileName(metadata.getName());
         setTitle(metadata.getName());
+        setUniqueId(metadata.getId());
 
         applyMediaInfo(metadata);
     }

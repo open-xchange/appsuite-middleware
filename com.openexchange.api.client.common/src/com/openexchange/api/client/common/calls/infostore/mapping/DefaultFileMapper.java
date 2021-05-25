@@ -1102,6 +1102,29 @@ public class DefaultFileMapper extends DefaultJsonMapper<DefaultFile, File.Field
             }
         });
 
+        mappings.put(File.Field.UNIQUE_ID, new StringMapping<DefaultFile>(File.Field.UNIQUE_ID.getName(), I(File.Field.UNIQUE_ID.getNumber())) {
+
+            @Override
+            public boolean isSet(DefaultFile object) {
+                return object.getUniqueId() != null;
+            }
+
+            @Override
+            public void set(DefaultFile object, String value) throws OXException {
+                object.setUniqueId(value);
+            }
+
+            @Override
+            public String get(DefaultFile object) {
+                return object.getUniqueId();
+            }
+
+            @Override
+            public void remove(DefaultFile object) {
+                object.setUniqueId(null);
+            }
+        });
+
         return mappings;
     }
 }

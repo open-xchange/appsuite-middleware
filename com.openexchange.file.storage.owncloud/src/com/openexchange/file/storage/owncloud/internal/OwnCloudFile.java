@@ -74,15 +74,17 @@ public class OwnCloudFile extends WebDAVFile {
         setEtag(res.getEtag());
         Integer fav = res.getProperty(OwnCloudFileAccess.OC_FAVORITE, Integer.class);
         favorite = (fav != null && fav.intValue() == 1);
+        setUniqueId(res.getProperty(OwnCloudFileAccess.OC_ID, String.class));
     }
 
     /**
      * Initializes a new {@link OwnCloudFile}.
      */
-    public OwnCloudFile(File file, String fileId, String etag) {
+    public OwnCloudFile(File file, String fileId, String etag, String id) {
         super(file);
         setFileId(fileId);
         setEtag(etag);
+        setUniqueId(id);
     }
 
     /**

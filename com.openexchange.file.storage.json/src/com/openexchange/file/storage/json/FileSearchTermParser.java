@@ -278,6 +278,7 @@ public class FileSearchTermParser {
             case OBJECT_PERMISSIONS:
             case ORIGIN:
             case SHAREABLE:
+            case UNIQUE_ID:
             default:
                 // Unknown term for field.
                 throw SearchExceptionMessages.PARSING_FAILED_INVALID_SEARCH_TERM.create();

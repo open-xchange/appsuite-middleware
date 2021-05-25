@@ -541,4 +541,14 @@ public class MetaDataAddingFile implements DelegatingFile {
         file.setModifiedFrom(modifiedFrom);
     }
 
+    @Override
+    public String getUniqueId() {
+        return file.getUniqueId();
+    }
+
+    @Override
+    public void setUniqueId(String uniqueId) {
+        file.setUniqueId(uniqueId);
+    }
+
 }

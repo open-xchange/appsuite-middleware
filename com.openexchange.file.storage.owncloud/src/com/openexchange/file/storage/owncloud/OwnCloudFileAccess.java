@@ -73,6 +73,7 @@ import com.openexchange.file.storage.File.Field;
 import com.openexchange.file.storage.FileStorageAccount;
 import com.openexchange.file.storage.FileStorageExceptionCodes;
 import com.openexchange.file.storage.FileStorageObjectPermission;
+import com.openexchange.file.storage.FileStoragePersistentIDs;
 import com.openexchange.file.storage.FileStorageVersionedFileAccess;
 import com.openexchange.file.storage.FileStorageZippableFolderFileAccess;
 import com.openexchange.file.storage.FileTimedResult;
@@ -107,7 +108,7 @@ import com.openexchange.webdav.client.WebDAVXmlBody;
  * @author <a href="mailto:benjamin.gruedelbach@open-xchange.com">Benjamin Gruedelbach</a>
  * @since v7.10.4
  */
-public class OwnCloudFileAccess extends AbstractWebDAVFileAccess implements FileStorageVersionedFileAccess, ThumbnailAware, FileStorageZippableFolderFileAccess {
+public class OwnCloudFileAccess extends AbstractWebDAVFileAccess implements FileStorageVersionedFileAccess, ThumbnailAware, FileStorageZippableFolderFileAccess, FileStoragePersistentIDs {
 
     private static final Logger LOG = LoggerFactory.getLogger(OwnCloudFileAccess.class);
 
@@ -118,6 +119,7 @@ public class OwnCloudFileAccess extends AbstractWebDAVFileAccess implements File
     public static final QName OC_SHARE_TYPES = new QName(NS_OWNCLOUD, "share-types", NS_PREFIX_OWNCLOUD);
     public static final QName OC_FAVORITE = new QName(NS_OWNCLOUD, "favorite", NS_PREFIX_OWNCLOUD);
     public static final QName DAV_RESOURCE_TYPE = new QName("DAV:", "resourcetype", "a");
+    public static final QName OC_ID = new QName(NS_OWNCLOUD, "id", NS_PREFIX_OWNCLOUD);
 
     private static final int THUMBNAIL_WIDTH = 200;
     private static final int THUMBNAIL_HEIGHT = 150;
@@ -161,6 +163,7 @@ public class OwnCloudFileAccess extends AbstractWebDAVFileAccess implements File
         }
         props.add(OC_SHARE_TYPES);
         props.add(OC_FILEID);
+        props.add(OC_ID);
         return props;
     }
 
@@ -469,7 +472,7 @@ public class OwnCloudFileAccess extends AbstractWebDAVFileAccess implements File
         if (file.getSize() != null) {
             webdavfile.setFileSize(file.getSize().intValue());
         }
-        return new OwnCloudFile(webdavfile, file.getFileId(), file.getEtag());
+        return new OwnCloudFile(webdavfile, file.getFileId(), file.getEtag(), file.getId());
     }
 
     @Override

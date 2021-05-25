@@ -61,8 +61,8 @@ import static com.openexchange.webdav.client.PropertyName.DAV_GETCONTENTLENGTH;
 import static com.openexchange.webdav.client.PropertyName.DAV_GETCONTENTTYPE;
 import static com.openexchange.webdav.client.PropertyName.DAV_GETETAG;
 import static com.openexchange.webdav.client.PropertyName.DAV_GETLASTMODIFIED;
-import static com.openexchange.webdav.client.PropertyName.DAV_RESOURCETYPE;
 import static com.openexchange.webdav.client.PropertyName.DAV_LOCKDISCOVERY;
+import static com.openexchange.webdav.client.PropertyName.DAV_RESOURCETYPE;
 import static com.openexchange.webdav.client.WebDAVClient.DEPTH_0;
 import static com.openexchange.webdav.client.WebDAVClient.DEPTH_1;
 import static com.openexchange.webdav.client.WebDAVClient.DEPTH_INFINITY;
@@ -428,7 +428,7 @@ public abstract class AbstractWebDAVFileAccess extends AbstractWebDAVAccess impl
         /*
          * update metadata as needed
          */
-        fieldsToUpdate = Field.reduceBy(fieldsToUpdate, Field.FOLDER_ID, Field.FILE_MIMETYPE, Field.FILE_SIZE, Field.FILENAME);
+        fieldsToUpdate = Field.reduceBy(fieldsToUpdate, Field.FOLDER_ID, Field.FILE_MIMETYPE, Field.FILE_SIZE, Field.FILENAME, Field.UNIQUE_ID);
         return saveFileMetadata(file, sequenceNumber, fieldsToUpdate);
     }
 

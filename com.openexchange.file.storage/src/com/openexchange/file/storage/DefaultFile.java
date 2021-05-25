@@ -108,6 +108,7 @@ public class DefaultFile extends AbstractFile {
     private MediaStatus mediaStatus = null;
     private EntityInfo createdFrom;
     private EntityInfo modifiedFrom;
+    private String uniqueId;
 
     /**
      * Initializes a new {@link DefaultFile}.
@@ -590,6 +591,16 @@ public class DefaultFile extends AbstractFile {
     @Override
     public void setModifiedFrom(EntityInfo modifiedFrom) {
         this.modifiedFrom = modifiedFrom;
+    }
+
+    @Override
+    public String getUniqueId() {
+        return this.uniqueId;
+    }
+
+    @Override
+    public void setUniqueId(String uniqueId) {
+        this.uniqueId = uniqueId;
     }
 
 }

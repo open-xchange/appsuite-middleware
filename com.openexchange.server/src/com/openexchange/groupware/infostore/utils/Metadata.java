@@ -105,6 +105,7 @@ public class Metadata {
     public static final int MEDIA_META = 723;
     public static final int MEDIA_STATUS = 724;
     public static final int MEDIA_DATE = 725;
+    public static final int UNIQUE_ID = 726;
 
     public static final int CREATED_FROM = 51;
     public static final int MODIFIED_FROM = 52;
@@ -152,6 +153,7 @@ public class Metadata {
     public static final Metadata MEDIA_DATE_LITERAL = new Metadata(MEDIA_DATE, "media_date");
     public static final Metadata CREATED_FROM_LITERAL = new Metadata(CREATED_FROM, "created_from");
     public static final Metadata MODIFIED_FROM_LITERAL = new Metadata(MODIFIED_FROM, "modified_from");
+    public static final Metadata UNIQUE_ID_LITERAL = new Metadata(UNIQUE_ID, "unique_id");
 
     public static final Metadata[] VALUES_ARRAY = new Metadata[]{
         LAST_MODIFIED_LITERAL,

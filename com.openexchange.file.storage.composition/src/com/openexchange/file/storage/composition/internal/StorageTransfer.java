@@ -290,6 +290,7 @@ public class StorageTransfer {
     private static IDTuple copyCurrentVersion(FileStorageFileAccess sourceFileAccess, File file, FileStorageFileAccess targetFileAccess, FolderID targetFolderID) throws OXException {
         DefaultFile toCreate = new DefaultFile(file);
         toCreate.setId(null);
+        toCreate.setUniqueId(null);
         toCreate.setFolderId(targetFolderID.getFolderId());
         toCreate.setVersion(null);
         toCreate.setObjectPermissions(null);
@@ -312,6 +313,7 @@ public class StorageTransfer {
                 File version = searchIterator.next();
                 DefaultFile toCreate = new DefaultFile(version);
                 toCreate.setId(null == id ? FileStorageFileAccess.NEW : id.getId());
+                toCreate.setUniqueId(null);
                 toCreate.setFolderId(targetFolderID.getFolderId());
                 toCreate.setObjectPermissions(null);
                 InputStream contents = null;
