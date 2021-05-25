@@ -196,3 +196,50 @@ app.kubernetes.io/instance: {{ .Release.Name }}
 {{- printf "%s/%s:%s" $registry .Values.init.image.repository .Chart.AppVersion -}}
 {{- end -}}
 {{- end -}}
+
+{{/* 
+Computes the OX_BLACKLISTED_PACKAGES value based on the given configuration. When a packages is deemed to be disabled
+it is added to the list. A package is disabled, if:
+  * It is listed under packages.status with a value of 'disabled':
+  packages:
+    status:
+      - open-xchange-authentication-database: 'disabled'
+  OR if it is disabled as part of a feature in features.status:
+  features:
+    status:
+      - admin: 'disabled'
+  This would disable all packages that are listed at features.definitions.admin, UNLESS they are enabled again in the 
+  packages section.
+
+  See the values.yaml file for default values 
+*/}}
+{{- define "core-mw.blacklistedPackages" -}}
+{{/* We'll assemble a list of blacklisted packages */}}
+{{-  $packages := dict -}}
+{{- $features := .Values.features.definitions -}} 
+{{/* Iterate the feature status subtree and add disabled packages to the blacklist, removing enabled packages */}}
+{{- range $feature, $status := .Values.features.status -}}
+{{-   $featurePackages := get $features $feature -}}
+{{-   range $package := $featurePackages  -}}
+{{-     if eq $status "enabled " -}}
+{{-       $_ := unset $packages $package -}}
+{{-     else if eq $status "disabled" -}}
+{{-       $_ := set $packages $package true -}}
+{{-     else -}}
+{{-       printf "Value for feature.status.%s is '%s' but needs to be either 'disabled' or 'enabled'" $feature $status | fail -}}
+{{-     end  -}}
+{{-   end  -}}
+{{- end -}}
+{{/* Iterate the package.status subtree and remove enabled packages from the blacklist, adding disabled ones */}}
+{{- range $package, $status := .Values.packages.status -}}
+{{-   if eq $status "enabled " -}}
+{{-     $_ := unset $packages $package -}}
+{{-   else if eq $status "disabled" -}}
+{{-     $_ := set $packages $package true -}}
+{{-   else -}}
+{{-     printf "Value for package.status.%s is '%s' but needs to be either 'disabled' or 'enabled'" $package $status | fail -}}
+{{-   end  -}}
+{{- end -}}
+{{/* render space separated list */}}
+{{- keys $packages | join " " -}}
+{{- end -}}

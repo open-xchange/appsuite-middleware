@@ -56,6 +56,76 @@ enabled:
   # antivir
   antivir: true
 
+# Packages & Features
+features:
+  definitions:
+    admin: 
+      - open-xchange-admin
+      - open-xchange-admin-contextrestore
+      - open-xchange-admin-oauth-provider
+      - open-xchange-admin-soap
+      - open-xchange-admin-soap-usercopy
+      - open-xchange-admin-user-copy
+    reseller:
+      - open-xchange-admin-reseller
+      - open-xchange-admin-soap-reseller
+    documents:
+      - TODO
+    guard:
+      - TODO
+    plugins:
+      - open-xchange-plugins-antiphishing
+      - open-xchange-plugins-antiphishing-vadesecure
+      - open-xchange-plugins-blackwhitelist
+      - open-xchange-plugins-blackwhitelist-sieve
+      - open-xchange-plugins-contact-storage-group
+      - open-xchange-plugins-contact-whitelist-sync
+      - open-xchange-plugins-mx-checker
+      - open-xchange-plugins-onboarding-maillogin
+      - open-xchange-plugins-trustedidentity
+      - open-xchange-plugins-unsubscribe
+      - open-xchange-plugins-unsubscribe-vadesecure
+    cloud-plugins:
+      - open-xchange-cloudplugins
+      - open-xchange-cloudplugins-antiphishing-vadesecure-ldap
+      - open-xchange-cloudplugins-blackwhitelist-ldap
+      - open-xchange-cloudplugins-forwards-ws
+      - open-xchange-cloudplugins-keycloak
+      - open-xchange-cloudplugins-loginproxy-ws
+      - open-xchange-cloudplugins-mailfilter
+      - open-xchange-cloudplugins-oidc
+      - open-xchange-cloudplugins-saml
+    oxaas:
+      - open-xchange-oxaas-alias
+      - open-xchange-oxaas-mail-notify-ws
+      - open-xchange-oxaas-mail-unread-ws
+      - open-xchange-oxaas-mail-ws
+
+  status: 
+    reseller: disabled
+    plugins: disabled
+    cloud-plugins: disabled
+    oxaas: disabled
+
+packages:
+  status:
+    open-xchange-admin-autocontextid: disabled
+    open-xchange-authentication-imap: disabled
+    open-xchange-authentication-kerberos: disabled
+    open-xchange-authentication-ldap: disabled
+    open-xchange-authentication-masterpassword: disabled
+    open-xchange-authentication-oauth: disabled
+    open-xchange-cluster-upgrade-from-7100-7101: disabled
+    open-xchange-cluster-upgrade-from-7102: disabled
+    open-xchange-cluster-upgrade-from-7103-7104: disabled
+    open-xchange-cluster-upgrade-from-76x: disabled
+    open-xchange-cluster-upgrade-from-780-782: disabled
+    open-xchange-cluster-upgrade-from-783: disabled
+    open-xchange-cluster-upgrade-from-784: disabled
+    open-xchange-sms-sipgate: disabled
+    open-xchange-sms-twilio: disabled
+
+
 # masterAdmin
 masterAdmin: "nn" # base64 encoded
 # masterPassword
