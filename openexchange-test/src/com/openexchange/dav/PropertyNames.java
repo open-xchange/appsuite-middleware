@@ -456,6 +456,11 @@ public final class PropertyNames {
     public static final DavPropertyName ALLOWED_SHARING_MODES = DavPropertyName.create("allowed-sharing-modes", NS_CALENDARSERVER);
 
     /**
+     * invite xmlns="http://calendarserver.org/ns/"
+     */
+    public static final DavPropertyName INVITE = DavPropertyName.create("invite", NS_CALENDARSERVER);
+
+    /**
      * calendar-color xmlns="http://apple.com/ns/ical/"
      */
     public static final DavPropertyName CALENDAR_COLOR = DavPropertyName.create("calendar-color", NS_APPLE_ICAL);
