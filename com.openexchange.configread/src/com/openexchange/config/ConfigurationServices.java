@@ -248,8 +248,6 @@ public class ConfigurationServices {
         }
     }
 
-    private static final String SYSENV_PROP_NAME_DELIMITER = "__";
-
     /**
      * Tries to acquire the environment variable corresponding to given property name and optional file name. In case a file name is given,
      * a look-up in environment variables happens first with file name prefix and provided that first look-up yields no result a second
@@ -300,6 +298,21 @@ public class ConfigurationServices {
      * <tr><th style="text-align:right; white-space:nowrap">Look-up behavior&nbsp;&nbsp;&nbsp;&nbsp;</th>
      *     <td><tt>First with <code>"mail_properties__COM_OPENEXCHANGE_MAIL_MAILSERVER"</code>, then <code>"COM_OPENEXCHANGE_MAIL_MAILSERVER"</code></tt></td></tr>
      * </table></blockquote>
+     *
+     * @param propName The property name
+     * @param optFileName The optional file name
+     * @return The value of the respective environment variable or <code>null</code> if there is no such environment variable
+     */
+    public static String checkForSysEnvVariable(String propName, String optFileName) {
+        return checkForSysEnvVariable(propName, getSystemEnvironment(), optFileName);
+    }
+
+    private static final String SYSENV_PROP_NAME_DELIMITER = "__";
+
+    /**
+     * Tries to acquire the environment variable corresponding to given property name and optional file name. In case a file name is given,
+     * a look-up in environment variables happens first with file name prefix and provided that first look-up yields no result a second
+     * look-up is performed using only the property name portion.
      *
      * @param propName The property name
      * @param sysenv The environment variables map to look-up

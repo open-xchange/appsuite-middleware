@@ -72,7 +72,6 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.atomic.AtomicReference;
-import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Iterators;
 import com.openexchange.annotation.NonNull;
 import com.openexchange.config.ConfigurationService;
@@ -182,6 +181,8 @@ public final class ConfigurationImpl implements ConfigurationService {
         return CONFIG_REFERENCE.get();
     }
 
+    private static final Object PRESENT = new Object();
+
     /*-
      * -------------------------------------------------- Member stuff ---------------------------------------------------------
      */
@@ -214,8 +215,11 @@ public final class ConfigurationImpl implements ConfigurationService {
 
     private final File[] dirs;
 
-    /** The set to file-wise track properties that were replaced by a system environment variable. */
-    private final ConcurrentMap<File, Set<String>> sysEnvPropertiesByFile;
+    /** The set to track such properties that were replaced by a system environment variable. */
+    private final ConcurrentMap<String, Object> sysEnvPropertyHits;
+
+    /** The set to track such properties that were looked-up by a system environment variable, but there ain't one. */
+    private final ConcurrentMap<String, Object> sysEnvPropertyMisses;
 
     /** Maps file paths of the .properties file to their properties. */
     private final Map<File, Properties> propertiesByFile;
@@ -262,7 +266,8 @@ public final class ConfigurationImpl implements ConfigurationService {
         this.matchingPrefixProperty = new ConcurrentHashMap<String, List<Reloadable>>(128, 0.9f, 1);
         this.matchingFile = new ConcurrentHashMap<String, List<Reloadable>>(128, 0.9f, 1);
 
-        sysEnvPropertiesByFile = new ConcurrentHashMap<>(16, 0.9f, 1);
+        sysEnvPropertyHits = new ConcurrentHashMap<>(16, 0.9f, 1);
+        sysEnvPropertyMisses = new ConcurrentHashMap<>(16, 0.9f, 1);
         propertiesByFile = new HashMap<File, Properties>(256);
         texts = new ConcurrentHashMap<String, String>(1024, 0.9f, 1);
         properties = new ConcurrentHashMap<String, String>(2048, 0.9f, 1);
@@ -396,7 +401,7 @@ public final class ConfigurationImpl implements ConfigurationService {
             Reference<Set<String>> sysEnvPropertiesReference = new Reference<>(null);
             Properties tmp = ConfigurationServices.loadPropertiesFrom(propFile, true, sysEnvPropertiesReference);
             propertiesByFile.put(propFile, tmp);
-            addToTrackedSysEnvVariables(sysEnvPropertiesReference, propFile);
+            addToTrackedSysEnvVariables(sysEnvPropertiesReference);
 
             String propFilePath = propFile.getPath();
             for (Map.Entry<Object, Object> e : tmp.entrySet()) {
@@ -420,41 +425,44 @@ public final class ConfigurationImpl implements ConfigurationService {
         }
     }
 
-    private void addToTrackedSysEnvVariables(Reference<Set<String>> sysEnvPropertiesReference, File propFile) {
+    private void addToTrackedSysEnvVariables(Reference<Set<String>> sysEnvPropertiesReference) {
         Set<String> sysEnvProperties = sysEnvPropertiesReference.getValue();
         if (sysEnvProperties == null || sysEnvProperties.isEmpty()) {
             return;
         }
 
-        Set<String> existent = sysEnvPropertiesByFile.putIfAbsent(propFile, ImmutableSet.copyOf(sysEnvProperties));
-        while (existent != null) {
-            Set<String> newSysEnvProperties = new HashSet<>(existent);
-            newSysEnvProperties.addAll(sysEnvProperties);
-            if (sysEnvPropertiesByFile.replace(propFile, existent, ImmutableSet.copyOf(newSysEnvProperties))) {
-                existent = null;
-            } else {
-                existent = sysEnvPropertiesByFile.get(propFile);
-            }
+        for (String sysEnvProperty : sysEnvProperties) {
+            this.sysEnvPropertyHits.putIfAbsent(sysEnvProperty, PRESENT);
         }
     }
 
     @Override
     public Filter getFilterFromProperty(final String name) {
-        final String value = properties.get(name);
-        if (null == value) {
-            return null;
-        }
-        return new WildcardFilter(value);
+        String value = getProperty(name);
+        return null == value ? null : new WildcardFilter(value);
     }
 
     @Override
     public String getProperty(final String name) {
-        return properties.get(name);
+        return getProperty(name, null);
     }
 
     @Override
     public String getProperty(final String name, final String defaultValue) {
-        final String value = properties.get(name);
+        String value = properties.get(name);
+        if (value == null) {
+            if (sysEnvPropertyMisses.containsKey(name) == false) {
+                value = ConfigurationServices.checkForSysEnvVariable(name, null);
+                if (value == null) {
+                    // No such system environment variable
+                    sysEnvPropertyMisses.put(name, PRESENT);
+                } else {
+                    // Found appropriate system environment variable. Store it.
+                    properties.putIfAbsent(name, value);
+                    sysEnvPropertyHits.put(name, PRESENT);
+                }
+            }
+        }
         return null == value ? defaultValue : value;
     }
 
@@ -488,8 +496,8 @@ public final class ConfigurationImpl implements ConfigurationService {
     }
 
     @Override
-    public Map<File, Set<String>> getSysEnvProperties() {
-        return Collections.unmodifiableMap(sysEnvPropertiesByFile);
+    public Set<String> getSysEnvProperties() {
+        return Collections.unmodifiableSet(sysEnvPropertyHits.keySet());
     }
 
     @Override
@@ -526,13 +534,13 @@ public final class ConfigurationImpl implements ConfigurationService {
 
     @Override
     public boolean getBoolProperty(final String name, final boolean defaultValue) {
-        final String prop = properties.get(name);
+        final String prop = getProperty(name);
         return null == prop ? defaultValue : Boolean.parseBoolean(prop.trim());
     }
 
     @Override
     public int getIntProperty(final String name, final int defaultValue) {
-        final String prop = properties.get(name);
+        final String prop = getProperty(name);
         if (prop != null) {
             try {
                 return Integer.parseInt(prop.trim());
@@ -779,7 +787,8 @@ public final class ConfigurationImpl implements ConfigurationService {
         properties.clear();
         propertiesByFile.clear();
         propertiesFiles.clear();
-        sysEnvPropertiesByFile.clear();
+        sysEnvPropertyHits.clear();
+        sysEnvPropertyMisses.clear();
         texts.clear();
         yamlFiles.clear();
         yamlPaths.clear();

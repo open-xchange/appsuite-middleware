@@ -1039,12 +1039,7 @@ public abstract class AbstractCapabilityService implements CapabilityService {
             return false;
         }
 
-        for (Set<String> propertyNames : optConfigService.getSysEnvProperties().values()) {
-            if (propertyNames.contains(key)) {
-                return false;
-            }
-        }
-        return false;
+        return optConfigService.getSysEnvProperties().contains(key);
     }
 
     /**
