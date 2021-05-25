@@ -871,4 +871,41 @@ public class ResellerAdmin extends EnforceableDataObject implements PasswordMech
     public Object clone() throws CloneNotSupportedException {
         return super.clone();
     }
+
+    /**
+     * Prints out the reseller data
+     *
+     * @return The reseller data as string
+     */
+    public String printOut() {
+        StringBuilder ret = new StringBuilder();
+        ret.append("[ \n");
+        for (Field f : this.getClass().getDeclaredFields()) {
+            try {
+                Object ob = f.get(this);
+                String tname = f.getName();
+                if (tname.equals("restrictions") && restrictions != null) {
+                    ret.append("  ");
+                    ret.append(tname);
+                    ret.append(": ");
+                    for (Restriction r : restrictions) {
+                        ret.append("{");
+                        ret.append(r).append("}, ");
+                    }
+                    ret.setLength(ret.length() - 2);
+                    ret.append("\n");
+                } else if (ob != null && (!tname.equals("serialVersionUID") && !tname.equals("password") && !tname.equals("salt"))) {
+                    ret.append("  ");
+                    ret.append(tname);
+                    ret.append(": ");
+                    ret.append(ob);
+                    ret.append("\n");
+                }
+            } catch (IllegalArgumentException | IllegalAccessException e) {
+                ret.append(e.getClass().getSimpleName()).append("\n");
+            }
+        }
+        ret.append("]");
+        return ret.toString();
+    }
 }

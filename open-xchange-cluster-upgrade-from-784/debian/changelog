@@ -1,3 +1,9 @@
+open-xchange-cluster-upgrade-from-784 (7.10.5-12) stable; urgency=medium
+
+  * Build for patch 2021-05-21 (5997)
+
+ -- Thorben Betten <thorben.betten@open-xchange.com>  Fri, 21 May 2021 08:30:57 +0000
+
 open-xchange-cluster-upgrade-from-784 (7.10.5-11) stable; urgency=medium
 
   * Build for patch 2021-05-17 (5994)
