@@ -157,6 +157,8 @@ public class SearchResult {
         String contentType;
         @XmlElement(name = "fileid", namespace = "http://owncloud.org/ns")
         String fileId;
+        @XmlElement(name = "id", namespace = "http://owncloud.org/ns")
+        String id;
         @XmlElement(name = "resourcetype", namespace = "DAV:")
         ResourceType resourcetype;
 
@@ -203,6 +205,15 @@ public class SearchResult {
          */
         public String getFileId() {
             return fileId;
+        }
+
+        /**
+         * Gets the id
+         *
+         * @return The id
+         */
+        public String getId() {
+            return id;
         }
 
         /**

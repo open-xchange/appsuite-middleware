@@ -273,4 +273,9 @@ public class FileFieldGet extends AbstractFileFieldSwitcher {
         return md(args).getModifiedFrom();
     }
 
+    @Override
+    public Object unique_id(Object[] args) {
+        return md(args).getUniqueId();
+    }
+
 }

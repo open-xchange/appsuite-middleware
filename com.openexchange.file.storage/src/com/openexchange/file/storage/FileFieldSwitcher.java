@@ -99,5 +99,6 @@ public interface FileFieldSwitcher {
     Object mediaDate(Object[] args);
     Object created_from(Object...args);
     Object modified_from(Object...args);
+    Object unique_id(Object[] args);
 
 }

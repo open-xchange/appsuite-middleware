@@ -60,6 +60,7 @@ import com.openexchange.file.storage.FolderPath;
 import com.openexchange.file.storage.MediaStatus;
 import com.openexchange.file.storage.composition.FileID;
 import com.openexchange.file.storage.composition.FolderID;
+import com.openexchange.file.storage.composition.UniqueFileID;
 import com.openexchange.groupware.EntityInfo;
 import com.openexchange.java.GeoLocation;
 
@@ -73,10 +74,12 @@ public class IDManglingFile implements DelegatingFile {
     private final File file;
     private final String id;
     private final String folder;
+    private final String uniqueFileId;
 
     /**
      * Initializes a new {@link IDManglingFile} instance delegating all regular calls to the supplied file, but returning the unique ID
-     * representations of the file's own object and the parent folder ID properties based on the underlying service- and account IDs.
+     * representations of the file's own object-, unique- and the parent folder ID properties based on the underlying service- and account
+     * IDs.
      *
      * @param file The file delegate
      * @param service The service identifier
@@ -85,6 +88,7 @@ public class IDManglingFile implements DelegatingFile {
     IDManglingFile(final File file, final String service, final String account) {
         id = new FileID(service, account, file.getFolderId(), file.getId()).toUniqueID();
         folder = new FolderID(service, account, file.getFolderId()).toUniqueID();
+        uniqueFileId = null != file.getUniqueId() ? new UniqueFileID(service, account, file.getUniqueId()).toUniqueID() : null;
         this.file = file;
     }
 
@@ -553,4 +557,13 @@ public class IDManglingFile implements DelegatingFile {
         file.setModifiedFrom(modifiedFrom);
     }
 
+    @Override
+    public String getUniqueId() {
+        return uniqueFileId;
+    }
+
+    @Override
+    public void setUniqueId(String uniqueId) {
+        throw new IllegalStateException("IDs are only read only with this class");
+    }
 }

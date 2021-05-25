@@ -140,5 +140,9 @@ properties:
     type: object
     description: Contains additional metadata for items in the "maildrive" file storage.
     readOnly: true
+  unique_id:
+    type: String
+    description: Lifetime unique identifier of the file that does not change e.g. after move or rename operations.
+    readOnly: true
 required:
   - folder_id

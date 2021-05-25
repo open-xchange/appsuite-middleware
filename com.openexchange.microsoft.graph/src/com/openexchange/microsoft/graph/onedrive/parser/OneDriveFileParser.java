@@ -88,6 +88,7 @@ public class OneDriveFileParser {
         OneDriveFile file = new OneDriveFile(userId);
         String name = entity.optString("name");
         file.setId(entity.optString("id"));
+        file.setUniqueId(entity.optString("id"));
         file.setFileName(name);
         file.setTitle(name);
         file.setFileSize(entity.optLong("size"));

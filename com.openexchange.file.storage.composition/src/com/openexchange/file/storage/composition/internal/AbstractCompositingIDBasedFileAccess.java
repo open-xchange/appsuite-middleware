@@ -128,6 +128,7 @@ import com.openexchange.file.storage.composition.FilenameValidationUtils;
 import com.openexchange.file.storage.composition.FolderID;
 import com.openexchange.file.storage.composition.IDBasedFileAccess;
 import com.openexchange.file.storage.composition.IDBasedFileAccessListener;
+import com.openexchange.file.storage.composition.UniqueFileID;
 import com.openexchange.file.storage.composition.osgi.IDBasedFileAccessListenerRegistry;
 import com.openexchange.file.storage.search.SearchTerm;
 import com.openexchange.groupware.results.Delta;
@@ -907,6 +908,7 @@ public abstract class AbstractCompositingIDBasedFileAccess extends AbstractCompo
             FolderID newFolderID = new FolderID(serviceID, accountID, idTuple.getFolder());
             document.setId(newID.toUniqueID());
             document.setFolderId(newFolderID.toUniqueID());
+            document.setUniqueId(document.getUniqueId() != null ? new UniqueFileID(document.getUniqueId()).toUniqueID() : null);
             postEvent(FileStorageEventHelper.buildCreateEvent(
                 session, serviceID, accountID, newFolderID.toUniqueID(), newID.toUniqueID(), document.getFileName()));
             return newID.toUniqueID();
@@ -974,6 +976,7 @@ public abstract class AbstractCompositingIDBasedFileAccess extends AbstractCompo
 
             document.setFolderId(sourceIDTuple.getFolder());
             document.setId(sourceIDTuple.getId());
+            document.setUniqueId(document.getUniqueId() != null ? new UniqueFileID(document.getUniqueId()).getUniqueFileId() : null);
             IDTuple result = new TransactionAwareFileAccessDelegation<IDTuple>() {
 
                 @Override
@@ -1007,12 +1010,14 @@ public abstract class AbstractCompositingIDBasedFileAccess extends AbstractCompo
          */
         document.setFolderId(sourceIDTuple.getFolder());
         document.setId(sourceIDTuple.getId());
+        document.setUniqueId(document.getUniqueId() != null ? new UniqueFileID(document.getUniqueId()).getUniqueFileId() : null);
         SaveResult result = saveDelegation.call(fileAccess);
         IDTuple idTuple = result.getIDTuple();
         FileID newID = new FileID(serviceID, accountID, idTuple.getFolder(), idTuple.getId());
         FolderID newFolderID = new FolderID(serviceID, accountID, idTuple.getFolder());
         document.setId(newID.toUniqueID());
         document.setFolderId(newFolderID.toUniqueID());
+        document.setUniqueId(document.getUniqueId() != null ? new UniqueFileID(document.getUniqueId()).toUniqueID() : null);
         postEvent(FileStorageEventHelper.buildUpdateEvent(
             session, serviceID, accountID, newFolderID.toUniqueID(), newID.toUniqueID(), document.getFileName()));
 
@@ -1092,6 +1097,7 @@ public abstract class AbstractCompositingIDBasedFileAccess extends AbstractCompo
 
         document.setId(FileStorageFileAccess.NEW);
         document.setFolderId(folderId.getFolderId());
+        document.setUniqueId(document.getUniqueId() != null ? new UniqueFileID(document.getUniqueId()).getUniqueFileId() : null);
         document.setObjectPermissions(null);
         document.setFileName(sourceFile.getFileName());
 
@@ -1122,6 +1128,7 @@ public abstract class AbstractCompositingIDBasedFileAccess extends AbstractCompo
             fieldsToSkip.add(Field.CREATED);
             fieldsToSkip.add(Field.VERSION);
             fieldsToSkip.add(Field.VERSION_COMMENT);
+            fieldsToSkip.add(Field.UNIQUE_ID);
             Set<Field> toCopy = EnumSet.complementOf(EnumSet.copyOf(fieldsToSkip));
             document.copyFrom(sourceFile, toCopy.toArray(new File.Field[toCopy.size()]));
         }
@@ -1144,6 +1151,7 @@ public abstract class AbstractCompositingIDBasedFileAccess extends AbstractCompo
         FolderID newFolderID = new FolderID(folderId.getService(), folderId.getAccountId(), result.getFolder());
         document.setId(newFileID.toUniqueID());
         document.setFolderId(newFolderID.toUniqueID());
+        document.setUniqueId(document.getUniqueId() != null ? new UniqueFileID(document.getUniqueId()).toUniqueID() : null);
 
         {
             final TransactionAwareFileAccessDelegation<Void> removeDocumentDelegation = new TransactionAwareFileAccessDelegation<Void>() {
@@ -1188,6 +1196,7 @@ public abstract class AbstractCompositingIDBasedFileAccess extends AbstractCompo
                 IDTuple result = access.saveDocument(document, data, sequenceNumber);
                 document.setFolderId(result.getFolder());
                 document.setId(result.getId());
+                document.setUniqueId(document.getUniqueId() != null ? new UniqueFileID(document.getUniqueId()).getUniqueFileId() : null);
                 IDTuple idTuple = ShareHelper.applyGuestPermissions(session, access, document, comparedPermissions);
                 SaveResult saveResult = new SaveResult();
                 saveResult.setIDTuple(idTuple);
@@ -1247,6 +1256,7 @@ public abstract class AbstractCompositingIDBasedFileAccess extends AbstractCompo
                 }
                 document.setFolderId(result.getFolder());
                 document.setId(result.getId());
+                document.setUniqueId(document.getUniqueId() != null ? new UniqueFileID(document.getUniqueId()).getUniqueFileId() : null);
                 IDTuple idTuple = ShareHelper.applyGuestPermissions(session, access, document, comparedPermissions);
                 SaveResult saveResult = new SaveResult();
                 saveResult.setIDTuple(idTuple);
@@ -1270,6 +1280,7 @@ public abstract class AbstractCompositingIDBasedFileAccess extends AbstractCompo
                 IDTuple result = ((FileStorageRandomFileAccess) access).saveDocument(document, data, sequenceNumber, modifiedColumns, offset);
                 document.setFolderId(result.getFolder());
                 document.setId(result.getId());
+                document.setUniqueId(document.getUniqueId() != null ? new UniqueFileID(document.getUniqueId()).getUniqueFileId() : null);
                 IDTuple idTuple = ShareHelper.applyGuestPermissions(session, access, document, comparedPermissions);
                 SaveResult saveResult = new SaveResult();
                 saveResult.setIDTuple(idTuple);
@@ -1289,6 +1300,7 @@ public abstract class AbstractCompositingIDBasedFileAccess extends AbstractCompo
                 IDTuple result = access.saveFileMetadata(document, sequenceNumber);
                 document.setFolderId(result.getFolder());
                 document.setId(result.getId());
+                document.setUniqueId(document.getUniqueId() != null ? new UniqueFileID(document.getUniqueId()).getUniqueFileId() : null);
                 IDTuple idTuple = ShareHelper.applyGuestPermissions(session, access, document, comparedPermissions);
                 SaveResult saveResult = new SaveResult();
                 saveResult.setIDTuple(idTuple);
@@ -1335,6 +1347,7 @@ public abstract class AbstractCompositingIDBasedFileAccess extends AbstractCompo
                 IDTuple result = access.saveFileMetadata(document, sequenceNumber, modifiedColumns);
                 document.setFolderId(result.getFolder());
                 document.setId(result.getId());
+                document.setUniqueId(document.getUniqueId() != null ? new UniqueFileID(document.getUniqueId()).getUniqueFileId() : null);
                 IDTuple idTuple = ShareHelper.applyGuestPermissions(session, access, document, comparedPermissions);
                 SaveResult saveResult = new SaveResult();
                 if (result instanceof UserizedIDTuple) {
@@ -1533,6 +1546,7 @@ public abstract class AbstractCompositingIDBasedFileAccess extends AbstractCompo
                     metadata.copyFrom(update);
                 }
                 metadata.setFolderId(null);
+                metadata.setUniqueId(null);
                 metadata.setId(null);
             } else {
                 metadata = null;
@@ -1569,6 +1583,7 @@ public abstract class AbstractCompositingIDBasedFileAccess extends AbstractCompo
 
         fileMetadata.setId(FileStorageFileAccess.NEW);
         fileMetadata.setFolderId(destFolderId);
+        fileMetadata.setUniqueId(FileStorageFileAccess.NEW);
         fileMetadata.setVersion(null);
         fileMetadata.setCreatedBy(0);
         fileMetadata.setCreatedFrom(null);

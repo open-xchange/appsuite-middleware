@@ -107,6 +107,7 @@ public final class GoogleDriveFile extends DefaultFile {
         setFileName(id);
         setVersion(FileStorageFileAccess.CURRENT_VERSION);
         setIsCurrentVersion(true);
+        setUniqueId(id);
     }
 
     private static boolean isRootFolder(String id, String rootFolderId) {

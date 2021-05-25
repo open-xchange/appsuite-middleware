@@ -370,5 +370,10 @@ public class FileFieldHandling {
             return handler.handle(Field.MODIFIED_FROM, args);
         }
 
+        @Override
+        public Object unique_id(Object[] args) {
+            return handler.handle(Field.UNIQUE_ID, args);
+        }
+
     }
 }

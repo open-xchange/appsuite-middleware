@@ -1,13 +1,17 @@
 
 package com.openexchange.file.storage.infostore;
 
+import static com.openexchange.java.Autoboxing.I;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import com.openexchange.file.storage.AbstractFile;
 import com.openexchange.file.storage.FileStorageFileAccess;
 import com.openexchange.file.storage.FileStorageObjectPermission;
+import com.openexchange.file.storage.FileStoragePersistentIDs;
 import com.openexchange.file.storage.FolderPath;
 import com.openexchange.file.storage.MediaStatus;
 import com.openexchange.file.storage.UserizedFile;
@@ -75,6 +79,7 @@ import com.openexchange.session.Session;
  */
 public class InfostoreFile extends AbstractFile implements UserizedFile {
 
+    private static final Logger LOGGER = LoggerFactory.getLogger(InfostoreFile.class);
     private final DocumentMetadata document;
 
     /**
@@ -521,6 +526,16 @@ public class InfostoreFile extends AbstractFile implements UserizedFile {
     @Override
     public void setModifiedFrom(EntityInfo modifiedFrom) {
         document.setModifiedFrom(modifiedFrom);
+    }
+
+    @Override
+    public String getUniqueId() {
+        return I(document.getId()).toString();
+    }
+
+    @Override
+    public void setUniqueId(String uniqueId) {
+        LOGGER.debug("The unique id for a infostore file cannot be modified.");
     }
 
 }

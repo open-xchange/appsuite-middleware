@@ -89,6 +89,7 @@ public final class BoxFile extends DefaultFile {
         setVersion(FileStorageFileAccess.CURRENT_VERSION);
         setNumberOfVersions(1);
         setIsCurrentVersion(true);
+        setUniqueId(id);
     }
 
     private static boolean isRootFolder(String id, String rootFolderId) {

@@ -169,7 +169,7 @@ public class XOXFileAccess implements /*@formatter:off*/
             ret = client.saveNewDocument(file, data, tryAddVersion);
         } else { /* update an existing file */
             List<Field> fieldsToUpdate = new ArrayList<Field>(null == modifiedFields ? Arrays.asList(Field.values()) : modifiedFields);
-            fieldsToUpdate = Field.reduceBy(fieldsToUpdate, Field.FOLDER_ID, Field.FILE_MIMETYPE, Field.FILE_SIZE, Field.FILENAME);
+            fieldsToUpdate = Field.reduceBy(fieldsToUpdate, Field.FOLDER_ID, Field.FILE_MIMETYPE, Field.FILE_SIZE, Field.FILENAME, Field.UNIQUE_ID);
             int[] modifiedColumns = fieldsToUpdate.stream().mapToInt(f -> f.getNumber()).toArray();
             ret = client.updateDocument(file, data, sequenceNumber, modifiedColumns);
         }

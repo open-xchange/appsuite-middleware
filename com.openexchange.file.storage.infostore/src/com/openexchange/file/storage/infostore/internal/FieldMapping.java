@@ -114,6 +114,7 @@ public class FieldMapping {
         field2metadata.put(File.Field.MEDIA_DATE, Metadata.MEDIA_DATE_LITERAL);
         field2metadata.put(File.Field.CREATED_FROM, Metadata.CREATED_FROM_LITERAL);
         field2metadata.put(File.Field.MODIFIED_FROM, Metadata.MODIFIED_FROM_LITERAL);
+        field2metadata.put(File.Field.UNIQUE_ID, Metadata.UNIQUE_ID_LITERAL);
     }
 
     public static Metadata getMatching(File.Field field) {

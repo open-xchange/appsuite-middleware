@@ -29276,6 +29276,11 @@
                       "description" : "Contains additional metadata for items in the \"maildrive\" file storage.",
                       "readOnly" : true
                     },
+                    "unique_id" : {
+                      "type" : "String",
+                      "description" : "Lifetime unique identifier of the file that do not change after move or rename operations.",
+                      "readOnly" : true
+                    },
                     "id" : {
                       "type" : "string",
                       "description" : "Object ID."
@@ -30540,6 +30545,11 @@
           "com.openexchange.file.storage.mail.mailMetadata" : {
             "type" : "object",
             "description" : "Contains additional metadata for items in the \"maildrive\" file storage.",
+            "readOnly" : true
+          },
+          "unique_id" : {
+            "type" : "String",
+            "description" : "Lifetime unique identifier of the file that do not change after move or rename operations.",
             "readOnly" : true
           },
           "id" : {
