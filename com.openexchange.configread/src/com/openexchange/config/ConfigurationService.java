@@ -245,12 +245,12 @@ public interface ConfigurationService {
     Map<String, Object> getYamlInFolder(String dirName);
 
     /**
-     * Gets those properties grouped by associated file, whose value originates from a system environment variable.
+     * Gets those properties whose value originates from a system environment variable.
      *
-     * @return The properties originating from system environment variables grouped by file
+     * @return The properties originating from system environment variables
      */
-    default Map<File, Set<String>> getSysEnvProperties() {
-        return Collections.emptyMap();
+    default Set<String> getSysEnvProperties() {
+        return Collections.emptySet();
     }
 
 }
