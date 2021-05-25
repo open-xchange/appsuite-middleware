@@ -7,7 +7,7 @@ BuildRequires: open-xchange-core >= @OXVERSION@
 BuildRequires: open-xchange-pns-impl >= @OXVERSION@
 BuildRequires: java-1.8.0-openjdk-devel
 Version:       @OXVERSION@
-%define        ox_release 24
+%define        ox_release 25
 Release:       %{ox_release}_<CI_CNT>.<B_CNT>
 Group:         Applications/Productivity
 License:       GPL-2.0
@@ -113,6 +113,8 @@ fi
 %config(noreplace) /opt/open-xchange/etc/contextSets/*
 
 %changelog
+* Tue May 25 2021 Steffen Templin <marcus.klein@open-xchange.com>
+Build for patch 2021-06-01 (5999)
 * Tue May 18 2021 Steffen Templin <marcus.klein@open-xchange.com>
 Build for patch 2021-05-17 (5993)
 * Mon Apr 26 2021 Steffen Templin <marcus.klein@open-xchange.com>
