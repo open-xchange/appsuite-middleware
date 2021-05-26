@@ -3,7 +3,7 @@
 Name:           open-xchange-meta
 BuildArch:      noarch
 Version:        @OXVERSION@
-%define         ox_release 12
+%define         ox_release 13
 Release:        %{ox_release}_<CI_CNT>.<B_CNT>
 Group:          Applications/Productivity
 License:        GPL-2.0
@@ -486,6 +486,8 @@ prep
 %defattr(-,root,root)
 
 %changelog
+* Wed May 26 2021 Carsten Hoeger <choeger@open-xchange.com>
+Build for patch 2021-06-01 (6000)
 * Fri May 21 2021 Carsten Hoeger <choeger@open-xchange.com>
 Build for patch 2021-05-21 (5997)
 * Tue May 18 2021 Carsten Hoeger <choeger@open-xchange.com>

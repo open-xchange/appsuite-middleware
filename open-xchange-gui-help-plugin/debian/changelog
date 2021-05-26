@@ -1,3 +1,9 @@
+open-xchange-gui-help-plugin (7.10.5-13) stable; urgency=medium
+
+  * Build for patch 2021-06-01 (6000)
+
+ -- Marcus Klein <marcus.klein@open-xchange.com>  Wed, 26 May 2021 10:19:07 +0000
+
 open-xchange-gui-help-plugin (7.10.5-12) stable; urgency=medium
 
   * Build for patch 2021-05-21 (5997)

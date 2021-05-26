@@ -9,7 +9,7 @@ BuildRequires: open-xchange-admin
 BuildRequires: java-1.8.0-openjdk-devel
 BuildRequires: pandoc >= 2.0.0
 Version:       @OXVERSION@
-%define        ox_release 12
+%define        ox_release 13
 Release:       %{ox_release}_<CI_CNT>.<B_CNT>
 Group:         Applications/Productivity
 License:       GPL-2.0
@@ -62,6 +62,8 @@ sed -i -e 's;%{buildroot};;' %{manlist}
 %config(noreplace) /opt/open-xchange/etc/plugin/*
 
 %changelog
+* Wed May 26 2021 Jan Bauerdick <jan.bauerdick@open-xchange.com>
+Build for patch 2021-06-01 (6000)
 * Fri May 21 2021 Jan Bauerdick <jan.bauerdick@open-xchange.com>
 Build for patch 2021-05-21 (5997)
 * Tue May 18 2021 Jan Bauerdick <jan.bauerdick@open-xchange.com>
