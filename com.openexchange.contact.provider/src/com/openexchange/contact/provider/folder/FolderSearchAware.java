@@ -61,7 +61,7 @@ import com.openexchange.search.SearchTerm;
  * {@link FolderSearchAware}
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
- * @since v8.0.0
+ * @since v7.10.6
  */
 public interface FolderSearchAware extends SearchAware {
 

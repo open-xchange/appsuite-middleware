@@ -147,7 +147,7 @@ abstract class AbstractContactsDatabasePerformer<T> {
      */
     T executeQuery() throws OXException {
         if (null != foreignConnection) {
-            return execute(new SimpleDBProvider(foreignConnection, null), DBTransactionPolicy.NORMAL_TRANSACTIONS);
+            return execute(new SimpleDBProvider(foreignConnection, null), DBTransactionPolicy.NO_TRANSACTIONS);
         }
         return doExecuteQuery();
     }
@@ -159,7 +159,7 @@ abstract class AbstractContactsDatabasePerformer<T> {
      */
     T executeUpdate() throws OXException {
         if (null != foreignConnection) {
-            return execute(new SimpleDBProvider(foreignConnection, foreignConnection), DBTransactionPolicy.NORMAL_TRANSACTIONS);
+            return execute(new SimpleDBProvider(foreignConnection, foreignConnection), DBTransactionPolicy.NO_TRANSACTIONS);
         }
         OXException toThrow;
         do {

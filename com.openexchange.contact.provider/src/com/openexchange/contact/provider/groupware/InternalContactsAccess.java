@@ -64,7 +64,7 @@ import com.openexchange.search.SearchTerm;
  * The {@link GroupwareContactsAccess} for the default internal address books.
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
- * @since v8.0.0
+ * @since v7.10.6
  */
 public interface InternalContactsAccess extends GroupwareContactsAccess {
 

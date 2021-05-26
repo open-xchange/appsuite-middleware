@@ -52,6 +52,8 @@ package com.openexchange.contact.provider.composition.impl;
 import static com.openexchange.contact.provider.composition.impl.idmangling.IDMangler.getAccountId;
 import static com.openexchange.contact.provider.composition.impl.idmangling.IDMangler.getRelativeFolderId;
 import static com.openexchange.contact.provider.composition.impl.idmangling.IDMangler.getRelativeId;
+import static com.openexchange.contact.provider.composition.impl.idmangling.IDMangler.getUniqueFolderId;
+import static com.openexchange.contact.provider.composition.impl.idmangling.IDMangler.withRelativeID;
 import static com.openexchange.contact.provider.composition.impl.idmangling.IDMangler.withUniqueID;
 import static com.openexchange.contact.provider.composition.impl.idmangling.IDMangler.withUniqueIDs;
 import static com.openexchange.java.Autoboxing.B;
@@ -118,6 +120,7 @@ import com.openexchange.groupware.contact.helpers.ContactField;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.search.ContactsSearchObject;
 import com.openexchange.groupware.search.Order;
+import com.openexchange.groupware.tools.mappings.json.JsonMapping;
 import com.openexchange.java.Strings;
 import com.openexchange.l10n.SuperCollator;
 import com.openexchange.search.CompositeSearchTerm;
@@ -335,8 +338,9 @@ public class CompositingIDBasedContactsAccess extends AbstractCompositingIDBased
             ContactsAccount existingAccount = optAccount(accountId);
             if (null != existingAccount && (null == providerId || providerId.equals(existingAccount.getProviderId()))) {
                 try {
-                    String folderId = getAccess(accountId, FolderContactsAccess.class).createFolder(IDMangler.withRelativeID(folder));
-                    return IDMangler.getUniqueFolderId(existingAccount.getAccountId(), folderId);
+                    FolderContactsAccess contactsAccess = getAccess(accountId, FolderContactsAccess.class);
+                    String folderId = contactsAccess.createFolder(IDMangler.withRelativeID(folder));
+                    return getUniqueFolderId(existingAccount.getAccountId(), folderId, GroupwareContactsAccess.class.isInstance(contactsAccess));
                 } catch (OXException e) {
                     throw IDMangler.withUniqueIDs(e, ContactsAccount.DEFAULT_ACCOUNT.getAccountId());
                 }
@@ -353,21 +357,31 @@ public class CompositingIDBasedContactsAccess extends AbstractCompositingIDBased
 
     @Override
     public String updateFolder(String folderId, ContactsFolder folder, JSONObject userConfig, long clientTimestamp) throws OXException {
-        int accountId = IDMangler.getAccountId(folderId);
+        int accountId = getAccountId(folderId);
         try {
             ContactsAccess contactsAccess = getAccess(accountId);
             if (FolderContactsAccess.class.isInstance(contactsAccess)) {
-                // Update folder directly within folder-aware account
-                String updatedId = ((FolderContactsAccess) contactsAccess).updateFolder(IDMangler.getRelativeFolderId(folderId), IDMangler.withRelativeID(folder), clientTimestamp);
-                return IDMangler.getUniqueFolderId(accountId, updatedId);
+                /*
+                 * update folder within folder-aware account
+                 */
+                String updatedId = ((FolderContactsAccess) contactsAccess).updateFolder(getRelativeFolderId(folderId), withRelativeID(folder), clientTimestamp);
+                /*
+                 * additionally update account settings as needed
+                 */
+                if (null != userConfig) {
+                    requireService(ContactsAccountService.class, services).updateAccount(session, accountId, userConfig, clientTimestamp, this);
+                }
+                return getUniqueFolderId(accountId, updatedId, GroupwareContactsAccess.class.isInstance(contactsAccess));
             }
-            // update account settings
-            folderMatches(IDMangler.getRelativeFolderId(folderId), BasicContactsAccess.FOLDER_ID);
+            /*
+             * update account settings
+             */
+            folderMatches(getRelativeFolderId(folderId), BasicContactsAccess.FOLDER_ID);
             ContactsSettings settings = getBasicContactsSettings(folder, userConfig);
             ContactsAccount updatedAccount = requireService(ContactsAccountService.class, services).updateAccount(session, accountId, clientTimestamp, settings, this);
-            return IDMangler.getUniqueFolderId(updatedAccount.getAccountId(), BasicContactsAccess.FOLDER_ID);
+            return getUniqueFolderId(updatedAccount.getAccountId(), BasicContactsAccess.FOLDER_ID);
         } catch (OXException e) {
-            throw IDMangler.withUniqueIDs(e, accountId);
+            throw withUniqueIDs(e, accountId);
         }
     }
 
@@ -1152,10 +1166,9 @@ public class CompositingIDBasedContactsAccess extends AbstractCompositingIDBased
             public int compare(Contact o1, Contact o2) {
                 for (SortOrder order : sortOrder) {
                     int comparison = 0;
-                    try {
-                        comparison = ContactMapper.getInstance().get(order.getBy()).compare(o1, o2, locale);
-                    } catch (OXException e) {
-                        LOG.error("error comparing objects", e);
+                    JsonMapping<? extends Object, Contact> mapping = ContactMapper.getInstance().opt(order.getBy());
+                    if (null != mapping) {
+                        comparison = mapping.compare(o1, o2, locale);
                     }
                     if (0 != comparison) {
                         return Order.DESCENDING.equals(order.getOrder()) ? -1 * comparison : comparison;
@@ -1166,19 +1179,4 @@ public class CompositingIDBasedContactsAccess extends AbstractCompositingIDBased
         };
     }
 
-    /**
-     * {@link SearchPerformer}
-     */
-    @FunctionalInterface
-    interface SearchPerformer {
-
-        /**
-         * Performs the search
-         *
-         * @param access The search aware access
-         * @return The result
-         * @throws OXException if an error is occurred
-         */
-        List<Contact> perform(BasicSearchAware access) throws OXException;
-    }
 }

@@ -306,7 +306,7 @@ public class TransactionManager {
                 try {
                     connection.commit();
                 } catch (SQLException e) {
-                    throw FolderExceptionErrorMessage.SQL_ERROR.create(e.getMessage());
+                    throw FolderExceptionErrorMessage.SQL_ERROR.create(e, e.getMessage());
                 }
                 if (null != cacheCondition) {
                     cacheCondition.set(true);

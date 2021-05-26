@@ -157,4 +157,9 @@ public class DefaultGroupwareContactsFolder extends DefaultContactsFolder implem
         this.meta = meta;
     }
 
+    @Override
+    public String toString() {
+        return "DefaultGroupwareContactsFolder [parentId=" + parentId + ", getId()=" + getId() + ", getName()=" + getName() + "]";
+    }
+
 }
