@@ -74,9 +74,10 @@
                   
                   Valid fields are the ones specified in [Contact data](#/definitions/ContactData) model.
                   The field 'folder' is not allowed as operand.
-                required: true
               folders:
                 type: array
                 description: The identifiers of the folders to restrict the search to.
                 items:
                   type: string
+            required: ["filter"]
+

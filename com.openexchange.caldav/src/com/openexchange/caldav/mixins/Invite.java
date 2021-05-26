@@ -49,6 +49,7 @@
 
 package com.openexchange.caldav.mixins;
 
+import com.google.common.xml.XmlEscapers;
 import com.openexchange.caldav.CaldavProtocol;
 import com.openexchange.caldav.GroupwareCaldavFactory;
 import com.openexchange.dav.mixins.PrincipalURL;
@@ -132,8 +133,8 @@ public class Invite extends SingleXMLPropertyMixin {
         }
         boolean mailtoPrefix = true; // bug #44264
         return new StringBuilder()
-            .append("<D:href>").append(mailtoPrefix ? "mailto:" : "").append(uri).append("</D:href>")
-            .append("<CS:common-name>").append(commonName).append("</CS:common-name>")
+            .append("<D:href>").append(mailtoPrefix ? "mailto:" : "").append(XmlEscapers.xmlContentEscaper().escape(uri)).append("</D:href>")
+            .append("<CS:common-name>").append(XmlEscapers.xmlContentEscaper().escape(commonName)).append("</CS:common-name>")
         .toString();
     }
 
