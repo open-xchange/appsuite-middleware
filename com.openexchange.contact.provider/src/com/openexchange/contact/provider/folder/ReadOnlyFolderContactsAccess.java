@@ -55,6 +55,7 @@ import com.openexchange.contact.common.ContactsAccount;
 import com.openexchange.contact.common.ContactsFolder;
 import com.openexchange.contact.provider.ContactsProviderExceptionCodes;
 import com.openexchange.exception.OXException;
+import com.openexchange.groupware.contact.helpers.ContactField;
 import com.openexchange.groupware.container.Contact;
 
 /**
@@ -105,6 +106,11 @@ public abstract class ReadOnlyFolderContactsAccess implements FolderContactsAcce
     @Override
     public void deleteFolder(String folderId, long clientTimestamp) throws OXException {
         throw unsupportedOperation();
+    }
+
+    @Override
+    public boolean supports(String folderId, ContactField... fields) throws OXException {
+        return false;
     }
 
     protected OXException unsupportedOperation() {
