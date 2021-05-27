@@ -186,9 +186,27 @@ properties:
     - key: com.openexchange.drive.maxConcurrentSyncFiles
       description: |
         Specifies the configured limit for concurrent syncFiles-Operation that 
-        is indicated to clients. 
+        is allowed to be performed by a single user. While the limit is reached, further
+        syncFiles requests are rejected for that user in a HTTP 503 manner (service
+        unavailable), and the client is instructed to try again at a later time.
+        <code>-1</code> means no limitations.
       defaultValue: 10
       version: 7.10.4
+      reloadable: true
+      configcascadeAware: true
+      related: 
+      file: drive.properties
+      packageName: open-xchange-drive
+      tags: ["Drive", "Limit"]
+    - key: com.openexchange.drive.maxConcurrentSyncFolders
+      description: |
+        Specifies the configured limit for concurrent syncFolders-Operation that 
+        is allowed to be performed by a single user. While the limit is reached, further
+        syncFolders requests are rejected for that user in a HTTP 503 manner (service
+        unavailable), and the client is instructed to try again at a later time.
+        <code>-1</code> means no limitations.
+      defaultValue: 3
+      version: 7.10.6
       reloadable: true
       configcascadeAware: true
       related: 

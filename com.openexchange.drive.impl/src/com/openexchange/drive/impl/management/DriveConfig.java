@@ -437,6 +437,17 @@ public class DriveConfig {
     }
 
     /**
+     * Gets the maxConcurrentSyncFolders
+     *
+     * @param contextId The context identifier
+     * @param userId The user identifier
+     * @return The maxConcurrentSyncFolders
+     */
+    public int getMaxConcurrentSyncFolders() {
+        return getConfigService().getIntProperty(userId, contextId, DriveProperty.MAX_CONCURRENT_SYNCFOLDERS);
+    }
+
+    /**
      * Gets the maxFilesPerDirectory
      *
      * @param contextId The context identifier
