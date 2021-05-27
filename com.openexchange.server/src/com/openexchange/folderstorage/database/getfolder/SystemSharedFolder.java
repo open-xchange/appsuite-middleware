@@ -192,10 +192,7 @@ public final class SystemSharedFolder {
                     }
                     creatorDisplayName = strHelper.getString(Groups.ALL_USERS);
                 }
-                if (displayNames.containsKey(creatorDisplayName)) {
-                    continue;
-                }
-                displayNames.put(creatorDisplayName, Integer.valueOf(sharedFolder.getCreatedBy()));
+                displayNames.putIfAbsent(creatorDisplayName, Integer.valueOf(sharedFolder.getCreatedBy()));
             }
         }
         /*
