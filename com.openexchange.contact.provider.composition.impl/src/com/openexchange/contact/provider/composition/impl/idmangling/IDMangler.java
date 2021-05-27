@@ -99,7 +99,7 @@ public final class IDMangler {
     private static final int DEFAULT_ACCOUNT_ID = ContactsAccount.DEFAULT_ACCOUNT.getAccountId();
 
     /** The pattern to lookup folder place holders in contacts exception messages */
-    private static final Pattern FOLDER_ARGUMENT_PATTERN = Pattern.compile("(?:\\[|,|)(([fF]older %(\\d)\\$s)|([fF]older %(\\d)\\$d))|([fF]older id %(\\d)\\$d)|([fF]older: %(\\d)\\$d)(?:\\]|,| )"); //FIXME: Too much deviation in ContactExceptionCodes, maybe align in the future
+    private static final Pattern FOLDER_ARGUMENT_PATTERN = Pattern.compile("(?:\\[|,|)(?:[fF]older(?: | id |\\: )%(\\d)\\$[sd])(?:\\]|,| )");
 
     /** The fixed prefix used to quickly identify contacts folder identifiers. */
     public static final String CONTACTS_PREFIX = "con";
@@ -237,13 +237,13 @@ public final class IDMangler {
      * @return The contacts folder representation with unique identifiers
      */
     public static AccountAwareContactsFolder withUniqueID(ContactsFolder folder, ContactsAccount account) {
-        String newId = getUniqueFolderId(account.getAccountId(), folder.getId());
         if (GroupwareContactsFolder.class.isInstance(folder)) {
             GroupwareContactsFolder groupwareFolder = (GroupwareContactsFolder) folder;
-            String newParentId = getUniqueFolderId(account.getAccountId(), groupwareFolder.getParentId());
+            String newId = getUniqueFolderId(account.getAccountId(), folder.getId(), true);
+            String newParentId = getUniqueFolderId(account.getAccountId(), groupwareFolder.getParentId(), true);
             return new IDManglingContactsAccountAwareGroupwareFolder(groupwareFolder, account, newId, newParentId);
         }
-        return new IDManglingContactsAccountAwareFolder(folder, account, newId);
+        return new IDManglingContactsAccountAwareFolder(folder, account, getUniqueFolderId(account.getAccountId(), folder.getId()));
     }
 
     /**
@@ -302,7 +302,7 @@ public final class IDMangler {
     /**
      * Gets the relative representation of a list of unique composite folder identifier, mapped to their associated account identifier.
      * <p/>
-     * {@link IDMangling#ROOT_FOLDER_IDS} are passed as-is implicitly, mapped to the default account.
+     * {@link IDMangler#ROOT_FOLDER_IDS} are passed as-is implicitly, mapped to the default account.
      *
      * @param uniqueFolderIds The unique composite folder identifiers, e.g. <code>con://11/38</code>
      * @param errorsPerFolderId A map to track possible errors that occurred when parsing the supplied identifiers
@@ -344,15 +344,30 @@ public final class IDMangler {
     /**
      * Gets the fully qualified composite representation of a specific relative folder identifier.
      * <p/>
-     * {@link IDMangling#ROOT_FOLDER_IDS} as well as identifiers starting with {@link IDMangling#SHARED_PREFIX} are passed as-is implicitly.
+     * {@link IDMangler#ROOT_FOLDER_IDS} as well as identifiers starting with {@link IDMangler#SHARED_PREFIX} are passed as-is implicitly.
      *
      * @param accountId The identifier of the account the folder originates in
      * @param relativeFolderId The relative folder identifier
      * @return The unique folder identifier
      */
     public static String getUniqueFolderId(int accountId, String relativeFolderId) {
-        if (DEFAULT_ACCOUNT_ID == accountId) {
-            if (null == relativeFolderId || ROOT_FOLDER_IDS.contains(relativeFolderId) || relativeFolderId.startsWith(SHARED_PREFIX)) {
+        return getUniqueFolderId(accountId, relativeFolderId, ContactsAccount.DEFAULT_ACCOUNT.getAccountId() == accountId);
+    }
+
+    /**
+     * Gets the fully qualified composite representation of a specific relative folder identifier.
+     * <p/>
+     * {@link IDMangler#ROOT_FOLDER_IDS} as well as identifiers starting with {@link IDMangler#SHARED_PREFIX} are passed as-is implicitly,
+     * in case a <i>groupware</i> contacts access is indicated.
+     *
+     * @param accountId The identifier of the account the folder originates in
+     * @param relativeFolderId The relative folder identifier
+     * @param groupwareAccess <code>true</code> if the identifier originates from a <i>groupware</i> contacts access, <code>false</code>, otherwise
+     * @return The unique folder identifier
+     */
+    public static String getUniqueFolderId(int accountId, String relativeFolderId, boolean groupwareAccess) {
+        if (groupwareAccess || ContactsAccount.DEFAULT_ACCOUNT.getAccountId() == accountId) {
+            if (ROOT_FOLDER_IDS.contains(relativeFolderId) || relativeFolderId.startsWith(SHARED_PREFIX)) {
                 return relativeFolderId;
             }
         } else if (null == relativeFolderId) {
@@ -364,7 +379,7 @@ public final class IDMangler {
     /**
      * Gets the account identifier of a specific unique composite folder identifier.
      * <p/>
-     * {@link IDMangling#ROOT_FOLDER_IDS} as well as identifiers starting with {@link IDMangling#SHARED_PREFIX} will always yield the
+     * {@link IDMangler#ROOT_FOLDER_IDS} as well as identifiers starting with {@link IDMangler#SHARED_PREFIX} will always yield the
      * identifier of the default account.
      *
      * @param uniqueFolderId The unique composite folder identifier, e.g. <code>con://11/38</code>

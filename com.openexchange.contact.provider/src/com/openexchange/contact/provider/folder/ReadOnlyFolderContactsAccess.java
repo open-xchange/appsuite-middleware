@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH group of companies.
+ *    trademarks of the OX Software GmbH. group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -47,68 +47,68 @@
  *
  */
 
-package com.openexchange.contact.provider.composition.impl;
+package com.openexchange.contact.provider.folder;
 
-import org.json.JSONObject;
-import org.slf4j.LoggerFactory;
+import java.util.List;
+import com.openexchange.contact.ContactID;
 import com.openexchange.contact.common.ContactsAccount;
-import com.openexchange.contact.common.UsedForSync;
-import com.openexchange.contact.provider.CommonContactsConfigurationFields;
-import com.openexchange.contact.provider.basic.ContactsSettings;
-import com.openexchange.contact.provider.basic.FallbackBasicContactsAccess;
+import com.openexchange.contact.common.ContactsFolder;
+import com.openexchange.contact.provider.ContactsProviderExceptionCodes;
 import com.openexchange.exception.OXException;
+import com.openexchange.groupware.container.Contact;
 
 /**
- * {@link FallbackUnknownContactsAccess}
+ * {@link ReadOnlyFolderContactsAccess}
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  * @since v7.10.6
  */
-public class FallbackUnknownContactsAccess extends FallbackBasicContactsAccess {
+public abstract class ReadOnlyFolderContactsAccess implements FolderContactsAccess {
 
-    private final OXException error;
+    protected final ContactsAccount account;
 
     /**
-     * Initializes a new {@link FallbackUnknownContactsAccess}.
+     * Initializes a new {@link ReadOnlyFolderContactsAccess}.
      *
-     * @param account The underlying contacts account
-     * @param error The error to include in the accesses' contacts settings, or <code>null</code> if not defined
+     * @param account The underlying account
      */
-    public FallbackUnknownContactsAccess(ContactsAccount account, OXException error) {
-        super(account);
-        this.error = error;
+    protected ReadOnlyFolderContactsAccess(ContactsAccount account) {
+        super();
+        this.account = account;
     }
 
     @Override
-    public ContactsSettings getSettings() {
-        ContactsSettings settings = new ContactsSettings();
-        settings.setLastModified(account.getLastModified());
-        settings.setConfig(account.getUserConfiguration());
-        settings.setName(getAccountName(account));
-        settings.setSubscribed(true);
-        settings.setUsedForSync(UsedForSync.DEACTIVATED);
-        settings.setError(error);
-        return settings;
+    public void createContact(String folderId, Contact contact) throws OXException {
+        throw unsupportedOperation();
     }
 
-    /**
-     * Gets a (fallback) for the account's display name, in case the corresponding settings are not available.
-     *
-     * @param account The account to get the name for
-     * @return The account name
-     */
-    private static String getAccountName(ContactsAccount account) {
-        String fallbackName = "Account " + account.getAccountId();
-        try {
-            JSONObject internalConfig = account.getInternalConfiguration();
-            if (null != internalConfig) {
-                return internalConfig.optString(CommonContactsConfigurationFields.NAME, fallbackName);
-            }
-        } catch (Exception e) {
-            LoggerFactory.getLogger(FallbackUnknownContactsAccess.class).debug(
-                "Error getting display name for contacts account \"{}\": {}", account.getProviderId(), e.getMessage());
-        }
-        return fallbackName;
+    @Override
+    public void updateContact(ContactID contactId, Contact contact, long clientTimestamp) throws OXException {
+        throw unsupportedOperation();
+    }
+
+    @Override
+    public void deleteContacts(List<ContactID> contactsIds, long clientTimestamp) throws OXException {
+        throw unsupportedOperation();
+    }
+
+    @Override
+    public String createFolder(ContactsFolder folder) throws OXException {
+        throw unsupportedOperation();
+    }
+
+    @Override
+    public String updateFolder(String folderId, ContactsFolder folder, long clientTimestamp) throws OXException {
+        throw unsupportedOperation();
+    }
+
+    @Override
+    public void deleteFolder(String folderId, long clientTimestamp) throws OXException {
+        throw unsupportedOperation();
+    }
+
+    protected OXException unsupportedOperation() {
+        return ContactsProviderExceptionCodes.UNSUPPORTED_OPERATION_FOR_PROVIDER.create(account.getProviderId());
     }
 
 }

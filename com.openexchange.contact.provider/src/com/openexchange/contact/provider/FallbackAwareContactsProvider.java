@@ -58,7 +58,7 @@ import com.openexchange.session.Session;
  * {@link FallbackAwareContactsProvider}
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
- * @since v8.0.0
+ * @since v7.10.6
  */
 public interface FallbackAwareContactsProvider extends ContactsProvider {
 

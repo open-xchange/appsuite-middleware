@@ -183,11 +183,14 @@ public class RdbContactsAccountStorage extends RdbStorage implements ContactsAcc
         Connection connection = null;
         try {
             connection = dbProvider.getWriteConnection(context);
+            txPolicy.setAutoCommit(connection, false);
             updated = deleteAccount(connection, context.getContextId(), accountId, userId, clientTimestamp);
             if (0 != updated) {
+                txPolicy.commit(connection);
                 return;
             }
             checkAccount(userId, accountId, clientTimestamp, connection);
+            txPolicy.commit(connection);
         } catch (SQLException e) {
             throw asOXException(e);
         } finally {

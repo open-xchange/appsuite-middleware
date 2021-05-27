@@ -54,7 +54,6 @@ import java.util.Date;
 import java.util.List;
 import com.openexchange.contact.ContactID;
 import com.openexchange.contact.common.ContactsAccount;
-import com.openexchange.contact.common.ContactsFolder;
 import com.openexchange.contact.common.ContactsPermission;
 import com.openexchange.contact.common.DefaultContactsFolder;
 import com.openexchange.contact.common.DefaultContactsPermission;
@@ -68,11 +67,9 @@ import com.openexchange.groupware.container.Contact;
  * {@link FallbackFolderCalendarAccess}
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
- * @since v8.0.0
+ * @since v7.10.6
  */
-public abstract class FallbackFolderContactsAccess implements FolderContactsAccess {
-
-    protected final ContactsAccount account;
+public abstract class FallbackFolderContactsAccess extends ReadOnlyFolderContactsAccess {
 
     /**
      * Initializes a new {@link FallbackFolderContactsAccess}.
@@ -80,43 +77,12 @@ public abstract class FallbackFolderContactsAccess implements FolderContactsAcce
      * @param account The underlying account
      */
     protected FallbackFolderContactsAccess(ContactsAccount account) {
-        super();
-        this.account = account;
+        super(account);
     }
 
     @Override
     public void close() {
         // nothing to do
-    }
-
-    @Override
-    public void createContact(String folderId, Contact contact) throws OXException {
-        throw unsupportedOperation();
-    }
-
-    @Override
-    public void updateContact(ContactID contactId, Contact contact, long clientTimestamp) throws OXException {
-        throw unsupportedOperation();
-    }
-
-    @Override
-    public void deleteContacts(List<ContactID> contactsIds, long clientTimestamp) throws OXException {
-        throw unsupportedOperation();
-    }
-
-    @Override
-    public String createFolder(ContactsFolder folder) throws OXException {
-        throw unsupportedOperation();
-    }
-
-    @Override
-    public String updateFolder(String folderId, ContactsFolder folder, long clientTimestamp) throws OXException {
-        throw unsupportedOperation();
-    }
-
-    @Override
-    public void deleteFolder(String folderId, long clientTimestamp) throws OXException {
-        throw unsupportedOperation();
     }
 
     @Override
@@ -159,10 +125,6 @@ public abstract class FallbackFolderContactsAccess implements FolderContactsAcce
             ContactsPermission.READ_FOLDER, ContactsPermission.READ_ALL_OBJECTS, ContactsPermission.NO_PERMISSIONS,
             ContactsPermission.NO_PERMISSIONS, false, false, 0)));
         return folder;
-    }
-
-    protected OXException unsupportedOperation() {
-        return ContactsProviderExceptionCodes.UNSUPPORTED_OPERATION_FOR_PROVIDER.create(account.getProviderId());
     }
 
 }

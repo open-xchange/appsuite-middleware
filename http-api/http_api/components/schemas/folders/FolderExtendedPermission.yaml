@@ -43,3 +43,6 @@ properties:
       A flag indicating whether the permissions is inherited from the parent
       folder or not. The client must not allow the user to delete or update
       inherited permissions.
+  isInheritedFrom:
+    type: integer
+    description: If this permission is handed down from a parent folder (isInherited is set to `true`) this field contains the id of the sharing folder.

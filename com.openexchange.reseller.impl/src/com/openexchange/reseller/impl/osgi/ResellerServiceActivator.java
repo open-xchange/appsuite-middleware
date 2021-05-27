@@ -49,6 +49,7 @@
 
 package com.openexchange.reseller.impl.osgi;
 
+import com.openexchange.caching.CacheService;
 import com.openexchange.database.DatabaseService;
 import com.openexchange.groupware.delete.DeleteListener;
 import com.openexchange.lock.LockService;
@@ -75,7 +76,7 @@ public class ResellerServiceActivator extends HousekeepingActivator {
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class[] { DatabaseService.class };
+        return new Class[] { DatabaseService.class, CacheService.class };
     }
 
     @Override
