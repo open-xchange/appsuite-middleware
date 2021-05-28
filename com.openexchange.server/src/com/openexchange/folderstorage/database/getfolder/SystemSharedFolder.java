@@ -183,13 +183,15 @@ public final class SystemSharedFolder {
             final Iterator<FolderObject> iter = q.iterator();
             for (int i = 0; i < size; i++) {
                 final FolderObject sharedFolder = iter.next();
-                String creatorDisplayName;
+                String creatorDisplayName = null;
                 try {
                     creatorDisplayName = us.getUser(sharedFolder.getCreatedBy(), ctx).getDisplayName();
                 } catch (OXException e) {
                     if (sharedFolder.getCreatedBy() != OCLPermission.ALL_GROUPS_AND_USERS) {
                         throw e;
                     }
+                }
+                if (creatorDisplayName == null) {
                     creatorDisplayName = strHelper.getString(Groups.ALL_USERS);
                 }
                 if (displayNames.containsKey(creatorDisplayName)) {
@@ -229,6 +231,12 @@ public final class SystemSharedFolder {
 
         @Override
         public int compare(final String displayName1, final String displayName2) {
+            if (displayName1 == null || displayName2 == null) {
+                if (displayName1 == null) {
+                    return displayName2 == null ? 0 : -1;
+                }
+                return 1;
+            }
             return collator.compare(displayName1, displayName2);
         }
 
