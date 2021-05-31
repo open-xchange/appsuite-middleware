@@ -60,6 +60,7 @@ import com.openexchange.contact.vcard.VCardImport;
 import com.openexchange.contact.vcard.VCardParameters;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.Contact;
+import com.openexchange.java.Charsets;
 import com.openexchange.java.Streams;
 import com.openexchange.tools.iterator.SearchIterator;
 import ezvcard.Ezvcard;
@@ -77,8 +78,7 @@ public class VCardImportIterator implements SearchIterator<VCardImport> {
 
     private final VCardMapper mapper;
     private final VCardParameters parameters;
-    private final VCardInputStream vCardStream;
-    private final VCardReader reader;
+    private final VCardFileIterator vCardFileIterator;
     private final List<OXException> warnings;
 
     private VCardImport next;
@@ -95,8 +95,7 @@ public class VCardImportIterator implements SearchIterator<VCardImport> {
         this.mapper = mapper;
         this.parameters = parameters;
         warnings = new ArrayList<OXException>();
-        vCardStream = new VCardInputStream(inputStream);
-        reader = new VCardReader(vCardStream);
+        vCardFileIterator = new VCardFileIterator(inputStream);
     }
 
     /**
@@ -131,7 +130,7 @@ public class VCardImportIterator implements SearchIterator<VCardImport> {
 
     @Override
     public void close() {
-        Streams.close(reader, vCardStream);
+        Streams.close(vCardFileIterator);
     }
 
     @Override
@@ -168,42 +167,42 @@ public class VCardImportIterator implements SearchIterator<VCardImport> {
         /*
          * read next vCard
          */
-        List<OXException> warnings = new ArrayList<OXException>();
-        long vCardSize;
-        VCard vCard = null;
-        try {
-            vCard = reader.readNext();
-        } catch (IOException e) {
-            if (null != e.getCause() && OXException.class.isInstance(e.getCause())) {
-                throw (OXException) e.getCause();
-            }
-            throw VCardExceptionCodes.IO_ERROR.create(e, e.getMessage());
-        } finally {
-            vCardSize = vCardStream.resetCurrentSize();
+        if (false == vCardFileIterator.hasNext()) {
+            return null;
         }
-        warnings.addAll(VCardExceptionUtils.getParserWarnings(reader.getWarnings()));
+        List<OXException> warnings = new ArrayList<OXException>();
+        VCard vCard;
+        ThresholdFileHolder fileHolder = null;
+        try {
+            /*
+             * read next vCard component to temporary fileholder
+             */
+            fileHolder = vCardFileIterator.next();
+            /*
+             * check size & add import result with placeholder contact if exceeded
+             */
+            long maxSize = parameters.getMaxVCardSize();
+            if (0 < maxSize && maxSize < fileHolder.getCount()) {
+                OXException e = VCardExceptionCodes.MAXIMUM_SIZE_EXCEEDED.create(L(maxSize));
+                addWarning(e);
+                Contact placeholderContact = null != contact ? contact : new Contact();
+                placeholderContact.setUid(null != fileHolder.getName() ? fileHolder.getName() : placeholderContact.getUid());
+                placeholderContact.setProperty("com.openexchange.contact.vcard.importError", e);
+                return new DefaultVCardImport(placeholderContact, warnings, null);
+            }
+            /*
+             * parse vCard
+             */
+            vCard = parse(fileHolder, warnings);
+        } finally {
+            Streams.close(fileHolder);
+        }
         if (null == vCard) {
             /*
              * no vCard to import, so collect any warnings in parent iterator
              */
             this.addWarnings(warnings);
             return null;
-        }
-        /*
-         * check size
-         */
-        long maxSize = parameters.getMaxVCardSize();
-        if (0 < maxSize && vCardSize > maxSize) {
-            /*
-             * size exceeded, add import result with placeholder contact
-             */
-            OXException e = VCardExceptionCodes.MAXIMUM_SIZE_EXCEEDED.create(L(maxSize));
-            addWarning(e);
-            Contact placeholderContact = null != contact ? contact : new Contact();
-            placeholderContact.setUid(null != vCard.getUid() ? vCard.getUid().getValue() : placeholderContact.getUid());
-            placeholderContact.setDisplayName(null != vCard.getFormattedName() ? vCard.getFormattedName().getValue() : placeholderContact.getDisplayName());
-            placeholderContact.setProperty("com.openexchange.contact.vcard.importError", e);
-            return new DefaultVCardImport(placeholderContact, warnings, null);
         }
         /*
          * import vCard
@@ -218,25 +217,46 @@ public class VCardImportIterator implements SearchIterator<VCardImport> {
         /*
          * store original vCard in file holder if requested
          */
-        ThresholdFileHolder originalVCard = null;
-        if (parameters.isKeepOriginalVCard()) {
-            originalVCard = new ThresholdFileHolder();
-            ChainingTextWriter writerChain = Ezvcard.write(vCard).prodId(false);
-            try {
-                writerChain.go(originalVCard.asOutputStream());
-            } catch (IllegalArgumentException e) {
-                Streams.close(originalVCard);
-                originalVCard = null;
-                warnings.add(VCardExceptionCodes.ORIGINAL_VCARD_NOT_STORED.create(e, e.getMessage()));
-            } catch (IOException e) {
-                Streams.close(originalVCard);
-                throw VCardExceptionCodes.IO_ERROR.create(e, e.getMessage());
-            }
-        }
+        ThresholdFileHolder originalVCard = parameters.isKeepOriginalVCard() ? write(vCard, warnings) : null;
         /*
          * construct & return vCard import result
          */
         return new DefaultVCardImport(contactToUse, warnings, originalVCard);
+    }
+
+    private static ThresholdFileHolder write(VCard vCard, List<OXException> warnings) throws OXException {
+        ThresholdFileHolder fileHolder = new ThresholdFileHolder();
+        ChainingTextWriter writerChain = Ezvcard.write(vCard).prodId(false);
+        try {
+            writerChain.go(fileHolder.asOutputStream());
+        } catch (IllegalArgumentException e) {
+            Streams.close(fileHolder);
+            fileHolder = null;
+            warnings.add(VCardExceptionCodes.ORIGINAL_VCARD_NOT_STORED.create(e, e.getMessage()));
+        } catch (IOException e) {
+            Streams.close(fileHolder);
+            throw VCardExceptionCodes.IO_ERROR.create(e, e.getMessage());
+        }
+        return fileHolder;
+    }
+
+    private static VCard parse(ThresholdFileHolder fileHolder, List<OXException> warnings) throws OXException {
+        VCardReader reader = null;
+        try {
+            if (fileHolder.isInMemory()) {
+                reader = new VCardReader(new String(fileHolder.toByteArray(), Charsets.UTF_8));
+            } else {
+                reader = new VCardReader(fileHolder.getTempFile());
+            }
+            return reader.readNext();
+        } catch (IOException e) {
+            throw VCardExceptionCodes.IO_ERROR.create(e, e.getMessage());
+        } finally {
+            if (null != reader) {
+                warnings.addAll(VCardExceptionUtils.getParserWarnings(reader.getWarnings()));
+            }
+            Streams.close(reader);
+        }
     }
 
 }
