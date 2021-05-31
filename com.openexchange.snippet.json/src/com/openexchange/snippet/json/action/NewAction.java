@@ -136,6 +136,17 @@ public final class NewAction extends SnippetAction {
             }
         }
 
+        String content = snippet.getContent();
+        if (content == null) {
+            // Set to empty string
+            content = "";
+        } else if (contentSubType.indexOf("htm") >= 0) {
+            content = sanitizeHtmlContent(content);
+        } else {
+            content = sanitizeContent(content);
+        }
+        snippet.setContent(content);
+
         // Create via management
         String id = getSnippetService(snippetRequest.getSession()).getManagement(snippetRequest.getSession()).createSnippet(snippet);
         return new AJAXRequestResult(id, "string");

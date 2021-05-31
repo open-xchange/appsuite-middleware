@@ -60,6 +60,7 @@ import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.capabilities.CapabilityService;
 import com.openexchange.capabilities.CapabilitySet;
 import com.openexchange.exception.OXException;
+import com.openexchange.html.HtmlService;
 import com.openexchange.mail.mime.ContentType;
 import com.openexchange.osgi.ServiceListing;
 import com.openexchange.server.ServiceExceptionCode;
@@ -215,6 +216,74 @@ public abstract class SnippetAction implements AJAXActionService {
         }
         final String ct = SnippetUtils.parseContentTypeFromMisc(snippet.getMisc());
         return new ContentType(ct).getSubType();
+    }
+
+    // ----------------------------------------------------- Sanitizing --------------------------------------------------------------------
+
+    /**
+     * Sanitizes given Snippet content.
+     *
+     * @param content The content
+     * @return The sanitized content
+     */
+    protected String sanitizeContent(String content) {
+        if (isEmpty(content)) {
+            return content;
+        }
+
+        int s1 = content.indexOf('<');
+        if (s1 < 0) {
+            return content;
+        }
+
+        int s2 = content.lastIndexOf('>');
+        if (s2 < 0 || s2 < s1) {
+            return content;
+        }
+
+        return sanitizeHtmlContent(content);
+    }
+
+    /**
+     * Sanitizes given Snippet HTML content.
+     *
+     * @param content The HTML content
+     * @return The sanitized HTML content
+     */
+    protected String sanitizeHtmlContent(String content) {
+        HtmlService service = services.getService(HtmlService.class);
+        if (null == service) {
+            return content;
+        }
+
+        return sanitizeHtmlContent(content, service);
+    }
+
+    /**
+     * Sanitizes given Snippet HTML content.
+     *
+     * @param content The HTML content
+     * @param service The HTML service to use
+     * @return The sanitized HTML content
+     */
+    protected String sanitizeHtmlContent(String content, HtmlService service) {
+        try {
+            String retval = service.sanitize(content, null, false, null, null);
+
+            int start = retval.indexOf("<body>");
+            if (start >= 0) {
+                start += 6;
+                int end = retval.indexOf("</body>", start);
+                if (end > 0) {
+                    retval = retval.substring(start, end).trim();
+                }
+            }
+
+            return retval;
+        } catch (Exception e) {
+            // Ignore
+            return content;
+        }
     }
 
 }

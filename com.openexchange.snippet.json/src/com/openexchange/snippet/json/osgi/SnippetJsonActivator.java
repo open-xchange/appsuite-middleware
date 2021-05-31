@@ -52,6 +52,7 @@ package com.openexchange.snippet.json.osgi;
 import com.openexchange.ajax.requesthandler.ResultConverter;
 import com.openexchange.ajax.requesthandler.osgiservice.AJAXModuleActivator;
 import com.openexchange.capabilities.CapabilityService;
+import com.openexchange.html.HtmlService;
 import com.openexchange.osgi.RankingAwareNearRegistryServiceTracker;
 import com.openexchange.snippet.SnippetService;
 import com.openexchange.snippet.json.SnippetActionFactory;
@@ -73,7 +74,7 @@ public class SnippetJsonActivator extends AJAXModuleActivator {
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { SnippetService.class };
+        return new Class<?>[] { SnippetService.class, HtmlService.class };
     }
 
     @Override

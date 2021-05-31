@@ -140,6 +140,19 @@ public final class UpdateAction extends SnippetAction {
             snippetProcessor.processImages(snippet, attachments);
         }
 
+        if (properties.contains(Property.CONTENT)) {
+            String content = snippet.getContent();
+            if (content == null) {
+                // Set to empty string
+                content = "";
+            } else if (contentSubType.indexOf("htm") >= 0) {
+                content = sanitizeHtmlContent(content);
+            } else {
+                content = sanitizeContent(content);
+            }
+            snippet.setContent(content);
+        }
+
         // Update
         String newId = management.updateSnippet(id, snippet, properties, attachments, Collections.<Attachment> emptyList());
         Snippet newSnippet = management.getSnippet(newId);
