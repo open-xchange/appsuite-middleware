@@ -136,6 +136,7 @@ public class ToMySqlQueryVisitor implements SearchTermVisitor {
     private final boolean fulltextSearch;
     private final int minimumPatternLength;
     private String fulltextSearchPattern;
+    private boolean fulltextExactMatch = false;
 
     /**
      * Initializes a new {@link ToMySqlQueryVisitor}.
@@ -239,8 +240,12 @@ public class ToMySqlQueryVisitor implements SearchTermVisitor {
             int parameterIndex = 1;
             if (fulltextSearch && Strings.isNotEmpty(fulltextSearchPattern)) {
                 String pattern = fulltextSearchPattern;
-                if (false == fulltextSearchPattern.endsWith("*")) {
-                    pattern += "*";
+                if (fulltextExactMatch) {
+                    pattern = "\"" + fulltextSearchPattern + "\"";
+                } else {
+                    if (false == fulltextSearchPattern.endsWith("*")) {
+                        pattern += "*";
+                    }
                 }
                 for (int i = 0; i < selectCount; i++) {
                     stmt.setString(parameterIndex++, pattern);
@@ -636,6 +641,9 @@ public class ToMySqlQueryVisitor implements SearchTermVisitor {
         if (Strings.isEmpty(pattern) || pattern.length() < minimumPatternLength) {
             LOG.warn("Search pattern is too short to use FULLTEXT search.");
             throw InfostoreExceptionCodes.PATTERN_NEEDS_MORE_CHARACTERS.create(I(minimumPatternLength));
+        }
+        if (false == searchTerm.isIgnoreCase() && false == searchTerm.isSubstringSearch()) {
+            this.fulltextExactMatch = true;
         }
         this.fulltextSearchPattern = pattern;
     }
