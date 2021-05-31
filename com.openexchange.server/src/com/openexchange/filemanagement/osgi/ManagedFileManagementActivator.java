@@ -85,7 +85,7 @@ public final class ManagedFileManagementActivator implements BundleActivator {
 
         trackers.add(new ServiceTracker<ConfigurationService, ConfigurationService>(context, ConfigurationService.class, new TmpFileCleaner(context)));
 
-        DependentServiceRegisterer<ManagedFileManagement> registerer = new DependentServiceRegisterer<ManagedFileManagement>(context, ManagedFileManagement.class, ManagedFileManagementImpl.class, null, TimerService.class, DispatcherPrefixService.class);
+        DependentServiceRegisterer<ManagedFileManagement> registerer = new DependentServiceRegisterer<ManagedFileManagement>(context, ManagedFileManagement.class, ManagedFileManagementImpl.class, null, ConfigurationService.class, TimerService.class, DispatcherPrefixService.class);
         trackers.add(new ServiceTracker<Object, Object>(context, registerer.getFilter(), registerer));
 
         for (ServiceTracker<?,?> tracker : trackers) {
