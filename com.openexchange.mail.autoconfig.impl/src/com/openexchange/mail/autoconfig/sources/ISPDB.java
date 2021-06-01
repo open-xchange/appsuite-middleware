@@ -21,6 +21,7 @@
 
 package com.openexchange.mail.autoconfig.sources;
 
+import static com.openexchange.java.Autoboxing.I;
 import static com.openexchange.mail.autoconfig.tools.Utils.getHttpProxyIfEnabled;
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -72,6 +73,11 @@ public class ISPDB extends AbstractProxyAwareConfigSource {
     }
 
     @Override
+    protected String getAccountId() {
+        return "ispdb";
+    }
+
+    @Override
     public Autoconfig getAutoconfig(String emailLocalPart, String emailDomain, String password, int userId, int contextId) throws OXException {
         return getAutoconfig(emailLocalPart, emailDomain, password, userId, contextId, true);
     }
@@ -116,14 +122,7 @@ public class ISPDB extends AbstractProxyAwareConfigSource {
         HttpGet req = null;
         HttpResponse rsp = null;
         try {
-            int port = url.getPort();
-            if (port < 0) {
-                port = url.getProtocol().equalsIgnoreCase("https") ? 443 : 80;
-            }
-            if (forceSecure) {
-                port = 443;
-            }
-
+            int port = getPort(forceSecure, url);
             HttpHost target = new HttpHost(url.getHost(), port, url.getProtocol());
             req = new HttpGet(url.getPath());
 
@@ -168,9 +167,26 @@ public class ISPDB extends AbstractProxyAwareConfigSource {
         return retval;
     }
 
-    @Override
-    protected String getAccountId() {
-        return "ispdb";
+    private int getPort(boolean forceSecure, URL url) {
+        int port = url.getPort();
+        if (forceSecure) {
+            port = 443;
+            LOG.debug("Using port 443 because the \"forceSecure\" flag is set");
+        } else if (port < 0) {
+            /*
+             * No port set, e.g. "https://autoconfig.thunderbird.net/v1.1/"
+             */
+            if (url.getProtocol().equalsIgnoreCase("https")) {
+                port = 443;
+            } else {
+                port = 80;
+                LOG.warn("Using port 80 for communication as per configured URL {}. Please note that this is deprecated. For details see \"https://developer.mozilla.org/en-US/docs/Mozilla/Thunderbird/Autoconfiguration#ssl\"", url.toString());
+            }
+        } else {
+            /* Port set per configuration, e.g. http://autoconfig.thunderbird.net:80/v1.1/ */
+            LOG.debug("Using port {} as per configured URL {}", I(port), url.toString());
+        }
+        return port;
     }
 
 }
