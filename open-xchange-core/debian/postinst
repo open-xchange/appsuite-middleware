@@ -1145,6 +1145,21 @@ done
 # SoftwareChange_Request-175
 ox_add_property com.openexchange.server.migrationRedirectURL "" /opt/open-xchange/etc/server.properties
 
+# SoftwareChange_Request-842
+PFILE=/opt/open-xchange/etc/mime.types
+TYPE="image/xcf xcf"
+if ! grep -q -- "${TYPE}" ${PFILE}
+then
+  echo "${TYPE}" >> ${PFILE}
+  LC_COLLATE=C sort -o ${PFILE} ${PFILE}
+fi
+TYPE="image/x-xcf xcf"
+if ! grep -q -- "${TYPE}" ${PFILE}
+then
+  echo "${TYPE}" >> ${PFILE}
+  LC_COLLATE=C sort -o ${PFILE} ${PFILE}
+fi
+
 setConfigFilePermissions() {
     PROTECT="configdb.properties mail.properties management.properties oauth-provider.properties secret.properties secrets sessiond.properties tokenlogin-secrets"
     for FILE in $PROTECT
