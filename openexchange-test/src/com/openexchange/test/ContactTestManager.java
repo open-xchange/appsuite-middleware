@@ -510,12 +510,16 @@ public class ContactTestManager implements TestManager {
     }
 
     public Contact[] searchAction(final JSONObject filter, final int[] columns, final int orderBy, final Order order) {
+        return searchAction(filter, null, columns, orderBy, order);
+    }
+
+    public Contact[] searchAction(JSONObject filter, List<String> folders, int[] columns, int orderBy, Order order) {
         List<Contact> contacts = new LinkedList<Contact>();
-        final AdvancedSearchRequest request = new AdvancedSearchRequest(filter, columns, orderBy, order == Order.DESCENDING ? "DESC" : "ASC");
+        AdvancedSearchRequest request = new AdvancedSearchRequest(filter, folders, columns, orderBy, order == Order.DESCENDING ? "DESC" : "ASC");
         try {
-            final CommonSearchResponse response = getClient().execute(request, getSleep());
+            CommonSearchResponse response = getClient().execute(request, getSleep());
             lastResponse = response;
-            final JSONArray data = (JSONArray) response.getResponse().getData();
+            JSONArray data = (JSONArray) response.getResponse().getData();
             contacts = transform(data, columns);
         } catch (Exception e) {
             doExceptionHandling(e, "searching for contacts with term: \n" + filter.toString());
