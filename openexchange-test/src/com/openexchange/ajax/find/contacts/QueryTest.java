@@ -174,13 +174,15 @@ public class QueryTest extends ContactsFindTest {
     @Test
     public void testFilterFolderType() throws Exception {
         Contact contact = cotm.newAction(randomContact());
-        List<PropDocument> privateFolderDocuments = query(Collections.singletonList(createFolderTypeFacet(FolderType.PRIVATE)));
+        ActiveFacet query = createQuery(contact.getEmail1());
+        List<PropDocument> privateFolderDocuments = query(Arrays.asList(createFolderTypeFacet(FolderType.PRIVATE), query));
         assertTrue("no contacts found", 0 < privateFolderDocuments.size());
         assertNotNull("contact not found", findByProperty(privateFolderDocuments, "email1", contact.getEmail1()));
-        List<PropDocument> sharedFolderDocuments = query(Collections.singletonList(createFolderTypeFacet(FolderType.SHARED)));
+        List<PropDocument> sharedFolderDocuments = query(Arrays.asList(createFolderTypeFacet(FolderType.SHARED), query));
         assertNull("contact found", findByProperty(sharedFolderDocuments, "email1", contact.getEmail1()));
-        List<PropDocument> publicFolderDocuments = query(Collections.singletonList(createFolderTypeFacet(FolderType.PUBLIC)));
+        List<PropDocument> publicFolderDocuments = query(Arrays.asList(createFolderTypeFacet(FolderType.PUBLIC), query));
         assertNull("contact found", findByProperty(publicFolderDocuments, "email1", contact.getEmail1()));
+        publicFolderDocuments = query(Arrays.asList(createFolderTypeFacet(FolderType.PUBLIC), createQuery(getClient().getValues().getDefaultAddress())));
         assertNotNull("user contact not found", findByProperty(publicFolderDocuments, "email1", getClient().getValues().getDefaultAddress()));
     }
 
@@ -269,12 +271,13 @@ public class QueryTest extends ContactsFindTest {
             contacts[1] = cotm.newAction(randomContact(folders[1].getObjectID()));
             contacts[2] = cotm.newAction(randomContact(folders[2].getObjectID()));
 
+            ActiveFacet wildcardQuery = createQuery("*");
             for (int i = 0; i < 3; i++) {
                 FolderType folderType = typesInOrder[i];
                 List<Facet> facets = autocomplete(clients[i], "");
                 ExclusiveFacet folderTypeFacet = (ExclusiveFacet) findByType(CommonFacetType.FOLDER_TYPE, facets);
                 FacetValue typeValue = findByValueId(folderType.getIdentifier(), folderTypeFacet);
-                List<PropDocument> docs = query(clients[i], Collections.singletonList(createActiveFacet(folderTypeFacet, typeValue)));
+                List<PropDocument> docs = query(clients[i], Arrays.asList(wildcardQuery, createActiveFacet(folderTypeFacet, typeValue)));
                 PropDocument[] foundDocs = new PropDocument[3];
                 for (PropDocument doc : docs) {
                     Map<String, Object> props = doc.getProps();
@@ -324,10 +327,11 @@ public class QueryTest extends ContactsFindTest {
             int numberOfContacts = getClient().execute(new AllRequest(6, AllRequest.GUI_COLUMNS)).getArray().length;
             Set<Integer> names = new HashSet<Integer>();
             ActiveFacet folderFacet = createActiveFacet(CommonFacetType.FOLDER, 6, Filter.NO_FILTER);
+            ActiveFacet wildcardQuery = createQuery("*");
 
             int start = 0;
             int size = numberOfContacts / 2;
-            List<PropDocument> results = query(Collections.singletonList(folderFacet), start, size, null);
+            List<PropDocument> results = query(Arrays.asList(wildcardQuery, folderFacet), start, size, null);
             assertEquals("Wrong number of results", size, results.size());
             for (PropDocument result : results) {
                 names.add(Integer.valueOf(String.class.cast(result.getProps().get("id"))));
@@ -336,7 +340,7 @@ public class QueryTest extends ContactsFindTest {
 
             start = size;
             size = numberOfContacts - start;
-            results = query(Collections.singletonList(folderFacet), start, size, null);
+            results = query(Arrays.asList(wildcardQuery, folderFacet), start, size, null);
             assertEquals("Wrong number of results", size, results.size());
             for (PropDocument result : results) {
                 names.add(Integer.valueOf(String.class.cast(result.getProps().get("id"))));
