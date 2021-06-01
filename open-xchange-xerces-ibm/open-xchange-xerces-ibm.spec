@@ -7,7 +7,7 @@ BuildRequires:  ant-nodeps
 BuildRequires:  java-sdk-ibm >= 1.6.0
 BuildRequires:  open-xchange-osgi
 Version:    	@OXVERSION@
-%define        ox_release 58
+%define        ox_release 59
 Release:     	%{ox_release}_<CI_CNT>.<B_CNT>
 Group:          Applications/Productivity
 License:        GPL-2.0
@@ -48,6 +48,8 @@ ant -lib build/lib -Dbasedir=build -DdestDir=%{buildroot} -DpackageName=%{name} 
 /opt/open-xchange/osgi/bundle.d/*
 
 %changelog
+* Tue Jun 01 2021 Marcus Klein <marcus.klein@open-xchange.com>
+Build for patch 2021-06-18 (6001)
 * Thu Mar 18 2021 Marcus Klein <marcus.klein@open-xchange.com>
 Build for patch 2021-03-26 (5974)
 * Tue Jan 12 2021 Marcus Klein <marcus.klein@open-xchange.com>

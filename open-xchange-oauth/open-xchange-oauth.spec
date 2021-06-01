@@ -6,7 +6,7 @@ BuildRequires: ant-nodeps
 BuildRequires: open-xchange-core
 BuildRequires: java-devel >= 1.6.0
 Version:       @OXVERSION@
-%define        ox_release 58
+%define        ox_release 59
 Release:       %{ox_release}_<CI_CNT>.<B_CNT>
 Group:         Applications/Productivity
 License:       GPL-2.0
@@ -116,6 +116,8 @@ fi
 %dir /opt/open-xchange/etc/settings/
 
 %changelog
+* Tue Jun 01 2021 Steffen Templin <marcus.klein@open-xchange.com>
+Build for patch 2021-06-18 (6001)
 * Thu Mar 18 2021 Steffen Templin <marcus.klein@open-xchange.com>
 Build for patch 2021-03-26 (5974)
 * Tue Jan 12 2021 Steffen Templin <marcus.klein@open-xchange.com>
