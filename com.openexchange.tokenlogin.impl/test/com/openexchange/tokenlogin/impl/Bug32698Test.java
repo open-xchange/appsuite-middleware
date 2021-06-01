@@ -24,6 +24,7 @@ package com.openexchange.tokenlogin.impl;
 import static com.openexchange.java.Autoboxing.I;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.powermock.api.support.membermodification.MemberMatcher.method;
+import java.util.Base64;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import org.junit.Assert;
@@ -43,6 +44,7 @@ import com.hazelcast.map.IMap;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.context.ContextService;
 import com.openexchange.exception.OXException;
+import com.openexchange.session.ObfuscatorService;
 import com.openexchange.session.Session;
 import com.openexchange.sessiond.AddSessionParameter;
 import com.openexchange.sessiond.SessiondService;
@@ -97,6 +99,12 @@ public class Bug32698Test {
      */
     @Mock
     private SessiondService sessiondService;
+
+    /**
+     * Mock of the {@link ObfuscatorService}
+     */
+    @Mock
+    private ObfuscatorService obfuscatorService;
 
     /**
      * Mock of the {@link IMap}
@@ -189,6 +197,30 @@ public class Bug32698Test {
                 return myMap2.putIfAbsent((String) args[0], (String) args[1]);
             }
         });
+        PowerMockito.when(SessionIMap, method(IMap.class, "putIfAbsent", String.class, String.class)).withArguments(anyString(), anyString()).thenAnswer(new Answer<String>() {
+
+            @Override
+            public String answer(InvocationOnMock invocation) throws Throwable {
+                Object[] args = invocation.getArguments();
+                return myMap2.putIfAbsent((String) args[0], (String) args[1]);
+            }
+        });
+        PowerMockito.when(obfuscatorService, method(ObfuscatorService.class, "obfuscate", String.class)).withArguments(anyString()).thenAnswer(new Answer<String>() {
+
+            @Override
+            public String answer(InvocationOnMock invocation) throws Throwable {
+                Object[] args = invocation.getArguments();
+                return Base64.getEncoder().encodeToString(((String) args[0]).getBytes());
+            }
+        });
+        PowerMockito.when(obfuscatorService, method(ObfuscatorService.class, "unobfuscate", String.class)).withArguments(anyString()).thenAnswer(new Answer<String>() {
+
+            @Override
+            public String answer(InvocationOnMock invocation) throws Throwable {
+                Object[] args = invocation.getArguments();
+                return new String(Base64.getDecoder().decode((String) args[0]));
+            }
+        });
     }
 
     @Test
@@ -198,6 +230,7 @@ public class Bug32698Test {
         PowerMockito.when(this.sessiondService.addSession(ArgumentMatchers.any(AddSessionParameter.class))).thenReturn(this.session);
         PowerMockito.when(Services.getService(SessiondService.class)).thenReturn(this.sessiondService);
         PowerMockito.when(Services.getService(ContextService.class)).thenReturn(this.contextService);
+        PowerMockito.when(Services.getService(ObfuscatorService.class)).thenReturn(this.obfuscatorService);
 
         configureTokenLoginServices();
         this.tokenLoginServiceImpl.changeBackingMapToHz();
