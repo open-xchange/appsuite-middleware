@@ -29,6 +29,7 @@ import com.openexchange.contact.provider.composition.IDBasedContactsAccessFactor
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contact.helpers.ContactField;
 import com.openexchange.groupware.container.Contact;
+import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.session.Session;
 
 /**
@@ -54,6 +55,9 @@ public class ContactUserFinder extends AbstractContactFinder {
             IDBasedContactsAccess contactsAccess = idBasedContactsAccessFactory.createAccess(session);
             try {
                 contactsAccess.set(ContactsParameters.PARAMETER_FIELDS, fields);
+                if (Integer.toString(FolderObject.VIRTUAL_GUEST_CONTACT_FOLDER_ID).equals(data.getFolderId())) {
+                    return contactsAccess.getUserAccess().getGuestContact(i(data.getUserId()));
+                }
                 return contactsAccess.getUserAccess().getUserContact(i(data.getUserId()));
             } finally {
                 contactsAccess.finish();

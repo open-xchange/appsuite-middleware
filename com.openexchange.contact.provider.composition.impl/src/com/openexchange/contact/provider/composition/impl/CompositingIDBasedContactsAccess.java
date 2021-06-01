@@ -598,6 +598,16 @@ public class CompositingIDBasedContactsAccess extends AbstractCompositingIDBased
         }
     }
 
+    @Override
+    public Contact getGuestContact(int userId) throws OXException {
+        ContactsAccount account = getAccount(ContactsAccount.DEFAULT_ACCOUNT.getAccountId());
+        try {
+            return withUniqueID(getAccess(account, InternalContactsAccess.class).getGuestContact(userId), account.getAccountId());
+        } catch (OXException e) {
+            throw withUniqueIDs(e, account.getAccountId());
+        }
+    }
+
     ////////////////////////////////// HELPERS ///////////////////////////////
 
     /**

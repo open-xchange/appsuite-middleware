@@ -311,6 +311,13 @@ public class InternalContactsAccess implements com.openexchange.contact.provider
         return iterateContacts(getContactService().searchUsers(session.getSession(), searchTerm, getFields(), getSortOptions()));
     }
 
+
+    @Override
+    public List<Contact> getGuestContacts(int[] userIds) throws OXException {
+        decorateSessionWithReadOnlyConnection();
+        return iterateContacts(getContactService().getGuestUsers(session.getSession(), userIds, getFields()));
+    }
+
     @Override
     public boolean supports(String folderId, ContactField... fields) throws OXException {
         decorateSessionWithReadOnlyConnection();
