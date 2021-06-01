@@ -1,30 +1,30 @@
 ///*
- * @copyright Copyright (c) OX Software GmbH, Germany <info@open-xchange.com>
- * @license AGPL-3.0
- *
- * This code is free software: you can redistribute it and/or modify
- * it under the terms of the GNU Affero General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU Affero General Public License for more details.
- *
- * You should have received a copy of the GNU Affero General Public License
- * along with OX App Suite.  If not, see <https://www.gnu.org/licenses/agpl-3.0.txt>.
- * 
- * Any use of the work other than as authorized under this license or copyright law is prohibited.
- *
- */
+// * @copyright Copyright (c) OX Software GmbH, Germany <info@open-xchange.com>
+// * @license AGPL-3.0
+// *
+// * This code is free software: you can redistribute it and/or modify
+// * it under the terms of the GNU Affero General Public License as published by
+// * the Free Software Foundation, either version 3 of the License, or
+// * (at your option) any later version.
+// *
+// * This program is distributed in the hope that it will be useful,
+// * but WITHOUT ANY WARRANTY; without even the implied warranty of
+// * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// * GNU Affero General Public License for more details.
+// *
+// * You should have received a copy of the GNU Affero General Public License
+// * along with OX App Suite.  If not, see <https://www.gnu.org/licenses/agpl-3.0.txt>.
+// *
+// * Any use of the work other than as authorized under this license or copyright law is prohibited.
+// *
+// */
 //
 //package com.openexchange.chronos.scheduling.common;
 //
 //import com.openexchange.i18n.LocalizableStrings;
 //
 ///**
-// * 
+// *
 // * {@link Messages}
 // *
 // * @author <a href="mailto:daniel.becker@open-xchange.com">Daniel Becker</a> - Partly moved existing strings
@@ -52,11 +52,11 @@
 //     * Example: "This appointment has attachments, please see the appointment at http://ox.superhoster.invalid/index.html#m=calendar&f=bla&i=bla to retrieve them"
 //     */
 //    public static final String HAS_ATTACHMENTS = "This appointment has attachments. Click on the following link to view the appointment and to retrieve the attachments: %1$s.";
-//    
+//
 //    public static final String HAS_ADDED_ATTACHMENT = "The appointment has a new attachment: %1$s.";
-//    
+//
 //    public static final String HAS_REMOVED_ATTACHMENT = "The attachment %1$s was removed from the appointment.";
-//    
+//
 //    public static final String HAS_CHANGED_RRULE = "The appointments recurrence rule has changed to: %1$s.";
 //
 //    /*
@@ -179,16 +179,16 @@
 //     */
 //    public static final String TENTATIVE_ON_YOUR_BEHALF_INTRO = "%1$s has %2$s the invitation on your behalf:";
 //    public static final String TENTATIVE_INSTANCE_ON_YOUR_BEHALF_INTRO = "%1$s has %2$s the invitation to an event of the series %3$s on your behalf:";
-//    
+//
 //    public static final String NONE_ON_YOUR_BEHALF_INTRO =  "On your behalf, %1$s sets your status for this appointment to %2$s:";
 //    public static final String NONE_INSTANCE_ON_YOUR_BEHALF_INTRO = "On your behalf, %1$s sets your status for an event of the series %3$s to %2$s:";
-//    
+//
 //    public static final String DELETE_ON_YOUR_BEHALF_INTRO = "%1$s has deleted an appointment on your behalf:";
 //    public static final String DELETE_INSTANCE_ON_YOUR_BEHALF_INTRO = "%1$s has deleted an event of the series %2$s on your behalf:";
-//    
+//
 //    public static final String UPDATE_ON_YOUR_BEHALF_INTRO = "%1$s has changed an event on your behalf:";
 //    public static final String UPDATE_INSTANCE_ON_YOUR_BEHALF_INTRO = "%1$s has changed an event of the series %2$s on your behalf:";
-//    
+//
 //    public static final String CREATE_ON_YOUR_BEHALF_INTRO = "%1$s is organizing an event on your behalf.";
 //
 //    /*
