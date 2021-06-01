@@ -76,7 +76,7 @@ import com.openexchange.java.Strings;
 public class MWB1024Test extends CardDAVTest {
 
     @Test
-    public void testBulkImportOneCardTooLarge() throws Exception {
+    public void testBulkImportOneCardTooLarge() {
         /*
          * prepare vCards, with the second one being too large
          */
@@ -93,7 +93,7 @@ public class MWB1024Test extends CardDAVTest {
             "END:VCARD" + "\r\n" +
             "BEGIN:VCARD" + "\r\n" +
             "VERSION:3.0" + "\r\n" +
-            "FN:" + RandomStringUtils.randomAlphabetic(3000000) + "\r\n" +
+            "FN:" + RandomStringUtils.randomAlphabetic(5000000) + "\r\n" +
             "EMAIL;type=INTERNET;type=WORK;type=pref:" + email2 + "\r\n" +
             "REV:" + formatAsUTC(new Date()) + "\r\n" +
             "PRODID:-//Apple Inc.//AddressBook 6.0//EN" + "\r\n" +
@@ -113,7 +113,7 @@ public class MWB1024Test extends CardDAVTest {
     }
 
     @Test
-    public void testBulkImportManyCards() throws Exception {
+    public void testBulkImportManyCards() {
         /*
          * prepare many vCards for the bulk import
          */
@@ -195,7 +195,7 @@ public class MWB1024Test extends CardDAVTest {
         testUploadRepeatedly(vCards, emails);
     }
 
-    private void testUploadRepeatedly(String vCards, List<String> expectedEmails) throws Exception {
+    private void testUploadRepeatedly(String vCards, List<String> expectedEmails) {
         /*
          * attempt to upload the bulk import, repeating multiple times if an error occurs
          */
