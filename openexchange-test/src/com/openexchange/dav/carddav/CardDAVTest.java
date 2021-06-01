@@ -541,24 +541,19 @@ public abstract class CardDAVTest extends WebDAVTest {
         return new VCardResource(vCard, href, eTag);
     }
 
-    private static JSONObject getSearchFilter(String uid, int[] folderIDs) throws JSONException {
-        String filter = null;
-        if (null == folderIDs || 0 == folderIDs.length) {
-            filter = "{'filter' : [ '=' , {'field' : 'uid'} , '" + uid + "']}";
-        } else if (1 == folderIDs.length) {
-            filter = "{'filter' : [ 'and', " + "['=' , {'field' : 'uid'} , '" + uid + "'], " + "['=' , {'field' : 'folder_id'}, '" + folderIDs[0] + "']" + "]})";
-        } else {
-            filter = "{'filter' : [ 'and', " + "['=' , {'field' : 'uid'} , '" + uid + "'], " + "[ 'or', " + "['=' , {'field' : 'folder_id'}, '" + folderIDs[0] + "'] ";
-            for (int i = 1; i < folderIDs.length; i++) {
-                filter = filter + ", " + "['=' , {'field' : 'folder_id'}, '" + folderIDs[i] + "'] ";
-            }
-            filter = filter + "]" + "]})";
-        }
-        return new JSONObject(filter);
+    private static JSONObject getSearchFilter(String uid) throws JSONException {
+        return new JSONObject("{'filter' : [ '=' , {'field' : 'uid'} , '" + uid + "']}");
     }
 
     protected Contact searchContact(String uid, int[] folderIDs, int[] columnIDs) throws JSONException {
-        Contact[] contacts = cotm.searchAction(getSearchFilter(uid, folderIDs), null == columnIDs ? Contact.ALL_COLUMNS : columnIDs, -1, null);
+        List<String> folders = null;
+        if (null != folderIDs) {
+            folders = new ArrayList<String>(folderIDs.length);
+            for (int folderID : folderIDs) {
+                folders.add(Integer.toString(folderID));
+            }
+        }
+        Contact[] contacts = cotm.searchAction(getSearchFilter(uid), folders, null == columnIDs ? Contact.ALL_COLUMNS : columnIDs, -1, null);
         return null != contacts && 0 < contacts.length ? contacts[0] : null;
     }
 

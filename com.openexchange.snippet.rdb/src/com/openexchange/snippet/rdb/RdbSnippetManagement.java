@@ -541,6 +541,8 @@ public final class RdbSnippetManagement implements SnippetManagement {
                     content = "";
                 } else if (contentSubType.indexOf("htm") >= 0) {
                     content = sanitizeHtmlContent(content);
+                } else {
+                    content = sanitizeContent(content);
                 }
                 if (null != content) {
                     stmt = con.prepareStatement("INSERT INTO snippetContent (cid, user, id, content) VALUES (?, ?, ?, ?)");
