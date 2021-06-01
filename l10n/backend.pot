@@ -1699,22 +1699,22 @@ msgid "The event %1$s was not canceled for the user %2$s and won't be deleted."
 msgstr ""
 
 #. The default name for Exchange ActiveSync profile
-#: com.openexchange.client.onboarding.plist/src/com/openexchange/client/onboarding/plist/PlistProviderNames.java:70
+#: com.openexchange.client.onboarding.plist/src/com/openexchange/client/onboarding/plist/PlistProviderNames.java:42
 msgid "Exchange ActiveSync"
 msgstr ""
 
 #. The default name for E-Mail profile
-#: com.openexchange.client.onboarding.plist/src/com/openexchange/client/onboarding/plist/PlistProviderNames.java:73
+#: com.openexchange.client.onboarding.plist/src/com/openexchange/client/onboarding/plist/PlistProviderNames.java:45
 msgid "E-Mail"
 msgstr ""
 
 #. The default name for CardDAV profile
-#: com.openexchange.client.onboarding.plist/src/com/openexchange/client/onboarding/plist/PlistProviderNames.java:76
+#: com.openexchange.client.onboarding.plist/src/com/openexchange/client/onboarding/plist/PlistProviderNames.java:48
 msgid "CardDAV"
 msgstr ""
 
 #. The default name for CalDAV profile
-#: com.openexchange.client.onboarding.plist/src/com/openexchange/client/onboarding/plist/PlistProviderNames.java:79
+#: com.openexchange.client.onboarding.plist/src/com/openexchange/client/onboarding/plist/PlistProviderNames.java:51
 msgid "CalDAV"
 msgstr ""
 
@@ -5820,32 +5820,32 @@ msgid "Password was not changed."
 msgstr ""
 
 #. No encrypted data was found for decryption
-#: com.openexchange.pgp.core/src/com/openexchange/pgp/core/exceptions/PGPCoreExceptionMessages.java:63
+#: com.openexchange.pgp.core/src/com/openexchange/pgp/core/exceptions/PGPCoreExceptionMessages.java:35
 msgid "No encrypted items found."
 msgstr ""
 
 #. The right private key wasn't found to perform the action.  Key identity is listed
-#: com.openexchange.pgp.core/src/com/openexchange/pgp/core/exceptions/PGPCoreExceptionMessages.java:66
+#: com.openexchange.pgp.core/src/com/openexchange/pgp/core/exceptions/PGPCoreExceptionMessages.java:38
 msgid "The private key for the identity '%1$s' could not be found."
 msgstr ""
 
 #. Bad password used
-#: com.openexchange.pgp.core/src/com/openexchange/pgp/core/exceptions/PGPCoreExceptionMessages.java:69
+#: com.openexchange.pgp.core/src/com/openexchange/pgp/core/exceptions/PGPCoreExceptionMessages.java:41
 msgid "Bad password."
 msgstr ""
 
 #. No items that contain a signature were found
-#: com.openexchange.pgp.core/src/com/openexchange/pgp/core/exceptions/PGPCoreExceptionMessages.java:72
+#: com.openexchange.pgp.core/src/com/openexchange/pgp/core/exceptions/PGPCoreExceptionMessages.java:44
 msgid "No signature items found"
 msgstr ""
 
 #. Generic IO error with error specified
-#: com.openexchange.pgp.core/src/com/openexchange/pgp/core/exceptions/PGPCoreExceptionMessages.java:75
+#: com.openexchange.pgp.core/src/com/openexchange/pgp/core/exceptions/PGPCoreExceptionMessages.java:47
 msgid "An I/O error occurred: '%1$s'"
 msgstr ""
 
 #. Generic PGP error with error specified
-#: com.openexchange.pgp.core/src/com/openexchange/pgp/core/exceptions/PGPCoreExceptionMessages.java:78
+#: com.openexchange.pgp.core/src/com/openexchange/pgp/core/exceptions/PGPCoreExceptionMessages.java:50
 msgid "A PGP error occurred: '%1$s'"
 msgstr ""
 
