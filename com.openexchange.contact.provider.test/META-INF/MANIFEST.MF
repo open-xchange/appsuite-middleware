@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Open-Xchange Test Contacts Provider
 Bundle-SymbolicName: com.openexchange.contact.provider.test
-Bundle-Version: 8.0.0
+Bundle-Version: 7.10.6
 Bundle-Vendor: OX Software GmbH
 Automatic-Module-Name: com.openexchange.contact.provider.test
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
