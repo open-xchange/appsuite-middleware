@@ -36,6 +36,7 @@ import java.util.concurrent.locks.Lock;
 import org.apache.commons.lang.Validate;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import com.google.common.base.Objects;
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
 import com.hazelcast.core.HazelcastInstance;
@@ -340,10 +341,17 @@ public class TokenLoginServiceImpl implements TokenLoginService {
         String sessionId = session.getSessionID();
         String token = getToken(sessionId);
 
-        // Check token is in correct format
-        if (token != null && token.startsWith(sessionId) == false) {
-            token = null;
-            remove(sessionId);
+        // Check token is in correct format & matches the session identifier
+        if (null != token) {
+            ObfuscatorService obfuscatorService = Services.getService(ObfuscatorService.class);
+            if (null == obfuscatorService) {
+                throw ServiceExceptionCode.SERVICE_UNAVAILABLE.create(ObfuscatorService.class.getName());
+            }
+            String[] splitToken = Strings.splitBy(token, '-', true);
+            if (null == splitToken || 2 != splitToken.length || false == Objects.equal(sessionId, obfuscatorService.unobfuscate(splitToken[0]))) {
+                token = null;
+                remove(sessionId);
+            }
         }
 
         if (null == token) {

@@ -598,6 +598,21 @@ public interface ContactService {
     SearchIterator<Contact> getUsers(Session session, int[] userIDs, ContactField[] fields) throws OXException;
 
     /**
+     * Gets guest user contacts with specified fields.<p>
+     *
+     * If the current user has no adequate permissions, no exception is thrown,
+     * but the queried contact fields are limited to the fields defined by
+     * <code>ContactService.LIMITED_USER_FIELDS</code>.
+     *
+     * @param session the session
+     * @param userIDs the guest user IDs
+     * @param fields the contact fields that should be retrieved
+     * @return the guest contacts
+     * @throws OXException
+     */
+    SearchIterator<Contact> getGuestUsers(Session session, int[] userIDs, ContactField[] fields) throws OXException;
+
+    /**
      * Gets all user contacts with specified fields.<p>
      *
      * If the current user has no adequate permissions, no exception is thrown,

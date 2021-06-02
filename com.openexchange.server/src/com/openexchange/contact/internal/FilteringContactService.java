@@ -287,6 +287,11 @@ public class FilteringContactService implements ContactService {
     }
 
     @Override
+    public SearchIterator<Contact> getGuestUsers(Session session, int[] userIDs, ContactField[] fields) throws OXException {
+        return delegate.getGuestUsers(session, userIDs, fields);
+    }
+
+    @Override
     public SearchIterator<Contact> getAllUsers(Session session, ContactField[] fields, SortOptions sortOptions) throws OXException {
         return removeAdmin(session.getContextId(), delegate.getAllUsers(session, fields, sortOptions));
     }

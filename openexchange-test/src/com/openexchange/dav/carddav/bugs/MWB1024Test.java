@@ -38,6 +38,7 @@ import com.openexchange.dav.carddav.CardDAVTest;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.java.Autoboxing;
 import com.openexchange.java.Strings;
+import com.openexchange.test.tryagain.TryAgain;
 
 /**
  * {@link MWB1024Test}
@@ -48,6 +49,7 @@ import com.openexchange.java.Strings;
 public class MWB1024Test extends CardDAVTest {
 
     @Test
+    @TryAgain
     public void testBulkImportOneCardTooLarge() {
         /*
          * prepare vCards, with the second one being too large
@@ -85,6 +87,7 @@ public class MWB1024Test extends CardDAVTest {
     }
 
     @Test
+    @TryAgain
     public void testBulkImportManyCards() {
         /*
          * prepare many vCards for the bulk import
@@ -106,6 +109,7 @@ public class MWB1024Test extends CardDAVTest {
                     "UID:" + uid + "\r\n" +
                     "ORG:Metzgerei Fischer" + "\r\n" +
                     "TITLE:Angestellter" + "\r\n" +
+                    "NICKNAME:" + RandomStringUtils.randomAlphabetic(3000) + "\r\n" +
                     "NOTE;CHARSET=Windows-1252:Wollte mich am Montag zur\u00fcckrufen." + "\r\n" +
                     "TEL;WORK;VOICE:034523-34234234" + "\r\n" +
                     "TEL;HOME;VOICE:0444 / 2340349" + "\r\n" +
@@ -114,45 +118,6 @@ public class MWB1024Test extends CardDAVTest {
                     "X-MS-OL-DEFAULT-POSTAL-ADDRESS:2" + "\r\n" +
                     "URL;WORK:http://www.metzgerei-fischer.co.uk" + "\r\n" +
                     "X-MS-IMADDRESS:ICQ: 143823280" + "\r\n" +
-                    "PHOTO;TYPE=JPEG;ENCODING=BASE64:" + "\r\n" +
-                    " /9j/4AAQSkZJRgABAgAAAQABAAD/2wBDAAgGBgcGBQgHBwcJCQgKDBQNDAsLDBkSEw8UHRof" + "\r\n" +
-                    " Hh0aHBwgJC4nICIsIxwcKDcpLDAxNDQ0Hyc5PTgyPC4zNDL/2wBDAQkJCQwLDBgNDRgyIRwh" + "\r\n" +
-                    " MjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjL/wAAR" + "\r\n" +
-                    " CABMAEADASIAAhEBAxEB/8QAHwAAAQUBAQEBAQEAAAAAAAAAAAECAwQFBgcICQoL/8QAtRAA" + "\r\n" +
-                    " AgEDAwIEAwUFBAQAAAF9AQIDAAQRBRIhMUEGE1FhByJxFDKBkaEII0KxwRVS0fAkM2JyggkK" + "\r\n" +
-                    " FhcYGRolJicoKSo0NTY3ODk6Q0RFRkdISUpTVFVWV1hZWmNkZWZnaGlqc3R1dnd4eXqDhIWG" + "\r\n" +
-                    " h4iJipKTlJWWl5iZmqKjpKWmp6ipqrKztLW2t7i5usLDxMXGx8jJytLT1NXW19jZ2uHi4+Tl" + "\r\n" +
-                    " 5ufo6erx8vP09fb3+Pn6/8QAHwEAAwEBAQEBAQEBAQAAAAAAAAECAwQFBgcICQoL/8QAtREA" + "\r\n" +
-                    " AgECBAQDBAcFBAQAAQJ3AAECAxEEBSExBhJBUQdhcRMiMoEIFEKRobHBCSMzUvAVYnLRChYk" + "\r\n" +
-                    " NOEl8RcYGRomJygpKjU2Nzg5OkNERUZHSElKU1RVVldYWVpjZGVmZ2hpanN0dXZ3eHl6goOE" + "\r\n" +
-                    " hYaHiImKkpOUlZaXmJmaoqOkpaanqKmqsrO0tba3uLm6wsPExcbHyMnK0tPU1dbX2Nna4uPk" + "\r\n" +
-                    " 5ebn6Onq8vP09fb3+Pn6/9oADAMBAAIRAxEAPwD3+iiigDG8VeIrTwr4du9YvMtFbrkIDgux" + "\r\n" +
-                    " 4Cj6mvmrxD8dvFurXe/Tpl0qAZ2xQgOcf7TMOfyFes/He3u9Q8KaZptoMvd6ikWCcA/KSMn0" + "\r\n" +
-                    " zXgWpeA7+xvtJtbe7sr7+03McE1rLujLggEE44xuH55oA77wr8dNf060M+uxw6pbNIE4bypU" + "\r\n" +
-                    " 9SMAhvpx0r6H0nVLTWtKttRsZBJbXCB0b2Pr718eeI/A8/h7Tmuf7StL8QT/AGe5FqzMIZMc" + "\r\n" +
-                    " KSQAc88j0r3L9nnUpbvwNd2kjEi0uyqZ7Kyg/wA80AevUUUUAFIelLSHpQB578XmMHh7TbsB" + "\r\n" +
-                    " CYNTgbDnAIJwQT2yDXKeH/Bem29rA5kldYJWmt5JJMmLLA4BGB2X8q2/iVNL4r1fS/BWjGKe" + "\r\n" +
-                    " 5E63Wo56W8SYI3Hpkkngc8VbufBN2t20VrkW7NnGMj8Mnj8a8vM6GJqwSoSsdOHnTjfnR5J4" + "\r\n" +
-                    " 90a08P8Ah3U0067adNTvoppQ56Fd5G3A55c5z7V1/wCzfMy2HiKzeN0khmgkYMMfeVx/7JXX" + "\r\n" +
-                    " +JfhrHrfgq701SBfld8DE8CRegJ9+n414d4B8fXnhDxyjauTHbbfsl6u3JUKTgkDqVOf1rqw" + "\r\n" +
-                    " dOtCko1pXkZVXFyvFH1tRUFneW99Zw3dpMs1vMgeORDkMp6EVPXUZhXMfEDxSPCHg691RNpu" + "\r\n" +
-                    " gPLtkbo0rcD8uv4V0xNeB/HrXI9S1TSvDdhN5lzbuXuEAOEd9ojz2zgsfxFFwJ/gHY6xc3Ou" + "\r\n" +
-                    " eIb4l1vJET7RKdxlYbi+PoSK9zAbd975fpWX4a0WHw74bsdKt1CrbQqhx3bHJ/E5rTjbc7+x" + "\r\n" +
-                    " xQBBeLeFf9GeP3DDn86+Wfi74Mn0TxYb0k7NVZ5kXb0cY3j/AMeBz7n0r6wrx/8AaHts+DLC" + "\r\n" +
-                    " 9T5Zbe82hh1CspBH5hfyoAwP2e/FcguL7wvf3LEhRLZRt2xnzFH6HHsa+gK+KPCGrvonjnQ9" + "\r\n" +
-                    " SDFWinj8z3UnaR+Kn9a+1x0oAqz31pasFuLqGIntJIF/nXhfivwXJc+LtQ8V6dcPcubqOf7K" + "\r\n" +
-                    " V4kVNpwD65Xj1Fej68g/t+bODmJD/OqWK+UzDO69Ks6VNW5X956mHwcHDnl1On8O+KdK8T2h" + "\r\n" +
-                    " lsLhfOjA8+2biWAns6dR0P1xWvECGkyOrfnXz34r0zxBo3jSw17whBcyXdzlLiKFSQ+MEbh0" + "\r\n" +
-                    " wQT19M19CQPI8EbSrskKAuvoccivocHiY4mhGrHr+Z59Wm6cnFkhNeO/Hy/WbwetpGN3l3aN" + "\r\n" +
-                    " J7jB4H516zqF/aadZyXN7dQ2tug+aWZwir9Sa8oM2n+L4bposXFm0mFZhw+O4rDMcW8LTjU8" + "\r\n" +
-                    " 1c0w9JVZOJ4Z4M0aTxB4ls4ljYBJ43kcDKqgPJJ7cDivtRWDKGByCMivJdF8PWOiJL9lt44j" + "\r\n" +
-                    " IQW2jriu/wBD1X7QgtZeJUGFP94VyYPOqeJxDp2suhpWwjpw5tzn9cstUg1W5uxaPcwSY2mE" + "\r\n" +
-                    " bioA6Edax01m1MpilLRSDgpICpH4GvVD0qKeGKeFo5o0kQjlXUEGoxWQ0q03NSabKpY2UEot" + "\r\n" +
-                    " aHkPiTVo7XTTJFc7JR80bo2GUjnIrmNN+JfxYmsV+zeHnvo8DZdHTpPnHY5BCnPXivbLXwho" + "\r\n" +
-                    " Nlf/AG6302FJ+oYDgH2Fbo6kV2ZbgHg4OPNe5nia6qtOx8k+Lv8AhZ/i4xvrejaw8MWSkMdg" + "\r\n" +
-                    " 6xpnqcBfbvmu7+HEqWnh5LWbMUqfeRxgqeeo7V74awtS8JaJq94Lm8sUaYDBdSVLfXHWqzPB" + "\r\n" +
-                    " vF0uS9icNWVKV2jl9OSXV7lobLaQmPMlPRP8TXY6Xo8WmgvuaSZhgu38h6CrNlZ21hbLb2kK" + "\r\n" +
-                    " QxJkBEGB1q2OlZ4DKaOESlvLuVXxU6unQ//Z" + "\r\n" +
                     "REV:" + formatAsUTC(new Date()) + "\r\n" +
                     "PRODID:-//Apple Inc.//AddressBook 6.0//EN" + "\r\n" +
                     "END:VCARD" + "\r\n"

@@ -70,7 +70,11 @@ public interface IDBasedUserAccess {
      * @return The user contact
      */
     default Contact getUserContact(int userId) throws OXException {
-        return getUserContacts(new int[] { userId }).get(0);
+        List<Contact> contacts = getUserContacts(new int[] { userId });
+        if (null == contacts || contacts.isEmpty()) {
+            throw OXException.notFound(String.valueOf(userId));
+        }
+        return contacts.get(0);
     }
 
     /**
@@ -138,5 +142,22 @@ public interface IDBasedUserAccess {
      * @return The found user contacts
      */
     List<Contact> searchUserContacts(SearchTerm<?> searchTerm) throws OXException;
+
+    /**
+     * Gets contact information associated with a specific guest user.
+     * <p/>
+     * If the current user has no adequate permissions for the virtual folder where contact data for guest users is stored,
+     * no exception is thrown, but the queried contact fields are limited to the fields defined by
+     * {@link ContactService#LIMITED_USER_FIELDS} or {@link ContactService#LIMITED_USER_FIELDS_NO_MAIL} respectively.
+     * <p/>
+     * The following contacts parameters are evaluated:
+     * <ul>
+     * <li>{@link ContactsParameters#PARAMETER_FIELDS}</li>
+     * </ul>
+     *
+     * @param userId The identifier of the guest user to get the contact data for
+     * @return The guest user contact
+     */
+    Contact getGuestContact(int userId) throws OXException;
 
 }

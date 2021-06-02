@@ -352,6 +352,13 @@ public abstract class DefaultContactService implements ContactService {
     }
 
     @Override
+    public SearchIterator<Contact> getGuestUsers(Session session, int[] userIDs, ContactField[] fields) throws OXException {
+        Check.argNotNull(session, "session");
+        Check.argNotNull(userIDs, "userIDs");
+        return this.doGetGuestUsers(session, userIDs, (SearchTerm<?>) null, fields, null);
+    }
+
+    @Override
     public SearchIterator<Contact> getAllUsers(Session session, ContactField[] fields, final SortOptions sortOptions) throws OXException {
         Check.argNotNull(session, "session");
         return this.doGetUsers(session, null, (SearchTerm<?>)null, fields, sortOptions);
@@ -447,6 +454,8 @@ public abstract class DefaultContactService implements ContactService {
     protected abstract String doGetOrganization(Session session) throws OXException;
 
     protected abstract <O> SearchIterator<Contact> doGetUsers(Session session, int[] userIDs, SearchTerm<O> term, ContactField[] fields, SortOptions sortOptions) throws OXException;
+
+    protected abstract <O> SearchIterator<Contact> doGetGuestUsers(Session session, int[] userIDs, SearchTerm<O> term, ContactField[] fields, SortOptions sortOptions) throws OXException;
 
     protected abstract SearchIterator<Contact> doGetUsers(Session session, int[] userIDs, ContactSearchObject contactSearch, ContactField[] fields, SortOptions sortOptions) throws OXException;
 

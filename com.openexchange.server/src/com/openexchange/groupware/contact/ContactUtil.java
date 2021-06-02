@@ -186,7 +186,8 @@ public class ContactUtil {
         if (0 < con.getNumberOfImages() || con.containsImage1() && null != con.getImage1()) {
             Date lastModified = con.getImageLastModified();
             ContactPictureURLService service = ServerServiceRegistry.getInstance().getService(ContactPictureURLService.class, true);
-            if (FolderObject.SYSTEM_LDAP_FOLDER_ID == con.getParentFolderID() && con.containsInternalUserId()) {
+            if (con.containsInternalUserId() && (FolderObject.SYSTEM_LDAP_FOLDER_ID == con.getParentFolderID() || 
+                FolderObject.VIRTUAL_GUEST_CONTACT_FOLDER_ID == con.getParentFolderID())) { 
                 return service.getUserPictureUrl(con.getInternalUserId(), session, lastModified == null ? null : L(lastModified.getTime()), true);
             }
             return service.getContactPictureUrl(con.getId(true), con.getFolderId(true), session, lastModified == null ? null : L(lastModified.getTime()), true);

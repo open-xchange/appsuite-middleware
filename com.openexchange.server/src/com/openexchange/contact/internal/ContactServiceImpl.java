@@ -862,11 +862,18 @@ public class ContactServiceImpl extends DefaultContactService {
     }
 
     @Override
-    protected <O> SearchIterator<Contact> doGetUsers(Session session, int[] userIDs, SearchTerm<O> term, ContactField[] fields,
-        SortOptions sortOptions) throws OXException {
+    protected <O> SearchIterator<Contact> doGetUsers(Session session, int[] userIDs, SearchTerm<O> term, ContactField[] fields, SortOptions sortOptions) throws OXException {
+        return doGetUsers(session, Integer.toString(FolderObject.SYSTEM_LDAP_FOLDER_ID), userIDs, term, fields, sortOptions);
+    }
+
+    @Override
+    protected <O> SearchIterator<Contact> doGetGuestUsers(Session session, int[] userIDs, SearchTerm<O> term, ContactField[] fields, SortOptions sortOptions) throws OXException {
+        return doGetUsers(session, Integer.toString(FolderObject.VIRTUAL_GUEST_CONTACT_FOLDER_ID), userIDs, term, fields, sortOptions);
+    }
+
+    protected <O> SearchIterator<Contact> doGetUsers(Session session, String folderID, int[] userIDs, SearchTerm<O> term, ContactField[] fields, SortOptions sortOptions) throws OXException {
         int currentUserID = session.getUserId();
         int contextID = session.getContextId();
-        String folderID = Integer.toString(FolderObject.SYSTEM_LDAP_FOLDER_ID);
         ContactStorage storage = Tools.getStorage(session, folderID);
         /*
          * limit queried fields when necessary due to permissions
