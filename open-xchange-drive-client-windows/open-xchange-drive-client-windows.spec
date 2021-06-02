@@ -9,7 +9,7 @@ BuildRequires: open-xchange-admin
 BuildRequires: open-xchange-core >= @OXVERSION@, open-xchange-client-onboarding >= @OXVERSION@, open-xchange-drive >= @OXVERSION@
 BuildRequires: pandoc >= 2.0.0
 Version:       @OXVERSION@
-%define        ox_release 24
+%define        ox_release 25
 Release:       %{ox_release}_<CI_CNT>.<B_CNT>
 Group:         Applications/Productivity
 License:       GPL-2.0
@@ -61,6 +61,8 @@ sed -i -e 's;%{buildroot};;' %{manlist}
 /opt/open-xchange/etc/security/drive.list
 
 %changelog
+* Tue May 25 2021 Kevin Ruthmann <kevin.ruthmann@open-xchange.com>
+Build for patch 2021-06-01 (5999)
 * Tue May 18 2021 Kevin Ruthmann <kevin.ruthmann@open-xchange.com>
 Build for patch 2021-05-17 (5993)
 * Mon Apr 26 2021 Kevin Ruthmann <kevin.ruthmann@open-xchange.com>

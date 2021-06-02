@@ -188,6 +188,22 @@ public interface Message {
             }
             return null;
         }
+
+        /**
+         * Gets the priority for given identifier
+         *
+         * @param level The level to look-up
+         * @return The associated priority or <code>null</code>
+         */
+        public static Priority priorityForLevel(int level) {
+            for (Priority p : Priority.values()) {
+                if (level == p.level) {
+                    return p;
+                }
+            }
+            return null;
+        }
+
     }
 
     // -------------------------------------------------------------------------------------------------------------------------------------

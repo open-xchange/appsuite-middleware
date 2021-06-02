@@ -163,7 +163,7 @@ public class ChunkedZippedOutputStream {
 
         // Create archive entry
         StringHelper stringHelper = StringHelper.valueOf(locale);
-        ZipArchiveEntry entry = new ZipArchiveEntry(stringHelper.getString(DataExportStrings.DIAGNOSTICS_FILE_PREFIX) + ".txt");
+        ZipArchiveEntry entry = new ZipArchiveEntry(DataExportUtility.prepareEntryName(stringHelper.getString(DataExportStrings.DIAGNOSTICS_FILE_PREFIX) + ".txt", storageService.getConfig()));
         zipOutputStream.putArchiveEntry(entry);
 
         StringBuilder messageBuilder = new StringBuilder(128);

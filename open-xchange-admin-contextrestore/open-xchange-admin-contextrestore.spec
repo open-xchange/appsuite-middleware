@@ -9,7 +9,7 @@ BuildRequires: open-xchange-admin
 BuildRequires: java-1.8.0-openjdk-devel
 BuildRequires: pandoc >= 2.0.0
 Version:       @OXVERSION@
-%define        ox_release 24
+%define        ox_release 25
 Release:       %{ox_release}_<CI_CNT>.<B_CNT>
 Group:         Applications/Productivity
 License:       GPL-2.0
@@ -63,6 +63,8 @@ sed -i -e 's;%{buildroot};;' %{manlist}
 %doc com.openexchange.admin.contextrestore/ChangeLog
 
 %changelog
+* Tue May 25 2021 Jan Bauerdick <jan.bauerdick@open-xchange.com>
+Build for patch 2021-06-01 (5999)
 * Tue May 18 2021 Jan Bauerdick <jan.bauerdick@open-xchange.com>
 Build for patch 2021-05-17 (5993)
 * Mon Apr 26 2021 Jan Bauerdick <jan.bauerdick@open-xchange.com>

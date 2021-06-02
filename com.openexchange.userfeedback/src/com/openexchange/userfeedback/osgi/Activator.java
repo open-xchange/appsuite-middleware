@@ -61,6 +61,7 @@ import com.openexchange.exception.OXException;
 import com.openexchange.groupware.settings.PreferencesItemService;
 import com.openexchange.jslob.ConfigTreeEquivalent;
 import com.openexchange.osgi.HousekeepingActivator;
+import com.openexchange.osgi.ServiceSet;
 import com.openexchange.osgi.SimpleRegistryListener;
 import com.openexchange.serverconfig.ServerConfigService;
 import com.openexchange.session.Session;
@@ -69,6 +70,7 @@ import com.openexchange.tools.session.ServerSessionAdapter;
 import com.openexchange.user.User;
 import com.openexchange.userfeedback.FeedbackMode;
 import com.openexchange.userfeedback.FeedbackService;
+import com.openexchange.userfeedback.FeedbackStoreListener;
 import com.openexchange.userfeedback.FeedbackType;
 import com.openexchange.userfeedback.internal.FeedbackServiceImpl;
 import com.openexchange.userfeedback.internal.FeedbackTypeRegistryImpl;
@@ -102,8 +104,10 @@ public class Activator extends HousekeepingActivator{
             public void removed(ServiceReference<FeedbackType> ref, FeedbackType type) {
                 FeedbackTypeRegistryImpl.getInstance().unregisterType(type);
             }});
+        ServiceSet<FeedbackStoreListener> storeListeners = new ServiceSet<FeedbackStoreListener>();
+        track(FeedbackStoreListener.class, storeListeners);
         openTrackers();
-        registerService(FeedbackService.class, new FeedbackServiceImpl());
+        registerService(FeedbackService.class, new FeedbackServiceImpl(storeListeners));
 
         {
             final String sCapability = "feedback";
