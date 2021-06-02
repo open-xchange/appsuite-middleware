@@ -85,6 +85,7 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.yaml.snakeyaml.Yaml;
+import org.yaml.snakeyaml.constructor.SafeConstructor;
 import com.mysql.jdbc.MySQLConnection;
 import com.openexchange.java.Streams;
 
@@ -420,7 +421,7 @@ public class Datamining {
             jdbcProps.setProperty("useSSL", "false");
 
             in = new FileInputStream("/opt/open-xchange/etc/dbconnector.yaml");
-            Yaml yaml = new Yaml();
+            Yaml yaml = new Yaml(new SafeConstructor());
             Object yamlObj = yaml.load(in);
             in.close();
             in = null;

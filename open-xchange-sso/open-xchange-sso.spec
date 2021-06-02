@@ -6,7 +6,7 @@ BuildRequires: ant
 BuildRequires: open-xchange-core
 BuildRequires: java-1.8.0-openjdk-devel
 Version:       @OXVERSION@
-%define        ox_release 12
+%define        ox_release 13
 Release:       %{ox_release}_<CI_CNT>.<B_CNT>
 Group:         Applications/Productivity
 License:       GPL-2.0
@@ -44,6 +44,8 @@ ant -lib build/lib -Dbasedir=build -DdestDir=%{buildroot} -DpackageName=%{name} 
 /opt/open-xchange/osgi/bundle.d/*
 
 %changelog
+* Wed May 26 2021 Marcus Klein <marcus.klein@open-xchange.com>
+Build for patch 2021-06-01 (6000)
 * Fri May 21 2021 Marcus Klein <marcus.klein@open-xchange.com>
 Build for patch 2021-05-21 (5997)
 * Tue May 18 2021 Marcus Klein <marcus.klein@open-xchange.com>

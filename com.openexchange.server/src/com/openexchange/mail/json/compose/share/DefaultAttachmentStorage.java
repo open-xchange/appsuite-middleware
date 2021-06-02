@@ -57,7 +57,6 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.Date;
 import java.util.LinkedHashMap;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -65,6 +64,8 @@ import java.util.concurrent.TimeUnit;
 import com.openexchange.cluster.timer.ClusterTimerService;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.exception.OXException;
+import com.openexchange.exception.OXExceptionCodeSet;
+import com.openexchange.exception.OXExceptions;
 import com.openexchange.file.storage.DefaultFile;
 import com.openexchange.file.storage.DefaultFileStorageFolder;
 import com.openexchange.file.storage.DefaultFileStorageGuestPermission;
@@ -110,6 +111,7 @@ import com.openexchange.share.recipient.ShareRecipient;
 import com.openexchange.timer.ScheduledTimerTask;
 import com.openexchange.tools.iterator.SearchIterator;
 import com.openexchange.tools.iterator.SearchIterators;
+import com.openexchange.tools.oxfolder.OXFolderExceptionCode;
 import com.openexchange.tools.session.ServerSession;
 import com.openexchange.tx.TransactionAware;
 import com.openexchange.tx.TransactionAwares;
@@ -123,6 +125,8 @@ import com.openexchange.user.User;
  * @since v7.8.2
  */
 public class DefaultAttachmentStorage implements AttachmentStorage {
+
+    private static final OXExceptionCodeSet CODES_DUPLICATE = new OXExceptionCodeSet(OXFolderExceptionCode.NO_DUPLICATE_FOLDER, OXFolderExceptionCode.DUPLICATE_NAME, OXExceptions.codeFor(1014, "FLD"));
 
     private static volatile DefaultAttachmentStorage instance;
 
@@ -434,8 +438,10 @@ public class DefaultAttachmentStorage implements AttachmentStorage {
             storageContext.startTransaction();
             rollback = true;
 
-            // Delete attachments from folder
-            renameFolder(subject, folderId, storageContext);
+            Locale locale = session.getUser().getLocale();
+
+            // Rename folder
+            renameFolder(subject, folderId, locale, storageContext);
 
             storageContext.commit();
             rollback = false;
@@ -574,13 +580,31 @@ public class DefaultAttachmentStorage implements AttachmentStorage {
     /**
      * Renames a folder.
      *
-     * @param subject The subject
+     * @param folderName The folder name to rename to
      * @param folderId The folder to rename
+     * @param locale The locale of session-associated user
      * @param storageContext The associated storage context
      * @throws OXException If delete attempt fails
      */
-    protected void renameFolder(String subject, String folderId, DefaultAttachmentStorageContext storageContext) throws OXException {
-        storageContext.folderAccess.renameFolder(folderId, subject);
+    protected void renameFolder(String folderName, String folderId, Locale locale, DefaultAttachmentStorageContext storageContext) throws OXException {
+        String fn = sanitizeName(folderName, StringHelper.valueOf(locale).getString(ShareComposeStrings.DEFAULT_NAME_FOLDER));
+        NameBuilder name = null;
+        do {
+            try {
+                storageContext.folderAccess.renameFolder(folderId, fn);
+                return;
+            } catch (OXException e) {
+                if (CODES_DUPLICATE.contains(e)) {
+                    // A duplicate folder exists
+                    if (null == name) {
+                        name = new NameBuilder(fn);
+                    }
+                    fn = name.advance().toString();
+                    continue;
+                }
+                throw e;
+            }
+        } while (true);
     }
 
     /**
@@ -671,21 +695,16 @@ public class DefaultAttachmentStorage implements AttachmentStorage {
             if (autoDelete && expiry != null) {
                 TimedResult<File> documents = storageContext.fileAccess.getDocuments(folderId);
                 iterator = documents.results();
-
-                List<String> fileIds = new LinkedList<>();
                 while (iterator.hasNext()) {
-                    File file = iterator.next();
-                    fileIds.add(file.getId());
+                    File existingFile = iterator.next();
+                    // Compile the file to update
+                    File file = new DefaultFile();
+                    file.setId(existingFile.getId());
+                    file.setMeta(mapFor("expiration-date-" + getId(), Long.valueOf(expiry.getTime())));
+                    storageContext.fileAccess.saveDocument(file, null, existingFile.getSequenceNumber(), Collections.singletonList(Field.META));
                 }
                 SearchIterators.close(iterator);
                 iterator = null;
-
-                for (String fileId : fileIds) {
-                    File file = new DefaultFile();
-                    file.setId(fileId);
-                    file.setMeta(mapFor("expiration-date-" + getId(), Long.valueOf(expiry.getTime())));
-                    storageContext.fileAccess.saveDocument(file, null, FileStorageFileAccess.UNDEFINED_SEQUENCE_NUMBER, Collections.singletonList(Field.META));
-                }
             }
 
             if (password != null || expiry != null) {
@@ -867,7 +886,7 @@ public class DefaultAttachmentStorage implements AttachmentStorage {
     /**
      * Creates the folder that is supposed to contain the attachments' files.
      *
-     * @param subject The subject
+     * @param folderName The name of the folder
      * @param password The optional password or <code>null</code>
      * @param expiry The optional expiration date or <code>null</code>
      * @param autoDelete <code>true</code> to have the files being cleansed provided that <code>expiry</code> is given; otherwise <code>false</code> to leave them
@@ -877,7 +896,7 @@ public class DefaultAttachmentStorage implements AttachmentStorage {
      * @return The identifier of the newly created folder
      * @throws OXException If folder cannot be created
      */
-    protected Item createFolder(String subject, String password, Date expiry, boolean autoDelete, boolean createGuestPermission, Locale locale, DefaultAttachmentStorageContext storageContext) throws OXException {
+    protected Item createFolder(String folderName, String password, Date expiry, boolean autoDelete, boolean createGuestPermission, Locale locale, DefaultAttachmentStorageContext storageContext) throws OXException {
         // Get or create base share attachments folder
         Session session = storageContext.session;
         String parentFolderID;
@@ -893,14 +912,14 @@ public class DefaultAttachmentStorage implements AttachmentStorage {
         }
 
         // Create folder, pre-shared to an anonymous recipient, for this message
-        DefaultFileStorageFolder folder = prepareFolder(subject, parentFolderID, password, expiry, autoDelete, createGuestPermission, session, locale);
+        DefaultFileStorageFolder folder = prepareFolder(folderName, parentFolderID, password, expiry, autoDelete, createGuestPermission, session, locale);
         IDBasedFolderAccess folderAccess = storageContext.folderAccess;
         NameBuilder name = null;
         do {
             try {
                 return new Item(folderAccess.createFolder(folder), folder.getName());
             } catch (OXException e) {
-                if (e.equalsCode(1014, "FLD") || e.equalsCode(12, "FLD")) {
+                if (CODES_DUPLICATE.contains(e)) {
                     // A duplicate folder exists
                     if (null == name) {
                         name = new NameBuilder(folder.getName());
@@ -955,7 +974,7 @@ public class DefaultAttachmentStorage implements AttachmentStorage {
     /**
      * Prepares a new folder holding the anonymous guest permission for the share.
      *
-     * @param subject The subject
+     * @param folderName The name of the folder
      * @param parentId The identifier of the parent folder
      * @param password The optional password for the share
      * @param expiry The optional expiration date for the share
@@ -965,10 +984,10 @@ public class DefaultAttachmentStorage implements AttachmentStorage {
      * @param locale The locale to use
      * @return A new folder instance (not yet created)
      */
-    protected DefaultFileStorageFolder prepareFolder(String subject, String parentId, String password, Date expiry, boolean autoDelete, boolean createGuestPermission, Session session, Locale locale) {
+    protected DefaultFileStorageFolder prepareFolder(String folderName, String parentId, String password, Date expiry, boolean autoDelete, boolean createGuestPermission, Session session, Locale locale) {
         DefaultFileStorageFolder folder = new DefaultFileStorageFolder();
         folder.setParentId(parentId);
-        folder.setName(sanitizeName(subject, StringHelper.valueOf(locale).getString(ShareComposeStrings.DEFAULT_NAME_FOLDER)));
+        folder.setName(sanitizeName(folderName, StringHelper.valueOf(locale).getString(ShareComposeStrings.DEFAULT_NAME_FOLDER)));
         List<FileStoragePermission> permissions = new ArrayList<FileStoragePermission>(2);
         {
             DefaultFileStoragePermission userPermission = DefaultFileStoragePermission.newInstance();

@@ -52,7 +52,9 @@ package com.openexchange.gdpr.dataexport.impl.utils;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.HashSet;
 import java.util.Optional;
+import java.util.Set;
 import org.apache.commons.compress.archivers.ArchiveEntry;
 import org.apache.commons.compress.archivers.zip.ZipArchiveEntry;
 import org.apache.commons.compress.archivers.zip.ZipArchiveOutputStream;
@@ -82,6 +84,7 @@ public class PipedZippedFileStorageOutputStream extends ZippedFileStorageOutputS
         static final Logger LOG = org.slf4j.LoggerFactory.getLogger(PipedZippedFileStorageOutputStream.class);
     }
 
+    private final Set<String> archiveEntryNames;
     private final FileStorage fileStorage;
     private final ServiceLookup services;
     private final BlockingAtomicReference<String> fileStorageLocationReference;
@@ -103,6 +106,7 @@ public class PipedZippedFileStorageOutputStream extends ZippedFileStorageOutputS
         fileStorageLocationReference = new BlockingAtomicReference<String>();
         out = initOutputStream();
         zipOut = initZipArchiveOutputStream(out, compressionLevel);
+        archiveEntryNames = new HashSet<String>();
     }
 
     /**
@@ -288,6 +292,9 @@ public class PipedZippedFileStorageOutputStream extends ZippedFileStorageOutputS
     @Override
     public void addRawArchiveEntry(ZipArchiveEntry entry, InputStream rawStream) throws IOException {
         try {
+            if (false == archiveEntryNames.add(entry.getName())) {
+                throw new java.util.zip.ZipException("duplicate entry");
+            }
             zipOut.addRawArchiveEntry(entry, rawStream);
         } catch (IOException e) {
             out.forwardException(e);
@@ -306,6 +313,9 @@ public class PipedZippedFileStorageOutputStream extends ZippedFileStorageOutputS
     @Override
     public void putArchiveEntry(ArchiveEntry archiveEntry) throws IOException {
         try {
+            if (false == archiveEntryNames.add(archiveEntry.getName())) {
+                throw new java.util.zip.ZipException("duplicate entry");
+            }
             zipOut.putArchiveEntry(archiveEntry);
         } catch (java.util.zip.ZipException e) {
             String message = e.getMessage();

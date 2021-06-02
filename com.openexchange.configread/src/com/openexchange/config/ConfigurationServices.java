@@ -60,6 +60,7 @@ import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.Properties;
 import org.yaml.snakeyaml.Yaml;
+import org.yaml.snakeyaml.constructor.SafeConstructor;
 import org.yaml.snakeyaml.error.YAMLException;
 import com.openexchange.java.Charsets;
 import com.openexchange.java.Streams;
@@ -117,7 +118,7 @@ public class ConfigurationServices {
         InputStreamReader inputStreamReader = null;
         try {
             inputStreamReader = new InputStreamReader(new FileInputStream(file), Charsets.UTF_8);
-            Yaml yaml = new Yaml();
+            Yaml yaml = new Yaml(new SafeConstructor());
             return yaml.load(inputStreamReader);
         } catch (YAMLException e) {
             throw new IllegalArgumentException("Failed to load YAML file '" + file + ". Please fix any syntax errors in it.", e);
@@ -140,7 +141,7 @@ public class ConfigurationServices {
         }
 
         try {
-            Yaml yaml = new Yaml();
+            Yaml yaml = new Yaml(new SafeConstructor());
             return yaml.load(in);
         } catch (YAMLException e) {
             throw new IllegalArgumentException("Failed to read YAML content from given input stream.", e);

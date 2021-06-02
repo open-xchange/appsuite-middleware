@@ -218,17 +218,17 @@ public class DataExportSinkImpl implements DataExportSink {
     }
 
     @Override
-    public synchronized boolean export(Directory directory) throws OXException {
+    public synchronized String export(Directory directory) throws OXException {
         ZippedFileStorageOutputStream zipOutput = null;
         boolean success = false; // Pessimistic
         try {
             if (canceled.get()) {
-                return false;
+                return null;
             }
 
             zipOutput = getZipOutputStream();
             String name = directory.getName();
-            String pathPrefix = directory.getPath();
+            String pathPrefix = directory.getParentPath();
             if (pathPrefix.length() > 0 && pathPrefix.charAt(pathPrefix.length() - 1) != '/') {
                 pathPrefix = new StringBuilder(pathPrefix).append('/').toString();
             }
@@ -253,6 +253,7 @@ public class DataExportSinkImpl implements DataExportSink {
 
                     // Assumes the entry represents a directory if and only if the name ends with a forward slash "/".
                     path = pathPrefix + entryName + "/";
+                    path = DataExportUtility.prepareEntryName(path, storageService.getConfig());
                     entry = new ZipArchiveEntry(path);
                     zipOutput.putArchiveEntry(entry);
                     break;
@@ -269,7 +270,10 @@ public class DataExportSinkImpl implements DataExportSink {
 
             exportCalled.set(true);
             success = true;
-            return true;
+            if (this.pathPrefix.length() > 0) {
+                path = path.substring(this.pathPrefix.length());
+            }
+            return path;
         } catch (IOException e) {
             throw DataExportExceptionCode.IO_ERROR.create(e, e.getMessage());
         } catch (RuntimeException e) {
@@ -319,7 +323,7 @@ public class DataExportSinkImpl implements DataExportSink {
                             entryName = name.substring(0, pos) + (num > 1 ? "_(" + num + ")" : "") + name.substring(pos);
                         }
                     }
-                    entry = new ZipArchiveEntry(pathPrefix + entryName);
+                    entry = new ZipArchiveEntry(DataExportUtility.prepareEntryName(pathPrefix + entryName, storageService.getConfig()));
                     {
                         Optional<Date> date = item.getOptionalDate();
                         if (date.isPresent()) {

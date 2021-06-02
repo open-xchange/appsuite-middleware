@@ -2,6 +2,7 @@ package liquibase.serializer.core.json;
 
 import org.yaml.snakeyaml.DumperOptions;
 import org.yaml.snakeyaml.Yaml;
+import org.yaml.snakeyaml.constructor.SafeConstructor;
 import org.yaml.snakeyaml.nodes.Tag;
 import liquibase.serializer.LiquibaseSerializable;
 import liquibase.serializer.core.yaml.YamlChangeLogSerializer;
@@ -15,7 +16,7 @@ public class JsonChangeLogSerializer extends YamlChangeLogSerializer {
         dumperOptions.setDefaultFlowStyle(DumperOptions.FlowStyle.FLOW);
         dumperOptions.setDefaultScalarStyle(DumperOptions.ScalarStyle.DOUBLE_QUOTED);
 
-        return new Yaml(new LiquibaseRepresenter(), dumperOptions);
+        return new Yaml(new SafeConstructor(), new LiquibaseRepresenter(), dumperOptions);
     }
 
     @Override

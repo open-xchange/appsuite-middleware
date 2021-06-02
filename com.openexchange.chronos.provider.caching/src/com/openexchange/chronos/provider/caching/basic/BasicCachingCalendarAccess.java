@@ -1087,13 +1087,14 @@ public abstract class BasicCachingCalendarAccess implements BasicCalendarAccess,
              */
             Consistency.adjustAllDayDates(event);
             /*
-             * Adjust timezones
+             * adjust timezones of the event's start- and end-time & normalize
              */
             try {
                 Services.getService(CalendarUtilities.class).adjustTimeZones(session, session.getUserId(), event, null);
             } catch (OXException e) {
                 LOG.error("Unable to adjust timezone for event with identifier {} and uid {}.", event.getId(), event.getUid(), e);
             }
+            Consistency.normalizeRecurrenceIDs(event.getStartDate(), event);
             /*
              * map events by UID
              */

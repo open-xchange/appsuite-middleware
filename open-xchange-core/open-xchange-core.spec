@@ -11,7 +11,7 @@ BuildRequires: open-xchange-hazelcast
 BuildRequires: java-1.8.0-openjdk-devel
 BuildRequires: pandoc >= 2.0.0
 Version:       @OXVERSION@
-%define        ox_release 12
+%define        ox_release 13
 Release:       %{ox_release}_<CI_CNT>.<B_CNT>
 Group:         Applications/Productivity
 License:       GPL-2.0
@@ -911,6 +911,25 @@ EOF
     fi
     GLOBIGNORE='*'
 
+    SCR=SCR-842
+    if ox_scr_todo ${SCR}
+    then
+      pfile=/opt/open-xchange/etc/mime.types
+      type="image/xcf xcf"
+      if ! contains "${type}" ${pfile}
+      then
+        echo "${type}" >> ${pfile}
+        LC_COLLATE=C sort -o ${pfile} ${pfile}
+      fi
+      type="image/x-xcf xcf"
+      if ! contains "${type}" ${pfile}
+      then
+        echo "${type}" >> ${pfile}
+        LC_COLLATE=C sort -o ${pfile} ${pfile}
+      fi
+      ox_scr_done ${SCR}
+    fi
+
 fi
 
 PROTECT=( autoconfig.properties configdb.properties hazelcast.properties jolokia.properties mail.properties mail-push.properties management.properties secret.properties secrets server.properties sessiond.properties share.properties tokenlogin-secrets )
@@ -964,6 +983,8 @@ exit 0
 %doc com.openexchange.authentication.application.impl/doc/examples
 
 %changelog
+* Wed May 26 2021 Marcus Klein <marcus.klein@open-xchange.com>
+Build for patch 2021-06-01 (6000)
 * Fri May 21 2021 Marcus Klein <marcus.klein@open-xchange.com>
 Build for patch 2021-05-21 (5997)
 * Tue May 18 2021 Marcus Klein <marcus.klein@open-xchange.com>
