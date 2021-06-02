@@ -180,7 +180,7 @@ public class ISPDB extends AbstractProxyAwareConfigSource {
                 port = 443;
             } else {
                 port = 80;
-                LOG.warn("Using port 80 for communication as per configured URL {}. Please note that this is deprecated. For details see \"https://developer.mozilla.org/en-US/docs/Mozilla/Thunderbird/Autoconfiguration#ssl\"", url.toString());
+                LOG.warn("Using port 80 for communication as per configured URL {}. Please note that this is deprecated and might not work in the future. For details see \"https://developer.mozilla.org/en-US/docs/Mozilla/Thunderbird/Autoconfiguration#ssl\"", url);
             }
         } else {
             /* Port set per configuration, e.g. http://autoconfig.thunderbird.net:80/v1.1/ */
