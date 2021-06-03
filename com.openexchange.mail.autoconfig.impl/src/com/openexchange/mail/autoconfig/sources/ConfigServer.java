@@ -60,9 +60,16 @@ public class ConfigServer extends AbstractProxyAwareConfigSource {
 
     /**
      * Initializes a new {@link ConfigServer}.
+     * 
+     * @param services The service lookup
      */
     public ConfigServer(ServiceLookup services) {
         super(services);
+    }
+
+    @Override
+    protected String getAccountId() {
+        return "configServer";
     }
 
     @Override
@@ -72,22 +79,22 @@ public class ConfigServer extends AbstractProxyAwareConfigSource {
 
     @Override
     public DefaultAutoconfig getAutoconfig(final String emailLocalPart, final String emailDomain, final String password, int userId, int contextId, boolean forceSecure) throws OXException {
-        URL url;
-        {
-            String sUrl = new StringBuilder("http://autoconfig.").append(emailDomain).append("/mail/config-v1.1.xml").toString();
-            try {
-                url = new URL(sUrl);
-            } catch (MalformedURLException e) {
-                LOG.debug("Unable to parse URL: {}. Skipping config server source for mail auto-config", sUrl, e);
-                return null;
-            }
-
-            if (isInvalid(url)) {
-                LOG.debug("Invalid URL: {}. Skipping config server source for mail auto-config", sUrl);
-                return null;
-            }
+        DefaultAutoconfig autoconfig = getAutoconfig(emailLocalPart, emailDomain, userId, contextId, forceSecure, true);
+        if (null == autoconfig && false == forceSecure) {
+            /*
+             * Fallback to HTTP
+             */
+            LOG.debug("Trying to get configuration via HTTP because HTTPS failed and configuration allows unsecure connections.");
+            return getAutoconfig(emailLocalPart, emailDomain, userId, contextId, forceSecure, false);
         }
+        return autoconfig;
+    }
 
+    private DefaultAutoconfig getAutoconfig(final String emailLocalPart, final String emailDomain, int userId, int contextId, boolean forceSecure, boolean useTLS) throws OXException {
+        URL url = getAutoConfigURL(emailDomain, useTLS);
+        if (null == url) {
+            return null;
+        }
         HttpContext httpContext = httpContextFor(contextId, userId);
         httpContext.setAttribute(OX_TARGET_ID, url);
         HttpClient httpclient = services.getServiceSafe(HttpClientService.class).getHttpClient("autoconfig-server");
@@ -107,25 +114,15 @@ public class ConfigServer extends AbstractProxyAwareConfigSource {
                 LOG.info("Could not retrieve config XML from autoconfig server. Return code was: {}", Autoboxing.I(statusCode));
 
                 // Try 2nd URL
-                {
-                    String sUrl = new StringBuilder(64).append("http://").append(emailDomain).append("/.well-known/autoconfig/mail/config-v1.1.xml").toString();
-                    try {
-                        url = new URL(sUrl);
-                    } catch (MalformedURLException e) {
-                        LOG.debug("Unable to parse URL: {}. Skipping config server source for mail auto-config", sUrl, e);
-                        return null;
-                    }
-
-                    if (isInvalid(url)) {
-                        LOG.debug("Invalid URL: {}. Skipping config server source for mail auto-config", sUrl);
-                        return null;
-                    }
+                url = getWellKownConfigURL(emailDomain, useTLS);
+                if (null == url) {
+                    return null;
                 }
                 req = new HttpGet(url.getPath() + "?" + URLEncodedUtils.format(Arrays.<NameValuePair> asList(new BasicNameValuePair("emailaddress", new StringBuilder(emailLocalPart).append('@').append(emailDomain).toString())), "UTF-8"));
                 rsp = httpclient.execute(target, req, httpContext);
                 statusCode = rsp.getStatusLine().getStatusCode();
                 if (statusCode != 200) {
-                    LOG.info("Could not retrieve config XML from main domain. Return code was: {}",  Autoboxing.I(statusCode));
+                    LOG.info("Could not retrieve config XML from main domain. Return code was: {}", Autoboxing.I(statusCode));
                     return null;
                 }
             }
@@ -167,11 +164,6 @@ public class ConfigServer extends AbstractProxyAwareConfigSource {
         }
     }
 
-    @Override
-    protected String getAccountId() {
-        return "configServer";
-    }
-
     // -------------------------------------------------------------------------------------------------------------------------------------
 
     /**
@@ -200,5 +192,39 @@ public class ConfigServer extends AbstractProxyAwareConfigSource {
             return false;
         }
         return true;
+    }
+
+    private URL getAutoConfigURL(String emailDomain, boolean useTLS) {
+        String sUrl = new StringBuilder(64) // @formatter:off
+            .append(useTLS ? "https" : "http")
+            .append("://autoconfig.")
+            .append(emailDomain)
+            .append("/mail/config-v1.1.xml").toString(); // @formatter:on
+        return buildAndCheckUrl(sUrl);
+    }
+
+    private URL getWellKownConfigURL(String emailDomain, boolean useTLS) {
+        String sUrl = new StringBuilder(64) // @formatter:off 
+            .append(useTLS ? "https" : "http")
+            .append(emailDomain)
+            .append("/.well-known/autoconfig/mail/config-v1.1.xml").toString();  // @formatter:on
+        return buildAndCheckUrl(sUrl);
+    }
+
+    private URL buildAndCheckUrl(String sUrl) {
+        try {
+            URL url = new URL(sUrl);
+            if (isInvalid(url)) {
+                LOG.debug("Invalid URL: {}. Skipping config server source for mail auto-config", sUrl);
+                return null;
+            }
+            if("http".equalsIgnoreCase(url.getProtocol())) {
+                LOG.warn("Using insecure connection for communication with {}. Please note that this is deprecated and might not work in the future. For details see \"https://developer.mozilla.org/en-US/docs/Mozilla/Thunderbird/Autoconfiguration#ssl\"", url);
+            }
+            return url;
+        } catch (MalformedURLException e) {
+            LOG.debug("Unable to parse URL: {}. Skipping config server source for mail auto-config", sUrl, e);
+        }
+        return null;
     }
 }
