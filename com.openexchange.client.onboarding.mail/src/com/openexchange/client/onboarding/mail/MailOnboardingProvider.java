@@ -460,8 +460,9 @@ public class MailOnboardingProvider implements OnboardingPlistProvider {
         if (needsAuthentication) {
             configuration.put(SMTP_LOGIN_FIELD, configurations.smtpConfig.login);
         } else {
-            String none = StringHelper.valueOf(getUser(session).getLocale()).getString("None");
-            configuration.put(SMTP_LOGIN_FIELD, none);
+            //String none = StringHelper.valueOf(getUser(session).getLocale()).getString("None");
+            //configuration.put(SMTP_LOGIN_FIELD, none);
+            configuration.put(SMTP_LOGIN_FIELD, configurations.smtpConfig.login);
         }
         configuration.put(SMTP_SERVER_FIELD, configurations.smtpConfig.host);
         configuration.put(SMTP_PORT_FIELD, new Integer(configurations.smtpConfig.port));
@@ -575,9 +576,9 @@ public class MailOnboardingProvider implements OnboardingPlistProvider {
 
         // Designates the user name for the email account, usually the same as the email address up to the @ character.
         // If not present in the payload, and the account is set up to require authentication for outgoing email, the device prompts for this string during profile installation.
-        if (needsAuthentication) {
-            payloadContent.addStringValue("OutgoingMailServerUsername", configurations.smtpConfig.login);
+        payloadContent.addStringValue("OutgoingMailServerUsername", configurations.smtpConfig.login);
 
+        if (needsAuthentication) {
             if (Strings.isNotEmpty(configurations.smtpConfig.password) && Strings.isNotEmpty(configurations.imapConfig.password) && configurations.smtpConfig.password.equals(configurations.imapConfig.password)) {
                 payloadContent.addBooleanValue("OutgoingPasswordSameAsIncomingPassword", true);
             }
