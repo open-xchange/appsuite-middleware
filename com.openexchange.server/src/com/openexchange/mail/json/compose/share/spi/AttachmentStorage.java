@@ -14,7 +14,7 @@
  *
  * You should have received a copy of the GNU Affero General Public License
  * along with OX App Suite.  If not, see <https://www.gnu.org/licenses/agpl-3.0.txt>.
- * 
+ *
  * Any use of the work other than as authorized under this license or copyright law is prohibited.
  *
  */
@@ -36,7 +36,6 @@ import com.openexchange.mail.json.compose.share.StorageQuota;
 import com.openexchange.mail.json.compose.share.StoredAttachments;
 import com.openexchange.mail.json.compose.share.StoredAttachmentsControl;
 import com.openexchange.session.Session;
-import com.openexchange.share.ShareTarget;
 import com.openexchange.tools.session.ServerSession;
 
 /**
@@ -185,15 +184,19 @@ public interface AttachmentStorage extends Applicable {
     /**
      * Creates the share target for the folder (for an anonymous user).
      *
+     * @param sourceMessage The source message providing basic information
      * @param folderId The folder identifier
+     * @param attachmentItems
+     * @param folderItem
      * @param password The optional password to protect the attachments
      * @param expiry The optional expiration date
      * @param autoDelete <code>true</code> to have the files being cleansed provided that <code>expiry</code> is given; otherwise <code>false</code> to leave them
      * @param session The session providing user information
-     * @return The share target
+     * @param context The associated compose context; does not contain any attachments
+     * @return The share target encapsulated in a StoredAttachmentsControl
      * @throws OXException If share target cannot be created
      */
-    ShareTarget createShareTarget(String folderId, String password, Date expiry, boolean autoDelete, ServerSession session) throws OXException;
+    StoredAttachmentsControl createShareTarget(ComposedMailMessage sourceMessage, String folderId, Item folderItem, List<Item> attachmentItems, String password, Date expiry, boolean autoDelete, ServerSession session, ComposeContext contextToPass) throws OXException;
 
     /**
      * Gets the current storage quota and usage for eager over-quota checks during attachment upload.

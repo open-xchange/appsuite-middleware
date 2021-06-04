@@ -14,7 +14,7 @@
  *
  * You should have received a copy of the GNU Affero General Public License
  * along with OX App Suite.  If not, see <https://www.gnu.org/licenses/agpl-3.0.txt>.
- * 
+ *
  * Any use of the work other than as authorized under this license or copyright law is prohibited.
  *
  */
@@ -288,6 +288,11 @@ public class ShareComposeHandler extends AbstractComposeHandler<ShareTransportCo
     }
 
     private ComposeTransportResult doCreateTransportResultWithFolder(String folderId, ComposeRequest composeRequest, ShareTransportComposeContext context) throws OXException {
+        ShareService shareService = ServerServiceRegistry.getServize(ShareService.class);
+        if (null == shareService) {
+            throw ServiceExceptionCode.absentService(ShareService.class);
+        }
+
         // Get the basic source message
         ServerSession session = composeRequest.getSession();
         ComposedMailMessage source = context.getSourceMessage();
@@ -334,22 +339,25 @@ public class ShareComposeHandler extends AbstractComposeHandler<ShareTransportCo
         }
         AttachmentStorage attachmentStorage = storageRegistry.getAttachmentStorageFor(composeRequest);
 
+        StoredAttachmentsControl attachmentsControl = null;
         boolean rollback = false;
         Map<String, ThresholdFileHolder> previewImages = null;
         try {
+            // Compose context should only advertise attachments to store
+            ForwardingComposeContext contextToPass = new ForwardingComposeContext(context);
+            contextToPass.setAllParts(Collections.emptyList());
+
             // Create the share target for an anonymous user
-            ShareTarget folderTarget = attachmentStorage.createShareTarget(folderId, password, expirationDate, autoDelete, session);
-            rollback = true;
-
-            ShareService shareService = ServerServiceRegistry.getServize(ShareService.class);
-            if (null == shareService) {
-                throw ServiceExceptionCode.absentService(ShareService.class);
-            }
-            ShareLink folderLink = shareService.getLink(session, folderTarget);
-
             // Create share compose reference
             Item folderItem = new Item(folderId, null);
             List<Item> attachmentItems = attachmentStorage.getAttachments(folderId, session);
+
+            attachmentsControl = attachmentStorage.createShareTarget(source, folderId, folderItem, attachmentItems, password, expirationDate, autoDelete, session, contextToPass);
+            rollback = true;
+
+            ShareTarget folderTarget = attachmentsControl.getFolderTarget();
+            ShareLink folderLink = shareService.getLink(session, folderTarget);
+
             ShareReference shareReference;
             {
                 String shareToken = folderLink.getGuest().getBaseToken();
@@ -422,12 +430,19 @@ public class ShareComposeHandler extends AbstractComposeHandler<ShareTransportCo
             DefaultComposeTransportResult transportResult = DefaultComposeTransportResult.builder()
                 .withTransportMessages(transportMessages, true)
                 .withSentMessage(sentMessage)
-                .withAttachmentsControl(new NoopStoredAttachmentsControl(attachmentItems, folderItem, folderTarget))
+                .withAttachmentsControl(attachmentsControl)
                 .build();
+            attachmentsControl = null;
             rollback = false;
 
             return transportResult;
         } finally {
+            if (null != attachmentsControl) {
+                if (rollback) {
+                    attachmentsControl.rollback();
+                }
+                attachmentsControl.finish();
+            }
             if (rollback && null != previewImages) {
                 for (ThresholdFileHolder tfh : previewImages.values()) {
                     tfh.close();
