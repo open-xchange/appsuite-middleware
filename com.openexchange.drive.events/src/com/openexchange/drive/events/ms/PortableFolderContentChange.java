@@ -14,7 +14,7 @@
  *
  * You should have received a copy of the GNU Affero General Public License
  * along with OX App Suite.  If not, see <https://www.gnu.org/licenses/agpl-3.0.txt>.
- * 
+ *
  * Any use of the work other than as authorized under this license or copyright law is prohibited.
  *
  */
@@ -63,7 +63,7 @@ public class PortableFolderContentChange implements CustomPortable, VersionedPor
         .addUTFField(PARAMETER_FOLDER_ID)
         .addUTFArrayField(PARAMETER_PATH_TO_ROOT)
     .build();
-    
+
     private String folderId;
     private List<IdAndName> pathToRoot;
 
@@ -125,20 +125,22 @@ public class PortableFolderContentChange implements CustomPortable, VersionedPor
 
     public static Portable[] wrap(List<DriveContentChange> contentChanges) {
         if (null == contentChanges) {
-            return null;
+            return new Portable[0];
         }
-        Portable[] portableContentChanges = new Portable[contentChanges.size()];
-        for (int i = 0; i < contentChanges.size(); i++) {
+        int size = contentChanges.size();
+        Portable[] portableContentChanges = new Portable[size];
+        int i = 0;
+        for (DriveContentChange contentChange : contentChanges) {
             PortableFolderContentChange portableContentChange = new PortableFolderContentChange();
-            portableContentChange.folderId = contentChanges.get(i).getFolderId();
-            portableContentChange.pathToRoot = contentChanges.get(i).getPathToRoot();
-            portableContentChanges[i] = portableContentChange;
+            portableContentChange.folderId = contentChange.getFolderId();
+            portableContentChange.pathToRoot = contentChange.getPathToRoot();
+            portableContentChanges[i++] = portableContentChange;
         }
         return portableContentChanges;
     }
 
     public static List<DriveContentChange> unwrap(Portable[] portableContentChanges) {
-        if (null == portableContentChanges) {
+        if (null == portableContentChanges || portableContentChanges.length <= 0) {
             return null;
         }
         List<DriveContentChange> folderContentChanges = new ArrayList<DriveContentChange>(portableContentChanges.length);
