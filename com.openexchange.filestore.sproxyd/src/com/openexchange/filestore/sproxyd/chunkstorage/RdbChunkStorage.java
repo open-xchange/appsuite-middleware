@@ -14,7 +14,7 @@
  *
  * You should have received a copy of the GNU Affero General Public License
  * along with OX App Suite.  If not, see <https://www.gnu.org/licenses/agpl-3.0.txt>.
- * 
+ *
  * Any use of the work other than as authorized under this license or copyright law is prohibited.
  *
  */
@@ -27,8 +27,10 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 import java.util.UUID;
 import com.openexchange.database.Databases;
 import com.openexchange.exception.OXException;
@@ -96,18 +98,18 @@ public class RdbChunkStorage implements ChunkStorage {
         PreparedStatement stmt = null;
         ResultSet rs = null;
         try {
-            stmt = con.prepareStatement("SELECT DISTINCT document_id FROM scality_filestore WHERE cid=? AND user=?");
+            stmt = con.prepareStatement("SELECT document_id FROM scality_filestore WHERE cid=? AND user=?");
             stmt.setInt(1, contextId);
             stmt.setInt(2, userId);
             rs = stmt.executeQuery();
             if (!rs.next()) {
                 return Collections.emptyList();
             }
-            List<UUID> documentIds = new ArrayList<UUID>();
+            Set<UUID> documentIds = new LinkedHashSet<>();
             do {
                 documentIds.add(UUIDs.toUUID(rs.getBytes(1)));
             } while (rs.next());
-            return documentIds;
+            return new ArrayList<>(documentIds);
         } catch (SQLException e) {
             throw SproxydExceptionCode.SQL_ERROR.create(e, e.getMessage());
         } finally {
