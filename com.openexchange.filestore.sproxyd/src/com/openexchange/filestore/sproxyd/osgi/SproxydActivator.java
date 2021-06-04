@@ -14,7 +14,7 @@
  *
  * You should have received a copy of the GNU Affero General Public License
  * along with OX App Suite.  If not, see <https://www.gnu.org/licenses/agpl-3.0.txt>.
- * 
+ *
  * Any use of the work other than as authorized under this license or copyright law is prohibited.
  *
  */
@@ -33,11 +33,9 @@ import com.openexchange.filestore.sproxyd.SproxydFileStorageFactory;
 import com.openexchange.filestore.sproxyd.groupware.SproxydConvertToUtf8mb4;
 import com.openexchange.filestore.sproxyd.groupware.SproxydCreateTableService;
 import com.openexchange.filestore.sproxyd.groupware.SproxydCreateTableTask;
-import com.openexchange.filestore.sproxyd.groupware.SproxydDeleteListener;
 import com.openexchange.filestore.sproxyd.http.SproxydHttpClientConfig;
 import com.openexchange.filestore.sproxyd.rmi.SproxydRemoteManagement;
 import com.openexchange.filestore.sproxyd.rmi.impl.SproxydRemoteImpl;
-import com.openexchange.groupware.delete.DeleteListener;
 import com.openexchange.groupware.update.DefaultUpdateTaskProviderService;
 import com.openexchange.groupware.update.UpdateTaskProviderService;
 import com.openexchange.osgi.HousekeepingActivator;
@@ -77,7 +75,6 @@ public class SproxydActivator extends HousekeepingActivator {
         // Register update task, create table job and delete listener
         registerService(CreateTableService.class, new SproxydCreateTableService());
         registerService(UpdateTaskProviderService.class, new DefaultUpdateTaskProviderService(new SproxydCreateTableTask(), new SproxydConvertToUtf8mb4()));
-        registerService(DeleteListener.class, new SproxydDeleteListener());
 
         // Register factory
         registerService(FileStorageProvider.class, new SproxydFileStorageFactory(this));
