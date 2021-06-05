@@ -435,7 +435,7 @@ public class DefaultAttachmentStorage implements AttachmentStorage {
     }
 
     @Override
-    public ShareTarget createShareTarget(String folderId, String password, Date expiry, boolean autoDelete, ServerSession session) throws OXException {
+    public StoredAttachmentsControl createShareTarget(ComposedMailMessage sourceMessage, String folderId, Item folderItem, List<Item> attachmentItems, String password, Date expiry, boolean autoDelete, ServerSession session, ComposeContext context) throws OXException {
         DefaultAttachmentStorageContext storageContext = new DefaultAttachmentStorageContext(getFileAccess(session), getFolderAccess(session), session);
         boolean rollback = false;
         try {
@@ -450,7 +450,7 @@ public class DefaultAttachmentStorage implements AttachmentStorage {
 
             storageContext.commit();
             rollback = false;
-            return folderTarget;
+            return new NoopStoredAttachmentsControl(attachmentItems, folderItem, folderTarget);
         } finally {
             if (rollback) {
                 rollback(storageContext);

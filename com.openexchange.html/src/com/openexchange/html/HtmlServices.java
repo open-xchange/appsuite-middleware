@@ -14,7 +14,7 @@
  *
  * You should have received a copy of the GNU Affero General Public License
  * along with OX App Suite.  If not, see <https://www.gnu.org/licenses/agpl-3.0.txt>.
- * 
+ *
  * Any use of the work other than as authorized under this license or copyright law is prohibited.
  *
  */
@@ -336,7 +336,7 @@ public final class HtmlServices {
         // Check for possible URI
         URI uri;
         try {
-            uri = new URI(Strings.replaceWhitespacesWith(possibleUrl, null)); 
+            uri = new URI(Strings.replaceWhitespacesWith(possibleUrl, null));
         } catch (URISyntaxException x) {
             // At least check for common attack vectors
             return isNonJavaScriptURL(possibleUrl, tagName);
@@ -346,7 +346,7 @@ public final class HtmlServices {
         String scheme = uri.getScheme();
         if (null == scheme) {
             // No scheme...
-            return true;
+            return isNonJavaScriptURL(possibleUrl, tagName);
         }
 
         List<String> schemes = WhitelistedSchemes.getWhitelistedSchemes();
@@ -489,7 +489,7 @@ public final class HtmlServices {
                 }
             }
         }
-        
+
         if (c == null) {
             return s;
         }

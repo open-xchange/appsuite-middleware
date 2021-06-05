@@ -14,7 +14,7 @@
  *
  * You should have received a copy of the GNU Affero General Public License
  * along with OX App Suite.  If not, see <https://www.gnu.org/licenses/agpl-3.0.txt>.
- * 
+ *
  * Any use of the work other than as authorized under this license or copyright law is prohibited.
  *
  */
@@ -307,6 +307,7 @@ public class HazelcastConfigurationServiceImpl implements HazelcastConfiguration
         if (Strings.isNotEmpty(configService.getProperty("com.openexchange.hazelcast.group.password"))) {
             LOG.info("The configured value for 'com.openexchange.hazelcast.group.password' is no longer used and should be removed.");
         }
+        config.setProperty(ClusterProperty.MOBY_NAMING_ENABLED.getName(), "false");
         config.setLiteMember(configService.getBoolProperty("com.openexchange.hazelcast.liteMember", config.isLiteMember()));
         switch (join) {
             case EMPTY:
