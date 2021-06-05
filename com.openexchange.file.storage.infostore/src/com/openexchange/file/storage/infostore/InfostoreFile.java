@@ -39,7 +39,7 @@ import com.openexchange.session.Session;
  *
  * You should have received a copy of the GNU Affero General Public License
  * along with OX App Suite.  If not, see <https://www.gnu.org/licenses/agpl-3.0.txt>.
- * 
+ *
  * Any use of the work other than as authorized under this license or copyright law is prohibited.
  *
  */
