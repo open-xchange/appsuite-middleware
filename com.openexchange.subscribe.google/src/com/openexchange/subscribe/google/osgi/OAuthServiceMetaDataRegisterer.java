@@ -76,7 +76,7 @@ public class OAuthServiceMetaDataRegisterer implements ServiceTrackerCustomizer<
             try {
                 subscribeService = new GoogleContactsSubscribeService(oAuthServiceMetaData, services);
             } catch (OXException e) {
-                logger.error("Unable to create Google Contact subscription services: " + e.getMessage(), e);
+                logger.error("Unable to create Google Contact subscription services", e);
                 return null;
             }
             contactsRegistration = context.registerService(SubscribeService.class, subscribeService, null);
