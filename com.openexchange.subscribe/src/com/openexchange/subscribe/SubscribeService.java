@@ -187,4 +187,31 @@ public interface SubscribeService {
      */
     boolean isCreateModifyEnabled();
 
+    /**
+     * Checks whether this service is enabled or not.
+     *
+     * @param session The session providing user data
+     * @return <code>true</code> if enabled, <code>false</code>, otherwise
+     * @throws OXException If check fails
+     */
+    default boolean isEnabled(Session session) throws OXException {
+        if (session == null) {
+            throw new IllegalArgumentException("Session must ot be null");
+        }
+        return isEnabled(session.getUserId(), session.getContextId());
+    }
+
+    /**
+     * Checks whether this service is enabled for given user or not.
+     *
+     * @param userId The user identifier
+     * @param contextId The context identifier
+     * @return <code>true</code> if enabled, <code>false</code>, otherwise
+     * @throws OXException If check fails
+     */
+    default boolean isEnabled(int userId, int contextId) throws OXException {
+        // Enabled by default
+        return true;
+    }
+
 }
