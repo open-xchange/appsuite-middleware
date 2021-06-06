@@ -31,8 +31,10 @@ import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.server.ServiceLookup;
+import com.openexchange.subscribe.SubscribeService;
 import com.openexchange.subscribe.SubscriptionSource;
 import com.openexchange.subscribe.json.SubscriptionSourceJSONWriter;
+import com.openexchange.tools.session.ServerSession;
 
 /**
  * @author <a href="mailto:karsten.will@open-xchange.com">Karsten Will</a>
@@ -52,17 +54,23 @@ public class ListSourcesAction extends AbstractSubscribeSourcesAction {
 
     @Override
     public AJAXRequestResult perform(SubscribeRequest subscribeRequest) throws OXException {
-        final int module = getModule(subscribeRequest.getRequestData().getModule());
+        int module = getModule(subscribeRequest.getRequestData().getModule());
         // Retrieve subscription sources
-        final List<SubscriptionSource> sources = new ArrayList<SubscriptionSource>(getAvailableSources(subscribeRequest.getServerSession()).getSources(module));
-        for (final Iterator<SubscriptionSource> iterator = sources.iterator(); iterator.hasNext();) {
+        ServerSession session = subscribeRequest.getServerSession();
+        List<SubscriptionSource> sources = new ArrayList<SubscriptionSource>(getAvailableSources(session).getSources(module));
+        for (Iterator<SubscriptionSource> iterator = sources.iterator(); iterator.hasNext();) {
             final SubscriptionSource subscriptionSource = iterator.next();
-            if (IGNOREES.contains(subscriptionSource.getId()) || false == subscriptionSource.getSubscribeService().isCreateModifyEnabled()) {
+            if (IGNOREES.contains(subscriptionSource.getId())) {
                 iterator.remove();
+            } else {
+                SubscribeService subscribeService = subscriptionSource.getSubscribeService();
+                if (false == subscribeService.isEnabled(session) || false == subscribeService.isCreateModifyEnabled()) {
+                    iterator.remove();
+                }
             }
         }
         // Generate appropriate JSON
-        final JSONArray json = new SubscriptionSourceJSONWriter(createTranslator(subscribeRequest.getServerSession())).writeJSONArray(sources, FIELDS);
+        JSONArray json = new SubscriptionSourceJSONWriter(createTranslator(session)).writeJSONArray(sources, FIELDS);
         return new AJAXRequestResult(json, "json");
     }
 

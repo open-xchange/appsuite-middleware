@@ -39,7 +39,8 @@ public class Activator extends CompositeBundleActivator {
         new TrackerActivator(),
         new UpdateTaskActivator(),
         new FilterActivator(),
-        new AutoUpdateActivator()};
+        new AutoUpdateActivator(),
+        new ServiceTrackingActivator()};
 
     @Override
     protected BundleActivator[] getActivators() {

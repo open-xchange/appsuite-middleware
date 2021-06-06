@@ -69,9 +69,8 @@ public class WebdavPutAction extends AbstractAction {
 		} catch (WebdavProtocolException x) {
 			if (in != null && in.hasExceeded()) {
 				throw WebdavProtocolException.Code.GENERAL_ERROR.create(req.getUrl(), HttpServletResponse.SC_REQUEST_ENTITY_TOO_LARGE);
-			} else {
-				throw x;
 			}
+            throw x;
 		}
 
 	}
@@ -82,6 +81,7 @@ public class WebdavPutAction extends AbstractAction {
 	}
 
 	public static final class SizeExceededInputStream extends SizeAwareInputStream {
+
 		private boolean exceeded;
 		private final long maxSize;
 
@@ -91,7 +91,7 @@ public class WebdavPutAction extends AbstractAction {
 		}
 
 		@Override
-		public void size(final long size) throws IOException {
+		protected void size(final long size) throws IOException {
 			if (size > maxSize) {
 				exceeded = true;
 				throw new IOException("Exceeded max upload size of "+maxSize);

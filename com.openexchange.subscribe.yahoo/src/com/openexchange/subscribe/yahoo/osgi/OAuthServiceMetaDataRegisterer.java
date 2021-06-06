@@ -80,7 +80,7 @@ public class OAuthServiceMetaDataRegisterer implements ServiceTrackerCustomizer<
                 try {
                     serviceRegistration = context.registerService(SubscribeService.class, new YahooSubscribeService(oAuthServiceMetaData, services), null);
                 } catch (OXException e) {
-                    LOG.error("Unable to create YahooSubscribeService: " + e.getMessage(), e);
+                    LOG.error("Unable to create YahooSubscribeService", e);
                     return null;
                 }
                 LoggerFactory.getLogger(Activator.class).info("YahooSubscribeService was started");

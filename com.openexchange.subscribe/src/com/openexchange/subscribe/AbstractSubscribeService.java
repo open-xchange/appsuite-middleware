@@ -34,6 +34,9 @@ import java.util.concurrent.atomic.AtomicReference;
 import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import com.openexchange.config.cascade.ConfigView;
+import com.openexchange.config.cascade.ConfigViewFactory;
+import com.openexchange.config.cascade.ConfigViews;
 import com.openexchange.crypto.CryptoService;
 import com.openexchange.exception.OXException;
 import com.openexchange.folder.FolderService;
@@ -44,6 +47,7 @@ import com.openexchange.secret.SecretEncryptionService;
 import com.openexchange.server.impl.EffectivePermission;
 import com.openexchange.server.impl.OCLPermission;
 import com.openexchange.session.Session;
+import com.openexchange.subscribe.osgi.Services;
 import com.openexchange.tools.iterator.SearchIterator;
 import com.openexchange.tools.iterator.SearchIteratorDelegator;
 import com.openexchange.tools.iterator.SearchIterators;
@@ -78,9 +82,21 @@ public abstract class AbstractSubscribeService implements SubscribeService {
      *
      * @param folderService The {@link com.openexchange.folderstorage.FolderService} to use
      */
-    public AbstractSubscribeService(com.openexchange.folderstorage.FolderService folderService) {
+    protected AbstractSubscribeService(com.openexchange.folderstorage.FolderService folderService) {
         super();
         marker = new SubscriptionErrorMarker(this, folderService);
+    }
+
+    @Override
+    public boolean isEnabled(int userId, int contextId) throws OXException {
+        boolean def = true;
+        ConfigViewFactory viewFactory = Services.optService(ConfigViewFactory.class);
+        if (viewFactory == null) {
+            return def;
+        }
+
+        ConfigView view = viewFactory.getView(userId, contextId);
+        return ConfigViews.getDefinedBoolPropertyFrom(getSubscriptionSource().getId(), def, view);
     }
 
     /**

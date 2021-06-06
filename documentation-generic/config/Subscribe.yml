@@ -112,3 +112,80 @@ properties:
       file: xingsubscribe.properties
       packageName: open-xchange-subscribe
       tags: ["Xing", "Contact", "Subscribe"]
+     - key: com.openexchange.subscribe.dav.gmx.de
+      description: |
+        The on/off configuration switch for gmx.de subscription
+      defaultValue: true
+      version: 7.10.6
+      reloadable: true
+      configcascadeAware: true
+      related: 
+      file: gmxdesubscribe.properties
+      packageName: open-xchange-subscribe
+      tags: 
+    - key: com.openexchange.subscribe.dav.tonline.de
+      description: |
+        The on/off configuration switch for T-Online.de subscription
+      defaultValue: true
+      version: 7.10.6
+      reloadable: true
+      configcascadeAware: true
+      related: 
+      file: tonlinedesubscribe.properties
+      packageName: open-xchange-subscribe
+      tags: 
+    - key: com.openexchange.subscribe.dav.web.de
+      description: |
+        The on/off configuration switch for web.de subscription
+      defaultValue: true
+      version: 7.10.6
+      reloadable: true
+      configcascadeAware: true
+      related: 
+      file: webdesubscribe.properties
+      packageName: open-xchange-subscribe
+      tags: 
+    - key: com.openexchange.oauth.google.contact
+      description: |
+        The on/off configuration switch for Google subscription
+      defaultValue: true
+      version: 7.10.6
+      reloadable: true
+      configcascadeAware: true
+      related: 
+      file: googlesubscribe.properties
+      packageName: open-xchange-subscribe
+      tags: 
+    - key: com.openexchange.oauth.microsoft.graph.contact
+      description: |
+        The on/off configuration switch for MS Live subscription
+      defaultValue: true
+      version: 7.10.6
+      reloadable: true
+      configcascadeAware: true
+      related: 
+      file: mslivesubscribe.properties
+      packageName: open-xchange-subscribe
+      tags: 
+    - key: com.openexchange.subscribe.xing
+      description: |
+        The on/off configuration switch for XING subscription
+      defaultValue: true
+      version: 7.10.6
+      reloadable: true
+      configcascadeAware: true
+      related: 
+      file: xingsubscribe.properties
+      packageName: open-xchange-subscribe
+      tags: 
+    - key: com.openexchange.subscribe.socialplugin.yahoo
+      description: |
+        The on/off configuration switch for Yahoo subscription
+      defaultValue: true
+      version: 7.10.6
+      reloadable: true
+      configcascadeAware: true
+      related: 
+      file: yahoosubscribe.properties
+      packageName: open-xchange-subscribe
+      tags: 

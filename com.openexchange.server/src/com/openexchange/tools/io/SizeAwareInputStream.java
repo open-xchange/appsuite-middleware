@@ -26,24 +26,32 @@ import java.io.IOException;
 import java.io.InputStream;
 
 /**
- * The SizeAwareInputStream is a utility class that can be used if file size has to be checked while someone reads the stream. The method
- * #size(long) is called whenever someone reads from the stream. This method is provided with the length of the stream up until the time the
- * method is called. The SizeAwareInputStream can be used to find out about the total length of a stream or to monitor certain upload quotas
- * (if a quota is exceeded the size method may simply throw an IOException).
+ * The <code>SizeAwareInputStream</code> is a utility class that can be used if file size has to be checked while someone reads the stream.
+ * <p>
+ * The method {@link #size(long)} is called whenever someone reads from the stream. This method is provided with the length of the stream up
+ * until the time the method is called.
+ * <p>
+ * The <code>SizeAwareInputStream</code> can be used to find out about the total length of a stream or to monitor certain upload quotas
+ * (if a quota is exceeded the size method may simply throw an <code>IOException</code>).
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.org">Francisco Laguna</a>
  */
-public class SizeAwareInputStream extends FilterInputStream {
+public abstract class SizeAwareInputStream extends FilterInputStream {
 
     private long read = 0;
 
-    public SizeAwareInputStream(final InputStream delegate) {
+    /**
+     * Initializes a new {@link SizeAwareInputStream}.
+     *
+     * @param delegate The input stream to read from
+     */
+    protected SizeAwareInputStream(final InputStream delegate) {
         super(delegate);
     }
 
     @Override
     public int read() throws IOException {
-        final int r = in.read();
+        int r = in.read();
         if (r != -1) {
             read++;
             size(read);
@@ -52,8 +60,8 @@ public class SizeAwareInputStream extends FilterInputStream {
     }
 
     @Override
-    public int read(final byte[] arg0, final int arg1, final int arg2) throws IOException {
-        final int r = in.read(arg0, arg1, arg2);
+    public int read(byte[] b, int off, int len) throws IOException {
+        int r = in.read(b, off, len);
         if (r > 0) {
             read += r;
             size(read);
@@ -62,8 +70,8 @@ public class SizeAwareInputStream extends FilterInputStream {
     }
 
     @Override
-    public int read(final byte[] arg0) throws IOException {
-        final int r = in.read(arg0);
+    public int read(byte[] b) throws IOException {
+        int r = in.read(b);
         if (r > 0) {
             read += r;
             size(read);
@@ -77,12 +85,16 @@ public class SizeAwareInputStream extends FilterInputStream {
     }
 
     @Override
-    public long skip(final long arg0) throws IOException {
-        return in.skip(arg0);
+    public long skip(final long n) throws IOException {
+        return in.skip(n);
     }
 
-    public void size(final long size) throws IOException {
-        // Override me
-    }
+    /**
+     * Invoked to signal that total number of bytes has changed to given value.
+     *
+     * @param size The total number of bytes read so far
+     * @throws IOException If an I/O error is raised
+     */
+    protected abstract void size(long size) throws IOException;
 
 }
