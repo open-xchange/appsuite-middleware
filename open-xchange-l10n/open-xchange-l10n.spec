@@ -5,7 +5,7 @@ BuildArch:     noarch
 BuildRequires: ant
 BuildRequires: java-1.8.0-openjdk-devel
 Version:       @OXVERSION@
-%define        ox_release 13
+%define        ox_release 14
 Release:       %{ox_release}_<CI_CNT>.<B_CNT>
 Group:         Applications/Productivity
 License:       GPL-2.0
@@ -719,6 +719,8 @@ done
 /opt/open-xchange/i18n/*en_GB*
 
 %changelog
+* Tue Jun 08 2021 Marcus Klein <marcus.klein@open-xchange.com>
+Build for patch 2021-06-14 (6003)
 * Wed May 26 2021 Marcus Klein <marcus.klein@open-xchange.com>
 Build for patch 2021-06-01 (6000)
 * Fri May 21 2021 Marcus Klein <marcus.klein@open-xchange.com>

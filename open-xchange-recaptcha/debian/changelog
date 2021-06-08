@@ -1,3 +1,9 @@
+open-xchange-recaptcha (7.10.5-14) stable; urgency=medium
+
+  * Build for patch 2021-06-14 (6003)
+
+ -- Marcus Klein <marcus.klein@open-xchange.com>  Tue, 08 Jun 2021 10:29:09 +0000
+
 open-xchange-recaptcha (7.10.5-13) stable; urgency=medium
 
   * Build for patch 2021-06-01 (6000)
