@@ -286,12 +286,16 @@ public final class HtmlServiceImpl implements HtmlService {
     @Override
     public String formatURLs(final String content, final String comment) {
         try {
-            final Matcher m = PATTERN_URL.matcher(content);
-            final StringBuilder targetBuilder = new StringBuilder(content.length());
-            final StringBuilder sb = new StringBuilder(256);
+            Matcher m = PATTERN_URL.matcher(content);
+            if (m.find() == false) {
+                return content;
+            }
+
+            StringBuilder targetBuilder = new StringBuilder(content.length());
+            StringBuilder sb = new StringBuilder(256);
             int lastMatch = 0;
-            while (m.find()) {
-                final String url = m.group();
+            do {
+                String url = m.group();
                 if (HtmlServices.isSafe(url, null)) {
                     final int startOpeningPos = m.start();
                     targetBuilder.append(content.substring(lastMatch, startOpeningPos));
@@ -300,7 +304,7 @@ public final class HtmlServiceImpl implements HtmlService {
                     targetBuilder.append("<!--").append(comment).append(' ').append(sb.toString()).append("-->");
                     lastMatch = m.end();
                 }
-            }
+            } while (m.find());
             targetBuilder.append(content.substring(lastMatch));
             return targetBuilder.toString();
         } catch (Exception e) {
@@ -1270,65 +1274,42 @@ public final class HtmlServiceImpl implements HtmlService {
         int length = s.length();
         TIntObjectMap<String> htmlChar2EntityMap = htmlCharMap;
 
-        if (withQuote) {
-            for (int i = 0, k = length; k-- > 0;) {
-                char c = s.charAt(i++);
-                boolean isSurrogatePair = appendChar(c, htmlChar2EntityMap.get(c), k > 0 ? Character.valueOf(s.charAt(i)) : null, htmlBuilder);
-                if (isSurrogatePair) {
-                    k--;
-                    i++;
-                }
-            }
-        } else {
-            for (int i = 0, k = length; k-- > 0;) {
-                char c = s.charAt(i++);
-                if ('"' == c) {
+        for (int i = 0, k = length; k-- > 0;) {
+            char c = s.charAt(i++);
+            if (withQuote && '"' == c) {
+                // Append quote character as-is
+                htmlBuilder.append(c);
+            } else {
+                String optEntity = htmlChar2EntityMap.get(c);
+                if (optEntity != null) {
+                    // HTML entity
+                    htmlBuilder.append('&').append(optEntity).append(';');
+                } else if (c <= 127) {
+                    // ASCII character
                     htmlBuilder.append(c);
+                } else if (k <= 0) {
+                    // No next character to check for a possible Unicode surrogate pair
+                    appendNonAsciiChar(c, htmlBuilder);
                 } else {
-                    boolean isSurrogatePair = appendChar(c, htmlChar2EntityMap.get(c), k > 0 ? Character.valueOf(s.charAt(i)) : null, htmlBuilder);
-                    if (isSurrogatePair) {
+                    char nc = s.charAt(i);
+                    if (false == Character.isSurrogatePair(c, nc)) {
+                        // Not a Unicode surrogate pair.
+                        appendNonAsciiChar(c, htmlBuilder);
+                    } else {
+                        // Surrogate pair
+                        int codePoint = Character.toCodePoint(c, nc);
+                        if (EmojiRegistry.getInstance().isEmoji(codePoint)) {
+                            // Keep unicode for Emoji
+                            htmlBuilder.appendCodePoint(codePoint);
+                        } else {
+                            htmlBuilder.append("&#").append(codePoint).append(';');
+                        }
                         k--;
                         i++;
                     }
                 }
             }
         }
-    }
-
-    private boolean appendChar(char c, String optEntity, Character optNextChar, StringBuilder htmlBuilder) {
-        if (optEntity != null) {
-            htmlBuilder.append('&').append(optEntity).append(';');
-            return false;
-        }
-
-        if (c <= 127) {
-            // ASCII character
-            htmlBuilder.append(c);
-            return false;
-        }
-
-        // Non-ASCII character
-        if (null == optNextChar) {
-            // No next character to check for a possible Unicode surrogate pair
-            appendNonAsciiChar(c, htmlBuilder);
-            return false;
-        }
-
-        char nc = optNextChar.charValue();
-        if (false == Character.isSurrogatePair(c, nc)) {
-            // Not a Unicode surrogate pair.
-            appendNonAsciiChar(c, htmlBuilder);
-            return false;
-        }
-
-        int codePoint = Character.toCodePoint(c, nc);
-        if (EmojiRegistry.getInstance().isEmoji(codePoint)) {
-            // Keep unicode for Emoji
-            htmlBuilder.appendCodePoint(codePoint);
-        } else {
-            htmlBuilder.append("&#").append(codePoint).append(';');
-        }
-        return true;
     }
 
     private void appendNonAsciiChar(char c, StringBuilder sb) {
