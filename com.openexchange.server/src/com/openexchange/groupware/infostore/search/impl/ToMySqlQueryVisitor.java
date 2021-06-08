@@ -133,8 +133,8 @@ public class ToMySqlQueryVisitor implements SearchTermVisitor {
     private final List<Integer> readAllFolders;
     private final List<Integer> readOwnFolders;
     private final ServerSession session;
-    private final boolean fulltextSearch;
     private final int minimumPatternLength;
+    private boolean fulltextSearch;
     private String fulltextSearchPattern;
 
     /**
@@ -629,6 +629,11 @@ public class ToMySqlQueryVisitor implements SearchTermVisitor {
     }
 
     private void parseFulltextStringSearchTerm(AbstractStringSearchTerm searchTerm) throws OXException {
+        if (isExactMatchTerm(searchTerm)) {
+            // Fulltext index is not suitable for exact match searches, disable fulltext index matching for search request
+            this.fulltextSearch = false;
+            return;
+        }
         String pattern = searchTerm.getPattern();
         if (Strings.isNotEmpty(fulltextSearchPattern) && false == fulltextSearchPattern.equals(pattern)) {
             LOG.warn("FULLTEXT search pattern changed while processing search term.");
@@ -638,6 +643,10 @@ public class ToMySqlQueryVisitor implements SearchTermVisitor {
             throw InfostoreExceptionCodes.PATTERN_NEEDS_MORE_CHARACTERS.create(I(minimumPatternLength));
         }
         this.fulltextSearchPattern = pattern;
+    }
+
+    private boolean isExactMatchTerm(AbstractStringSearchTerm searchTerm) {
+        return false == searchTerm.isIgnoreCase() && false == searchTerm.isSubstringSearch();
     }
 
     private void parseStringSearchTerm(AbstractStringSearchTerm searchTerm, String field) {
