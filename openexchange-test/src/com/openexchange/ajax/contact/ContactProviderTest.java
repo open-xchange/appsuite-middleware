@@ -26,6 +26,7 @@ import static com.openexchange.java.Autoboxing.I;
 import static org.hamcrest.Matchers.greaterThan;
 import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertThat;
+import static org.junit.Assert.assertTrue;
 import java.util.ArrayList;
 import java.util.Optional;
 import org.junit.Before;
@@ -33,7 +34,10 @@ import com.openexchange.ajax.folder.actions.EnumAPI;
 import com.openexchange.ajax.folder.manager.FolderApi;
 import com.openexchange.ajax.folder.manager.FolderManager;
 import com.openexchange.ajax.framework.AbstractAPIClientSession;
+import com.openexchange.contact.provider.ContactsProviders;
 import com.openexchange.testing.httpclient.invoker.ApiException;
+import com.openexchange.testing.httpclient.models.CapabilityData;
+import com.openexchange.testing.httpclient.modules.CapabilitiesApi;
 import com.openexchange.testing.httpclient.modules.ContactsApi;
 
 /**
@@ -44,7 +48,8 @@ import com.openexchange.testing.httpclient.modules.ContactsApi;
  */
 public abstract class ContactProviderTest extends AbstractAPIClientSession {
 
-    private static final String CONTACT_TEST_PROVIDER_NAME = "c.o.contact.provider.test";
+    private static final String CONTACT_TEST_PROVIDER_ID = com.openexchange.contact.provider.test.impl.TestContactsProvider.PROVIDER_ID;
+    private static final String CONTACT_TEST_PROVIDER_NAME = com.openexchange.contact.provider.test.impl.TestContactsProvider.PROVIDER_DISPLAY_NAME;
     private static final String PARENT_FOLDER = "1";
     private static final String FOLDER_COLUMNS = "1,300";
 
@@ -69,7 +74,13 @@ public abstract class ContactProviderTest extends AbstractAPIClientSession {
         ArrayList<ArrayList<Object>> folders = folderManager.listFolders(PARENT_FOLDER, FOLDER_COLUMNS, Boolean.FALSE);
         assertThat(I(folders.size()), greaterThan(I(1)));
         Optional<ArrayList<Object>> testProviderFolder = folders.stream().filter(folder -> folder.get(1).equals(CONTACT_TEST_PROVIDER_NAME)).findFirst();
-        assertThat("The test privider's contact folder must be accessible", B(testProviderFolder.isPresent()), is(Boolean.TRUE));
+        if (false == testProviderFolder.isPresent()) {
+            String capability = ContactsProviders.getCapabilityName(CONTACT_TEST_PROVIDER_ID);
+            CapabilitiesApi capabilitiesApi = new CapabilitiesApi(getApiClient());
+            CapabilityData capabilityData = capabilitiesApi.getCapability(capability).getData();
+            assertTrue("Capability " + capability + " not set", null != capabilityData && capability.equals(capabilityData.getId()));
+        }
+        assertThat("The test provider's contact folder must be accessible", B(testProviderFolder.isPresent()), is(Boolean.TRUE));
         return (String) testProviderFolder.get().get(0);
     }
 
