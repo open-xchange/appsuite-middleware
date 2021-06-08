@@ -112,7 +112,7 @@ properties:
       file: xingsubscribe.properties
       packageName: open-xchange-subscribe
       tags: ["Xing", "Contact", "Subscribe"]
-     - key: com.openexchange.subscribe.dav.gmx.de
+    - key: com.openexchange.subscribe.dav.gmx.de
       description: |
         The on/off configuration switch for gmx.de subscription
       defaultValue: true
