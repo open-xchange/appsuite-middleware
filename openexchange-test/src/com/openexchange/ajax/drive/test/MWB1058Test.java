@@ -51,7 +51,6 @@ package com.openexchange.ajax.drive.test;
 
 import static com.openexchange.java.Autoboxing.I;
 import static com.openexchange.java.Autoboxing.L;
-import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import java.util.UUID;
 import org.junit.Test;

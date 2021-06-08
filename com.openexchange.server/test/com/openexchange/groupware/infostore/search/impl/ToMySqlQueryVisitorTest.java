@@ -25,6 +25,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.regex.Pattern;
@@ -272,8 +273,20 @@ public class ToMySqlQueryVisitorTest {
         try {
             term.visit(visitor);
         } catch (OXException e) {
-            assertTrue("Wrong exception thrown.", InfostoreExceptionCodes.PATTERN_NEEDS_MORE_CHARACTERS.equals(e));
+            if (false == InfostoreExceptionCodes.PATTERN_NEEDS_MORE_CHARACTERS.equals(e)) {
+                fail("Wrong exception thrown: " + e.getMessage());
+            }
         }
+    }
+
+    private final Pattern EXACT_MATCH_PATTERN = Pattern.compile("MATCH \\(.*?\\) AGAINST \\(.*? IN BOOLEAN MODE\\)", Pattern.DOTALL);
+    @Test
+    public void testExactMatch_omitFulltextIndex() throws Exception {
+        FileNameTerm term = new FileNameTerm("exactMatch", false, false);
+        ToMySqlQueryVisitor visitor = new ToMySqlQueryVisitor(session, new int[] { 119 }, new int[] { 120 }, "SELECT field01", Metadata.LAST_MODIFIED_LITERAL, InfostoreSearchEngine.ASC, 0, 5, true, 3);
+        visitor.visit(term);
+        String result = visitor.previewMySqlQuery();
+        assertFalse("Fulltext index used even though search term is for exact match.", EXACT_MATCH_PATTERN.matcher(result).matches());
     }
 
 }
