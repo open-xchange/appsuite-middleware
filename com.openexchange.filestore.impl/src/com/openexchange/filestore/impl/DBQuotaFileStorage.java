@@ -227,6 +227,11 @@ public class DBQuotaFileStorage implements SpoolingCapableQuotaFileStorage, Seri
     }
 
     @Override
+    public boolean isSpooling() {
+        return fileStorage.isSpooling();
+    }
+
+    @Override
     public long getQuota() throws OXException {
         UnifiedQuotaService unifiedQuotaService = getHighestRankedBackendService(effectiveUserId, contextId);
         return null == unifiedQuotaService ? quota : unifiedQuotaService.getLimit(effectiveUserId, contextId);

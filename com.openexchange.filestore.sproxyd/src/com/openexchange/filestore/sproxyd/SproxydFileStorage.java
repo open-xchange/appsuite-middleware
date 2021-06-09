@@ -86,6 +86,11 @@ public class SproxydFileStorage implements DestroyAwareFileStorage {
     }
 
     @Override
+    public boolean isSpooling() {
+        return true;
+    }
+
+    @Override
     public String saveNewFile(InputStream file) throws OXException {
         File tmpFile = null;
         try {

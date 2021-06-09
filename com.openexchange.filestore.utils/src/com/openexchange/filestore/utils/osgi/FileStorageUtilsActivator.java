@@ -21,6 +21,7 @@
 
 package com.openexchange.filestore.utils.osgi;
 
+import com.openexchange.filestore.QuotaFileStorageService;
 import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.uploaddir.UploadDirService;
 
@@ -47,6 +48,8 @@ public class FileStorageUtilsActivator extends HousekeepingActivator {
     @Override
     protected void startBundle() throws Exception {
         Services.setServiceLookup(this);
+        track(QuotaFileStorageService.class, new SettingRegisterer(context));
+        openTrackers();
     }
 
     @Override

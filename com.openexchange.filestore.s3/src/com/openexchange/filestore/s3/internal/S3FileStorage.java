@@ -129,6 +129,11 @@ public class S3FileStorage implements FileStorage {
     }
 
     @Override
+    public boolean isSpooling() {
+        return true;
+    }
+
+    @Override
     public String saveNewFile(InputStream input) throws OXException {
         /*
          * perform chunked upload as needed

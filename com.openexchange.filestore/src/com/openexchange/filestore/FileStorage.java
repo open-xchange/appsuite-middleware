@@ -43,6 +43,15 @@ public interface FileStorage {
     URI getUri();
 
     /**
+     * Checks if this file storage attempts spooling data to a temporary file to not exhaust/block file storage resources (e.g. HTTP connection pool).
+     *
+     * @return <code>true</code> if spooling is performed; otherwise <code>false</code>
+     */
+    default boolean isSpooling() {
+        return false;
+    }
+
+    /**
      * Saves specified stream as a file.
      *
      * @param file The stream to save as a file
