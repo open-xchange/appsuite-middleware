@@ -39,21 +39,33 @@ import com.openexchange.groupware.update.internal.SchemaStoreImpl;
  */
 public abstract class SchemaStore {
 
-    private static final SchemaStoreImpl SINGLETON = new SchemaStoreImpl();
-
-    protected SchemaStore() {
-        super();
-    }
-
     /**
      * Factory method.
      *
      * @return an implementation for this interface.
      */
     public static SchemaStore getInstance() {
-        return SINGLETON;
+        return SchemaStoreImpl.getInstance();
     }
 
+    // -------------------------------------------------------------------------------------------------------------------------------------
+
+    /**
+     * Initializes a new {@link SchemaStore}.
+     */
+    protected SchemaStore() {
+        super();
+    }
+
+    /**
+     * Gets the schema information for specified schema name on given database referenced by given pool identifier.
+     *
+     * @param poolId The pool identifier referencing the database
+     * @param schemaName The schema name
+     * @param con The connection to use
+     * @return The schema information
+     * @throws OXException If schema information cannot be returned
+     */
     protected abstract SchemaUpdateState getSchema(int poolId, String schemaName, Connection con) throws OXException;
 
     /**
@@ -84,10 +96,33 @@ public abstract class SchemaStore {
      */
     public abstract boolean tryRefreshSchemaLock(Schema schema, boolean background) throws OXException;
 
+    /**
+     * Gets the idle time in milliseconds for either blocking or background tasks.
+     *
+     * @param background <code>true</code> to retrieve idle time for background tasks; otherwise <code>false</code> for blocking ones
+     * @return The idle time
+     * @throws OXException If idle time cannot be returned
+     */
+    public abstract long getIdleMillis(boolean background);
+
+    /**
+     * Gets the schema information for specified context (implicitly referencing schema and database).
+     *
+     * @param ctx The context
+     * @return The schema information
+     * @throws OXException If schema information cannot be returned
+     */
     public final Schema getSchema(final Context ctx) throws OXException {
         return getSchema(ctx.getContextId());
     }
 
+    /**
+     * Gets the schema information for specified context identifier (implicitly referencing schema and database).
+     *
+     * @param contextId The context identifier
+     * @return The schema information
+     * @throws OXException If schema information cannot be returned
+     */
     public final SchemaUpdateState getSchema(final int contextId) throws OXException {
         // This method is used when doing a normal login. In this case fetching the Connection runs through replication monitor and
         // initializes the transaction counter from the master. This allows redirecting subsequent reads after normal login to the master
@@ -101,6 +136,14 @@ public abstract class SchemaStore {
         }
     }
 
+    /**
+     * Gets the schema information for specified schema name on given database referenced by given pool identifier.
+     *
+     * @param poolId The pool identifier referencing the database
+     * @param schemaName The schema name
+     * @return The schema information
+     * @throws OXException If schema information cannot be returned
+     */
     public final SchemaUpdateState getSchema(int poolId, String schemaName) throws OXException {
         // This method is used when creating a context through the administration daemon. In this case we did not write yet the information
         // into the ConfigDB in which database and schema the context is located. Therefore we are not able to initialize the transaction
@@ -113,8 +156,25 @@ public abstract class SchemaStore {
         }
     }
 
+    /**
+     * Gets the collection of executed update tasks.
+     *
+     * @param poolId The pool identifier referencing the database
+     * @param schemaName The schema name
+     * @return The collection of executed update tasks
+     * @throws OXException If collection of executed update tasks cannot be returned
+     */
     public abstract ExecutedTask[] getExecutedTasks(int poolId, String schemaName) throws OXException;
 
+    /**
+     * Adds specified executed update task to referenced database schema.
+     *
+     * @param taskName The unique name of the task
+     * @param success The flag indicating successful execution or not
+     * @param poolId The pool identifier referencing the database
+     * @param schema The schema name
+     * @throws OXException If adding executed task fails
+     */
     public final void addExecutedTask(String taskName, boolean success, int poolId, String schema) throws OXException {
         Connection con = Database.get(poolId, schema);
         int rollback = 0;
@@ -140,10 +200,28 @@ public abstract class SchemaStore {
     }
 
     /**
-     * @param con a writable database connection, but in transaction mode.
+     * Adds specified executed update task to referenced database schema using given read-write connection.
+     *
+     * @param con The read-write connection to use (in transaction mode)
+     * @param taskName The unique name of the task
+     * @param success The flag indicating successful execution or not
+     * @param poolId The pool identifier referencing the database
+     * @param schema The schema name
+     * @throws OXException If adding executed task fails
      */
     public abstract void addExecutedTask(Connection con, String taskName, boolean success, int poolId, String schema) throws OXException;
 
+    /**
+     * Adds specified executed update tasks to referenced database schema.
+     *
+     * @param contextId The context identifier
+     * @param taskNames The unique names of the tasks
+     * @param success The flag indicating successful execution or not
+     * @param poolId The pool identifier referencing the database
+     * @param schema The schema name
+     * @throws OXException If adding executed task fails
+     */
+    @Deprecated
     public final void addExecutedTasks(int contextId, Collection<String> taskNames, boolean success, int poolId, String schema) throws OXException {
         final Connection con = Database.get(contextId, true);
         int rollback = 0;
@@ -169,11 +247,34 @@ public abstract class SchemaStore {
     }
 
     /**
-     * @param con a writable database connection, but in transaction mode.
+     * Adds specified executed update tasks to referenced database schema.
+     *
+     * @param con The read-write connection to use (in transaction mode)
+     * @param taskNames The unique names of the tasks
+     * @param success The flag indicating successful execution or not
+     * @param poolId The pool identifier referencing the database
+     * @param schema The schema name
+     * @throws OXException If adding executed task fails
      */
     public abstract void addExecutedTasks(Connection con, Collection<String> taskNames, boolean success, int poolId, String schema) throws OXException;
 
+    /**
+     * Sets the cache service to use.
+     *
+     * @param cacheService The cache service
+     */
     public abstract void setCacheService(CacheService cacheService);
 
+    /**
+     * Removes the cache service.
+     */
     public abstract void removeCacheService();
+
+    /**
+     * Invalidates given schema from cache.
+     *
+     * @param schema The schema
+     */
+    public abstract void invalidateCache(Schema schema);
+
 }

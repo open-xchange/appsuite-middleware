@@ -27,6 +27,7 @@ import java.util.Hashtable;
 import org.osgi.util.tracker.ServiceTracker;
 import com.openexchange.caching.CacheService;
 import com.openexchange.config.ConfigurationService;
+import com.openexchange.config.Reloadable;
 import com.openexchange.config.lean.LeanConfigurationService;
 import com.openexchange.database.CreateTableService;
 import com.openexchange.groupware.update.ExtendedUpdateTaskService;
@@ -36,6 +37,7 @@ import com.openexchange.groupware.update.internal.ExcludedSet;
 import com.openexchange.groupware.update.internal.ExtendedUpdateTaskServiceImpl;
 import com.openexchange.groupware.update.internal.InternalList;
 import com.openexchange.groupware.update.internal.NamespaceAwareExcludedSet;
+import com.openexchange.groupware.update.internal.SchemaStoreImpl;
 import com.openexchange.groupware.update.internal.UpdateTaskServiceImpl;
 import com.openexchange.groupware.update.tasks.objectpermission.ObjectPermissionCreateTableService;
 import com.openexchange.osgi.HousekeepingActivator;
@@ -82,11 +84,12 @@ public class Activator extends HousekeepingActivator {
         registerService(CreateTableService.class, new ObjectPermissionCreateTableService());
         Dictionary<String, Object> serviceProperties = new Hashtable<String, Object>(1);
         serviceProperties.put("RMI_NAME", UpdateTaskServiceImpl.RMI_NAME);
-        
+
         ExtendedUpdateTaskServiceImpl extendedUpdateTaskServiceImpl = new ExtendedUpdateTaskServiceImpl();
         UpdateTaskServiceImpl updateTaskServiceImpl = extendedUpdateTaskServiceImpl;
         registerService(Remote.class, updateTaskServiceImpl, serviceProperties);
         registerService(ExtendedUpdateTaskService.class, extendedUpdateTaskServiceImpl);
+        registerService(Reloadable.class, SchemaStoreImpl.getInstance());
     }
 
     @Override

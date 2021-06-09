@@ -92,9 +92,11 @@ public class DBMigrationExecutor implements Runnable {
         for (ScheduledExecution scheduledExecution; (scheduledExecution = nextExecution()) != null;) {
             DBMigrationConnectionProvider connectionProvider = scheduledExecution.getConnectionProvider();
             Connection connection = null;
+            Connection lifeThreadConnection = null;
             try {
                 // Acquire connection
                 connection = connectionProvider.get();
+                lifeThreadConnection = connectionProvider.get();
 
                 // Check if update is needed
                 if (checkIfUpdateIsNeeded(scheduledExecution, connection)) {
@@ -104,7 +106,7 @@ public class DBMigrationExecutor implements Runnable {
                     DBMigrationListener migrationListener = new DBMigrationListener();
                     String fileLocation = scheduledExecution.getFileLocation();
                     try {
-                        liquibase = LiquibaseHelper.prepareLiquibase(connection, scheduledExecution.getMigration());
+                        liquibase = LiquibaseHelper.prepareLiquibase(connection, lifeThreadConnection, scheduledExecution.getMigration());
                         liquibase.setChangeExecListener(migrationListener);
                         DBMigrationMonitor.getInstance().addFile(fileLocation);
                         if (scheduledExecution.isRollback()) {
@@ -149,6 +151,10 @@ public class DBMigrationExecutor implements Runnable {
                             connectionProvider.back(connection);
                             connection = null;
                         }
+                        if (null != lifeThreadConnection) {
+                            connectionProvider.back(lifeThreadConnection);
+                            lifeThreadConnection = null;
+                        }
                         DBMigrationMonitor.getInstance().removeFile(fileLocation);
                     }
 
@@ -160,6 +166,9 @@ public class DBMigrationExecutor implements Runnable {
             } finally {
                 if (null != connection) {
                     connectionProvider.backAfterReading(connection);
+                }
+                if (null != lifeThreadConnection) {
+                    connectionProvider.backAfterReading(lifeThreadConnection);
                 }
             }
         }
@@ -227,7 +236,7 @@ public class DBMigrationExecutor implements Runnable {
         Liquibase liquibase = null;
         boolean releaseLocks = true;
         try {
-            liquibase = LiquibaseHelper.prepareLiquibase(connection, scheduledExecution.getMigration());
+            liquibase = LiquibaseHelper.prepareLiquibase(connection, null, scheduledExecution.getMigration());
             if (false == scheduledExecution.isRollback()) {
                 List<ChangeSet> unrunChangeSets = liquibase.listUnrunChangeSets(LIQUIBASE_NO_DEFINED_CONTEXT);
                 releaseLocks = false;

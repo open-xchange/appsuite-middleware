@@ -112,7 +112,7 @@ properties:
       file: xingsubscribe.properties
       packageName: open-xchange-subscribe
       tags: ["Xing", "Contact", "Subscribe"]
-     - key: com.openexchange.subscribe.dav.gmx.de
+    - key: com.openexchange.subscribe.dav.gmx.de
       description: |
         The on/off configuration switch for gmx.de subscription
       defaultValue: true
@@ -122,7 +122,7 @@ properties:
       related: 
       file: gmxdesubscribe.properties
       packageName: open-xchange-subscribe
-      tags: 
+      tags: ["Contact", "Subscribe"]
     - key: com.openexchange.subscribe.dav.tonline.de
       description: |
         The on/off configuration switch for T-Online.de subscription
@@ -133,7 +133,7 @@ properties:
       related: 
       file: tonlinedesubscribe.properties
       packageName: open-xchange-subscribe
-      tags: 
+      tags: ["Contact", "Subscribe"]
     - key: com.openexchange.subscribe.dav.web.de
       description: |
         The on/off configuration switch for web.de subscription
@@ -144,7 +144,7 @@ properties:
       related: 
       file: webdesubscribe.properties
       packageName: open-xchange-subscribe
-      tags: 
+      tags: ["Contact", "Subscribe"]
     - key: com.openexchange.oauth.google.contact
       description: |
         The on/off configuration switch for Google subscription
@@ -155,7 +155,7 @@ properties:
       related: 
       file: googlesubscribe.properties
       packageName: open-xchange-subscribe
-      tags: 
+      tags: ["Contact", "Subscribe"]
     - key: com.openexchange.oauth.microsoft.graph.contact
       description: |
         The on/off configuration switch for MS Live subscription
@@ -166,7 +166,7 @@ properties:
       related: 
       file: mslivesubscribe.properties
       packageName: open-xchange-subscribe
-      tags: 
+      tags: ["Contact", "Subscribe"]
     - key: com.openexchange.subscribe.xing
       description: |
         The on/off configuration switch for XING subscription
@@ -177,7 +177,7 @@ properties:
       related: 
       file: xingsubscribe.properties
       packageName: open-xchange-subscribe
-      tags: 
+      tags: ["Contact", "Subscribe"]
     - key: com.openexchange.subscribe.socialplugin.yahoo
       description: |
         The on/off configuration switch for Yahoo subscription
@@ -188,4 +188,4 @@ properties:
       related: 
       file: yahoosubscribe.properties
       packageName: open-xchange-subscribe
-      tags: 
+      tags: ["Contact", "Subscribe"]

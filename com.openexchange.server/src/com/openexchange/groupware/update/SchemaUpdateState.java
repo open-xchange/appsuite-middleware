@@ -38,6 +38,12 @@ public interface SchemaUpdateState extends Schema {
      */
     void addExecutedTask(String taskName, boolean success);
 
+    /**
+     * Checks if the task associated with given name has been executed.
+     *
+     * @param taskName The name of the task to check
+     * @return <code>true</code> if executed; otherwise <code>false</code> if pending
+     */
     boolean isExecuted(String taskName);
 
     /**
@@ -70,10 +76,25 @@ public interface SchemaUpdateState extends Schema {
      */
     NamesOfExecutedTasks getExecuted();
 
+    /**
+     * Checks if the background marker is set and therefore background update tasks are running.
+     *
+     * @return <code>true</code> if background update tasks are running; otherwise <code>false</code>
+     */
     boolean backgroundUpdatesRunning();
 
+    /**
+     * Gets the time stamp of the background marker.
+     *
+     * @return The time stamp or <code>null</code> if this instance advertises <code>false</code> for {@link #backgroundUpdatesRunning()}
+     */
     Date backgroundUpdatesRunningSince();
 
+    /**
+     * Gets the time stamp of the blocking lock.
+     *
+     * @return The time stamp or <code>null</code> if this instance advertises <code>false</code> for {@link #isLocked()}
+     */
     Date blockingUpdatesRunningSince();
 
 }

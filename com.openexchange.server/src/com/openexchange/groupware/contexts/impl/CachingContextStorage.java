@@ -33,6 +33,7 @@ import com.openexchange.context.PoolAndSchema;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.UpdateBehavior;
+import com.openexchange.groupware.update.UpdateProperty;
 import com.openexchange.groupware.update.UpdateStatus;
 import com.openexchange.groupware.update.Updater;
 import com.openexchange.groupware.update.internal.SchemaExceptionCodes;
@@ -291,14 +292,14 @@ public class CachingContextStorage extends ContextStorage {
     }
 
     private static boolean getDenyImplicitUpdateOnContextLoadProperty() {
-        boolean defaultValue = false;
+        boolean defaultValue = UpdateProperty.DENY_IMPLICIT_UPDATE_ON_CONTEXT_LOAD.getDefaultValue(Boolean.class).booleanValue();
 
         ConfigurationService configService = ServerServiceRegistry.getInstance().getService(ConfigurationService.class);
         if (null == configService) {
             return defaultValue;
         }
 
-        return configService.getBoolProperty("com.openexchange.groupware.update.denyImplicitUpdateOnContextLoad", defaultValue);
+        return configService.getBoolProperty(UpdateProperty.DENY_IMPLICIT_UPDATE_ON_CONTEXT_LOAD.getFQPropertyName(), defaultValue);
     }
 
 }

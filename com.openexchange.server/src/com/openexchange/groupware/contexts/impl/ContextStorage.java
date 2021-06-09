@@ -27,6 +27,8 @@ import com.openexchange.context.PoolAndSchema;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.UpdateBehavior;
+import com.openexchange.groupware.update.UpdateStatus;
+import com.openexchange.groupware.update.Updater;
 import com.openexchange.session.Session;
 import com.openexchange.tools.session.ServerSession;
 
@@ -116,6 +118,13 @@ public abstract class ContextStorage {
     public Context getContext(final int contextId, UpdateBehavior updateBehavior) throws OXException {
         final ContextExtended retval = loadContext(contextId, updateBehavior);
         if (retval.isUpdating()) {
+            Updater updater = Updater.getInstance();
+            UpdateStatus status = updater.getStatus(contextId);
+            if (status.blockingUpdatesRunning() == false || status.blockingUpdatesTimedOut()) {
+                // Invalidate caches & repeat
+                updater.invalidateCacheFor(status.getSchemaName(), status.getPoolId());
+                return getContext(contextId, updateBehavior);
+            }
             OXException exception = ContextExceptionCodes.UPDATE.create();
             LOG.info(exception.getMessage());
             throw exception;

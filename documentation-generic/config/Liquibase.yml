@@ -1,0 +1,25 @@
+feature_name: Liquibase
+feature_description: Describes properties related to the liquibase migration.
+properties:
+    - key: com.openexchange.liquibase.refreshIntervalMillis
+      description: |
+        Specifies the interval in milliseconds between updates to the liquibase lock's timestamp.
+      defaultValue: 20000
+      version: 8.0.0
+      reloadable: false
+      configcascadeAware: false
+      related: com.openexchange.liquibase.locked.maxIdleMillis
+      file: liquibase.properties
+      packageName: open-xchange-core
+      tags: ["Liquibase", "Database", "Migration"]
+    - key: com.openexchange.liquibase.locked.maxIdleMillis
+      description: |
+        Specifies the max time in milliseconds that a liquibase migration is still considered to be running.
+      defaultValue: 60000
+      version: 8.0.0
+      reloadable: true
+      configcascadeAware: false
+      related: com.openexchange.liquibase.refreshIntervalMillis
+      file: liquibase.properties
+      packageName: open-xchange-core
+      tags: ["Liquibase", "Database", "Migration"]      

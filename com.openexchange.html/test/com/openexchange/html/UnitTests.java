@@ -175,6 +175,7 @@ import com.openexchange.html.vulntests.Bug57095VulTest;
     Bug57095VulTest.class,
     MWB990Test.class,
     com.openexchange.html.vulntests.MWB1113VulTest.class,
+    com.openexchange.html.vulntests.MWB1116VulTest.class,
     com.openexchange.html.vulntests.ImgVulTest.class,
     CSSMatcherTest.class,
     ConformHtmlTest.class,

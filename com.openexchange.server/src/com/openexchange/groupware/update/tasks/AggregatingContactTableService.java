@@ -22,17 +22,11 @@
 package com.openexchange.groupware.update.tasks;
 
 import java.sql.Connection;
-import java.sql.DatabaseMetaData;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
 import com.openexchange.database.AbstractCreateTableImpl;
-import com.openexchange.database.Databases;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.update.Attributes;
 import com.openexchange.groupware.update.PerformParameters;
 import com.openexchange.groupware.update.TaskAttributes;
-import com.openexchange.groupware.update.UpdateExceptionCodes;
 import com.openexchange.groupware.update.UpdateTaskV2;
 
 /**
@@ -43,10 +37,8 @@ import com.openexchange.groupware.update.UpdateTaskV2;
  */
 public class AggregatingContactTableService extends AbstractCreateTableImpl implements UpdateTaskV2 {
 
-    private static final String AGGREGATING_CONTACTS = "aggregatingContacts";
-
     private String getTableSQL() {
-        return "CREATE TABLE "+AGGREGATING_CONTACTS+" (" +
+        return "CREATE TABLE aggregatingContacts (" +
                     "contributor BINARY(16) NOT NULL, " +
         		    "aggregator BINARY(16) NOT NULL," +
         		    "state TINYINT NOT NULL" +
@@ -70,7 +62,7 @@ public class AggregatingContactTableService extends AbstractCreateTableImpl impl
 
     @Override
     public void perform(final PerformParameters params) throws OXException {
-        createTable(AGGREGATING_CONTACTS, getTableSQL(), params);
+        createTable("aggregatingContacts", getTableSQL(), params);
         final org.slf4j.Logger logger = org.slf4j.LoggerFactory.getLogger(AggregatingContactTableService.class);
         logger.info("UpdateTask ''{}'' successfully performed!", AggregatingContactTableService.class.getSimpleName());
     }
@@ -82,34 +74,12 @@ public class AggregatingContactTableService extends AbstractCreateTableImpl impl
 
     @Override
     public String[] tablesToCreate() {
-        return new String[] { AGGREGATING_CONTACTS };
+        return new String[] { "aggregatingContacts" };
     }
 
     private void createTable(String tablename, String sqlCreate, PerformParameters params) throws OXException {
         Connection con = params.getConnection();
-        PreparedStatement stmt = null;
-        try {
-            if (tableExists(con, tablename)) {
-                return;
-            }
-            stmt = con.prepareStatement(sqlCreate);
-            stmt.executeUpdate();
-        } catch (SQLException e) {
-            throw UpdateExceptionCodes.SQL_PROBLEM.create(e, e.getMessage());
-        } finally {
-            Databases.closeSQLStuff(stmt);
-        }
-    }
-
-    private boolean tableExists(Connection con, String table) throws SQLException {
-        DatabaseMetaData metaData = con.getMetaData();
-        ResultSet rs = null;
-        try {
-            rs = metaData.getTables(null, null, table, new String[] { "TABLE" });
-            return (rs.next() && rs.getString("TABLE_NAME").equals(table));
-        } finally {
-            Databases.closeSQLStuff(rs);
-        }
+        createTable(tablename, sqlCreate, con);
     }
 
 }

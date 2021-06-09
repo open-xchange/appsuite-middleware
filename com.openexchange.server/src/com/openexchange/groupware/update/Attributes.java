@@ -42,12 +42,23 @@ public class Attributes implements TaskAttributes {
         this(BLOCKING, SCHEMA);
     }
 
+    /**
+     * Initializes a new attributes with given concurrency behavior and working level.
+     *
+     * @param concurrency The concurrency behavior
+     * @param level The working level
+     */
     public Attributes(UpdateConcurrency concurrency, WorkingLevel level) {
         super();
         this.concurrency = concurrency;
         this.level = level;
     }
 
+    /**
+     * Initializes a new attributes with given concurrency behavior on schema level.
+     *
+     * @param concurrency The concurrency behavior
+     */
     public Attributes(UpdateConcurrency concurrency) {
         this(concurrency, SCHEMA);
     }

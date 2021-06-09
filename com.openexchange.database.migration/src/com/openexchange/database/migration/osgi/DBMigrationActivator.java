@@ -24,13 +24,17 @@ package com.openexchange.database.migration.osgi;
 import java.rmi.Remote;
 import java.util.Dictionary;
 import java.util.Hashtable;
+import com.openexchange.config.lean.LeanConfigurationService;
 import com.openexchange.database.migration.DBMigrationExecutorService;
 import com.openexchange.database.migration.DBMigrationMonitorService;
 import com.openexchange.database.migration.internal.BundlePackageScanClassResolver;
 import com.openexchange.database.migration.internal.DBMigrationExecutorServiceImpl;
 import com.openexchange.database.migration.internal.DBMigrationMonitor;
+import com.openexchange.database.migration.internal.StaleMigrationDetectingLockService;
 import com.openexchange.database.migration.rmi.DBMigrationRMIServiceImpl;
 import com.openexchange.osgi.HousekeepingActivator;
+import com.openexchange.timer.TimerService;
+import liquibase.lockservice.LockServiceFactory;
 import liquibase.servicelocator.CustomResolverServiceLocator;
 import liquibase.servicelocator.ServiceLocator;
 
@@ -47,7 +51,7 @@ public class DBMigrationActivator extends HousekeepingActivator {
      */
     @Override
     protected Class<?>[] getNeededServices() {
-        return EMPTY_CLASSES;
+        return new Class[] { LeanConfigurationService.class, TimerService.class };
     }
 
     /**
@@ -55,6 +59,9 @@ public class DBMigrationActivator extends HousekeepingActivator {
      */
     @Override
     protected void startBundle() throws Exception {
+        Services.setServiceLookup(this);
+        LockServiceFactory.getInstance().register(new StaleMigrationDetectingLockService());
+
         org.slf4j.LoggerFactory.getLogger(DBMigrationActivator.class).info("Starting bundle: {}", context.getBundle().getSymbolicName());
 
         // Important: Enable liquibase to load required classes (e.g. liquibase.logging.Logger implementation) from this bundle

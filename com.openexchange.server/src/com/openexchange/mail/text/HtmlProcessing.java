@@ -32,6 +32,7 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
+import java.util.UUID;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -230,8 +231,6 @@ public final class HtmlProcessing {
         return formatContentForDisplay(content, charset, isHtml, session, mailPath, null, usm, modified, mode, sanitize, embedded, asMarkup, maxContentSize);
     }
 
-    private static final String COMMENT_ID = "anchor-5fd15ca8-a027-4b14-93ea-35de1747419e:";
-
     /**
      * Performs all the formatting for both text and HTML content for a proper display according to specified user's mail settings.
      * <p>
@@ -314,10 +313,11 @@ public final class HtmlProcessing {
                 if (DisplayMode.MODIFYABLE.isIncluded(mode)) {
                     HtmlService htmlService = ServerServiceRegistry.getInstance().getService(HtmlService.class);
                     if (DisplayMode.DISPLAY.isIncluded(mode)) {
+                        String commentId = new StringBuilder(48).append("anchor-").append(UUID.randomUUID()).append(':').toString();
                         if (false == usm.isSuppressLinks()) {
-                            retval.setContent(htmlService.formatURLs(retval.getContent(), COMMENT_ID));
+                            retval.setContent(htmlService.formatURLs(retval.getContent(), commentId));
                         }
-                        retval = htmlService.htmlFormat(retval.getContent(), true, COMMENT_ID, maxContentSize);
+                        retval = htmlService.htmlFormat(retval.getContent(), true, commentId, maxContentSize);
                         if (usm.isUseColorQuote()) {
                             retval.setContent(replaceHTMLSimpleQuotesForDisplay(retval.getContent()));
                         }

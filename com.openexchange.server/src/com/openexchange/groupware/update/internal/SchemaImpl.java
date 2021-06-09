@@ -38,15 +38,28 @@ public abstract class SchemaImpl implements Schema {
     private String schema;
     private int poolId;
 
+    /**
+     * Initializes a new {@link SchemaImpl}.
+     */
     protected SchemaImpl() {
         super();
     }
 
+    /**
+     * Initializes a new {@link SchemaImpl}.
+     *
+     * @param locked <code>true</code> if locked; otherwise <code>false</code>
+     */
     public SchemaImpl(boolean locked) {
         super();
         this.locked = locked;
     }
 
+    /**
+     * Initializes a new {@link SchemaImpl}.
+     *
+     * @param schema The schema to copy from
+     */
     public SchemaImpl(Schema schema) {
         super();
         this.locked = schema.isLocked();
@@ -69,6 +82,11 @@ public abstract class SchemaImpl implements Schema {
         return server;
     }
 
+    /**
+     * Sets the server name.
+     *
+     * @param server The server name
+     */
     public void setServer(final String server) {
         this.server = server;
     }

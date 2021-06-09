@@ -21,10 +21,14 @@
 
 package com.openexchange.groupware.update.internal;
 
+import java.sql.Connection;
 import java.util.Collection;
 import java.util.Date;
 import java.util.List;
+import com.openexchange.database.DatabaseService;
+import com.openexchange.databaseold.Database;
 import com.openexchange.exception.OXException;
+import com.openexchange.groupware.contexts.impl.ContextStorage;
 import com.openexchange.groupware.update.SchemaStore;
 import com.openexchange.groupware.update.SchemaUpdateState;
 import com.openexchange.groupware.update.SeparatedTasks;
@@ -107,6 +111,35 @@ public class UpdaterImpl extends Updater {
         return LocalUpdateTaskMonitor.getInstance().getScheduledStates();
     }
 
+    @Override
+    public void invalidateCacheFor(int contextId) throws OXException {
+        SchemaUpdateState schema = getSchema(contextId);
+        removeContexts(schema);
+        SchemaStore.getInstance().invalidateCache(schema);
+    }
+
+    @Override
+    public void invalidateCacheFor(String schemaName, int poolId) throws OXException {
+        SchemaUpdateState schema = getSchema(poolId, schemaName);
+        removeContexts(schema);
+        SchemaStore.getInstance().invalidateCache(schema);
+    }
+
+    private final void removeContexts(SchemaUpdateState schema) throws OXException {
+        int[] contextIds = determineContextIds(schema);
+        ContextStorage.getInstance().invalidateContexts(contextIds);
+    }
+
+    private final int[] determineContextIds(SchemaUpdateState schema) throws OXException {
+        DatabaseService databaseService = Database.getDatabaseService();
+        Connection con = databaseService.getReadOnly();
+        try {
+            return databaseService.getContextsInSchema(con, schema.getPoolId(), schema.getSchema());
+        } finally {
+            databaseService.backReadOnly(con);
+        }
+    }
+
     // ------------------------------------------------------------------------------------------------------------------------ //
 
     private static class UpdateStatusImpl implements UpdateStatus {
@@ -118,6 +151,16 @@ public class UpdaterImpl extends Updater {
             super();
             this.tasks = tasks;
             this.schema = schema;
+        }
+
+        @Override
+        public int getPoolId() {
+            return schema.getPoolId();
+        }
+
+        @Override
+        public String getSchemaName() {
+            return schema.getSchema();
         }
 
         @Override
@@ -153,6 +196,16 @@ public class UpdaterImpl extends Updater {
         @Override
         public boolean isExecutedSuccessfully(String taskName) {
             return schema.isExecutedSuccessfully(taskName);
+        }
+
+        @Override
+        public boolean blockingUpdatesTimedOut() {
+            Date blockingUpdatesRunningSince = schema.blockingUpdatesRunningSince();
+            if (blockingUpdatesRunningSince == null) {
+                return false;
+            }
+            long idleMillis = SchemaStore.getInstance().getIdleMillis(false);
+            return idleMillis > 0 && (System.currentTimeMillis() - blockingUpdatesRunningSince.getTime() > idleMillis);
         }
     }
 

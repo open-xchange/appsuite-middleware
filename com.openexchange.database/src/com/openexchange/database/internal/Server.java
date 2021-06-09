@@ -48,6 +48,10 @@ public final class Server {
 
     private static final AtomicReference<ConfigDatabaseService> CONFIG_DB_SERVICE_REF = new AtomicReference<ConfigDatabaseService>(null);
 
+    static void setConfigDatabaseService(final ConfigDatabaseService configDatabaseService) {
+        CONFIG_DB_SERVICE_REF.set(configDatabaseService);
+    }
+
     /**
      * Prevent instantiation
      */
@@ -55,11 +59,7 @@ public final class Server {
         super();
     }
 
-    static void setConfigDatabaseService(final ConfigDatabaseService configDatabaseService) {
-        CONFIG_DB_SERVICE_REF.set(configDatabaseService);
-    }
-
-    private static volatile Integer serverId;
+    private static final AtomicReference<Integer> SERVER_ID = new AtomicReference<>(null);
 
     /**
      * Gets the identifier of the registered server matching the configured <code>SERVER_NAME</code> property.
@@ -69,17 +69,17 @@ public final class Server {
      */
     public static int getServerId() throws OXException {
         // Load if not yet done
-        Integer tmp = serverId;
+        Integer tmp = SERVER_ID.get();
         if (null == tmp) {
             synchronized (Server.class) {
-                tmp = serverId;
+                tmp = SERVER_ID.get();
                 if (null == tmp) {
-                    int iServerId = Server.loadServerId(getServerName());
+                    int iServerId = loadServerId(getServerName());
                     if (-1 == iServerId) {
                         throw DBPoolingExceptionCodes.NOT_RESOLVED_SERVER.create(getServerName());
                     }
                     tmp = Integer.valueOf(iServerId);
-                    serverId = tmp;
+                    SERVER_ID.set(tmp);
                     LOG.trace("Got server id: {}", tmp);
                 }
             }

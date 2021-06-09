@@ -22,17 +22,11 @@
 package com.openexchange.groupware.infostore.database.impl;
 
 import java.sql.Connection;
-import java.sql.DatabaseMetaData;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
 import com.openexchange.database.AbstractCreateTableImpl;
-import com.openexchange.database.Databases;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.update.Attributes;
 import com.openexchange.groupware.update.PerformParameters;
 import com.openexchange.groupware.update.TaskAttributes;
-import com.openexchange.groupware.update.UpdateExceptionCodes;
 import com.openexchange.groupware.update.UpdateTaskV2;
 
 /**
@@ -94,31 +88,4 @@ public class InfostoreFilenameReservationsCreateTableTask extends AbstractCreate
         return new String[] { INFOSTORE_RESERVED_PATHS };
     }
 
-    private void createTable(String tablename, String sqlCreate, Connection con) throws OXException {
-        PreparedStatement stmt = null;
-        try {
-            if (tableExists(con, tablename)) {
-                return;
-            }
-            stmt = con.prepareStatement(sqlCreate);
-            stmt.executeUpdate();
-        } catch (SQLException e) {
-            throw UpdateExceptionCodes.SQL_PROBLEM.create(e, e.getMessage());
-        } finally {
-            Databases.closeSQLStuff(stmt);
-        }
-    }
-
-    private boolean tableExists(final Connection con, final String table) throws SQLException {
-        final DatabaseMetaData metaData = con.getMetaData();
-        ResultSet rs = null;
-        boolean retval = false;
-        try {
-            rs = metaData.getTables(null, null, table, new String[] { "TABLE" });
-            retval = (rs.next() && rs.getString("TABLE_NAME").equals(table));
-        } finally {
-            Databases.closeSQLStuff(rs);
-        }
-        return retval;
-    }
 }

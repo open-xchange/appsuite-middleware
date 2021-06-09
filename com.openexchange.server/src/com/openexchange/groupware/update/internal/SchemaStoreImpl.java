@@ -36,14 +36,24 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
+import java.util.Optional;
 import java.util.UUID;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
+import java.util.function.BiConsumer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import com.google.common.collect.ImmutableMap;
 import com.openexchange.caching.Cache;
 import com.openexchange.caching.CacheKey;
 import com.openexchange.caching.CacheService;
+import com.openexchange.config.ConfigurationService;
+import com.openexchange.config.Interests;
+import com.openexchange.config.Reloadable;
+import com.openexchange.config.Reloadables;
+import com.openexchange.config.lean.Property;
 import com.openexchange.database.Databases;
 import com.openexchange.databaseold.Database;
 import com.openexchange.exception.OXException;
@@ -51,7 +61,9 @@ import com.openexchange.groupware.update.ExecutedTask;
 import com.openexchange.groupware.update.Schema;
 import com.openexchange.groupware.update.SchemaStore;
 import com.openexchange.groupware.update.SchemaUpdateState;
+import com.openexchange.groupware.update.UpdateProperty;
 import com.openexchange.java.util.UUIDs;
+import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.tools.caching.SerializedCachingLoader;
 import com.openexchange.tools.caching.StorageLoader;
 import com.openexchange.tools.update.Tools;
@@ -62,7 +74,7 @@ import com.openexchange.tools.update.Tools;
  * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public class SchemaStoreImpl extends SchemaStore {
+public class SchemaStoreImpl extends SchemaStore implements Reloadable {
 
     private static final Logger LOG = LoggerFactory.getLogger(SchemaStoreImpl.class);
     private static final String CACHE_REGION = "OXDBPoolCache";
@@ -82,10 +94,12 @@ public class SchemaStoreImpl extends SchemaStore {
 
         private final String name;
         private final byte[] uuid;
+        private final AtomicReference<Long> idleTimeMillis;
 
         private Idiom(String name, byte[] uuid) {
             this.name = name;
             this.uuid = uuid;
+            this.idleTimeMillis = new AtomicReference<>(null);
         }
 
         /**
@@ -105,12 +119,57 @@ public class SchemaStoreImpl extends SchemaStore {
         String getName() {
             return name;
         }
+
+        /**
+         * Gets the number of milliseconds of idleness after which an update process is considered as stalled.
+         *
+         * @return The idle duration in milliseconds
+         */
+        long getIdleMillis() {
+            Long idleMillis = idleTimeMillis.get();
+            if (idleMillis == null) {
+                synchronized (this) {
+                    idleMillis = idleTimeMillis.get();
+                    if (idleMillis == null) {
+                        Property property = Idiom.LOCKED == this ? UpdateProperty.BLOCKED_IDLE_MILLIS : UpdateProperty.BACKGROUND_IDLE_MILLIS;
+                        long defaultMillis = property.getDefaultValue(Long.class).longValue();
+
+                        ConfigurationService configService = ServerServiceRegistry.getInstance().getService(ConfigurationService.class);
+                        if (configService == null) {
+                            return defaultMillis;
+                        }
+
+                        idleMillis = Long.valueOf(configService.getIntProperty(property.getFQPropertyName(), (int) defaultMillis));
+                        idleTimeMillis.set(idleMillis);
+                    }
+                }
+            }
+            return idleMillis.longValue();
+        }
+
+        /**
+         * Clears possibly cached idle time milliseconds.
+         */
+        void clearIdleMillis() {
+            idleTimeMillis.set(null);
+        }
     }
 
     private static final int MYSQL_DEADLOCK = 1213;
     private static final int MYSQL_DUPLICATE = 1062;
 
-    // -------------------------------------------------------------------------------------------------------------------------------------------------
+    private static final SchemaStoreImpl INSTANCE = new SchemaStoreImpl();
+
+    /**
+     * Gets the instance.
+     *
+     * @return The instance
+     */
+    public static SchemaStoreImpl getInstance() {
+        return INSTANCE;
+    }
+
+    // -------------------------------------------------------------------------------------------------------------------------------------
 
     private final Lock cacheLock;
     private volatile Cache cache;
@@ -118,9 +177,23 @@ public class SchemaStoreImpl extends SchemaStore {
     /**
      * Initializes a new {@link SchemaStoreImpl}.
      */
-    public SchemaStoreImpl() {
+    private SchemaStoreImpl() {
         super();
         cacheLock = new ReentrantLock();
+    }
+
+    @Override
+    public Interests getInterests() {
+        return Reloadables.interestsForProperties(
+            UpdateProperty.BLOCKED_IDLE_MILLIS.getFQPropertyName(),
+            UpdateProperty.BACKGROUND_IDLE_MILLIS.getFQPropertyName());
+    }
+
+    @Override
+    public void reloadConfiguration(ConfigurationService configService) {
+        for (Idiom idiom : Idiom.values()) {
+            idiom.clearIdleMillis();
+        }
     }
 
     @Override
@@ -187,15 +260,15 @@ public class SchemaStoreImpl extends SchemaStore {
 
     @Override
     public void lockSchema(Schema schema, boolean background) throws OXException {
-        Connection con = Database.get(schema.getPoolId(), schema.getSchema());
         int rollback = 0;
+        Connection con = Database.get(schema.getPoolId(), schema.getSchema());
         try {
             con.setAutoCommit(false); // BEGIN
             rollback = 1;
             // Insert lock
             insertLock(con, schema, background ? Idiom.BACKGROUND : Idiom.LOCKED);
             // Everything went fine. Schema is marked as locked
-            con.commit();
+            con.commit(); // COMMIT
             rollback = 2;
             // Invalidate cache
             invalidateCache(schema);
@@ -214,38 +287,74 @@ public class SchemaStoreImpl extends SchemaStore {
 
     private static void insertLock(Connection con, Schema schema, Idiom idiom) throws OXException {
         // Check for existing lock exclusively
-        final ExecutedTask[] tasks = readUpdateTasks(con);
-        for (final ExecutedTask task : tasks) {
-            if (idiom.getName().equals(task.getTaskName())) {
-                throw SchemaExceptionCodes.ALREADY_LOCKED.create(schema.getSchema());
+        Date update = null;
+        {
+            ExecutedTask[] executedTasks = readUpdateTasks(Optional.of(idiom.getName()), con);
+            for (int i = 0; update == null && i < executedTasks.length; i++) {
+                ExecutedTask task = executedTasks[i];
+                if (idiom.getName().equals(task.getTaskName())) {
+                    // Check if threshold is not exceeded
+                    if (isNotTimedOut(task, idiom)) {
+                        throw SchemaExceptionCodes.ALREADY_LOCKED.create(schema.getSchema());
+                    }
+                    update = task.getLastModified();
+                }
             }
         }
-        // Insert lock
+
+        // Insert or update lock
         PreparedStatement stmt = null;
         try {
-            stmt = con.prepareStatement("INSERT INTO updateTask (cid,taskName,successful,lastModified,uuid) VALUES (0,?,true,?,?)");
-            stmt.setString(1, idiom.getName());
-            stmt.setLong(2, System.currentTimeMillis());
-            stmt.setBytes(3, idiom.getUuid());
-            if (stmt.executeUpdate() == 0) {
-                throw SchemaExceptionCodes.LOCK_FAILED.create(schema.getSchema());
+            if (update == null) {
+                stmt = con.prepareStatement("INSERT INTO updateTask (cid, taskName, successful, lastModified, uuid) VALUES (0,?,true,?,?)");
+                stmt.setString(1, idiom.getName());
+                stmt.setLong(2, System.currentTimeMillis());
+                stmt.setBytes(3, idiom.getUuid());
+                try {
+                    if (stmt.executeUpdate() <= 0) {
+                        throw SchemaExceptionCodes.LOCK_FAILED.create(schema.getSchema());
+                    }
+                } catch (SQLException e) {
+                    if (MYSQL_DEADLOCK == e.getErrorCode() || MYSQL_DUPLICATE == e.getErrorCode() || Databases.isPrimaryKeyConflictInMySQL(e)) {
+                        throw SchemaExceptionCodes.ALREADY_LOCKED.create(e, schema.getSchema());
+                    }
+                    throw e;
+                }
+            } else {
+                stmt = con.prepareStatement("UPDATE updateTask SET lastModified=? WHERE cid=0 AND uuid=? AND taskName=? AND lastModified=?");
+                stmt.setLong(1, System.currentTimeMillis());
+                stmt.setBytes(2, idiom.getUuid());
+                stmt.setString(3, idiom.getName());
+                stmt.setLong(4, update.getTime());
+                if (stmt.executeUpdate() <= 0) {
+                    throw SchemaExceptionCodes.ALREADY_LOCKED.create(schema.getSchema());
+                }
             }
+            // If thread comes that far, lock has been acquired
         } catch (SQLException e) {
-            if (MYSQL_DEADLOCK == e.getErrorCode() || MYSQL_DUPLICATE == e.getErrorCode() || Databases.isPrimaryKeyConflictInMySQL(e)) {
-                throw SchemaExceptionCodes.ALREADY_LOCKED.create(e, schema.getSchema());
-            }
             throw SchemaExceptionCodes.SQL_PROBLEM.create(e, e.getMessage());
         } finally {
             closeSQLStuff(stmt);
         }
     }
 
-    @Override
-    public boolean tryRefreshSchemaLock(Schema schema, boolean background) throws OXException {
-        return tryRefreshLock(schema, background);
+    private static boolean isNotTimedOut(ExecutedTask task, Idiom idiom) {
+        return isTimedOut(task, idiom) == false;
     }
 
-    private boolean tryRefreshLock(Schema schema, boolean background) throws OXException {
+    private static boolean isTimedOut(ExecutedTask task, Idiom idiom) {
+        // Check if threshold is not exceeded
+        long idleMillis = idiom.getIdleMillis();
+        return idleMillis > 0 && (System.currentTimeMillis() - task.getLastModified().getTime() > idleMillis);
+    }
+
+    @Override
+    public long getIdleMillis(boolean background) {
+        return (background ? Idiom.BACKGROUND : Idiom.LOCKED).getIdleMillis();
+    }
+
+    @Override
+    public boolean tryRefreshSchemaLock(Schema schema, boolean background) throws OXException {
         int poolId = schema.getPoolId();
         Connection con = Database.get(poolId, schema.getSchema());
         try {
@@ -264,9 +373,9 @@ public class SchemaStoreImpl extends SchemaStore {
         // Refresh lock
         PreparedStatement stmt = null;
         try {
-            stmt = con.prepareStatement("UPDATE updateTask SET lastModified = ? WHERE cid=0 AND taskName=?");
+            stmt = con.prepareStatement("UPDATE updateTask SET lastModified = ? WHERE cid=0 AND uuid=?");
             stmt.setLong(1, System.currentTimeMillis());
-            stmt.setString(2, idiom.getName());
+            stmt.setBytes(2, idiom.getUuid());
             return stmt.executeUpdate() > 0;
         } catch (SQLException e) {
             throw SchemaExceptionCodes.SQL_PROBLEM.create(e, e.getMessage());
@@ -278,8 +387,8 @@ public class SchemaStoreImpl extends SchemaStore {
     @Override
     public void unlockSchema(final Schema schema, final boolean background) throws OXException {
         int poolId = schema.getPoolId();
-        Connection con = Database.get(poolId, schema.getSchema());
         int rollback = 0;
+        Connection con = Database.get(poolId, schema.getSchema());
         try {
             // End of update process, so unlock schema
             con.setAutoCommit(false);
@@ -308,7 +417,7 @@ public class SchemaStoreImpl extends SchemaStore {
 
     private static void deleteLock(final Connection con, final Schema schema, final Idiom idiom) throws OXException {
         // Check for existing lock exclusively
-        final ExecutedTask[] tasks = readUpdateTasks(con);
+        final ExecutedTask[] tasks = readUpdateTasks(Optional.of(idiom.getName()), con);
         boolean found = false;
         for (final ExecutedTask task : tasks) {
             if (idiom.getName().equals(task.getTaskName())) {
@@ -322,8 +431,8 @@ public class SchemaStoreImpl extends SchemaStore {
         // Delete lock
         PreparedStatement stmt = null;
         try {
-            stmt = con.prepareStatement("DELETE FROM updateTask WHERE cid=0 AND taskName=?");
-            stmt.setString(1, idiom.getName());
+            stmt = con.prepareStatement("DELETE FROM updateTask WHERE cid=0 AND uuid=?");
+            stmt.setBytes(1, idiom.getUuid());
             if (stmt.executeUpdate() == 0) {
                 throw SchemaExceptionCodes.UNLOCK_FAILED.create(schema.getSchema());
             }
@@ -351,23 +460,50 @@ public class SchemaStoreImpl extends SchemaStore {
         return retval;
     }
 
-    private static void loadUpdateTasks(final Connection con, final SchemaUpdateStateImpl state) throws OXException {
-        String lockedName = Idiom.LOCKED.getName();
-        String backgroundName = Idiom.BACKGROUND.getName();
-        for (final ExecutedTask task : readUpdateTasks(con)) {
-            if (lockedName.equals(task.getTaskName())) {
+    private static Map<String, BiConsumer<ExecutedTask, SchemaUpdateStateImpl>> STATE_UPDATERS = ImmutableMap.<String, BiConsumer<ExecutedTask, SchemaUpdateStateImpl>> builder()
+        .put(Idiom.LOCKED.getName(), (task, state) -> {
+            if (isNotTimedOut(task, Idiom.LOCKED)) {
                 state.setBlockingUpdatesRunning(true);
                 state.setBlockingUpdatesRunningSince(task.getLastModified());
-            } else if (backgroundName.equals(task.getTaskName())) {
+            }
+        })
+        .put(Idiom.BACKGROUND.getName(), (task, state) -> {
+            if (isNotTimedOut(task, Idiom.BACKGROUND)) {
                 state.setBackgroundUpdatesRunning(true);
                 state.setBackgroundUpdatesRunningSince(task.getLastModified());
-            } else {
+            }
+        })
+        .build();
+
+    private static void loadUpdateTasks(final Connection con, final SchemaUpdateStateImpl state) throws OXException {
+        for (ExecutedTask task : readUpdateTasks(Optional.empty(), con)) {
+            BiConsumer<ExecutedTask, SchemaUpdateStateImpl> c = STATE_UPDATERS.get(task.getTaskName());
+            if (c == null) {
                 state.addExecutedTask(task.getTaskName(), task.isSuccessful());
+            } else {
+                c.accept(task, state);
             }
         }
     }
 
-    private static ExecutedTask[] readUpdateTasks(final Connection con) throws OXException {
+    private static ExecutedTask[] readUpdateTasks(Optional<String> optionalTaskName, Connection con) throws OXException {
+        if (optionalTaskName.isPresent()) {
+            String taskName = optionalTaskName.get();
+            PreparedStatement stmt = null;
+            ResultSet result = null;
+            try {
+                stmt = con.prepareStatement("SELECT taskName,successful,lastModified,uuid FROM updateTask WHERE cid=0 AND taskName=? FOR UPDATE");
+                stmt.setString(1, taskName);
+                result = stmt.executeQuery();
+                return result.next() ? new ExecutedTask[] { createExecutedTaskFrom(result) } : new ExecutedTask[0];
+            } catch (SQLException e) {
+                throw SchemaExceptionCodes.SQL_PROBLEM.create(e, e.getMessage());
+            } finally {
+                closeSQLStuff(result, stmt);
+            }
+        }
+
+        // No task name filter. Read them all.
         List<ExecutedTask> retval;
         {
             Statement stmt = null;
@@ -375,14 +511,13 @@ public class SchemaStoreImpl extends SchemaStore {
             try {
                 stmt = con.createStatement();
                 result = stmt.executeQuery("SELECT taskName,successful,lastModified,uuid FROM updateTask WHERE cid=0 FOR UPDATE");
-                if (false == result.next()) {
+                if (result.next() == false) {
                     return new ExecutedTask[0];
                 }
 
                 retval = new ArrayList<ExecutedTask>(512);
                 do {
-                    ExecutedTask task = new ExecutedTaskImpl(result.getString(1), result.getBoolean(2), new Date(result.getLong(3)), UUIDs.toUUID(result.getBytes(4)));
-                    retval.add(task);
+                    retval.add(createExecutedTaskFrom(result));
                 } while (result.next());
             } catch (SQLException e) {
                 throw SchemaExceptionCodes.SQL_PROBLEM.create(e, e.getMessage());
@@ -406,6 +541,10 @@ public class SchemaStoreImpl extends SchemaStore {
             }
         });
         return retval.toArray(new ExecutedTask[retval.size()]);
+    }
+
+    private static ExecutedTask createExecutedTaskFrom(ResultSet result) throws SQLException {
+        return new ExecutedTaskImpl(result.getString(1), result.getBoolean(2), new Date(result.getLong(3)), UUIDs.toUUID(result.getBytes(4)));
     }
 
     @Override
@@ -519,7 +658,7 @@ public class SchemaStoreImpl extends SchemaStore {
         final Connection con = Database.get(poolId, schemaName);
         try {
             con.setAutoCommit(false);
-            ExecutedTask[] tasks = readUpdateTasks(con);
+            ExecutedTask[] tasks = readUpdateTasks(Optional.empty(), con);
             con.commit();
             return tasks;
         } catch (SQLException e) {
@@ -552,7 +691,8 @@ public class SchemaStoreImpl extends SchemaStore {
         }
     }
 
-    private void invalidateCache(Schema schema) {
+    @Override
+    public void invalidateCache(Schema schema) {
         invalidateCache(schema.getPoolId(), schema.getSchema());
     }
 
