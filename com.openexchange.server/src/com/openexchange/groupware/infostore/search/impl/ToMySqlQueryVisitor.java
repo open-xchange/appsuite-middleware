@@ -29,8 +29,8 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
-import org.slf4j.Logger;
 import java.util.Set;
+import org.slf4j.Logger;
 import com.google.common.collect.ImmutableSet;
 import com.openexchange.database.Databases;
 import com.openexchange.exception.OXException;
@@ -258,14 +258,7 @@ public class ToMySqlQueryVisitor implements SearchTermVisitor {
             }
         }
         Pair<Integer, Integer> filterAndSelectCount = SearchEngineImpl.appendFoldersAsUnion(session, queryBuilder, filterBuilder.length() > 0 ? filterBuilder.toString() : null, readAllFolders, readOwnFolders);
-        if (null != sortedBy && dir != InfostoreSearchEngine.NOT_SET) {
-            queryBuilder.append(" ORDER BY ").append(sortedBy.getName());
-            if (dir == InfostoreSearchEngine.ASC) {
-                queryBuilder.append(" ASC");
-            } else if (dir == InfostoreSearchEngine.DESC) {
-                queryBuilder.append(" DESC");
-            }
-        }
+        SearchEngineImpl.appendOrderBy(queryBuilder, sortedBy, dir);
         if (start >= 0 && end >= 0 && start < end) {
             queryBuilder.append(" LIMIT ").append(start).append(",").append(end);
         }
