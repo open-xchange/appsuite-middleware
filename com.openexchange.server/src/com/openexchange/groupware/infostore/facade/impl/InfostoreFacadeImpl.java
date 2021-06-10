@@ -3727,7 +3727,9 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade, I
         List<Integer> all = new ArrayList<>();
         List<Integer> own = new ArrayList<>();
         Map<Integer, EffectiveInfostoreFolderPermission> permissionsByFolderID;
-        if (includeSubfolders) {
+        if (NOT_SET == folderId || NO_FOLDER == folderId) {
+            permissionsByFolderID = Tools.gatherVisibleFolders(session, security, db, null, all, own);
+        } else if (includeSubfolders) {
             permissionsByFolderID = Tools.gatherVisibleFolders(session, security, db, folderId, all, own);
         } else {
             permissionsByFolderID = Tools.gatherVisibleFolders(session, security, db, new int[] { folderId }, all, own);

@@ -1630,8 +1630,23 @@ public abstract class AbstractCompositingIDBasedFileAccess extends AbstractCompo
 
     @Override
     public SearchIterator<File> search(String folderId, boolean includeSubfolders, final SearchTerm<?> searchTerm, final List<Field> fields, final Field sort, final SortDirection order, final int start, final int end) throws OXException {
-        Map<FileStorageFileAccess, List<String>> foldersByFileAccess = getFoldersByFileAccess(Collections.singletonList(folderId));
-        if (foldersByFileAccess.isEmpty()) {
+        /*
+         * check which storages to consider
+         */
+        Map<FileStorageFileAccess, List<String>> foldersByFileAccess;
+        if (FileStorageFileAccess.ALL_FOLDERS == folderId) {
+            List<FileStorageFileAccess> allFileStorageAccesses = getAllFileStorageAccesses();
+            foldersByFileAccess = new HashMap<FileStorageFileAccess, List<String>>(allFileStorageAccesses.size());
+            for (FileStorageFileAccess fileStorageFileAccess : allFileStorageAccesses) {
+                foldersByFileAccess.put(fileStorageFileAccess, null);
+            }
+        } else {
+            foldersByFileAccess = getFoldersByFileAccess(Collections.singletonList(folderId));
+        }
+        if (0 == foldersByFileAccess.size()) {
+            /*
+             * no suitable storages
+             */
             return SearchIteratorAdapter.emptyIterator();
         }
         if (1 == foldersByFileAccess.size()) {
