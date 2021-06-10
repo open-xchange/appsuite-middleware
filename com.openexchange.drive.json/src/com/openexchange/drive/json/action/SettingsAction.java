@@ -91,7 +91,6 @@ public class SettingsAction extends AbstractDriveAction {
                 jsonObject.put("minSearchChars", settings.getMinSearchChars());
                 jsonObject.put("hasTrashFolder", settings.hasTrashFolder());
                 jsonObject.put("maxConcurrentSyncFiles", settings.getMaxConcurrentSyncFiles());
-                jsonObject.put("maxConcurrentSyncFolders", settings.getMaxConcurrentSyncFolders());
             }
         } catch (JSONException e) {
             throw AjaxExceptionCodes.JSON_ERROR.create(e, e.getMessage());
