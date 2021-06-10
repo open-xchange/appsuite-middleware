@@ -140,7 +140,7 @@ public class FileSearchTermParser {
      * @throws OXException
      */
     private static SearchTerm<?> convertTerm(SingleSearchTerm term) throws OXException {
-        SingleSearchTerm.SingleOperation operation = (SingleSearchTerm.SingleOperation) term.getOperation();
+        SingleSearchTerm.SingleOperation operation = term.getOperation();
         Field field = null;
         String query = null;
 
@@ -286,7 +286,7 @@ public class FileSearchTermParser {
             case ISNULL:
             case GREATER_OR_EQUAL:
             default:
-                throw SearchExceptionMessages.UNKNOWN_OPERATION.create();
+                throw SearchExceptionMessages.UNKNOWN_OPERATION.create(String.valueOf(singleOperation));
         }
 
         return comparison;
