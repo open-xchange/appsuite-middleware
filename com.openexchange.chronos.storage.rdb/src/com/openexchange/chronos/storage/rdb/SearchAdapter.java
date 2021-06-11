@@ -471,27 +471,22 @@ public class SearchAdapter {
      * @param singleSearchTerm The search term to adjust
      * @return The adjusted search term
      */
-    private SingleSearchTerm adjustAttendeesTerm(SingleSearchTerm singleSearchTerm) {
-        ColumnFieldOperand<AttendeeField> adjustedColumnOperand;
+    private SearchTerm<?> adjustAttendeesTerm(SingleSearchTerm singleSearchTerm) {
         Operand<?> constantOperand = getFirstOperandOfType(singleSearchTerm, Operand.Type.CONSTANT);
         if (null != constantOperand && Number.class.isInstance(constantOperand.getValue())) {
             /*
              * match against attendee entity
              */
-            adjustedColumnOperand = new ColumnFieldOperand<AttendeeField>(AttendeeField.ENTITY);
-        } else {
-            /*
-             * match against attendee uri, trimming the mailto: prefix as needed
-             */
-            adjustedColumnOperand = new FormattingColumnFieldOperand<AttendeeField>(AttendeeField.URI, 
-                (label) -> String.format("TRIM(LEADING 'mailto:' FROM LOWER(%1$s))", label)
-            );                
-        }
-        SingleSearchTerm adjustedTerm = new SingleSearchTerm(singleSearchTerm.getOperation());
-        for (Operand<?> operand : singleSearchTerm.getOperands()) {
-            adjustedTerm.addOperand(EventField.ATTENDEES.equals(operand.getValue()) ? adjustedColumnOperand : operand);
-        }
-        return adjustedTerm;
+            return adjustTerm(singleSearchTerm, EventField.ATTENDEES, new ColumnFieldOperand<AttendeeField>(AttendeeField.ENTITY));
+        } 
+        /*
+         * match against attendee uri, trimming the mailto: prefix as needed, and alternatively against the attendee's cn
+         */
+        return new CompositeSearchTerm(CompositeOperation.OR)
+            .addSearchTerm(adjustTerm(singleSearchTerm, EventField.ATTENDEES, new FormattingColumnFieldOperand<AttendeeField>(AttendeeField.URI, 
+                (label) -> String.format("TRIM(LEADING 'mailto:' FROM LOWER(%1$s))", label))))
+            .addSearchTerm(adjustTerm(singleSearchTerm, EventField.ATTENDEES, new ColumnFieldOperand<AttendeeField>(AttendeeField.CN))
+        );
     }
 
     private void appendOperation(Operation operation, Operand<?>[] operands, DbMapping<? extends Object, ?> mapping) {
@@ -729,6 +724,22 @@ public class SearchAdapter {
             return ((FormattingColumnFieldOperand<?>) operand).getColumnLabelFormatFunction();
         }
         return null;
+    }
+
+    /**
+     * Adjusts a search term by exchanging a specific column field operand with another one.
+     * 
+     * @param singleSearchTerm The search term to adjust
+     * @param columnField The column field of the operand to exchange
+     * @param adjustedColumnOperand The replacement operand
+     * @return A new search term instance with the adjusted column field operand
+     */
+    private static <E extends Enum<?>> SingleSearchTerm adjustTerm(SingleSearchTerm singleSearchTerm, E columnField, Operand<?> adjustedColumnOperand) {
+        SingleSearchTerm adjustedTerm = new SingleSearchTerm(singleSearchTerm.getOperation());
+        for (Operand<?> operand : singleSearchTerm.getOperands()) {
+            adjustedTerm.addOperand(columnField.equals(operand.getValue()) ? adjustedColumnOperand : operand);
+        }
+        return adjustedTerm;
     }
 
     private static final class FormattingColumnFieldOperand<E extends Enum<?>> extends ColumnFieldOperand<E> {
