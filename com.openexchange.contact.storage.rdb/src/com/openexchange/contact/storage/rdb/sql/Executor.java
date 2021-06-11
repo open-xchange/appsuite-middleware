@@ -61,6 +61,7 @@ import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.search.ContactSearchObject;
 import com.openexchange.groupware.search.Order;
 import com.openexchange.groupware.tools.mappings.common.ItemUpdate;
+import com.openexchange.java.util.UUIDs;
 import com.openexchange.l10n.SuperCollator;
 import com.openexchange.search.SearchTerm;
 
@@ -1269,13 +1270,13 @@ public class Executor {
                 stmt = connection.prepareStatement(sql);
                 stmt.setInt(1, contextID);
                 stmt.setInt(2, member.getEntryID());
-                stmt.setString(3, member.getUuid().toString());
+                stmt.setBytes(3, UUIDs.toByteArray(member.getUuid()));
                 logExecuteUpdate(stmt);
             } finally {
                 Databases.closeSQLStuff(stmt);
             }
+            deleteSingleFromObjectUseCountTable(connection, contextID, member.getEntryID());
         }
-        deleteSingleFromObjectUseCountTable(connection, contextID, members.get(0).getEntryID());
     }
     public int deleteSingle(Connection connection, Table table, int contextID, int objectID, long maxLastModified) throws SQLException, OXException {
         StringBuilder stringBuilder = new StringBuilder();
