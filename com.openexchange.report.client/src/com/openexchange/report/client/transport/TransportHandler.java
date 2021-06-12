@@ -168,6 +168,7 @@ public class TransportHandler {
             }
             stream.flush();
             stream.close();
+            stream = null;
         } catch (SSLException e) {
             e.printStackTrace();
             System.err.println("Report sending failure, unable to send with SSL.");
