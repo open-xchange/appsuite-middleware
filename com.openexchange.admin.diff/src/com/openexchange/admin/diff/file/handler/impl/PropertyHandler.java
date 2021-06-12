@@ -109,7 +109,7 @@ public class PropertyHandler extends AbstractFileHandler {
                 }
 
                 Properties installedProperty = new Properties();
-                installedProperty.load(new StringReader(result.get(0).getContent()));
+                loadPropertiesFrom(new StringReader(result.get(0).getContent()), installedProperty);
 
                 getDiffProperties(diffResult, fileName, originalProperty, installedProperty);
             } catch (IOException e) {
