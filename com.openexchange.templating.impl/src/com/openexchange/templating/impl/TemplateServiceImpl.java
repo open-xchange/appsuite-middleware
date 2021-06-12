@@ -31,6 +31,7 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.io.Reader;
 import java.io.StringReader;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -374,13 +375,23 @@ public class TemplateServiceImpl implements TemplateService {
 
         try {
             if (state > 0) {
-                properties.load(new StringReader(props.toString()));
+                loadPropertiesFrom(new StringReader(props.toString()), properties);
             }
         } catch (IOException e) {
             throw TemplateErrorMessage.IOException.create();
         }
 
         return keep.toString();
+    }
+
+    private void loadPropertiesFrom(Reader reader, Properties originalProperty) throws IOException {
+        if (reader != null) {
+            try {
+                originalProperty.load(reader);
+            } finally {
+                reader.close();
+            }
+        }
     }
 
     private boolean isUserTemplatingEnabled(final ServerSession session) {
