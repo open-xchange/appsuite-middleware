@@ -29,6 +29,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import com.openexchange.java.Charsets;
+import com.openexchange.java.Streams;
 
 public class ShellExecutor {
 
@@ -108,20 +109,36 @@ public class ShellExecutor {
     }
 
     private final ArrayOutput getoutputs(final Process proc) throws IOException {
-        final InputStream err = proc.getErrorStream();
-        final InputStream is = proc.getInputStream();
-        final BufferedReader buf = new BufferedReader(new InputStreamReader(is, Charsets.UTF_8));
-        final BufferedReader errbuf = new BufferedReader(new InputStreamReader(err, Charsets.UTF_8));
-        String readBuffer = null;
-        String errreadBuffer = null;
-        final ArrayOutput retval = new ArrayOutput();
+        ArrayOutput retval = new ArrayOutput();
 
-        while (null != (errreadBuffer = errbuf.readLine())) {
-            retval.errOutput.add(errreadBuffer);
+        {
+            InputStream err = null;
+            BufferedReader errbuf = null;
+            try {
+                err = proc.getErrorStream();
+                errbuf = new BufferedReader(new InputStreamReader(err, Charsets.UTF_8));
+                for (String errreadBuffer; (errreadBuffer = errbuf.readLine()) != null;) {
+                    retval.errOutput.add(errreadBuffer);
+                }
+            } finally {
+                Streams.close(errbuf, err);
+            }
         }
-        while (null != (readBuffer = buf.readLine())) {
-            retval.stdOutput.add(readBuffer);
+
+        {
+            InputStream is = null;
+            BufferedReader buf = null;
+            try {
+                is = proc.getInputStream();
+                buf = new BufferedReader(new InputStreamReader(is, Charsets.UTF_8));
+                for (String readBuffer; (readBuffer = buf.readLine()) != null;) {
+                    retval.stdOutput.add(readBuffer);
+                }
+            } finally {
+                Streams.close(buf, is);
+            }
         }
+
         return retval;
     }
 
