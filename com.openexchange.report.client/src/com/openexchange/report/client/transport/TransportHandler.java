@@ -159,8 +159,9 @@ public class TransportHandler {
             httpURLConnection.setRequestProperty("Proxy-Authorization", proxyAutorizationProperty);
         }
 
+        DataOutputStream stream = null;
         try {
-            final DataOutputStream stream = new DataOutputStream(httpURLConnection.getOutputStream());
+            stream = new DataOutputStream(httpURLConnection.getOutputStream());
             stream.writeBytes(report.toString());
             if (metadata.getBoolean("needsComposition")) {
                 appendStoredContentToOutputstream(metadata, stream, true);
@@ -169,14 +170,16 @@ public class TransportHandler {
             stream.close();
         } catch (SSLException e) {
             e.printStackTrace();
-            System.err.println("Report sending failure, unable to send with ssl.");
+            System.err.println("Report sending failure, unable to send with SSL.");
             if (isHttps) {
-                System.out.println("Trying to send without ssl.");
+                System.out.println("Trying to send without SSL.");
                 sendReport(false, reportConfiguration, metadata);
                 return;
             } else {
                 saveReportToHardDrive(metadata);
             }
+        } finally {
+            Streams.close(stream);
         }
 
         if (httpURLConnection.getResponseCode() != HttpURLConnection.HTTP_OK) {
