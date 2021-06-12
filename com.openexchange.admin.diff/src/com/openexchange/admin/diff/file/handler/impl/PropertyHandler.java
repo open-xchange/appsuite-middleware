@@ -22,6 +22,7 @@
 package com.openexchange.admin.diff.file.handler.impl;
 
 import java.io.IOException;
+import java.io.Reader;
 import java.io.StringReader;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -97,7 +98,7 @@ public class PropertyHandler extends AbstractFileHandler {
             try {
                 String originalFileContent = origFile.getContent();
                 Properties originalProperty = new Properties();
-                originalProperty.load(new StringReader(originalFileContent));
+                loadPropertiesFrom(new StringReader(originalFileContent), originalProperty);
 
                 final String fileName = origFile.getName();
                 List<ConfigurationFile> result = new ConfigurationFileSearch().search(lInstalledFiles, fileName);
@@ -113,6 +114,16 @@ public class PropertyHandler extends AbstractFileHandler {
                 getDiffProperties(diffResult, fileName, originalProperty, installedProperty);
             } catch (IOException e) {
                 diffResult.getProcessingErrors().add("Error while property diff per file: " + e.getLocalizedMessage() + "\n");
+            }
+        }
+    }
+
+    private void loadPropertiesFrom(Reader reader, Properties originalProperty) throws IOException {
+        if (reader != null) {
+            try {
+                originalProperty.load(reader);
+            } finally {
+                reader.close();
             }
         }
     }
