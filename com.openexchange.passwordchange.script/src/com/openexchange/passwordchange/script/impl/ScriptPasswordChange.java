@@ -180,6 +180,10 @@ public final class ScriptPasswordChange extends PasswordChangeService {
             for (String line; (line = br.readLine()) != null;) {
                 LOG.debug("PWD CHANGE: {}", line);
             }
+            Streams.close(br, isr, stderr);
+            br = null;
+            isr = null;
+            stderr = null;
 
             return proc.waitFor();
         } finally {
