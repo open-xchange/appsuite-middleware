@@ -207,7 +207,6 @@
 	<classpathentry kind="lib" path="lib/jakarta.xml.bind-api-2.3.3.jar"/>
 	<classpathentry kind="lib" path="lib/http_api_client.jar" sourcepath="lib/source/http_api_client-sources.jar"/>
 	<classpathentry kind="lib" path="lib/rest_api_client.jar" sourcepath="lib/source/rest_api_client-sources.jar"/>
-	<classpathentry combineaccessrules="false" kind="src" path="/com.openexchange.contact.provider.test"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/com.openexchange.contact.provider"/>
 	<classpathentry kind="output" path="build"/>
 </classpath>
