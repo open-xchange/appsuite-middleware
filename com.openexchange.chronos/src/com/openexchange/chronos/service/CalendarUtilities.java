@@ -91,6 +91,9 @@ public interface CalendarUtilities {
     /**
      * Checks and adjusts the timezones of the event's start- and end-time (in case they are <i>set</i>) to match well-known & valid
      * timezones, using different fallbacks if no exactly matching timezone is available.
+     * <p/>
+     * For series events (both series master and overridden instances), also the timezone references in recurrence-related fields
+     * (recurrence id, recurrence dates, delete- and change exception dates) are adjusted implicitly as needed.
      *
      * @param session The users session
      * @param calendarUserId The identifier of the user to get the fallback timezone from

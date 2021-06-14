@@ -1565,6 +1565,8 @@ public class CalendarUtils {
     /**
      * Normalizes a recurrence identifier so that its value shares the same date type and timezone of a specific reference date. If the
      * recurrence identifier denotes a different timezone, the underlying date-time is shifted to the timezone of this reference date.
+     * <p/>
+     * Recurrence identifiers whose value is an <i>all-day</i> date are not changed.
      *
      * @param referenceDate The reference date to derive the date type and timezone from
      * @param recurrenceId The recurrence identifier to normalize
@@ -1575,7 +1577,7 @@ public class CalendarUtils {
             return null;
         }
         DateTime value = recurrenceId.getValue();
-        if (matchesTypeAndTimeZone(referenceDate, value)) {
+        if (value.isAllDay() || matchesTypeAndTimeZone(referenceDate, value)) {
             return recurrenceId;
         }
         return new DefaultRecurrenceId(value.shiftTimeZone(referenceDate.getTimeZone()), recurrenceId.getRange());

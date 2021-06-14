@@ -1071,46 +1071,52 @@ public abstract class BasicCachingCalendarAccess implements BasicCalendarAccess,
              */
             Consistency.adjustAllDayDates(event);
             /*
-             * adjust timezones of the event's start- and end-time & normalize
+             * adjust timezones of the event's start- and end-time
              */
             try {
                 Services.getService(CalendarUtilities.class).adjustTimeZones(session, session.getUserId(), event, null);
             } catch (OXException e) {
                 LOG.error("Unable to adjust timezone for event with identifier {} and uid {}.", event.getId(), event.getUid(), e);
             }
-            Consistency.normalizeRecurrenceIDs(event.getStartDate(), event);
             /*
              * map events by UID
              */
             com.openexchange.tools.arrays.Collections.put(eventsByUID, event.getUid(), event);
         }
+        /*
+         * prepare event groups representing the same calendar object resource & prepare further recurrence-related properties
+         */
         for (Iterator<List<Event>> iterator = eventsByUID.values().iterator(); iterator.hasNext();) {
-            List<Event> eventGroup = iterator.next();
-            try {
-                eventGroup = sortEventGroup(eventGroup);
-            } catch (OXException e) {
-                LOG.debug("Removed event with uid {} from list to add because of the following corrupt data: {}", eventGroup.get(0).getUid(), e.getMessage());
+            List<Event> eventGroup = sortSeriesMasterFirst(iterator.next());
+            if (eventGroup.isEmpty()) {
                 iterator.remove();
+                continue;
+            }
+            /*
+             * normalize recurrence ids in events using the first event as reference
+             */
+            Event firstEvent = eventGroup.get(0);
+            for (Event event : eventGroup) {
+                Consistency.normalizeRecurrenceIDs(firstEvent.getStartDate(), event);
+            }
+            /*
+             * ensure recurrence rule is valid
+             */
+            try {
+                Check.recurrenceRuleIsValid(Services.getService(RecurrenceService.class), firstEvent);
+            } catch (OXException e) {
+                LOG.debug("Removed event with uid {} from list to add because of the following corrupt data: {}", firstEvent.getUid(), e.getMessage(), e);
+                iterator.remove();
+                continue;
+            }
+            /*
+             * assign change exception dates if applicable
+             */
+            if (1 < eventGroup.size()) {
+                firstEvent.setChangeExceptionDates(getRecurrenceIds(eventGroup.subList(1, eventGroup.size())));
             }
         }
         return eventsByUID;
-    }
-
-    private static List<Event> sortEventGroup(List<Event> eventGroup) throws OXException {
-        if (1 >= eventGroup.size()) {
-            Check.recurrenceRuleIsValid(Services.getService(RecurrenceService.class), eventGroup.get(0));
-            return eventGroup;
-        }
-        /*
-         * sort series master first, then assign change exception dates
-         */
-        eventGroup = sortSeriesMasterFirst(eventGroup);
-        Event masterEvent = eventGroup.get(0);
-        if (null != masterEvent.getRecurrenceRule()) {
-            Check.recurrenceRuleIsValid(Services.getService(RecurrenceService.class), masterEvent);
-            masterEvent.setChangeExceptionDates(getRecurrenceIds(eventGroup.subList(1, eventGroup.size())));
-        }
-        return eventGroup;
     }
 
     /**

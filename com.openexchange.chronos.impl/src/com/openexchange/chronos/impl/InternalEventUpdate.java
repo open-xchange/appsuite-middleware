@@ -146,7 +146,7 @@ public class InternalEventUpdate implements EventUpdate {
          */
         Event changedEvent = apply(originalEvent, updatedEvent, assumeExternalOrganizerUpdate, ignoredFields);
         checkIntegrity(originalEvent, changedEvent, originalSeriesMasterEvent);
-        ensureConsistency(originalEvent, changedEvent);
+        ensureConsistency(originalEvent, changedEvent, originalSeriesMasterEvent);
         List<Event> changedChangeExceptions = adjustExceptions(originalEvent, changedEvent, originalChangeExceptions);
         /*
          * derive & take over event update
@@ -338,11 +338,12 @@ public class InternalEventUpdate implements EventUpdate {
         return changedChangeExceptions;
     }
 
-    private void ensureConsistency(Event originalEvent, Event updatedEvent) throws OXException {
+    private void ensureConsistency(Event originalEvent, Event updatedEvent, Event originalSeriesMaster) throws OXException {
         Consistency.adjustAllDayDates(updatedEvent);
         Consistency.adjustTimeZones(session.getSession(), calendarUser.getEntity(), updatedEvent, originalEvent);
         Consistency.adjustRecurrenceRule(updatedEvent);
-        Consistency.normalizeRecurrenceIDs(originalEvent.getStartDate(), updatedEvent);
+        DateTime referenceDate = (isSeriesException(originalEvent) && null != originalSeriesMaster ? originalSeriesMaster : originalEvent).getStartDate();
+        Consistency.normalizeRecurrenceIDs(referenceDate, updatedEvent);
         /*
          * adjust recurrence-related properties
          */

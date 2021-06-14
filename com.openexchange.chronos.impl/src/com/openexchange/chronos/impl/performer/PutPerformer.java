@@ -406,7 +406,7 @@ public class PutPerformer extends AbstractUpdatePerformer {
                 preparedEvent = EventMapper.getInstance().copy(event, null, EventField.START_DATE, EventField.END_DATE, EventField.RECURRENCE_ID);
                 Consistency.adjustAllDayDates(preparedEvent);
                 Consistency.adjustTimeZones(session.getSession(), calendarUserId, preparedEvent, events.get(0));
-                Consistency.normalizeRecurrenceIDs(preparedEvent.getStartDate(), preparedEvent);
+                Consistency.normalizeRecurrenceIDs((isSeriesMaster(events.get(0)) ? events.get(0) : preparedEvent).getStartDate(), preparedEvent);
             } catch (OXException e) {
                 LOG.warn("Unexpected error preparing {} for reucurrence lookup, falling back to supplied event data.", event, e);
                 preparedEvent = event;
