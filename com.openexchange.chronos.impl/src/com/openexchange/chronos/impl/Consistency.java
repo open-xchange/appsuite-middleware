@@ -49,11 +49,16 @@
 
 package com.openexchange.chronos.impl;
 
+import java.util.Collection;
 import java.util.Date;
+import java.util.SortedSet;
 import java.util.TimeZone;
+import java.util.TreeSet;
 import org.dmfs.rfc5545.DateTime;
 import com.openexchange.chronos.CalendarUser;
 import com.openexchange.chronos.Event;
+import com.openexchange.chronos.RecurrenceId;
+import com.openexchange.chronos.common.DefaultRecurrenceId;
 import com.openexchange.chronos.service.CalendarSession;
 import com.openexchange.exception.OXException;
 import com.openexchange.folderstorage.type.PublicType;
@@ -70,6 +75,9 @@ public class Consistency extends com.openexchange.chronos.common.Consistency {
     /**
      * Checks and adjusts the timezones of the event's start- and end-time (in case they are <i>set</i>) to match well-known & valid
      * timezones, using different fallbacks if no exactly matching timezone is available.
+     * <p/>
+     * For series events (both series master and overridden instances), also the timezone references in recurrence-related fields
+     * (recurrence id, recurrence dates, delete- and change exception dates) are adjusted implicitly.
      *
      * @param session The session
      * @param calendarUserId The identifier of the user to get the fallback timezone from
@@ -83,6 +91,38 @@ public class Consistency extends com.openexchange.chronos.common.Consistency {
         if (event.containsEndDate()) {
             event.setEndDate(selectTimeZone(session, event.getEndDate(), calendarUserId, null == originalEvent ? null : originalEvent.getEndDate()));
         }
+        if (event.containsRecurrenceId()) {
+            event.setRecurrenceId(selectTimeZone(session, event.getRecurrenceId(), calendarUserId, null == originalEvent ? null : originalEvent.getRecurrenceId()));
+        }
+        if (event.containsRecurrenceDates()) {
+            event.setRecurrenceDates(selectTimeZone(session, event.getRecurrenceDates(), calendarUserId, null == originalEvent ? null : originalEvent.getRecurrenceDates()));
+        }
+        if (event.containsDeleteExceptionDates()) {
+            event.setDeleteExceptionDates(selectTimeZone(session, event.getDeleteExceptionDates(), calendarUserId, null == originalEvent ? null : originalEvent.getDeleteExceptionDates()));
+        }
+        if (event.containsChangeExceptionDates()) {
+            event.setChangeExceptionDates(selectTimeZone(session, event.getChangeExceptionDates(), calendarUserId, null == originalEvent ? null : originalEvent.getChangeExceptionDates()));
+        }
+    }
+
+    private static RecurrenceId selectTimeZone(Session session, RecurrenceId recurrenceId, int calendarUserId, RecurrenceId originalRecurrenceId) throws OXException {
+        if (null == recurrenceId) {
+            return recurrenceId;
+        }
+        DateTime dateTime = selectTimeZone(session, recurrenceId.getValue(), calendarUserId, null == originalRecurrenceId ? null : originalRecurrenceId.getValue());
+        return new DefaultRecurrenceId(dateTime, recurrenceId.getRange());
+    }
+
+    private static SortedSet<RecurrenceId> selectTimeZone(Session session, Collection<RecurrenceId> recurrenceIds, int calendarUserId, Collection<RecurrenceId> originalRecurrenceIds) throws OXException {
+        if (null == recurrenceIds) {
+            return null;
+        }
+        RecurrenceId originalRecurrenceId = null != originalRecurrenceIds && 0 < originalRecurrenceIds.size() ? originalRecurrenceIds.iterator().next() : null;
+        SortedSet<RecurrenceId> adjustedRecurrenceIds = new TreeSet<RecurrenceId>();
+        for (RecurrenceId recurrenceId : recurrenceIds) {
+            adjustedRecurrenceIds.add(selectTimeZone(session, recurrenceId, calendarUserId, originalRecurrenceId));
+        }
+        return adjustedRecurrenceIds;
     }
 
     private static DateTime selectTimeZone(Session session, DateTime dateTime, int calendarUserId, DateTime originalDateTime) throws OXException {
