@@ -432,16 +432,10 @@ public abstract class AbstractInfostoreFileAccess extends InfostoreAccess implem
 
     @Override
     public SearchIterator<File> search(String folderId, boolean includeSubfolders, SearchTerm<?> searchTerm, List<Field> fields, Field sort, SortDirection order, int start, int end) throws OXException {
-        int fid;
-        try {
-            fid = Utils.parseUnsignedInt(folderId);
-        } catch (NumberFormatException e) {
-            throw FileStorageExceptionCodes.INVALID_FOLDER_IDENTIFIER.create(e, folderId);
-        }
-
+        int folder = null == folderId ? InfostoreSearchEngine.NO_FOLDER : Utils.parseUnsignedInt(folderId);
         ToInfostoreTermVisitor visitor = new ToInfostoreTermVisitor();
         searchTerm.visit(visitor);
-        return getConverter().getFileSearchIterator(search.search(session, visitor.getInfostoreTerm(), fid, includeSubfolders, getMatching(fields), getMatching(sort), getSortDirection(order), start, end));
+        return getConverter().getFileSearchIterator(search.search(session, visitor.getInfostoreTerm(), folder, includeSubfolders, getMatching(fields), getMatching(sort), getSortDirection(order), start, end));
     }
 
     @Override

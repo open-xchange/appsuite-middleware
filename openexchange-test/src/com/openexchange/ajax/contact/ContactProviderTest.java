@@ -48,8 +48,8 @@ import com.openexchange.testing.httpclient.modules.ContactsApi;
  */
 public abstract class ContactProviderTest extends AbstractAPIClientSession {
 
-    private static final String CONTACT_TEST_PROVIDER_ID = com.openexchange.contact.provider.test.impl.TestContactsProvider.PROVIDER_ID;
-    private static final String CONTACT_TEST_PROVIDER_NAME = com.openexchange.contact.provider.test.impl.TestContactsProvider.PROVIDER_DISPLAY_NAME;
+    private static final String CONTACT_TEST_PROVIDER_ID = "com.openexchange.contact.provider.test"; // com.openexchange.contact.provider.test.impl.TestContactsProvider.PROVIDER_ID;
+    private static final String CONTACT_TEST_PROVIDER_NAME = "c.o.contact.provider.test"; //com.openexchange.contact.provider.test.impl.TestContactsProvider.PROVIDER_DISPLAY_NAME;
     private static final String PARENT_FOLDER = "1";
     private static final String FOLDER_COLUMNS = "1,300";
 

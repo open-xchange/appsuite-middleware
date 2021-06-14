@@ -1,0 +1,86 @@
+/*
+ * @copyright Copyright (c) OX Software GmbH, Germany <info@open-xchange.com>
+ * @license AGPL-3.0
+ *
+ * This code is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU Affero General Public License for more details.
+ *
+ * You should have received a copy of the GNU Affero General Public License
+ * along with OX App Suite.  If not, see <https://www.gnu.org/licenses/agpl-3.0.txt>.
+ *
+ * Any use of the work other than as authorized under this license or copyright law is prohibited.
+ *
+ */
+
+package com.openexchange.filestore.utils.osgi;
+
+import java.util.ArrayList;
+import java.util.List;
+import org.osgi.framework.BundleContext;
+import org.osgi.framework.ServiceReference;
+import org.osgi.framework.ServiceRegistration;
+import org.osgi.util.tracker.ServiceTrackerCustomizer;
+import com.openexchange.filestore.QuotaFileStorageService;
+import com.openexchange.filestore.utils.settings.SpoolBehaviorSetting;
+import com.openexchange.groupware.settings.PreferencesItemService;
+import com.openexchange.jslob.ConfigTreeEquivalent;
+
+/**
+ * {@link SettingRegisterer}
+ *
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @since v7.10.6
+ */
+public class SettingRegisterer implements ServiceTrackerCustomizer<QuotaFileStorageService, QuotaFileStorageService> {
+
+    private final BundleContext context;
+    private List<ServiceRegistration<?>> registrations;
+
+    /**
+     * Initializes a new {@link SettingRegisterer}.
+     *
+     * @param context The bundle context
+     */
+    public SettingRegisterer(BundleContext context) {
+        super();
+        this.context = context;
+    }
+
+    @Override
+    public synchronized QuotaFileStorageService addingService(ServiceReference<QuotaFileStorageService> reference) {
+        QuotaFileStorageService service = context.getService(reference);
+
+        registrations = new ArrayList<ServiceRegistration<?>>(2);
+        {
+            SpoolBehaviorSetting spoolSetting = new SpoolBehaviorSetting(service);
+            registrations.add(context.registerService(PreferencesItemService.class, spoolSetting, null));
+            registrations.add(context.registerService(ConfigTreeEquivalent.class, spoolSetting, null));
+        }
+
+        return service;
+    }
+
+    @Override
+    public void modifiedService(ServiceReference<QuotaFileStorageService> reference, QuotaFileStorageService service) {
+        // Nothing
+    }
+
+    @Override
+    public synchronized void removedService(ServiceReference<QuotaFileStorageService> reference, QuotaFileStorageService service) {
+        List<ServiceRegistration<?>> registrations = this.registrations;
+        if (registrations != null) {
+            this.registrations = null;
+            for (ServiceRegistration<?> registration : registrations) {
+                registration.unregister();
+            }
+        }
+    }
+
+}

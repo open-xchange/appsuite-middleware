@@ -129,6 +129,11 @@ public class S3FileStorage implements FileStorage {
     }
 
     @Override
+    public boolean isSpooling() {
+        return true;
+    }
+
+    @Override
     public String saveNewFile(InputStream input) throws OXException {
         /*
          * perform chunked upload as needed
@@ -166,6 +171,7 @@ public class S3FileStorage implements FileStorage {
                 String uploadID = client.getSdkClient().initiateMultipartUpload(initiateMultipartUploadRequest).getUploadId();
                 boolean completed = false;
                 try {
+                    Thread currentThread = Thread.currentThread();
                     List<PartETag> partETags = new ArrayList<PartETag>();
                     int partNumber = 1;
                     /*
@@ -173,6 +179,9 @@ public class S3FileStorage implements FileStorage {
                      */
                     do {
                         partETags.add(uploadPart(key, uploadID, partNumber++, chunk, false).getPartETag());
+                        if (currentThread.isInterrupted()) {
+                            throw OXException.general("Upload to S3 aborted");
+                        }
                         chunk = chunkedUpload.next();
                     } while (chunkedUpload.hasNext());
                     /*

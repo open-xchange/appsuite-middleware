@@ -86,6 +86,11 @@ public class SproxydFileStorage implements DestroyAwareFileStorage {
     }
 
     @Override
+    public boolean isSpooling() {
+        return true;
+    }
+
+    @Override
     public String saveNewFile(InputStream file) throws OXException {
         File tmpFile = null;
         try {
@@ -326,8 +331,12 @@ public class SproxydFileStorage implements DestroyAwareFileStorage {
         List<UUID> scalityIds = new LinkedList<UUID>();
         try {
             chunkedUpload = new DefaultChunkedUpload(data);
+            Thread currentThread = Thread.currentThread();
             long off = offset;
             while (chunkedUpload.hasNext()) {
+                if (currentThread.isInterrupted()) {
+                    throw OXException.general("Upload to Sproxyd aborted");
+                }
                 UploadChunk chunk = chunkedUpload.next();
                 try {
                     UUID scalityId = client.put(chunk.getData(), chunk.getSize());
