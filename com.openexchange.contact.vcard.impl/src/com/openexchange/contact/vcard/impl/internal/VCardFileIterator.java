@@ -115,38 +115,45 @@ public class VCardFileIterator implements SearchIterator<ThresholdFileHolder> {
             buffer = new UnsynchronizedByteArrayOutputStream(64 * 1024);
             sink = new ThresholdFileHolder();
             int componentDepth = 0;
-            String currentLine;
-            while (null != (currentLine = readLine(inputStream, buffer, 12))) {
+            byte[] currentLine;
+            while (null != (currentLine = readLine(inputStream))) {
                 /*
-                 * flush to file holder if threshold exceeded
+                 * while not in component, scan for BEGIN:VCARD, otherwise skip
                  */
+                String peekedString = peekAsciiString(currentLine, 12);
+                if (0 == componentDepth && false == peekedString.regionMatches(true, 0, BEGIN_VCARD, 0, BEGIN_VCARD.length())) {
+                    continue;
+                }
+                /*
+                 * consume line & flush to file holder if threshold exceeded
+                 */
+                buffer.write(currentLine);
                 if (buffer.size() > BUFFER_THRESHOLD) {
                     sink.write(buffer.toByteArray());
                     buffer.reset();
                 }
-                if (currentLine.regionMatches(true, 0, BEGIN_VCARD, 0, BEGIN_VCARD.length())) {
+                if (peekedString.regionMatches(true, 0, BEGIN_VCARD, 0, BEGIN_VCARD.length())) {
                     /*
                      * enter VCARD component
                      */
                     componentDepth++;
-                } else if (currentLine.regionMatches(true, 0, END_VCARD, 0, END_VCARD.length())) {
+                } else if (peekedString.regionMatches(true, 0, END_VCARD, 0, END_VCARD.length())) {
                     /*
-                     * leave VCARD component, return sink if outer component is closed
+                     * leave VCARD component, return sink if outer component is closed (buffer is flushed to sink in finally-block)
                      */
                     componentDepth--;
                     if (0 == componentDepth) {
-                        sink.write(buffer.toByteArray());
                         finished = true;
                         return sink;
                     } else if (0 > componentDepth) {
                         componentDepth = 0; // ignore                          
                     }
-                } else if (currentLine.regionMatches(true, 0, UID, 0, UID.length())) {
+                } else if (peekedString.regionMatches(true, 0, UID, 0, UID.length())) {
                     /*
                      * track UID value
                      */
-                    if (1 == componentDepth && currentLine.length() < UID.length()) {
-                        sink.setName(currentLine.substring(UID.length()).trim());
+                    if (1 == componentDepth && peekedString.length() < UID.length()) {
+                        sink.setName(peekedString.substring(UID.length()).trim());
                     }
                 }
             }
@@ -171,24 +178,19 @@ public class VCardFileIterator implements SearchIterator<ThresholdFileHolder> {
         return null;
     }
 
-
-    private static String readLine(InputStream inputStream, ByteArrayOutputStream sink, int peekedLineLength) throws IOException {
+    private static byte[] readLine(InputStream inputStream) throws IOException {
         try (ByteArrayOutputStream baos = new UnsynchronizedByteArrayOutputStream()) {
             byte buf[] = new byte[1];
             int length = -1;
             while (0 < (length = inputStream.read(buf))) {
                 baos.write(buf, 0, length);
                 if ('\n' == buf[0]) {
-                    byte[] line = baos.toByteArray();
-                    sink.write(line);
-                    return peekAsciiString(line, peekedLineLength);
+                    return baos.toByteArray();
                 }
             }
             if (0 < baos.size()) {
                 baos.write((byte) 10); // add final newline
-                byte[] line = baos.toByteArray();
-                sink.write(line);
-                return peekAsciiString(line, peekedLineLength);
+                return baos.toByteArray();
             }
             return null;
         }

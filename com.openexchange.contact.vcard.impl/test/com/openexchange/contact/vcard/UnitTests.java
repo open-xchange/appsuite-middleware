@@ -58,6 +58,7 @@ import org.junit.runners.Suite;
     Bug7250Test.class,
     Bug7719Test.class,
     MWB768Test.class,
+    MWB1133Test.class,
 })
 public class UnitTests {
 
