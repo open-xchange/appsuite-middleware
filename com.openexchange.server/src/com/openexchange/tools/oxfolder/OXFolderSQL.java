@@ -2642,6 +2642,8 @@ public final class OXFolderSQL {
             stmt = writeCon.prepareStatement(Strings.replaceSequenceWith(SQL_DROP_SYS_PERMS, TMPL_PERM_TABLE, permTable));
             stmt.setInt(1, ctx.getContextId());
             stmt.setInt(2, entity);
+            // Logging to trace cause for MWB-938
+            LOG.debug(stmt.toString());
             executeUpdate(stmt);
         } finally {
             closeResources(null, stmt, createReadCon ? writeCon : null, false, ctx);
