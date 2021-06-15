@@ -28,6 +28,7 @@ import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import com.openexchange.exception.OXException;
+import com.openexchange.java.Streams;
 import com.openexchange.java.Strings;
 import com.openexchange.passwordchange.PasswordChangeEvent;
 import com.openexchange.passwordchange.PasswordChangeService;
@@ -164,20 +165,30 @@ public final class ScriptPasswordChange extends PasswordChangeService {
     }
 
     private int executePasswordUpdateShell(final String[] cmd) throws IOException, InterruptedException {
+        Runtime rt = Runtime.getRuntime();
+        Process proc = rt.exec(cmd);
 
-        final Runtime rt = Runtime.getRuntime();
-        final Process proc = rt.exec(cmd);
-        final InputStream stderr = proc.getInputStream();
-        final InputStreamReader isr = new InputStreamReader(stderr, StandardCharsets.UTF_8);
-        final BufferedReader br = new BufferedReader(isr);
-        String line = null;
 
-        while ((line = br.readLine()) != null) {
-            LOG.debug("PWD CHANGE: {}", line);
+        InputStream stderr = null;
+        InputStreamReader isr = null;
+        BufferedReader br = null;
+        try {
+            stderr = proc.getInputStream();
+            isr = new InputStreamReader(stderr, StandardCharsets.UTF_8);
+            br = new BufferedReader(isr);
+
+            for (String line; (line = br.readLine()) != null;) {
+                LOG.debug("PWD CHANGE: {}", line);
+            }
+            Streams.close(br, isr, stderr);
+            br = null;
+            isr = null;
+            stderr = null;
+
+            return proc.waitFor();
+        } finally {
+            Streams.close(br, isr, stderr);
         }
-
-        return proc.waitFor();
-
     }
 
 }

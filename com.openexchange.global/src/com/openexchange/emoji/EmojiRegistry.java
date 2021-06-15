@@ -62,6 +62,8 @@ public class EmojiRegistry {
         return INSTANCE;
     }
 
+    private static final Pattern PATTERN_CHARSET_PARAMETER = Pattern.compile("charset= *([a-zA-Z-0-9_]+)(;|$)");
+
     /**
      * The main method to generate the code from specified <code>"emoji.json"</code> file.
      *
@@ -82,21 +84,27 @@ public class EmojiRegistry {
 
                 String mimeType = connection.getContentType();
                 if (null != mimeType) {
-                    Pattern charsetPattern = Pattern.compile("charset= *([a-zA-Z-0-9_]+)(;|$)");
+                    Pattern charsetPattern = PATTERN_CHARSET_PARAMETER;
                     Matcher m = charsetPattern.matcher(mimeType);
                     if (m.find()) {
                         mimeType = m.group(1);
+                    } else {
+                        mimeType = null;
                     }
                 }
 
+                InputStreamReader reader = null;
                 InputStream inputStream = connection.getInputStream();
                 try {
-                    InputStreamReader reader = new InputStreamReader(inputStream, null == mimeType ? "UTF-8" : mimeType);
+                    reader = new InputStreamReader(inputStream, null == mimeType ? "UTF-8" : mimeType);
                     char[] cbug = new char[8192];
                     for (int read; (read = reader.read(cbug)) > 0;) {
                         sb.append(cbug, 0, read);
                     }
                 } finally {
+                    if (reader != null) {
+                        reader.close();
+                    }
                     inputStream.close();
                 }
             }
@@ -112,18 +120,23 @@ public class EmojiRegistry {
                     Element tr = id.getParentElement();
                     if (null != tr && tr.getName() == HTMLElementName.TR) {
                         List<Element> tds = tr.getAllElements(HTMLElementName.TD);
-                        if (tds.size() >= 16) {
-                            Element nameTd = tds.get(15);
-                            Segment name = nameTd.getContent();
-
-                            Element unicodeTd = tds.get(1);
-                            List<Element> anchors = unicodeTd.getAllElements(HTMLElementName.A);
-                            for (Element anchor : anchors) {
-                                Segment unicode = anchor.getContent();
-                                String[] splits = unicode.toString().split(" +");
-                                for (String s : splits) {
-                                    codes.put(s, name.toString());
+                        // Extract name and unicodes
+                        Segment name = null;
+                        String[] splits = null;
+                        for (Element td : tds) {
+                            if ("code".equals(td.getAttributeValue("class"))) {
+                                List<Element> anchors = td.getAllElements(HTMLElementName.A);
+                                for (Element anchor : anchors) {
+                                    Segment unicode = anchor.getContent();
+                                    splits = unicode.toString().split(" +");
                                 }
+                            } else if ("name".equals(td.getAttributeValue("class"))) {
+                                name = td.getContent();
+                            }
+                        }
+                        if (name != null && splits != null) {
+                            for (String s : splits) {
+                                codes.put(s, name.toString());
                             }
                         }
                     }
@@ -200,120 +213,242 @@ public class EmojiRegistry {
     }
 
     private gnu.trove.map.TIntObjectMap<String> initEmojiRegistry() {
-        gnu.trove.map.TIntObjectMap<String> emojis = new gnu.trove.map.hash.TIntObjectHashMap<String>(1129);
+        gnu.trove.map.TIntObjectMap<String> emojis = new gnu.trove.map.hash.TIntObjectHashMap<String>(1375);
         emojis.put(128512, "\u1F600"); // grinning face
-        emojis.put(128513, "\u1F601"); // grinning face with smiling eyes
-        emojis.put(128514, "\u1F602"); // face with tears of joy
+        emojis.put(128515, "\u1F603"); // grinning face with big eyes
+        emojis.put(128516, "\u1F604"); // grinning face with smiling eyes
+        emojis.put(128513, "\u1F601"); // beaming face with smiling eyes
+        emojis.put(128518, "\u1F606"); // grinning squinting face
+        emojis.put(128517, "\u1F605"); // grinning face with sweat
         emojis.put(129315, "\u1F923"); // rolling on the floor laughing
-        emojis.put(128515, "\u1F603"); // smiling face with open mouth
-        emojis.put(128516, "\u1F604"); // smiling face with open mouth & smiling eyes
-        emojis.put(128517, "\u1F605"); // smiling face with open mouth & cold sweat
-        emojis.put(128518, "\u1F606"); // smiling face with open mouth & closed eyes
+        emojis.put(128514, "\u1F602"); // face with tears of joy
+        emojis.put(128578, "\u1F642"); // slightly smiling face
+        emojis.put(128579, "\u1F643"); // upside-down face
         emojis.put(128521, "\u1F609"); // winking face
         emojis.put(128522, "\u1F60A"); // smiling face with smiling eyes
-        emojis.put(128523, "\u1F60B"); // face savouring delicious food
-        emojis.put(128526, "\u1F60E"); // smiling face with sunglasses
+        emojis.put(128519, "\u1F607"); // smiling face with halo
+        emojis.put(129392, "\u1F970"); // smiling face with hearts
         emojis.put(128525, "\u1F60D"); // smiling face with heart-eyes
+        emojis.put(129321, "\u1F929"); // star-struck
         emojis.put(128536, "\u1F618"); // face blowing a kiss
         emojis.put(128535, "\u1F617"); // kissing face
-        emojis.put(128537, "\u1F619"); // kissing face with smiling eyes
-        emojis.put(128538, "\u1F61A"); // kissing face with closed eyes
         emojis.put(9786, "\u263A"); // smiling face
-        emojis.put(128578, "\u1F642"); // slightly smiling face
+        emojis.put(128538, "\u1F61A"); // kissing face with closed eyes
+        emojis.put(128537, "\u1F619"); // kissing face with smiling eyes
+        emojis.put(129394, "\u1F972"); // smiling face with tear
+        emojis.put(128523, "\u1F60B"); // face savoring food
+        emojis.put(128539, "\u1F61B"); // face with tongue
+        emojis.put(128540, "\u1F61C"); // winking face with tongue
+        emojis.put(129322, "\u1F92A"); // zany face
+        emojis.put(128541, "\u1F61D"); // squinting face with tongue
+        emojis.put(129297, "\u1F911"); // money-mouth face
         emojis.put(129303, "\u1F917"); // hugging face
+        emojis.put(129325, "\u1F92D"); // face with hand over mouth
+        emojis.put(129323, "\u1F92B"); // shushing face
         emojis.put(129300, "\u1F914"); // thinking face
+        emojis.put(129296, "\u1F910"); // zipper-mouth face
+        emojis.put(129320, "\u1F928"); // face with raised eyebrow
         emojis.put(128528, "\u1F610"); // neutral face
         emojis.put(128529, "\u1F611"); // expressionless face
-        emojis.put(128566, "\u1F636"); // face without mouth
-        emojis.put(128580, "\u1F644"); // face with rolling eyes
+        emojis.put(128566, "\u1F636"); // ⊛ face in clouds
+        emojis.put(8205, "\u200D"); // pirate flag
+        emojis.put(127787, "\u1F32B"); // fog
+        emojis.put(65039, "\uFE0F"); // pirate flag
         emojis.put(128527, "\u1F60F"); // smirking face
-        emojis.put(128547, "\u1F623"); // persevering face
-        emojis.put(128549, "\u1F625"); // disappointed but relieved face
-        emojis.put(128558, "\u1F62E"); // face with open mouth
-        emojis.put(129296, "\u1F910"); // zipper-mouth face
-        emojis.put(128559, "\u1F62F"); // hushed face
-        emojis.put(128554, "\u1F62A"); // sleepy face
-        emojis.put(128555, "\u1F62B"); // tired face
-        emojis.put(128564, "\u1F634"); // sleeping face
-        emojis.put(128524, "\u1F60C"); // relieved face
-        emojis.put(128539, "\u1F61B"); // face with stuck-out tongue
-        emojis.put(128540, "\u1F61C"); // face with stuck-out tongue & winking eye
-        emojis.put(128541, "\u1F61D"); // face with stuck-out tongue & closed eyes
-        emojis.put(129316, "\u1F924"); // drooling face
         emojis.put(128530, "\u1F612"); // unamused face
-        emojis.put(128531, "\u1F613"); // face with cold sweat
-        emojis.put(128532, "\u1F614"); // pensive face
-        emojis.put(128533, "\u1F615"); // confused face
-        emojis.put(128579, "\u1F643"); // upside-down face
-        emojis.put(129297, "\u1F911"); // money-mouth face
-        emojis.put(128562, "\u1F632"); // astonished face
-        emojis.put(9785, "\u2639"); // frowning face
-        emojis.put(128577, "\u1F641"); // slightly frowning face
-        emojis.put(128534, "\u1F616"); // confounded face
-        emojis.put(128542, "\u1F61E"); // disappointed face
-        emojis.put(128543, "\u1F61F"); // worried face
-        emojis.put(128548, "\u1F624"); // face with steam from nose
-        emojis.put(128546, "\u1F622"); // crying face
-        emojis.put(128557, "\u1F62D"); // loudly crying face
-        emojis.put(128550, "\u1F626"); // frowning face with open mouth
-        emojis.put(128551, "\u1F627"); // anguished face
-        emojis.put(128552, "\u1F628"); // fearful face
-        emojis.put(128553, "\u1F629"); // weary face
+        emojis.put(128580, "\u1F644"); // face with rolling eyes
         emojis.put(128556, "\u1F62C"); // grimacing face
-        emojis.put(128560, "\u1F630"); // face with open mouth & cold sweat
-        emojis.put(128561, "\u1F631"); // face screaming in fear
-        emojis.put(128563, "\u1F633"); // flushed face
-        emojis.put(128565, "\u1F635"); // dizzy face
-        emojis.put(128545, "\u1F621"); // pouting face
-        emojis.put(128544, "\u1F620"); // angry face
+        emojis.put(128558, "\u1F62E"); // face with open mouth
+        emojis.put(128168, "\u1F4A8"); // dashing away
+        emojis.put(129317, "\u1F925"); // lying face
+        emojis.put(128524, "\u1F60C"); // relieved face
+        emojis.put(128532, "\u1F614"); // pensive face
+        emojis.put(128554, "\u1F62A"); // sleepy face
+        emojis.put(129316, "\u1F924"); // drooling face
+        emojis.put(128564, "\u1F634"); // sleeping face
         emojis.put(128567, "\u1F637"); // face with medical mask
         emojis.put(129298, "\u1F912"); // face with thermometer
         emojis.put(129301, "\u1F915"); // face with head-bandage
         emojis.put(129314, "\u1F922"); // nauseated face
+        emojis.put(129326, "\u1F92E"); // face vomiting
         emojis.put(129319, "\u1F927"); // sneezing face
-        emojis.put(128519, "\u1F607"); // smiling face with halo
+        emojis.put(129397, "\u1F975"); // hot face
+        emojis.put(129398, "\u1F976"); // cold face
+        emojis.put(129396, "\u1F974"); // woozy face
+        emojis.put(128565, "\u1F635"); // ⊛ face with spiral eyes
+        emojis.put(128171, "\u1F4AB"); // dizzy
+        emojis.put(129327, "\u1F92F"); // exploding head
         emojis.put(129312, "\u1F920"); // cowboy hat face
-        emojis.put(129313, "\u1F921"); // clown face
-        emojis.put(129317, "\u1F925"); // lying face
+        emojis.put(129395, "\u1F973"); // partying face
+        emojis.put(129400, "\u1F978"); // disguised face
+        emojis.put(128526, "\u1F60E"); // smiling face with sunglasses
         emojis.put(129299, "\u1F913"); // nerd face
+        emojis.put(129488, "\u1F9D0"); // face with monocle
+        emojis.put(128533, "\u1F615"); // confused face
+        emojis.put(128543, "\u1F61F"); // worried face
+        emojis.put(128577, "\u1F641"); // slightly frowning face
+        emojis.put(9785, "\u2639"); // frowning face
+        emojis.put(128559, "\u1F62F"); // hushed face
+        emojis.put(128562, "\u1F632"); // astonished face
+        emojis.put(128563, "\u1F633"); // flushed face
+        emojis.put(129402, "\u1F97A"); // pleading face
+        emojis.put(128550, "\u1F626"); // frowning face with open mouth
+        emojis.put(128551, "\u1F627"); // anguished face
+        emojis.put(128552, "\u1F628"); // fearful face
+        emojis.put(128560, "\u1F630"); // anxious face with sweat
+        emojis.put(128549, "\u1F625"); // sad but relieved face
+        emojis.put(128546, "\u1F622"); // crying face
+        emojis.put(128557, "\u1F62D"); // loudly crying face
+        emojis.put(128561, "\u1F631"); // face screaming in fear
+        emojis.put(128534, "\u1F616"); // confounded face
+        emojis.put(128547, "\u1F623"); // persevering face
+        emojis.put(128542, "\u1F61E"); // disappointed face
+        emojis.put(128531, "\u1F613"); // downcast face with sweat
+        emojis.put(128553, "\u1F629"); // weary face
+        emojis.put(128555, "\u1F62B"); // tired face
+        emojis.put(129393, "\u1F971"); // yawning face
+        emojis.put(128548, "\u1F624"); // face with steam from nose
+        emojis.put(128545, "\u1F621"); // pouting face
+        emojis.put(128544, "\u1F620"); // angry face
+        emojis.put(129324, "\u1F92C"); // face with symbols on mouth
         emojis.put(128520, "\u1F608"); // smiling face with horns
         emojis.put(128127, "\u1F47F"); // angry face with horns
+        emojis.put(128128, "\u1F480"); // skull
+        emojis.put(9760, "\u2620"); // pirate flag
+        emojis.put(128169, "\u1F4A9"); // pile of poo
+        emojis.put(129313, "\u1F921"); // clown face
         emojis.put(128121, "\u1F479"); // ogre
         emojis.put(128122, "\u1F47A"); // goblin
-        emojis.put(128128, "\u1F480"); // skull
-        emojis.put(9760, "\u2620"); // skull and crossbones
         emojis.put(128123, "\u1F47B"); // ghost
         emojis.put(128125, "\u1F47D"); // alien
         emojis.put(128126, "\u1F47E"); // alien monster
-        emojis.put(129302, "\u1F916"); // robot face
-        emojis.put(128169, "\u1F4A9"); // pile of poo
-        emojis.put(128570, "\u1F63A"); // smiling cat face with open mouth
-        emojis.put(128568, "\u1F638"); // grinning cat face with smiling eyes
-        emojis.put(128569, "\u1F639"); // cat face with tears of joy
-        emojis.put(128571, "\u1F63B"); // smiling cat face with heart-eyes
-        emojis.put(128572, "\u1F63C"); // cat face with wry smile
-        emojis.put(128573, "\u1F63D"); // kissing cat face with closed eyes
-        emojis.put(128576, "\u1F640"); // weary cat face
-        emojis.put(128575, "\u1F63F"); // crying cat face
-        emojis.put(128574, "\u1F63E"); // pouting cat face
+        emojis.put(129302, "\u1F916"); // robot
+        emojis.put(128570, "\u1F63A"); // grinning cat
+        emojis.put(128568, "\u1F638"); // grinning cat with smiling eyes
+        emojis.put(128569, "\u1F639"); // cat with tears of joy
+        emojis.put(128571, "\u1F63B"); // smiling cat with heart-eyes
+        emojis.put(128572, "\u1F63C"); // cat with wry smile
+        emojis.put(128573, "\u1F63D"); // kissing cat
+        emojis.put(128576, "\u1F640"); // weary cat
+        emojis.put(128575, "\u1F63F"); // crying cat
+        emojis.put(128574, "\u1F63E"); // pouting cat
         emojis.put(128584, "\u1F648"); // see-no-evil monkey
         emojis.put(128585, "\u1F649"); // hear-no-evil monkey
         emojis.put(128586, "\u1F64A"); // speak-no-evil monkey
-        emojis.put(128118, "\u1F476"); // baby: dark skin tone
-        emojis.put(127995, "\u1F3FB"); // nose: light skin tone
-        emojis.put(127996, "\u1F3FC"); // nose: medium-light skin tone
-        emojis.put(127997, "\u1F3FD"); // nose: medium skin tone
-        emojis.put(127998, "\u1F3FE"); // nose: medium-dark skin tone
-        emojis.put(127999, "\u1F3FF"); // nose: dark skin tone
+        emojis.put(128139, "\u1F48B"); // kiss: woman, woman
+        emojis.put(128140, "\u1F48C"); // love letter
+        emojis.put(128152, "\u1F498"); // heart with arrow
+        emojis.put(128157, "\u1F49D"); // heart with ribbon
+        emojis.put(128150, "\u1F496"); // sparkling heart
+        emojis.put(128151, "\u1F497"); // growing heart
+        emojis.put(128147, "\u1F493"); // beating heart
+        emojis.put(128158, "\u1F49E"); // revolving hearts
+        emojis.put(128149, "\u1F495"); // two hearts
+        emojis.put(128159, "\u1F49F"); // heart decoration
+        emojis.put(10083, "\u2763"); // heart exclamation
+        emojis.put(128148, "\u1F494"); // broken heart
+        emojis.put(10084, "\u2764"); // couple with heart: woman, woman
+        emojis.put(128293, "\u1F525"); // fire
+        emojis.put(129657, "\u1FA79"); // adhesive bandage
+        emojis.put(129505, "\u1F9E1"); // orange heart
+        emojis.put(128155, "\u1F49B"); // yellow heart
+        emojis.put(128154, "\u1F49A"); // green heart
+        emojis.put(128153, "\u1F499"); // blue heart
+        emojis.put(128156, "\u1F49C"); // purple heart
+        emojis.put(129294, "\u1F90E"); // brown heart
+        emojis.put(128420, "\u1F5A4"); // black heart
+        emojis.put(129293, "\u1F90D"); // white heart
+        emojis.put(128175, "\u1F4AF"); // hundred points
+        emojis.put(128162, "\u1F4A2"); // anger symbol
+        emojis.put(128165, "\u1F4A5"); // collision
+        emojis.put(128166, "\u1F4A6"); // sweat droplets
+        emojis.put(128371, "\u1F573"); // hole
+        emojis.put(128163, "\u1F4A3"); // bomb
+        emojis.put(128172, "\u1F4AC"); // speech balloon
+        emojis.put(128065, "\u1F441"); // eye
+        emojis.put(128488, "\u1F5E8"); // left speech bubble
+        emojis.put(128495, "\u1F5EF"); // right anger bubble
+        emojis.put(128173, "\u1F4AD"); // thought balloon
+        emojis.put(128164, "\u1F4A4"); // zzz
+        emojis.put(128075, "\u1F44B"); // waving hand
+        emojis.put(129306, "\u1F91A"); // raised back of hand
+        emojis.put(128400, "\u1F590"); // hand with fingers splayed
+        emojis.put(9995, "\u270B"); // raised hand
+        emojis.put(128406, "\u1F596"); // vulcan salute
+        emojis.put(128076, "\u1F44C"); // OK hand
+        emojis.put(129292, "\u1F90C"); // pinched fingers
+        emojis.put(129295, "\u1F90F"); // pinching hand
+        emojis.put(9996, "\u270C"); // victory hand
+        emojis.put(129310, "\u1F91E"); // crossed fingers
+        emojis.put(129311, "\u1F91F"); // love-you gesture
+        emojis.put(129304, "\u1F918"); // sign of the horns
+        emojis.put(129305, "\u1F919"); // call me hand
+        emojis.put(128072, "\u1F448"); // backhand index pointing left
+        emojis.put(128073, "\u1F449"); // backhand index pointing right
+        emojis.put(128070, "\u1F446"); // backhand index pointing up
+        emojis.put(128405, "\u1F595"); // middle finger
+        emojis.put(128071, "\u1F447"); // backhand index pointing down
+        emojis.put(9757, "\u261D"); // index pointing up
+        emojis.put(128077, "\u1F44D"); // thumbs up
+        emojis.put(128078, "\u1F44E"); // thumbs down
+        emojis.put(9994, "\u270A"); // raised fist
+        emojis.put(128074, "\u1F44A"); // oncoming fist
+        emojis.put(129307, "\u1F91B"); // left-facing fist
+        emojis.put(129308, "\u1F91C"); // right-facing fist
+        emojis.put(128079, "\u1F44F"); // clapping hands
+        emojis.put(128588, "\u1F64C"); // raising hands
+        emojis.put(128080, "\u1F450"); // open hands
+        emojis.put(129330, "\u1F932"); // palms up together
+        emojis.put(129309, "\u1F91D"); // people holding hands
+        emojis.put(128591, "\u1F64F"); // folded hands
+        emojis.put(9997, "\u270D"); // writing hand
+        emojis.put(128133, "\u1F485"); // nail polish
+        emojis.put(129331, "\u1F933"); // selfie
+        emojis.put(128170, "\u1F4AA"); // flexed biceps
+        emojis.put(129470, "\u1F9BE"); // mechanical arm
+        emojis.put(129471, "\u1F9BF"); // mechanical leg
+        emojis.put(129461, "\u1F9B5"); // leg
+        emojis.put(129462, "\u1F9B6"); // foot
+        emojis.put(128066, "\u1F442"); // ear
+        emojis.put(129467, "\u1F9BB"); // ear with hearing aid
+        emojis.put(128067, "\u1F443"); // nose
+        emojis.put(129504, "\u1F9E0"); // brain
+        emojis.put(129728, "\u1FAC0"); // anatomical heart
+        emojis.put(129729, "\u1FAC1"); // lungs
+        emojis.put(129463, "\u1F9B7"); // tooth
+        emojis.put(129460, "\u1F9B4"); // bone
+        emojis.put(128064, "\u1F440"); // eyes
+        emojis.put(128069, "\u1F445"); // tongue
+        emojis.put(128068, "\u1F444"); // mouth
+        emojis.put(128118, "\u1F476"); // baby
+        emojis.put(129490, "\u1F9D2"); // child
         emojis.put(128102, "\u1F466"); // family: woman, girl, boy
         emojis.put(128103, "\u1F467"); // family: woman, girl, girl
+        emojis.put(129489, "\u1F9D1"); // people holding hands
+        emojis.put(128113, "\u1F471"); // man: blond hair
         emojis.put(128104, "\u1F468"); // family: man, girl, girl
+        emojis.put(129492, "\u1F9D4"); // ⊛ woman: beard
+        emojis.put(9794, "\u2642"); // male sign
+        emojis.put(9792, "\u2640"); // female sign
+        emojis.put(129456, "\u1F9B0"); // red hair
+        emojis.put(129457, "\u1F9B1"); // curly hair
+        emojis.put(129459, "\u1F9B3"); // white hair
+        emojis.put(129458, "\u1F9B2"); // bald
         emojis.put(128105, "\u1F469"); // family: woman, girl, girl
-        emojis.put(128116, "\u1F474"); // old man: dark skin tone
-        emojis.put(128117, "\u1F475"); // old woman: dark skin tone
-        emojis.put(8205, "\u200D"); // rainbow flag
+        emojis.put(129491, "\u1F9D3"); // older person
+        emojis.put(128116, "\u1F474"); // old man
+        emojis.put(128117, "\u1F475"); // old woman
+        emojis.put(128589, "\u1F64D"); // woman frowning
+        emojis.put(128590, "\u1F64E"); // woman pouting
+        emojis.put(128581, "\u1F645"); // woman gesturing NO
+        emojis.put(128582, "\u1F646"); // woman gesturing OK
+        emojis.put(128129, "\u1F481"); // woman tipping hand
+        emojis.put(128587, "\u1F64B"); // woman raising hand
+        emojis.put(129487, "\u1F9CF"); // deaf woman
+        emojis.put(128583, "\u1F647"); // woman bowing
+        emojis.put(129318, "\u1F926"); // woman facepalming
+        emojis.put(129335, "\u1F937"); // woman shrugging
         emojis.put(9877, "\u2695"); // medical symbol
-        emojis.put(65039, "\uFE0F"); // rainbow flag
         emojis.put(127891, "\u1F393"); // graduation cap
         emojis.put(127979, "\u1F3EB"); // school
         emojis.put(9878, "\u2696"); // balance scale
@@ -323,189 +458,111 @@ public class EmojiRegistry {
         emojis.put(127981, "\u1F3ED"); // factory
         emojis.put(128188, "\u1F4BC"); // briefcase
         emojis.put(128300, "\u1F52C"); // microscope
-        emojis.put(128187, "\u1F4BB"); // laptop computer
+        emojis.put(128187, "\u1F4BB"); // laptop
         emojis.put(127908, "\u1F3A4"); // microphone
         emojis.put(127912, "\u1F3A8"); // artist palette
         emojis.put(9992, "\u2708"); // airplane
         emojis.put(128640, "\u1F680"); // rocket
         emojis.put(128658, "\u1F692"); // fire engine
-        emojis.put(128110, "\u1F46E"); // woman police officer: dark skin tone
-        emojis.put(9794, "\u2642"); // male sign
-        emojis.put(9792, "\u2640"); // female sign
-        emojis.put(128373, "\u1F575"); // woman detective: dark skin tone
-        emojis.put(128130, "\u1F482"); // woman guard: dark skin tone
-        emojis.put(128119, "\u1F477"); // woman construction worker: dark skin tone
-        emojis.put(129332, "\u1F934"); // prince: dark skin tone
-        emojis.put(128120, "\u1F478"); // princess: dark skin tone
-        emojis.put(128115, "\u1F473"); // woman wearing turban: dark skin tone
-        emojis.put(128114, "\u1F472"); // man with Chinese cap: dark skin tone
-        emojis.put(128113, "\u1F471"); // blond-haired woman: dark skin tone
-        emojis.put(129333, "\u1F935"); // man in tuxedo: dark skin tone
-        emojis.put(128112, "\u1F470"); // bride with veil: dark skin tone
-        emojis.put(129328, "\u1F930"); // pregnant woman: dark skin tone
-        emojis.put(128124, "\u1F47C"); // baby angel: dark skin tone
-        emojis.put(127877, "\u1F385"); // Santa Claus: dark skin tone
-        emojis.put(129334, "\u1F936"); // Mrs. Claus: dark skin tone
-        emojis.put(128589, "\u1F64D"); // woman frowning: dark skin tone
-        emojis.put(128590, "\u1F64E"); // woman pouting: dark skin tone
-        emojis.put(128581, "\u1F645"); // woman gesturing NO: dark skin tone
-        emojis.put(128582, "\u1F646"); // woman gesturing OK: dark skin tone
-        emojis.put(128129, "\u1F481"); // woman tipping hand: dark skin tone
-        emojis.put(128587, "\u1F64B"); // woman raising hand: dark skin tone
-        emojis.put(128583, "\u1F647"); // woman bowing: dark skin tone
-        emojis.put(129318, "\u1F926"); // woman facepalming: dark skin tone
-        emojis.put(129335, "\u1F937"); // woman shrugging: dark skin tone
-        emojis.put(128134, "\u1F486"); // woman getting massage: dark skin tone
-        emojis.put(128135, "\u1F487"); // woman getting haircut: dark skin tone
-        emojis.put(128694, "\u1F6B6"); // woman walking: dark skin tone
-        emojis.put(127939, "\u1F3C3"); // woman running: dark skin tone
-        emojis.put(128131, "\u1F483"); // woman dancing: dark skin tone
-        emojis.put(128378, "\u1F57A"); // man dancing: dark skin tone
-        emojis.put(128111, "\u1F46F"); // women with bunny ears partying
-        emojis.put(128704, "\u1F6C0"); // person taking bath: dark skin tone
-        emojis.put(128716, "\u1F6CC"); // person in bed: dark skin tone
-        emojis.put(128372, "\u1F574"); // man in business suit levitating: dark skin tone
+        emojis.put(128110, "\u1F46E"); // woman police officer
+        emojis.put(128373, "\u1F575"); // woman detective
+        emojis.put(128130, "\u1F482"); // woman guard
+        emojis.put(129399, "\u1F977"); // ninja
+        emojis.put(128119, "\u1F477"); // woman construction worker
+        emojis.put(129332, "\u1F934"); // prince
+        emojis.put(128120, "\u1F478"); // princess
+        emojis.put(128115, "\u1F473"); // woman wearing turban
+        emojis.put(128114, "\u1F472"); // person with skullcap
+        emojis.put(129493, "\u1F9D5"); // woman with headscarf
+        emojis.put(129333, "\u1F935"); // woman in tuxedo
+        emojis.put(128112, "\u1F470"); // woman with veil
+        emojis.put(129328, "\u1F930"); // pregnant woman
+        emojis.put(129329, "\u1F931"); // breast-feeding
+        emojis.put(127868, "\u1F37C"); // baby bottle
+        emojis.put(128124, "\u1F47C"); // baby angel
+        emojis.put(127877, "\u1F385"); // Santa Claus
+        emojis.put(129334, "\u1F936"); // Mrs. Claus
+        emojis.put(127876, "\u1F384"); // Christmas tree
+        emojis.put(129464, "\u1F9B8"); // woman superhero
+        emojis.put(129465, "\u1F9B9"); // woman supervillain
+        emojis.put(129497, "\u1F9D9"); // woman mage
+        emojis.put(129498, "\u1F9DA"); // woman fairy
+        emojis.put(129499, "\u1F9DB"); // woman vampire
+        emojis.put(129500, "\u1F9DC"); // mermaid
+        emojis.put(129501, "\u1F9DD"); // woman elf
+        emojis.put(129502, "\u1F9DE"); // woman genie
+        emojis.put(129503, "\u1F9DF"); // woman zombie
+        emojis.put(128134, "\u1F486"); // woman getting massage
+        emojis.put(128135, "\u1F487"); // woman getting haircut
+        emojis.put(128694, "\u1F6B6"); // woman walking
+        emojis.put(129485, "\u1F9CD"); // woman standing
+        emojis.put(129486, "\u1F9CE"); // woman kneeling
+        emojis.put(129455, "\u1F9AF"); // white cane
+        emojis.put(129468, "\u1F9BC"); // motorized wheelchair
+        emojis.put(129469, "\u1F9BD"); // manual wheelchair
+        emojis.put(127939, "\u1F3C3"); // woman running
+        emojis.put(128131, "\u1F483"); // woman dancing
+        emojis.put(128378, "\u1F57A"); // man dancing
+        emojis.put(128372, "\u1F574"); // person in suit levitating
+        emojis.put(128111, "\u1F46F"); // women with bunny ears
+        emojis.put(129494, "\u1F9D6"); // woman in steamy room
+        emojis.put(129495, "\u1F9D7"); // woman climbing
+        emojis.put(129338, "\u1F93A"); // person fencing
+        emojis.put(127943, "\u1F3C7"); // horse racing
+        emojis.put(9975, "\u26F7"); // skier
+        emojis.put(127938, "\u1F3C2"); // snowboarder
+        emojis.put(127948, "\u1F3CC"); // woman golfing
+        emojis.put(127940, "\u1F3C4"); // woman surfing
+        emojis.put(128675, "\u1F6A3"); // woman rowing boat
+        emojis.put(127946, "\u1F3CA"); // woman swimming
+        emojis.put(9977, "\u26F9"); // woman bouncing ball
+        emojis.put(127947, "\u1F3CB"); // woman lifting weights
+        emojis.put(128692, "\u1F6B4"); // woman biking
+        emojis.put(128693, "\u1F6B5"); // woman mountain biking
+        emojis.put(129336, "\u1F938"); // woman cartwheeling
+        emojis.put(129340, "\u1F93C"); // women wrestling
+        emojis.put(129341, "\u1F93D"); // woman playing water polo
+        emojis.put(129342, "\u1F93E"); // woman playing handball
+        emojis.put(129337, "\u1F939"); // woman juggling
+        emojis.put(129496, "\u1F9D8"); // woman in lotus position
+        emojis.put(128704, "\u1F6C0"); // person taking bath
+        emojis.put(128716, "\u1F6CC"); // person in bed
+        emojis.put(128109, "\u1F46D"); // women holding hands
+        emojis.put(128107, "\u1F46B"); // woman and man holding hands
+        emojis.put(128108, "\u1F46C"); // men holding hands
+        emojis.put(128143, "\u1F48F"); // kiss
+        emojis.put(128145, "\u1F491"); // couple with heart
+        emojis.put(128106, "\u1F46A"); // family
         emojis.put(128483, "\u1F5E3"); // speaking head
         emojis.put(128100, "\u1F464"); // bust in silhouette
         emojis.put(128101, "\u1F465"); // busts in silhouette
-        emojis.put(129338, "\u1F93A"); // person fencing
-        emojis.put(127943, "\u1F3C7"); // horse racing: dark skin tone
-        emojis.put(9975, "\u26F7"); // skier
-        emojis.put(127938, "\u1F3C2"); // snowboarder: dark skin tone
-        emojis.put(127948, "\u1F3CC"); // woman golfing: dark skin tone
-        emojis.put(127940, "\u1F3C4"); // woman surfing: dark skin tone
-        emojis.put(128675, "\u1F6A3"); // woman rowing boat: dark skin tone
-        emojis.put(127946, "\u1F3CA"); // woman swimming: dark skin tone
-        emojis.put(9977, "\u26F9"); // woman bouncing ball: dark skin tone
-        emojis.put(127947, "\u1F3CB"); // woman lifting weights: dark skin tone
-        emojis.put(128692, "\u1F6B4"); // woman biking: dark skin tone
-        emojis.put(128693, "\u1F6B5"); // woman mountain biking: dark skin tone
-        emojis.put(127950, "\u1F3CE"); // racing car
-        emojis.put(127949, "\u1F3CD"); // motorcycle
-        emojis.put(129336, "\u1F938"); // woman cartwheeling: dark skin tone
-        emojis.put(129340, "\u1F93C"); // women wrestling
-        emojis.put(129341, "\u1F93D"); // woman playing water polo: dark skin tone
-        emojis.put(129342, "\u1F93E"); // woman playing handball: dark skin tone
-        emojis.put(129337, "\u1F939"); // woman juggling: dark skin tone
-        emojis.put(128107, "\u1F46B"); // man and woman holding hands
-        emojis.put(128108, "\u1F46C"); // two men holding hands
-        emojis.put(128109, "\u1F46D"); // two women holding hands
-        emojis.put(128143, "\u1F48F"); // kiss
-        emojis.put(10084, "\u2764"); // red heart
-        emojis.put(128139, "\u1F48B"); // kiss mark
-        emojis.put(128145, "\u1F491"); // couple with heart
-        emojis.put(128106, "\u1F46A"); // family
-        emojis.put(129331, "\u1F933"); // selfie: dark skin tone
-        emojis.put(128170, "\u1F4AA"); // flexed biceps: dark skin tone
-        emojis.put(128072, "\u1F448"); // backhand index pointing left: dark skin tone
-        emojis.put(128073, "\u1F449"); // backhand index pointing right: dark skin tone
-        emojis.put(9757, "\u261D"); // index pointing up: dark skin tone
-        emojis.put(128070, "\u1F446"); // backhand index pointing up: dark skin tone
-        emojis.put(128405, "\u1F595"); // middle finger: dark skin tone
-        emojis.put(128071, "\u1F447"); // backhand index pointing down: dark skin tone
-        emojis.put(9996, "\u270C"); // victory hand: dark skin tone
-        emojis.put(129310, "\u1F91E"); // crossed fingers: dark skin tone
-        emojis.put(128406, "\u1F596"); // vulcan salute: dark skin tone
-        emojis.put(129304, "\u1F918"); // sign of the horns: dark skin tone
-        emojis.put(129305, "\u1F919"); // call me hand: dark skin tone
-        emojis.put(128400, "\u1F590"); // raised hand with fingers splayed: dark skin tone
-        emojis.put(9995, "\u270B"); // raised hand: dark skin tone
-        emojis.put(128076, "\u1F44C"); // OK hand: dark skin tone
-        emojis.put(128077, "\u1F44D"); // thumbs up: dark skin tone
-        emojis.put(128078, "\u1F44E"); // thumbs down: dark skin tone
-        emojis.put(9994, "\u270A"); // raised fist: dark skin tone
-        emojis.put(128074, "\u1F44A"); // oncoming fist: dark skin tone
-        emojis.put(129307, "\u1F91B"); // left-facing fist: dark skin tone
-        emojis.put(129308, "\u1F91C"); // right-facing fist: dark skin tone
-        emojis.put(129306, "\u1F91A"); // raised back of hand: dark skin tone
-        emojis.put(128075, "\u1F44B"); // waving hand: dark skin tone
-        emojis.put(9997, "\u270D"); // writing hand: dark skin tone
-        emojis.put(128079, "\u1F44F"); // clapping hands: dark skin tone
-        emojis.put(128080, "\u1F450"); // open hands: dark skin tone
-        emojis.put(128588, "\u1F64C"); // raising hands: dark skin tone
-        emojis.put(128591, "\u1F64F"); // folded hands: dark skin tone
-        emojis.put(129309, "\u1F91D"); // handshake
-        emojis.put(128133, "\u1F485"); // nail polish: dark skin tone
-        emojis.put(128066, "\u1F442"); // ear: dark skin tone
-        emojis.put(128067, "\u1F443"); // nose: dark skin tone
+        emojis.put(129730, "\u1FAC2"); // people hugging
         emojis.put(128099, "\u1F463"); // footprints
-        emojis.put(128064, "\u1F440"); // eyes
-        emojis.put(128065, "\u1F441"); // eye in speech bubble
-        emojis.put(128488, "\u1F5E8"); // left speech bubble
-        emojis.put(128069, "\u1F445"); // tongue
-        emojis.put(128068, "\u1F444"); // mouth
-        emojis.put(128152, "\u1F498"); // heart with arrow
-        emojis.put(128147, "\u1F493"); // beating heart
-        emojis.put(128148, "\u1F494"); // broken heart
-        emojis.put(128149, "\u1F495"); // two hearts
-        emojis.put(128150, "\u1F496"); // sparkling heart
-        emojis.put(128151, "\u1F497"); // growing heart
-        emojis.put(128153, "\u1F499"); // blue heart
-        emojis.put(128154, "\u1F49A"); // green heart
-        emojis.put(128155, "\u1F49B"); // yellow heart
-        emojis.put(128156, "\u1F49C"); // purple heart
-        emojis.put(128420, "\u1F5A4"); // black heart
-        emojis.put(128157, "\u1F49D"); // heart with ribbon
-        emojis.put(128158, "\u1F49E"); // revolving hearts
-        emojis.put(128159, "\u1F49F"); // heart decoration
-        emojis.put(10083, "\u2763"); // heavy heart exclamation
-        emojis.put(128140, "\u1F48C"); // love letter
-        emojis.put(128164, "\u1F4A4"); // zzz
-        emojis.put(128162, "\u1F4A2"); // anger symbol
-        emojis.put(128163, "\u1F4A3"); // bomb
-        emojis.put(128165, "\u1F4A5"); // collision
-        emojis.put(128166, "\u1F4A6"); // sweat droplets
-        emojis.put(128168, "\u1F4A8"); // dashing away
-        emojis.put(128171, "\u1F4AB"); // dizzy
-        emojis.put(128172, "\u1F4AC"); // speech balloon
-        emojis.put(128495, "\u1F5EF"); // right anger bubble
-        emojis.put(128173, "\u1F4AD"); // thought balloon
-        emojis.put(128371, "\u1F573"); // hole
-        emojis.put(128083, "\u1F453"); // glasses
-        emojis.put(128374, "\u1F576"); // sunglasses
-        emojis.put(128084, "\u1F454"); // necktie
-        emojis.put(128085, "\u1F455"); // t-shirt
-        emojis.put(128086, "\u1F456"); // jeans
-        emojis.put(128087, "\u1F457"); // dress
-        emojis.put(128088, "\u1F458"); // kimono
-        emojis.put(128089, "\u1F459"); // bikini
-        emojis.put(128090, "\u1F45A"); // woman's clothes
-        emojis.put(128091, "\u1F45B"); // purse
-        emojis.put(128092, "\u1F45C"); // handbag
-        emojis.put(128093, "\u1F45D"); // clutch bag
-        emojis.put(128717, "\u1F6CD"); // shopping bags
-        emojis.put(127890, "\u1F392"); // school backpack
-        emojis.put(128094, "\u1F45E"); // man's shoe
-        emojis.put(128095, "\u1F45F"); // running shoe
-        emojis.put(128096, "\u1F460"); // high-heeled shoe
-        emojis.put(128097, "\u1F461"); // woman's sandal
-        emojis.put(128098, "\u1F462"); // woman's boot
-        emojis.put(128081, "\u1F451"); // crown
-        emojis.put(128082, "\u1F452"); // woman's hat
-        emojis.put(127913, "\u1F3A9"); // top hat
-        emojis.put(9937, "\u26D1"); // rescue worker's helmet
-        emojis.put(128255, "\u1F4FF"); // prayer beads
-        emojis.put(128132, "\u1F484"); // lipstick
-        emojis.put(128141, "\u1F48D"); // ring
-        emojis.put(128142, "\u1F48E"); // gem stone
         emojis.put(128053, "\u1F435"); // monkey face
         emojis.put(128018, "\u1F412"); // monkey
         emojis.put(129421, "\u1F98D"); // gorilla
+        emojis.put(129447, "\u1F9A7"); // orangutan
         emojis.put(128054, "\u1F436"); // dog face
-        emojis.put(128021, "\u1F415"); // dog
+        emojis.put(128021, "\u1F415"); // service dog
+        emojis.put(129454, "\u1F9AE"); // guide dog
+        emojis.put(129466, "\u1F9BA"); // safety vest
         emojis.put(128041, "\u1F429"); // poodle
-        emojis.put(128058, "\u1F43A"); // wolf face
-        emojis.put(129418, "\u1F98A"); // fox face
+        emojis.put(128058, "\u1F43A"); // wolf
+        emojis.put(129418, "\u1F98A"); // fox
+        emojis.put(129437, "\u1F99D"); // raccoon
         emojis.put(128049, "\u1F431"); // cat face
-        emojis.put(128008, "\u1F408"); // cat
-        emojis.put(129409, "\u1F981"); // lion face
+        emojis.put(128008, "\u1F408"); // black cat
+        emojis.put(11035, "\u2B1B"); // black large square
+        emojis.put(129409, "\u1F981"); // lion
         emojis.put(128047, "\u1F42F"); // tiger face
         emojis.put(128005, "\u1F405"); // tiger
         emojis.put(128006, "\u1F406"); // leopard
         emojis.put(128052, "\u1F434"); // horse face
         emojis.put(128014, "\u1F40E"); // horse
-        emojis.put(129412, "\u1F984"); // unicorn face
+        emojis.put(129412, "\u1F984"); // unicorn
+        emojis.put(129427, "\u1F993"); // zebra
         emojis.put(129420, "\u1F98C"); // deer
+        emojis.put(129452, "\u1F9AC"); // bison
         emojis.put(128046, "\u1F42E"); // cow face
         emojis.put(128002, "\u1F402"); // ox
         emojis.put(128003, "\u1F403"); // water buffalo
@@ -519,19 +576,31 @@ public class EmojiRegistry {
         emojis.put(128016, "\u1F410"); // goat
         emojis.put(128042, "\u1F42A"); // camel
         emojis.put(128043, "\u1F42B"); // two-hump camel
+        emojis.put(129433, "\u1F999"); // llama
+        emojis.put(129426, "\u1F992"); // giraffe
         emojis.put(128024, "\u1F418"); // elephant
+        emojis.put(129443, "\u1F9A3"); // mammoth
         emojis.put(129423, "\u1F98F"); // rhinoceros
+        emojis.put(129435, "\u1F99B"); // hippopotamus
         emojis.put(128045, "\u1F42D"); // mouse face
         emojis.put(128001, "\u1F401"); // mouse
         emojis.put(128000, "\u1F400"); // rat
-        emojis.put(128057, "\u1F439"); // hamster face
+        emojis.put(128057, "\u1F439"); // hamster
         emojis.put(128048, "\u1F430"); // rabbit face
         emojis.put(128007, "\u1F407"); // rabbit
         emojis.put(128063, "\u1F43F"); // chipmunk
+        emojis.put(129451, "\u1F9AB"); // beaver
+        emojis.put(129428, "\u1F994"); // hedgehog
         emojis.put(129415, "\u1F987"); // bat
-        emojis.put(128059, "\u1F43B"); // bear face
+        emojis.put(128059, "\u1F43B"); // polar bear
+        emojis.put(10052, "\u2744"); // snowflake
         emojis.put(128040, "\u1F428"); // koala
-        emojis.put(128060, "\u1F43C"); // panda face
+        emojis.put(128060, "\u1F43C"); // panda
+        emojis.put(129445, "\u1F9A5"); // sloth
+        emojis.put(129446, "\u1F9A6"); // otter
+        emojis.put(129448, "\u1F9A8"); // skunk
+        emojis.put(129432, "\u1F998"); // kangaroo
+        emojis.put(129441, "\u1F9A1"); // badger
         emojis.put(128062, "\u1F43E"); // paw prints
         emojis.put(129411, "\u1F983"); // turkey
         emojis.put(128020, "\u1F414"); // chicken
@@ -544,35 +613,48 @@ public class EmojiRegistry {
         emojis.put(128330, "\u1F54A"); // dove
         emojis.put(129413, "\u1F985"); // eagle
         emojis.put(129414, "\u1F986"); // duck
+        emojis.put(129442, "\u1F9A2"); // swan
         emojis.put(129417, "\u1F989"); // owl
-        emojis.put(128056, "\u1F438"); // frog face
+        emojis.put(129444, "\u1F9A4"); // dodo
+        emojis.put(129718, "\u1FAB6"); // feather
+        emojis.put(129449, "\u1F9A9"); // flamingo
+        emojis.put(129434, "\u1F99A"); // peacock
+        emojis.put(129436, "\u1F99C"); // parrot
+        emojis.put(128056, "\u1F438"); // frog
         emojis.put(128010, "\u1F40A"); // crocodile
         emojis.put(128034, "\u1F422"); // turtle
         emojis.put(129422, "\u1F98E"); // lizard
         emojis.put(128013, "\u1F40D"); // snake
         emojis.put(128050, "\u1F432"); // dragon face
         emojis.put(128009, "\u1F409"); // dragon
+        emojis.put(129429, "\u1F995"); // sauropod
+        emojis.put(129430, "\u1F996"); // T-Rex
         emojis.put(128051, "\u1F433"); // spouting whale
         emojis.put(128011, "\u1F40B"); // whale
         emojis.put(128044, "\u1F42C"); // dolphin
+        emojis.put(129453, "\u1F9AD"); // seal
         emojis.put(128031, "\u1F41F"); // fish
         emojis.put(128032, "\u1F420"); // tropical fish
         emojis.put(128033, "\u1F421"); // blowfish
         emojis.put(129416, "\u1F988"); // shark
         emojis.put(128025, "\u1F419"); // octopus
         emojis.put(128026, "\u1F41A"); // spiral shell
-        emojis.put(129408, "\u1F980"); // crab
-        emojis.put(129424, "\u1F990"); // shrimp
-        emojis.put(129425, "\u1F991"); // squid
         emojis.put(128012, "\u1F40C"); // snail
         emojis.put(129419, "\u1F98B"); // butterfly
         emojis.put(128027, "\u1F41B"); // bug
         emojis.put(128028, "\u1F41C"); // ant
         emojis.put(128029, "\u1F41D"); // honeybee
+        emojis.put(129714, "\u1FAB2"); // beetle
         emojis.put(128030, "\u1F41E"); // lady beetle
+        emojis.put(129431, "\u1F997"); // cricket
+        emojis.put(129715, "\u1FAB3"); // cockroach
         emojis.put(128375, "\u1F577"); // spider
         emojis.put(128376, "\u1F578"); // spider web
         emojis.put(129410, "\u1F982"); // scorpion
+        emojis.put(129439, "\u1F99F"); // mosquito
+        emojis.put(129712, "\u1FAB0"); // fly
+        emojis.put(129713, "\u1FAB1"); // worm
+        emojis.put(129440, "\u1F9A0"); // microbe
         emojis.put(128144, "\u1F490"); // bouquet
         emojis.put(127800, "\u1F338"); // cherry blossom
         emojis.put(128174, "\u1F4AE"); // white flower
@@ -584,6 +666,7 @@ public class EmojiRegistry {
         emojis.put(127804, "\u1F33C"); // blossom
         emojis.put(127799, "\u1F337"); // tulip
         emojis.put(127793, "\u1F331"); // seedling
+        emojis.put(129716, "\u1FAB4"); // potted plant
         emojis.put(127794, "\u1F332"); // evergreen tree
         emojis.put(127795, "\u1F333"); // deciduous tree
         emojis.put(127796, "\u1F334"); // palm tree
@@ -601,44 +684,66 @@ public class EmojiRegistry {
         emojis.put(127819, "\u1F34B"); // lemon
         emojis.put(127820, "\u1F34C"); // banana
         emojis.put(127821, "\u1F34D"); // pineapple
+        emojis.put(129389, "\u1F96D"); // mango
         emojis.put(127822, "\u1F34E"); // red apple
         emojis.put(127823, "\u1F34F"); // green apple
         emojis.put(127824, "\u1F350"); // pear
         emojis.put(127825, "\u1F351"); // peach
         emojis.put(127826, "\u1F352"); // cherries
         emojis.put(127827, "\u1F353"); // strawberry
+        emojis.put(129744, "\u1FAD0"); // blueberries
         emojis.put(129373, "\u1F95D"); // kiwi fruit
         emojis.put(127813, "\u1F345"); // tomato
+        emojis.put(129746, "\u1FAD2"); // olive
+        emojis.put(129381, "\u1F965"); // coconut
         emojis.put(129361, "\u1F951"); // avocado
         emojis.put(127814, "\u1F346"); // eggplant
         emojis.put(129364, "\u1F954"); // potato
         emojis.put(129365, "\u1F955"); // carrot
         emojis.put(127805, "\u1F33D"); // ear of corn
         emojis.put(127798, "\u1F336"); // hot pepper
+        emojis.put(129745, "\u1FAD1"); // bell pepper
         emojis.put(129362, "\u1F952"); // cucumber
+        emojis.put(129388, "\u1F96C"); // leafy green
+        emojis.put(129382, "\u1F966"); // broccoli
+        emojis.put(129476, "\u1F9C4"); // garlic
+        emojis.put(129477, "\u1F9C5"); // onion
         emojis.put(127812, "\u1F344"); // mushroom
         emojis.put(129372, "\u1F95C"); // peanuts
         emojis.put(127792, "\u1F330"); // chestnut
         emojis.put(127838, "\u1F35E"); // bread
         emojis.put(129360, "\u1F950"); // croissant
         emojis.put(129366, "\u1F956"); // baguette bread
+        emojis.put(129747, "\u1FAD3"); // flatbread
+        emojis.put(129384, "\u1F968"); // pretzel
+        emojis.put(129391, "\u1F96F"); // bagel
         emojis.put(129374, "\u1F95E"); // pancakes
+        emojis.put(129479, "\u1F9C7"); // waffle
         emojis.put(129472, "\u1F9C0"); // cheese wedge
         emojis.put(127830, "\u1F356"); // meat on bone
         emojis.put(127831, "\u1F357"); // poultry leg
+        emojis.put(129385, "\u1F969"); // cut of meat
         emojis.put(129363, "\u1F953"); // bacon
         emojis.put(127828, "\u1F354"); // hamburger
         emojis.put(127839, "\u1F35F"); // french fries
         emojis.put(127829, "\u1F355"); // pizza
         emojis.put(127789, "\u1F32D"); // hot dog
+        emojis.put(129386, "\u1F96A"); // sandwich
         emojis.put(127790, "\u1F32E"); // taco
         emojis.put(127791, "\u1F32F"); // burrito
+        emojis.put(129748, "\u1FAD4"); // tamale
         emojis.put(129369, "\u1F959"); // stuffed flatbread
+        emojis.put(129478, "\u1F9C6"); // falafel
         emojis.put(129370, "\u1F95A"); // egg
         emojis.put(129368, "\u1F958"); // shallow pan of food
         emojis.put(127858, "\u1F372"); // pot of food
+        emojis.put(129749, "\u1FAD5"); // fondue
+        emojis.put(129379, "\u1F963"); // bowl with spoon
         emojis.put(129367, "\u1F957"); // green salad
         emojis.put(127871, "\u1F37F"); // popcorn
+        emojis.put(129480, "\u1F9C8"); // butter
+        emojis.put(129474, "\u1F9C2"); // salt
+        emojis.put(129387, "\u1F96B"); // canned food
         emojis.put(127857, "\u1F371"); // bento box
         emojis.put(127832, "\u1F358"); // rice cracker
         emojis.put(127833, "\u1F359"); // rice ball
@@ -651,7 +756,16 @@ public class EmojiRegistry {
         emojis.put(127843, "\u1F363"); // sushi
         emojis.put(127844, "\u1F364"); // fried shrimp
         emojis.put(127845, "\u1F365"); // fish cake with swirl
+        emojis.put(129390, "\u1F96E"); // moon cake
         emojis.put(127841, "\u1F361"); // dango
+        emojis.put(129375, "\u1F95F"); // dumpling
+        emojis.put(129376, "\u1F960"); // fortune cookie
+        emojis.put(129377, "\u1F961"); // takeout box
+        emojis.put(129408, "\u1F980"); // crab
+        emojis.put(129438, "\u1F99E"); // lobster
+        emojis.put(129424, "\u1F990"); // shrimp
+        emojis.put(129425, "\u1F991"); // squid
+        emojis.put(129450, "\u1F9AA"); // oyster
         emojis.put(127846, "\u1F366"); // soft ice cream
         emojis.put(127847, "\u1F367"); // shaved ice
         emojis.put(127848, "\u1F368"); // ice cream
@@ -659,14 +773,16 @@ public class EmojiRegistry {
         emojis.put(127850, "\u1F36A"); // cookie
         emojis.put(127874, "\u1F382"); // birthday cake
         emojis.put(127856, "\u1F370"); // shortcake
+        emojis.put(129473, "\u1F9C1"); // cupcake
+        emojis.put(129383, "\u1F967"); // pie
         emojis.put(127851, "\u1F36B"); // chocolate bar
         emojis.put(127852, "\u1F36C"); // candy
         emojis.put(127853, "\u1F36D"); // lollipop
         emojis.put(127854, "\u1F36E"); // custard
         emojis.put(127855, "\u1F36F"); // honey pot
-        emojis.put(127868, "\u1F37C"); // baby bottle
         emojis.put(129371, "\u1F95B"); // glass of milk
         emojis.put(9749, "\u2615"); // hot beverage
+        emojis.put(129750, "\u1FAD6"); // teapot
         emojis.put(127861, "\u1F375"); // teacup without handle
         emojis.put(127862, "\u1F376"); // sake
         emojis.put(127870, "\u1F37E"); // bottle with popping cork
@@ -677,6 +793,12 @@ public class EmojiRegistry {
         emojis.put(127867, "\u1F37B"); // clinking beer mugs
         emojis.put(129346, "\u1F942"); // clinking glasses
         emojis.put(129347, "\u1F943"); // tumbler glass
+        emojis.put(129380, "\u1F964"); // cup with straw
+        emojis.put(129483, "\u1F9CB"); // bubble tea
+        emojis.put(129475, "\u1F9C3"); // beverage box
+        emojis.put(129481, "\u1F9C9"); // mate
+        emojis.put(129482, "\u1F9CA"); // ice
+        emojis.put(129378, "\u1F962"); // chopsticks
         emojis.put(127869, "\u1F37D"); // fork and knife with plate
         emojis.put(127860, "\u1F374"); // fork and knife
         emojis.put(129348, "\u1F944"); // spoon
@@ -688,6 +810,7 @@ public class EmojiRegistry {
         emojis.put(127760, "\u1F310"); // globe with meridians
         emojis.put(128506, "\u1F5FA"); // world map
         emojis.put(128510, "\u1F5FE"); // map of Japan
+        emojis.put(129517, "\u1F9ED"); // compass
         emojis.put(127956, "\u1F3D4"); // snow-capped mountain
         emojis.put(9968, "\u26F0"); // mountain
         emojis.put(127755, "\u1F30B"); // volcano
@@ -700,8 +823,11 @@ public class EmojiRegistry {
         emojis.put(127967, "\u1F3DF"); // stadium
         emojis.put(127963, "\u1F3DB"); // classical building
         emojis.put(127959, "\u1F3D7"); // building construction
+        emojis.put(129521, "\u1F9F1"); // brick
+        emojis.put(129704, "\u1FAA8"); // rock
+        emojis.put(129717, "\u1FAB5"); // wood
+        emojis.put(128726, "\u1F6D6"); // hut
         emojis.put(127960, "\u1F3D8"); // houses
-        emojis.put(127961, "\u1F3D9"); // cityscape
         emojis.put(127962, "\u1F3DA"); // derelict house
         emojis.put(127968, "\u1F3E0"); // house
         emojis.put(127969, "\u1F3E1"); // house with garden
@@ -721,6 +847,7 @@ public class EmojiRegistry {
         emojis.put(128509, "\u1F5FD"); // Statue of Liberty
         emojis.put(9962, "\u26EA"); // church
         emojis.put(128332, "\u1F54C"); // mosque
+        emojis.put(128725, "\u1F6D5"); // hindu temple
         emojis.put(128333, "\u1F54D"); // synagogue
         emojis.put(9961, "\u26E9"); // shinto shrine
         emojis.put(128331, "\u1F54B"); // kaaba
@@ -728,25 +855,22 @@ public class EmojiRegistry {
         emojis.put(9978, "\u26FA"); // tent
         emojis.put(127745, "\u1F301"); // foggy
         emojis.put(127747, "\u1F303"); // night with stars
+        emojis.put(127961, "\u1F3D9"); // cityscape
         emojis.put(127748, "\u1F304"); // sunrise over mountains
         emojis.put(127749, "\u1F305"); // sunrise
         emojis.put(127750, "\u1F306"); // cityscape at dusk
         emojis.put(127751, "\u1F307"); // sunset
         emojis.put(127753, "\u1F309"); // bridge at night
         emojis.put(9832, "\u2668"); // hot springs
-        emojis.put(127756, "\u1F30C"); // milky way
         emojis.put(127904, "\u1F3A0"); // carousel horse
         emojis.put(127905, "\u1F3A1"); // ferris wheel
         emojis.put(127906, "\u1F3A2"); // roller coaster
         emojis.put(128136, "\u1F488"); // barber pole
         emojis.put(127914, "\u1F3AA"); // circus tent
-        emojis.put(127917, "\u1F3AD"); // performing arts
-        emojis.put(128444, "\u1F5BC"); // framed picture
-        emojis.put(127920, "\u1F3B0"); // slot machine
         emojis.put(128642, "\u1F682"); // locomotive
         emojis.put(128643, "\u1F683"); // railway car
         emojis.put(128644, "\u1F684"); // high-speed train
-        emojis.put(128645, "\u1F685"); // high-speed train with bullet nose
+        emojis.put(128645, "\u1F685"); // bullet train
         emojis.put(128646, "\u1F686"); // train
         emojis.put(128647, "\u1F687"); // metro
         emojis.put(128648, "\u1F688"); // light rail
@@ -767,21 +891,28 @@ public class EmojiRegistry {
         emojis.put(128663, "\u1F697"); // automobile
         emojis.put(128664, "\u1F698"); // oncoming automobile
         emojis.put(128665, "\u1F699"); // sport utility vehicle
+        emojis.put(128763, "\u1F6FB"); // pickup truck
         emojis.put(128666, "\u1F69A"); // delivery truck
         emojis.put(128667, "\u1F69B"); // articulated lorry
         emojis.put(128668, "\u1F69C"); // tractor
+        emojis.put(127950, "\u1F3CE"); // racing car
+        emojis.put(127949, "\u1F3CD"); // motorcycle
+        emojis.put(128757, "\u1F6F5"); // motor scooter
+        emojis.put(128762, "\u1F6FA"); // auto rickshaw
         emojis.put(128690, "\u1F6B2"); // bicycle
         emojis.put(128756, "\u1F6F4"); // kick scooter
-        emojis.put(128757, "\u1F6F5"); // motor scooter
+        emojis.put(128761, "\u1F6F9"); // skateboard
+        emojis.put(128764, "\u1F6FC"); // roller skate
         emojis.put(128655, "\u1F68F"); // bus stop
         emojis.put(128739, "\u1F6E3"); // motorway
         emojis.put(128740, "\u1F6E4"); // railway track
+        emojis.put(128738, "\u1F6E2"); // oil drum
         emojis.put(9981, "\u26FD"); // fuel pump
         emojis.put(128680, "\u1F6A8"); // police car light
         emojis.put(128677, "\u1F6A5"); // horizontal traffic light
         emojis.put(128678, "\u1F6A6"); // vertical traffic light
-        emojis.put(128679, "\u1F6A7"); // construction
         emojis.put(128721, "\u1F6D1"); // stop sign
+        emojis.put(128679, "\u1F6A7"); // construction
         emojis.put(9875, "\u2693"); // anchor
         emojis.put(9973, "\u26F5"); // sailboat
         emojis.put(128758, "\u1F6F6"); // canoe
@@ -793,49 +924,46 @@ public class EmojiRegistry {
         emojis.put(128745, "\u1F6E9"); // small airplane
         emojis.put(128747, "\u1F6EB"); // airplane departure
         emojis.put(128748, "\u1F6EC"); // airplane arrival
+        emojis.put(129666, "\u1FA82"); // parachute
         emojis.put(128186, "\u1F4BA"); // seat
         emojis.put(128641, "\u1F681"); // helicopter
         emojis.put(128671, "\u1F69F"); // suspension railway
         emojis.put(128672, "\u1F6A0"); // mountain cableway
         emojis.put(128673, "\u1F6A1"); // aerial tramway
         emojis.put(128752, "\u1F6F0"); // satellite
+        emojis.put(128760, "\u1F6F8"); // flying saucer
         emojis.put(128718, "\u1F6CE"); // bellhop bell
-        emojis.put(128682, "\u1F6AA"); // door
-        emojis.put(128719, "\u1F6CF"); // bed
-        emojis.put(128715, "\u1F6CB"); // couch and lamp
-        emojis.put(128701, "\u1F6BD"); // toilet
-        emojis.put(128703, "\u1F6BF"); // shower
-        emojis.put(128705, "\u1F6C1"); // bathtub
-        emojis.put(8987, "\u231B"); // hourglass
-        emojis.put(9203, "\u23F3"); // hourglass with flowing sand
+        emojis.put(129523, "\u1F9F3"); // luggage
+        emojis.put(8987, "\u231B"); // hourglass done
+        emojis.put(9203, "\u23F3"); // hourglass not done
         emojis.put(8986, "\u231A"); // watch
         emojis.put(9200, "\u23F0"); // alarm clock
         emojis.put(9201, "\u23F1"); // stopwatch
         emojis.put(9202, "\u23F2"); // timer clock
         emojis.put(128368, "\u1F570"); // mantelpiece clock
-        emojis.put(128347, "\u1F55B"); // twelve o'clock
+        emojis.put(128347, "\u1F55B"); // twelve o’clock
         emojis.put(128359, "\u1F567"); // twelve-thirty
-        emojis.put(128336, "\u1F550"); // one o'clock
+        emojis.put(128336, "\u1F550"); // one o’clock
         emojis.put(128348, "\u1F55C"); // one-thirty
-        emojis.put(128337, "\u1F551"); // two o'clock
+        emojis.put(128337, "\u1F551"); // two o’clock
         emojis.put(128349, "\u1F55D"); // two-thirty
-        emojis.put(128338, "\u1F552"); // three o'clock
+        emojis.put(128338, "\u1F552"); // three o’clock
         emojis.put(128350, "\u1F55E"); // three-thirty
-        emojis.put(128339, "\u1F553"); // four o'clock
+        emojis.put(128339, "\u1F553"); // four o’clock
         emojis.put(128351, "\u1F55F"); // four-thirty
-        emojis.put(128340, "\u1F554"); // five o'clock
+        emojis.put(128340, "\u1F554"); // five o’clock
         emojis.put(128352, "\u1F560"); // five-thirty
-        emojis.put(128341, "\u1F555"); // six o'clock
+        emojis.put(128341, "\u1F555"); // six o’clock
         emojis.put(128353, "\u1F561"); // six-thirty
-        emojis.put(128342, "\u1F556"); // seven o'clock
+        emojis.put(128342, "\u1F556"); // seven o’clock
         emojis.put(128354, "\u1F562"); // seven-thirty
-        emojis.put(128343, "\u1F557"); // eight o'clock
+        emojis.put(128343, "\u1F557"); // eight o’clock
         emojis.put(128355, "\u1F563"); // eight-thirty
-        emojis.put(128344, "\u1F558"); // nine o'clock
+        emojis.put(128344, "\u1F558"); // nine o’clock
         emojis.put(128356, "\u1F564"); // nine-thirty
-        emojis.put(128345, "\u1F559"); // ten o'clock
+        emojis.put(128345, "\u1F559"); // ten o’clock
         emojis.put(128357, "\u1F565"); // ten-thirty
-        emojis.put(128346, "\u1F55A"); // eleven o'clock
+        emojis.put(128346, "\u1F55A"); // eleven o’clock
         emojis.put(128358, "\u1F566"); // eleven-thirty
         emojis.put(127761, "\u1F311"); // new moon
         emojis.put(127762, "\u1F312"); // waxing crescent moon
@@ -847,15 +975,17 @@ public class EmojiRegistry {
         emojis.put(127768, "\u1F318"); // waning crescent moon
         emojis.put(127769, "\u1F319"); // crescent moon
         emojis.put(127770, "\u1F31A"); // new moon face
-        emojis.put(127771, "\u1F31B"); // first quarter moon with face
-        emojis.put(127772, "\u1F31C"); // last quarter moon with face
+        emojis.put(127771, "\u1F31B"); // first quarter moon face
+        emojis.put(127772, "\u1F31C"); // last quarter moon face
         emojis.put(127777, "\u1F321"); // thermometer
         emojis.put(9728, "\u2600"); // sun
-        emojis.put(127773, "\u1F31D"); // full moon with face
+        emojis.put(127773, "\u1F31D"); // full moon face
         emojis.put(127774, "\u1F31E"); // sun with face
-        emojis.put(11088, "\u2B50"); // white medium star
+        emojis.put(129680, "\u1FA90"); // ringed planet
+        emojis.put(11088, "\u2B50"); // star
         emojis.put(127775, "\u1F31F"); // glowing star
         emojis.put(127776, "\u1F320"); // shooting star
+        emojis.put(127756, "\u1F30C"); // milky way
         emojis.put(9729, "\u2601"); // cloud
         emojis.put(9925, "\u26C5"); // sun behind cloud
         emojis.put(9928, "\u26C8"); // cloud with lightning and rain
@@ -866,7 +996,6 @@ public class EmojiRegistry {
         emojis.put(127784, "\u1F328"); // cloud with snow
         emojis.put(127785, "\u1F329"); // cloud with lightning
         emojis.put(127786, "\u1F32A"); // tornado
-        emojis.put(127787, "\u1F32B"); // fog
         emojis.put(127788, "\u1F32C"); // wind face
         emojis.put(127744, "\u1F300"); // cyclone
         emojis.put(127752, "\u1F308"); // rainbow flag
@@ -875,17 +1004,15 @@ public class EmojiRegistry {
         emojis.put(9748, "\u2614"); // umbrella with rain drops
         emojis.put(9969, "\u26F1"); // umbrella on ground
         emojis.put(9889, "\u26A1"); // high voltage
-        emojis.put(10052, "\u2744"); // snowflake
         emojis.put(9731, "\u2603"); // snowman
         emojis.put(9924, "\u26C4"); // snowman without snow
         emojis.put(9732, "\u2604"); // comet
-        emojis.put(128293, "\u1F525"); // fire
         emojis.put(128167, "\u1F4A7"); // droplet
         emojis.put(127754, "\u1F30A"); // water wave
         emojis.put(127875, "\u1F383"); // jack-o-lantern
-        emojis.put(127876, "\u1F384"); // Christmas tree
         emojis.put(127878, "\u1F386"); // fireworks
         emojis.put(127879, "\u1F387"); // sparkler
+        emojis.put(129512, "\u1F9E8"); // firecracker
         emojis.put(10024, "\u2728"); // sparkles
         emojis.put(127880, "\u1F388"); // balloon
         emojis.put(127881, "\u1F389"); // party popper
@@ -896,6 +1023,7 @@ public class EmojiRegistry {
         emojis.put(127887, "\u1F38F"); // carp streamer
         emojis.put(127888, "\u1F390"); // wind chime
         emojis.put(127889, "\u1F391"); // moon viewing ceremony
+        emojis.put(129511, "\u1F9E7"); // red envelope
         emojis.put(127872, "\u1F380"); // ribbon
         emojis.put(127873, "\u1F381"); // wrapped gift
         emojis.put(127895, "\u1F397"); // reminder ribbon
@@ -909,37 +1037,103 @@ public class EmojiRegistry {
         emojis.put(129353, "\u1F949"); // 3rd place medal
         emojis.put(9917, "\u26BD"); // soccer ball
         emojis.put(9918, "\u26BE"); // baseball
+        emojis.put(129358, "\u1F94E"); // softball
         emojis.put(127936, "\u1F3C0"); // basketball
         emojis.put(127952, "\u1F3D0"); // volleyball
         emojis.put(127944, "\u1F3C8"); // american football
         emojis.put(127945, "\u1F3C9"); // rugby football
         emojis.put(127934, "\u1F3BE"); // tennis
-        emojis.put(127921, "\u1F3B1"); // pool 8 ball
+        emojis.put(129359, "\u1F94F"); // flying disc
         emojis.put(127923, "\u1F3B3"); // bowling
-        emojis.put(127951, "\u1F3CF"); // cricket
+        emojis.put(127951, "\u1F3CF"); // cricket game
         emojis.put(127953, "\u1F3D1"); // field hockey
         emojis.put(127954, "\u1F3D2"); // ice hockey
+        emojis.put(129357, "\u1F94D"); // lacrosse
         emojis.put(127955, "\u1F3D3"); // ping pong
         emojis.put(127992, "\u1F3F8"); // badminton
         emojis.put(129354, "\u1F94A"); // boxing glove
         emojis.put(129355, "\u1F94B"); // martial arts uniform
         emojis.put(129349, "\u1F945"); // goal net
-        emojis.put(127919, "\u1F3AF"); // direct hit
         emojis.put(9971, "\u26F3"); // flag in hole
         emojis.put(9976, "\u26F8"); // ice skate
         emojis.put(127907, "\u1F3A3"); // fishing pole
+        emojis.put(129343, "\u1F93F"); // diving mask
         emojis.put(127933, "\u1F3BD"); // running shirt
         emojis.put(127935, "\u1F3BF"); // skis
+        emojis.put(128759, "\u1F6F7"); // sled
+        emojis.put(129356, "\u1F94C"); // curling stone
+        emojis.put(127919, "\u1F3AF"); // bullseye
+        emojis.put(129664, "\u1FA80"); // yo-yo
+        emojis.put(129665, "\u1FA81"); // kite
+        emojis.put(127921, "\u1F3B1"); // pool 8 ball
+        emojis.put(128302, "\u1F52E"); // crystal ball
+        emojis.put(129668, "\u1FA84"); // magic wand
+        emojis.put(129535, "\u1F9FF"); // nazar amulet
         emojis.put(127918, "\u1F3AE"); // video game
         emojis.put(128377, "\u1F579"); // joystick
+        emojis.put(127920, "\u1F3B0"); // slot machine
         emojis.put(127922, "\u1F3B2"); // game die
+        emojis.put(129513, "\u1F9E9"); // puzzle piece
+        emojis.put(129528, "\u1F9F8"); // teddy bear
+        emojis.put(129669, "\u1FA85"); // piñata
+        emojis.put(129670, "\u1FA86"); // nesting dolls
         emojis.put(9824, "\u2660"); // spade suit
         emojis.put(9829, "\u2665"); // heart suit
         emojis.put(9830, "\u2666"); // diamond suit
         emojis.put(9827, "\u2663"); // club suit
+        emojis.put(9823, "\u265F"); // chess pawn
         emojis.put(127183, "\u1F0CF"); // joker
         emojis.put(126980, "\u1F004"); // mahjong red dragon
         emojis.put(127924, "\u1F3B4"); // flower playing cards
+        emojis.put(127917, "\u1F3AD"); // performing arts
+        emojis.put(128444, "\u1F5BC"); // framed picture
+        emojis.put(129525, "\u1F9F5"); // thread
+        emojis.put(129697, "\u1FAA1"); // sewing needle
+        emojis.put(129526, "\u1F9F6"); // yarn
+        emojis.put(129698, "\u1FAA2"); // knot
+        emojis.put(128083, "\u1F453"); // glasses
+        emojis.put(128374, "\u1F576"); // sunglasses
+        emojis.put(129405, "\u1F97D"); // goggles
+        emojis.put(129404, "\u1F97C"); // lab coat
+        emojis.put(128084, "\u1F454"); // necktie
+        emojis.put(128085, "\u1F455"); // t-shirt
+        emojis.put(128086, "\u1F456"); // jeans
+        emojis.put(129507, "\u1F9E3"); // scarf
+        emojis.put(129508, "\u1F9E4"); // gloves
+        emojis.put(129509, "\u1F9E5"); // coat
+        emojis.put(129510, "\u1F9E6"); // socks
+        emojis.put(128087, "\u1F457"); // dress
+        emojis.put(128088, "\u1F458"); // kimono
+        emojis.put(129403, "\u1F97B"); // sari
+        emojis.put(129649, "\u1FA71"); // one-piece swimsuit
+        emojis.put(129650, "\u1FA72"); // briefs
+        emojis.put(129651, "\u1FA73"); // shorts
+        emojis.put(128089, "\u1F459"); // bikini
+        emojis.put(128090, "\u1F45A"); // woman’s clothes
+        emojis.put(128091, "\u1F45B"); // purse
+        emojis.put(128092, "\u1F45C"); // handbag
+        emojis.put(128093, "\u1F45D"); // clutch bag
+        emojis.put(128717, "\u1F6CD"); // shopping bags
+        emojis.put(127890, "\u1F392"); // backpack
+        emojis.put(129652, "\u1FA74"); // thong sandal
+        emojis.put(128094, "\u1F45E"); // man’s shoe
+        emojis.put(128095, "\u1F45F"); // running shoe
+        emojis.put(129406, "\u1F97E"); // hiking boot
+        emojis.put(129407, "\u1F97F"); // flat shoe
+        emojis.put(128096, "\u1F460"); // high-heeled shoe
+        emojis.put(128097, "\u1F461"); // woman’s sandal
+        emojis.put(129648, "\u1FA70"); // ballet shoes
+        emojis.put(128098, "\u1F462"); // woman’s boot
+        emojis.put(128081, "\u1F451"); // crown
+        emojis.put(128082, "\u1F452"); // woman’s hat
+        emojis.put(127913, "\u1F3A9"); // top hat
+        emojis.put(129506, "\u1F9E2"); // billed cap
+        emojis.put(129686, "\u1FA96"); // military helmet
+        emojis.put(9937, "\u26D1"); // rescue worker’s helmet
+        emojis.put(128255, "\u1F4FF"); // prayer beads
+        emojis.put(128132, "\u1F484"); // lipstick
+        emojis.put(128141, "\u1F48D"); // ring
+        emojis.put(128142, "\u1F48E"); // gem stone
         emojis.put(128263, "\u1F507"); // muted speaker
         emojis.put(128264, "\u1F508"); // speaker low volume
         emojis.put(128265, "\u1F509"); // speaker medium volume
@@ -958,11 +1152,14 @@ public class EmojiRegistry {
         emojis.put(127911, "\u1F3A7"); // headphone
         emojis.put(128251, "\u1F4FB"); // radio
         emojis.put(127927, "\u1F3B7"); // saxophone
+        emojis.put(129687, "\u1FA97"); // accordion
         emojis.put(127928, "\u1F3B8"); // guitar
         emojis.put(127929, "\u1F3B9"); // musical keyboard
         emojis.put(127930, "\u1F3BA"); // trumpet
         emojis.put(127931, "\u1F3BB"); // violin
+        emojis.put(129685, "\u1FA95"); // banjo
         emojis.put(129345, "\u1F941"); // drum
+        emojis.put(129688, "\u1FA98"); // long drum
         emojis.put(128241, "\u1F4F1"); // mobile phone
         emojis.put(128242, "\u1F4F2"); // mobile phone with arrow
         emojis.put(9742, "\u260E"); // telephone
@@ -980,6 +1177,7 @@ public class EmojiRegistry {
         emojis.put(128190, "\u1F4BE"); // floppy disk
         emojis.put(128191, "\u1F4BF"); // optical disk
         emojis.put(128192, "\u1F4C0"); // dvd
+        emojis.put(129518, "\u1F9EE"); // abacus
         emojis.put(127909, "\u1F3A5"); // movie camera
         emojis.put(127902, "\u1F39E"); // film frames
         emojis.put(128253, "\u1F4FD"); // film projector
@@ -989,14 +1187,13 @@ public class EmojiRegistry {
         emojis.put(128248, "\u1F4F8"); // camera with flash
         emojis.put(128249, "\u1F4F9"); // video camera
         emojis.put(128252, "\u1F4FC"); // videocassette
-        emojis.put(128269, "\u1F50D"); // left-pointing magnifying glass
-        emojis.put(128270, "\u1F50E"); // right-pointing magnifying glass
-        emojis.put(128301, "\u1F52D"); // telescope
-        emojis.put(128225, "\u1F4E1"); // satellite antenna
+        emojis.put(128269, "\u1F50D"); // magnifying glass tilted left
+        emojis.put(128270, "\u1F50E"); // magnifying glass tilted right
         emojis.put(128367, "\u1F56F"); // candle
         emojis.put(128161, "\u1F4A1"); // light bulb
         emojis.put(128294, "\u1F526"); // flashlight
         emojis.put(127982, "\u1F3EE"); // red paper lantern
+        emojis.put(129684, "\u1FA94"); // diya lamp
         emojis.put(128212, "\u1F4D4"); // notebook with decorative cover
         emojis.put(128213, "\u1F4D5"); // closed book
         emojis.put(128214, "\u1F4D6"); // open book
@@ -1015,15 +1212,15 @@ public class EmojiRegistry {
         emojis.put(128278, "\u1F516"); // bookmark
         emojis.put(127991, "\u1F3F7"); // label
         emojis.put(128176, "\u1F4B0"); // money bag
+        emojis.put(129689, "\u1FA99"); // coin
         emojis.put(128180, "\u1F4B4"); // yen banknote
         emojis.put(128181, "\u1F4B5"); // dollar banknote
         emojis.put(128182, "\u1F4B6"); // euro banknote
         emojis.put(128183, "\u1F4B7"); // pound banknote
         emojis.put(128184, "\u1F4B8"); // money with wings
         emojis.put(128179, "\u1F4B3"); // credit card
+        emojis.put(129534, "\u1F9FE"); // receipt
         emojis.put(128185, "\u1F4B9"); // chart increasing with yen
-        emojis.put(128177, "\u1F4B1"); // currency exchange
-        emojis.put(128178, "\u1F4B2"); // heavy dollar sign
         emojis.put(9993, "\u2709"); // envelope
         emojis.put(128231, "\u1F4E7"); // e-mail
         emojis.put(128232, "\u1F4E8"); // incoming envelope
@@ -1073,35 +1270,73 @@ public class EmojiRegistry {
         emojis.put(128273, "\u1F511"); // key
         emojis.put(128477, "\u1F5DD"); // old key
         emojis.put(128296, "\u1F528"); // hammer
+        emojis.put(129683, "\u1FA93"); // axe
         emojis.put(9935, "\u26CF"); // pick
         emojis.put(9874, "\u2692"); // hammer and pick
         emojis.put(128736, "\u1F6E0"); // hammer and wrench
         emojis.put(128481, "\u1F5E1"); // dagger
         emojis.put(9876, "\u2694"); // crossed swords
-        emojis.put(128299, "\u1F52B"); // pistol
+        emojis.put(128299, "\u1F52B"); // water pistol
+        emojis.put(129667, "\u1FA83"); // boomerang
         emojis.put(127993, "\u1F3F9"); // bow and arrow
         emojis.put(128737, "\u1F6E1"); // shield
+        emojis.put(129690, "\u1FA9A"); // carpentry saw
+        emojis.put(129691, "\u1FA9B"); // screwdriver
         emojis.put(128297, "\u1F529"); // nut and bolt
         emojis.put(9881, "\u2699"); // gear
         emojis.put(128476, "\u1F5DC"); // clamp
-        emojis.put(9879, "\u2697"); // alembic
         emojis.put(128279, "\u1F517"); // link
         emojis.put(9939, "\u26D3"); // chains
+        emojis.put(129693, "\u1FA9D"); // hook
+        emojis.put(129520, "\u1F9F0"); // toolbox
+        emojis.put(129522, "\u1F9F2"); // magnet
+        emojis.put(129692, "\u1FA9C"); // ladder
+        emojis.put(9879, "\u2697"); // alembic
+        emojis.put(129514, "\u1F9EA"); // test tube
+        emojis.put(129515, "\u1F9EB"); // petri dish
+        emojis.put(129516, "\u1F9EC"); // dna
+        emojis.put(128301, "\u1F52D"); // telescope
+        emojis.put(128225, "\u1F4E1"); // satellite antenna
         emojis.put(128137, "\u1F489"); // syringe
+        emojis.put(129656, "\u1FA78"); // drop of blood
         emojis.put(128138, "\u1F48A"); // pill
+        emojis.put(129658, "\u1FA7A"); // stethoscope
+        emojis.put(128682, "\u1F6AA"); // door
+        emojis.put(128727, "\u1F6D7"); // elevator
+        emojis.put(129694, "\u1FA9E"); // mirror
+        emojis.put(129695, "\u1FA9F"); // window
+        emojis.put(128719, "\u1F6CF"); // bed
+        emojis.put(128715, "\u1F6CB"); // couch and lamp
+        emojis.put(129681, "\u1FA91"); // chair
+        emojis.put(128701, "\u1F6BD"); // toilet
+        emojis.put(129696, "\u1FAA0"); // plunger
+        emojis.put(128703, "\u1F6BF"); // shower
+        emojis.put(128705, "\u1F6C1"); // bathtub
+        emojis.put(129700, "\u1FAA4"); // mouse trap
+        emojis.put(129682, "\u1FA92"); // razor
+        emojis.put(129524, "\u1F9F4"); // lotion bottle
+        emojis.put(129527, "\u1F9F7"); // safety pin
+        emojis.put(129529, "\u1F9F9"); // broom
+        emojis.put(129530, "\u1F9FA"); // basket
+        emojis.put(129531, "\u1F9FB"); // roll of paper
+        emojis.put(129699, "\u1FAA3"); // bucket
+        emojis.put(129532, "\u1F9FC"); // soap
+        emojis.put(129701, "\u1FAA5"); // toothbrush
+        emojis.put(129533, "\u1F9FD"); // sponge
+        emojis.put(129519, "\u1F9EF"); // fire extinguisher
+        emojis.put(128722, "\u1F6D2"); // shopping cart
         emojis.put(128684, "\u1F6AC"); // cigarette
         emojis.put(9904, "\u26B0"); // coffin
+        emojis.put(129702, "\u1FAA6"); // headstone
         emojis.put(9905, "\u26B1"); // funeral urn
         emojis.put(128511, "\u1F5FF"); // moai
-        emojis.put(128738, "\u1F6E2"); // oil drum
-        emojis.put(128302, "\u1F52E"); // crystal ball
-        emojis.put(128722, "\u1F6D2"); // shopping cart
+        emojis.put(129703, "\u1FAA7"); // placard
         emojis.put(127975, "\u1F3E7"); // ATM sign
         emojis.put(128686, "\u1F6AE"); // litter in bin sign
         emojis.put(128688, "\u1F6B0"); // potable water
         emojis.put(9855, "\u267F"); // wheelchair symbol
-        emojis.put(128697, "\u1F6B9"); // men's room
-        emojis.put(128698, "\u1F6BA"); // women's room
+        emojis.put(128697, "\u1F6B9"); // men’s room
+        emojis.put(128698, "\u1F6BA"); // women’s room
         emojis.put(128699, "\u1F6BB"); // restroom
         emojis.put(128700, "\u1F6BC"); // baby symbol
         emojis.put(128702, "\u1F6BE"); // water closet
@@ -1137,7 +1372,7 @@ public class EmojiRegistry {
         emojis.put(10548, "\u2934"); // right arrow curving up
         emojis.put(10549, "\u2935"); // right arrow curving down
         emojis.put(128259, "\u1F503"); // clockwise vertical arrows
-        emojis.put(128260, "\u1F504"); // anticlockwise arrows button
+        emojis.put(128260, "\u1F504"); // counterclockwise arrows button
         emojis.put(128281, "\u1F519"); // BACK arrow
         emojis.put(128282, "\u1F51A"); // END arrow
         emojis.put(128283, "\u1F51B"); // ON! arrow
@@ -1162,7 +1397,7 @@ public class EmojiRegistry {
         emojis.put(9804, "\u264C"); // Leo
         emojis.put(9805, "\u264D"); // Virgo
         emojis.put(9806, "\u264E"); // Libra
-        emojis.put(9807, "\u264F"); // Scorpius
+        emojis.put(9807, "\u264F"); // Scorpio
         emojis.put(9808, "\u2650"); // Sagittarius
         emojis.put(9809, "\u2651"); // Capricorn
         emojis.put(9810, "\u2652"); // Aquarius
@@ -1178,9 +1413,9 @@ public class EmojiRegistry {
         emojis.put(9664, "\u25C0"); // reverse button
         emojis.put(9194, "\u23EA"); // fast reverse button
         emojis.put(9198, "\u23EE"); // last track button
-        emojis.put(128316, "\u1F53C"); // up button
+        emojis.put(128316, "\u1F53C"); // upwards button
         emojis.put(9195, "\u23EB"); // fast up button
-        emojis.put(128317, "\u1F53D"); // down button
+        emojis.put(128317, "\u1F53D"); // downwards button
         emojis.put(9196, "\u23EC"); // fast down button
         emojis.put(9208, "\u23F8"); // pause button
         emojis.put(9209, "\u23F9"); // stop button
@@ -1192,34 +1427,38 @@ public class EmojiRegistry {
         emojis.put(128246, "\u1F4F6"); // antenna bars
         emojis.put(128243, "\u1F4F3"); // vibration mode
         emojis.put(128244, "\u1F4F4"); // mobile phone off
+        emojis.put(9895, "\u26A7"); // transgender flag
+        emojis.put(10006, "\u2716"); // multiply
+        emojis.put(10133, "\u2795"); // plus
+        emojis.put(10134, "\u2796"); // minus
+        emojis.put(10135, "\u2797"); // divide
+        emojis.put(9854, "\u267E"); // infinity
+        emojis.put(8252, "\u203C"); // double exclamation mark
+        emojis.put(8265, "\u2049"); // exclamation question mark
+        emojis.put(10067, "\u2753"); // red question mark
+        emojis.put(10068, "\u2754"); // white question mark
+        emojis.put(10069, "\u2755"); // white exclamation mark
+        emojis.put(10071, "\u2757"); // red exclamation mark
+        emojis.put(12336, "\u3030"); // wavy dash
+        emojis.put(128177, "\u1F4B1"); // currency exchange
+        emojis.put(128178, "\u1F4B2"); // heavy dollar sign
         emojis.put(9851, "\u267B"); // recycling symbol
         emojis.put(9884, "\u269C"); // fleur-de-lis
         emojis.put(128305, "\u1F531"); // trident emblem
         emojis.put(128219, "\u1F4DB"); // name badge
         emojis.put(128304, "\u1F530"); // Japanese symbol for beginner
-        emojis.put(11093, "\u2B55"); // heavy large circle
-        emojis.put(9989, "\u2705"); // white heavy check mark
-        emojis.put(9745, "\u2611"); // ballot box with check
-        emojis.put(10004, "\u2714"); // heavy check mark
-        emojis.put(10006, "\u2716"); // heavy multiplication x
+        emojis.put(11093, "\u2B55"); // hollow red circle
+        emojis.put(9989, "\u2705"); // check mark button
+        emojis.put(9745, "\u2611"); // check box with check
+        emojis.put(10004, "\u2714"); // check mark
         emojis.put(10060, "\u274C"); // cross mark
         emojis.put(10062, "\u274E"); // cross mark button
-        emojis.put(10133, "\u2795"); // heavy plus sign
-        emojis.put(10134, "\u2796"); // heavy minus sign
-        emojis.put(10135, "\u2797"); // heavy division sign
         emojis.put(10160, "\u27B0"); // curly loop
         emojis.put(10175, "\u27BF"); // double curly loop
         emojis.put(12349, "\u303D"); // part alternation mark
         emojis.put(10035, "\u2733"); // eight-spoked asterisk
         emojis.put(10036, "\u2734"); // eight-pointed star
         emojis.put(10055, "\u2747"); // sparkle
-        emojis.put(8252, "\u203C"); // double exclamation mark
-        emojis.put(8265, "\u2049"); // exclamation question mark
-        emojis.put(10067, "\u2753"); // question mark
-        emojis.put(10068, "\u2754"); // white question mark
-        emojis.put(10069, "\u2755"); // white exclamation mark
-        emojis.put(10071, "\u2757"); // exclamation mark
-        emojis.put(12336, "\u3030"); // wavy dash
         emojis.put(169, "\u00A9"); // copyright
         emojis.put(174, "\u00AE"); // registered
         emojis.put(8482, "\u2122"); // trade mark
@@ -1236,8 +1475,7 @@ public class EmojiRegistry {
         emojis.put(55, "\u0037"); // keycap: 7
         emojis.put(56, "\u0038"); // keycap: 8
         emojis.put(57, "\u0039"); // keycap: 9
-        emojis.put(128287, "\u1F51F"); // keycap 10
-        emojis.put(128175, "\u1F4AF"); // hundred points
+        emojis.put(128287, "\u1F51F"); // keycap: 10
         emojis.put(128288, "\u1F520"); // input latin uppercase
         emojis.put(128289, "\u1F521"); // input latin lowercase
         emojis.put(128290, "\u1F522"); // input numbers
@@ -1260,31 +1498,46 @@ public class EmojiRegistry {
         emojis.put(127384, "\u1F198"); // SOS button
         emojis.put(127385, "\u1F199"); // UP! button
         emojis.put(127386, "\u1F19A"); // VS button
-        emojis.put(127489, "\u1F201"); // Japanese 'here' button
-        emojis.put(127490, "\u1F202"); // Japanese 'service charge' button
-        emojis.put(127543, "\u1F237"); // Japanese 'monthly amount' button
-        emojis.put(127542, "\u1F236"); // Japanese 'not free of charge' button
-        emojis.put(127535, "\u1F22F"); // Japanese 'reserved' button
-        emojis.put(127568, "\u1F250"); // Japanese 'bargain' button
-        emojis.put(127545, "\u1F239"); // Japanese 'discount' button
-        emojis.put(127514, "\u1F21A"); // Japanese 'free of charge' button
-        emojis.put(127538, "\u1F232"); // Japanese 'prohibited' button
-        emojis.put(127569, "\u1F251"); // Japanese 'acceptable' button
-        emojis.put(127544, "\u1F238"); // Japanese 'application' button
-        emojis.put(127540, "\u1F234"); // Japanese 'passing grade' button
-        emojis.put(127539, "\u1F233"); // Japanese 'vacancy' button
-        emojis.put(12951, "\u3297"); // Japanese 'congratulations' button
-        emojis.put(12953, "\u3299"); // Japanese 'secret' button
-        emojis.put(127546, "\u1F23A"); // Japanese 'open for business' button
-        emojis.put(127541, "\u1F235"); // Japanese 'no vacancy' button
+        emojis.put(127489, "\u1F201"); // Japanese “here” button
+        emojis.put(127490, "\u1F202"); // Japanese “service charge” button
+        emojis.put(127543, "\u1F237"); // Japanese “monthly amount” button
+        emojis.put(127542, "\u1F236"); // Japanese “not free of charge” button
+        emojis.put(127535, "\u1F22F"); // Japanese “reserved” button
+        emojis.put(127568, "\u1F250"); // Japanese “bargain” button
+        emojis.put(127545, "\u1F239"); // Japanese “discount” button
+        emojis.put(127514, "\u1F21A"); // Japanese “free of charge” button
+        emojis.put(127538, "\u1F232"); // Japanese “prohibited” button
+        emojis.put(127569, "\u1F251"); // Japanese “acceptable” button
+        emojis.put(127544, "\u1F238"); // Japanese “application” button
+        emojis.put(127540, "\u1F234"); // Japanese “passing grade” button
+        emojis.put(127539, "\u1F233"); // Japanese “vacancy” button
+        emojis.put(12951, "\u3297"); // Japanese “congratulations” button
+        emojis.put(12953, "\u3299"); // Japanese “secret” button
+        emojis.put(127546, "\u1F23A"); // Japanese “open for business” button
+        emojis.put(127541, "\u1F235"); // Japanese “no vacancy” button
+        emojis.put(128308, "\u1F534"); // red circle
+        emojis.put(128992, "\u1F7E0"); // orange circle
+        emojis.put(128993, "\u1F7E1"); // yellow circle
+        emojis.put(128994, "\u1F7E2"); // green circle
+        emojis.put(128309, "\u1F535"); // blue circle
+        emojis.put(128995, "\u1F7E3"); // purple circle
+        emojis.put(128996, "\u1F7E4"); // brown circle
+        emojis.put(9899, "\u26AB"); // black circle
+        emojis.put(9898, "\u26AA"); // white circle
+        emojis.put(128997, "\u1F7E5"); // red square
+        emojis.put(128999, "\u1F7E7"); // orange square
+        emojis.put(129000, "\u1F7E8"); // yellow square
+        emojis.put(129001, "\u1F7E9"); // green square
+        emojis.put(128998, "\u1F7E6"); // blue square
+        emojis.put(129002, "\u1F7EA"); // purple square
+        emojis.put(129003, "\u1F7EB"); // brown square
+        emojis.put(11036, "\u2B1C"); // white large square
+        emojis.put(9724, "\u25FC"); // black medium square
+        emojis.put(9723, "\u25FB"); // white medium square
+        emojis.put(9726, "\u25FE"); // black medium-small square
+        emojis.put(9725, "\u25FD"); // white medium-small square
         emojis.put(9642, "\u25AA"); // black small square
         emojis.put(9643, "\u25AB"); // white small square
-        emojis.put(9723, "\u25FB"); // white medium square
-        emojis.put(9724, "\u25FC"); // black medium square
-        emojis.put(9725, "\u25FD"); // white medium-small square
-        emojis.put(9726, "\u25FE"); // black medium-small square
-        emojis.put(11035, "\u2B1B"); // black large square
-        emojis.put(11036, "\u2B1C"); // white large square
         emojis.put(128310, "\u1F536"); // large orange diamond
         emojis.put(128311, "\u1F537"); // large blue diamond
         emojis.put(128312, "\u1F538"); // small orange diamond
@@ -1293,43 +1546,49 @@ public class EmojiRegistry {
         emojis.put(128315, "\u1F53B"); // red triangle pointed down
         emojis.put(128160, "\u1F4A0"); // diamond with a dot
         emojis.put(128280, "\u1F518"); // radio button
-        emojis.put(128306, "\u1F532"); // black square button
         emojis.put(128307, "\u1F533"); // white square button
-        emojis.put(9898, "\u26AA"); // white circle
-        emojis.put(9899, "\u26AB"); // black circle
-        emojis.put(128308, "\u1F534"); // red circle
-        emojis.put(128309, "\u1F535"); // blue circle
+        emojis.put(128306, "\u1F532"); // black square button
         emojis.put(127937, "\u1F3C1"); // chequered flag
         emojis.put(128681, "\u1F6A9"); // triangular flag
         emojis.put(127884, "\u1F38C"); // crossed flags
-        emojis.put(127988, "\u1F3F4"); // black flag
-        emojis.put(127987, "\u1F3F3"); // rainbow flag
-        emojis.put(127462, "\u1F1E6"); // South Africa
-        emojis.put(127464, "\u1F1E8"); // St. Vincent & Grenadines
-        emojis.put(127465, "\u1F1E9"); // Chad
-        emojis.put(127466, "\u1F1EA"); // Yemen
-        emojis.put(127467, "\u1F1EB"); // Wallis & Futuna
-        emojis.put(127468, "\u1F1EC"); // British Virgin Islands
-        emojis.put(127470, "\u1F1EE"); // U.S. Virgin Islands
-        emojis.put(127473, "\u1F1F1"); // Timor-Leste
-        emojis.put(127474, "\u1F1F2"); // Zambia
-        emojis.put(127476, "\u1F1F4"); // Tonga
-        emojis.put(127478, "\u1F1F6"); // Qatar
-        emojis.put(127479, "\u1F1F7"); // Turkey
-        emojis.put(127480, "\u1F1F8"); // Samoa
-        emojis.put(127481, "\u1F1F9"); // Mayotte
-        emojis.put(127482, "\u1F1FA"); // Vanuatu
-        emojis.put(127484, "\u1F1FC"); // Zimbabwe
-        emojis.put(127485, "\u1F1FD"); // Kosovo
-        emojis.put(127487, "\u1F1FF"); // Zimbabwe
-        emojis.put(127463, "\u1F1E7"); // Solomon Islands
-        emojis.put(127469, "\u1F1ED"); // Thailand
-        emojis.put(127471, "\u1F1EF"); // Tajikistan
-        emojis.put(127475, "\u1F1F3"); // Vietnam
-        emojis.put(127483, "\u1F1FB"); // Vanuatu
-        emojis.put(127486, "\u1F1FE"); // Mayotte
-        emojis.put(127472, "\u1F1F0"); // Kosovo
-        emojis.put(127477, "\u1F1F5"); // Paraguay
+        emojis.put(127988, "\u1F3F4"); // flag: Wales
+        emojis.put(127987, "\u1F3F3"); // transgender flag
+        emojis.put(127462, "\u1F1E6"); // flag: South Africa
+        emojis.put(127464, "\u1F1E8"); // flag: St. Vincent &amp; Grenadines
+        emojis.put(127465, "\u1F1E9"); // flag: Chad
+        emojis.put(127466, "\u1F1EA"); // flag: Yemen
+        emojis.put(127467, "\u1F1EB"); // flag: Wallis &amp; Futuna
+        emojis.put(127468, "\u1F1EC"); // flag: British Virgin Islands
+        emojis.put(127470, "\u1F1EE"); // flag: U.S. Virgin Islands
+        emojis.put(127473, "\u1F1F1"); // flag: Timor-Leste
+        emojis.put(127474, "\u1F1F2"); // flag: Zambia
+        emojis.put(127476, "\u1F1F4"); // flag: Tonga
+        emojis.put(127478, "\u1F1F6"); // flag: Qatar
+        emojis.put(127479, "\u1F1F7"); // flag: Turkey
+        emojis.put(127480, "\u1F1F8"); // flag: Samoa
+        emojis.put(127481, "\u1F1F9"); // flag: Mayotte
+        emojis.put(127482, "\u1F1FA"); // flag: Vanuatu
+        emojis.put(127484, "\u1F1FC"); // flag: Zimbabwe
+        emojis.put(127485, "\u1F1FD"); // flag: Kosovo
+        emojis.put(127487, "\u1F1FF"); // flag: Zimbabwe
+        emojis.put(127463, "\u1F1E7"); // flag: Solomon Islands
+        emojis.put(127469, "\u1F1ED"); // flag: Thailand
+        emojis.put(127471, "\u1F1EF"); // flag: Tajikistan
+        emojis.put(127475, "\u1F1F3"); // flag: Vietnam
+        emojis.put(127483, "\u1F1FB"); // flag: Vanuatu
+        emojis.put(127486, "\u1F1FE"); // flag: Mayotte
+        emojis.put(127472, "\u1F1F0"); // flag: Kosovo
+        emojis.put(127477, "\u1F1F5"); // flag: Paraguay
+        emojis.put(917607, "\uE0067"); // flag: Wales
+        emojis.put(917602, "\uE0062"); // flag: Wales
+        emojis.put(917605, "\uE0065"); // flag: England
+        emojis.put(917614, "\uE006E"); // flag: England
+        emojis.put(917631, "\uE007F"); // flag: Wales
+        emojis.put(917619, "\uE0073"); // flag: Wales
+        emojis.put(917603, "\uE0063"); // flag: Scotland
+        emojis.put(917620, "\uE0074"); // flag: Scotland
+        emojis.put(917623, "\uE0077"); // flag: Wales
+        emojis.put(917612, "\uE006C"); // flag: Wales
         return emojis;
     }
 

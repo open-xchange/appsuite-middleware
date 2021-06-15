@@ -574,7 +574,17 @@ public class MailAuthenticityFetchListener implements MailFetchListener {
 
         DenyIfContainedFolderChecker(String... foldersToDeny) {
             super();
-            this.foldersToDeny = null == foldersToDeny || foldersToDeny.length <= 0 ? Collections.emptySet() : ImmutableSet.copyOf(foldersToDeny);
+            if (null == foldersToDeny || foldersToDeny.length <= 0) {
+                this.foldersToDeny = Collections.emptySet();
+            } else {
+                ImmutableSet.Builder<String> builder = ImmutableSet.builderWithExpectedSize(foldersToDeny.length);
+                for (String folderToDeny : foldersToDeny) {
+                    if (folderToDeny != null) {
+                        builder.add(folderToDeny);
+                    }
+                }
+                this.foldersToDeny = builder.build();
+            }
         }
 
         @Override

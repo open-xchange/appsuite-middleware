@@ -27,6 +27,7 @@ import java.util.UUID;
 import com.openexchange.crypto.CryptoErrorMessage;
 import com.openexchange.crypto.CryptoService;
 import com.openexchange.exception.OXException;
+import com.openexchange.java.Streams;
 import com.openexchange.java.util.UUIDs;
 import com.openexchange.mail.compose.Attachment;
 import com.openexchange.mail.compose.AttachmentOrigin;
@@ -90,7 +91,14 @@ public class DecryptingAttachment implements Attachment { // Do not implement Ra
 
     @Override
     public InputStream getData() throws OXException {
-        return CryptoUtility.decryptingStreamFor(attachment.getData(), key, cryptoService);
+        InputStream data = attachment.getData();
+        try {
+            InputStream retval = CryptoUtility.decryptingStreamFor(data, key, cryptoService);
+            data = null; // Null'ify to prevent premature closing
+            return retval;
+        } finally {
+            Streams.close(data);
+        }
     }
 
     @Override

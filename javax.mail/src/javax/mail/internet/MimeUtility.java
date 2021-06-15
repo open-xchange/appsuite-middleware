@@ -1152,8 +1152,8 @@ public class MimeUtility {
 	// eliminating blank lines and inserting whitespace as necessary
 	StringBuilder sb = new StringBuilder(s.length() + 1);
 	BufferedReader r = new BufferedReader(new StringReader(s.toString()));
-	String line;
 	try {
+	    String line;
 	    while ((line = r.readLine()) != null) {
 		if (line.trim().length() == 0)
 		    continue;	// ignore empty lines
@@ -1169,6 +1169,8 @@ public class MimeUtility {
 	} catch (IOException ex) {
 	    // XXX - should never happen when reading from a string
 	    return s.toString();
+	} finally {
+	    try { r.close(); } catch (Exception e) {/* ignore */}
 	}
 	return sb.toString();
     }

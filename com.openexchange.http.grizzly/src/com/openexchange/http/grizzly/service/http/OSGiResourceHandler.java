@@ -67,6 +67,7 @@ import static com.openexchange.java.Autoboxing.I;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.net.HttpURLConnection;
 import java.net.URL;
 import java.net.URLConnection;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
@@ -77,6 +78,7 @@ import org.glassfish.grizzly.http.util.MimeType;
 import org.glassfish.grizzly.servlet.HttpServletRequestImpl;
 import org.glassfish.grizzly.servlet.HttpServletResponseImpl;
 import org.osgi.service.http.HttpContext;
+import com.openexchange.java.Streams;
 
 /**
  * OSGi Resource {@link HttpHandler}.
@@ -151,11 +153,14 @@ public class OSGiResourceHandler extends HttpHandler implements OSGiHandler {
             response.setContentType(mime);
         }
 
+        URLConnection urlConnection = null;
+        InputStream is = null;
+        OutputStream os = null;
         try {
-            final URLConnection urlConnection = resource.openConnection();
-            final int length = urlConnection.getContentLength();
-            final InputStream is = urlConnection.getInputStream();
-            final OutputStream os = response.getOutputStream();
+            urlConnection = resource.openConnection();
+            int length = urlConnection.getContentLength();
+            is = urlConnection.getInputStream();
+            os = response.getOutputStream();
 
             int blen = 8192;
             byte buff[] = new byte[8192];
@@ -166,11 +171,20 @@ public class OSGiResourceHandler extends HttpHandler implements OSGiHandler {
             }
             os.flush();
             response.finish();
+            os = null;
             if (total != length) {
                 LOG.warn("Was supposed to send {}, but sent {}", I(length), I(total));
             }
         } catch (IOException e) {
             LOG.warn("", e);
+        } finally {
+            if (os != null) {
+                response.finish();
+            }
+            Streams.close(is);
+            if (urlConnection instanceof HttpURLConnection) {
+                ((HttpURLConnection) urlConnection).disconnect();
+            }
         }
     }
 
