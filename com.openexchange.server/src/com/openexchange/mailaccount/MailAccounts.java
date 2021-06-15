@@ -133,7 +133,7 @@ public final class MailAccounts {
         }
 
         // Check if host is (ASCII-wise) equal to given one
-        if (IDNA.toASCII(host).equals(IDNA.toASCII(account.getMailServer()))) {
+        if (false == IDNA.toASCII(host).equals(IDNA.toASCII(account.getMailServer()))) {
             return false;
         }
 
