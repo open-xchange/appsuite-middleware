@@ -52,6 +52,7 @@ package com.openexchange.tools.oxfolder.downgrade;
 import static com.openexchange.chronos.service.CalendarParameters.PARAMETER_CONNECTION;
 import java.sql.Connection;
 import java.sql.SQLException;
+import java.util.Arrays;
 import java.util.Dictionary;
 import java.util.Hashtable;
 import org.osgi.service.event.Event;
@@ -243,6 +244,8 @@ public final class OXFolderDowngradeListener implements DowngradeListener {
             deleteFoldersContent(fuids, event);
             OXFolderDowngradeSQL.deleteFolderPermissions(fuids, cid, TABLE_PERMISSIONS_WORKING, event.getWriteCon());
             OXFolderDowngradeSQL.deleteFolders(fuids, cid, TABLE_FOLDER_WORKING, event.getWriteCon());
+            // Trace cause for MWB-938
+            LOG.debug("Deleted all permissions for folders {}", Arrays.toString(fuids.toArray()));
             /*
              * Update cache
              */
