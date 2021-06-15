@@ -56,6 +56,17 @@ public class MWB1058Test extends AbstractAPIClientSession {
 
     @Test
     public void testSyncFileWithDashes() throws Exception {
+        testFile = InfostoreTestManager.createFile(testFolder.getObjectID(), "MWB-1058-Test-File" + UUID.randomUUID().toString(), "text/plain");
+        infostoreTestManager.newAction(testFile, new java.io.File(FILE_NAME));
+        DriveDownloadBody body = new DriveDownloadBody();
+        java.io.File file = driveApi.downloadFile(getSessionId(), String.valueOf(driveRootFolderId), "/" + testFolder.getFolderName(), testFile.getFileName(), FILE_MD5, I(8), L(0), L(FILE_SIZE), Boolean.TRUE, body);
+        assertNotNull(file);
+    }
+
+    @Test
+    public void testSyncFileWithSpaces() throws Exception {
+        testFile = InfostoreTestManager.createFile(testFolder.getObjectID(), "MWB 1058 Test File" + UUID.randomUUID().toString(), "text/plain");
+        infostoreTestManager.newAction(testFile, new java.io.File(FILE_NAME));
         DriveDownloadBody body = new DriveDownloadBody();
         java.io.File file = driveApi.downloadFile(getSessionId(), String.valueOf(driveRootFolderId), "/" + testFolder.getFolderName(), testFile.getFileName(), FILE_MD5, I(8), L(0), L(FILE_SIZE), Boolean.TRUE, body);
         assertNotNull(file);
@@ -71,8 +82,6 @@ public class MWB1058Test extends AbstractAPIClientSession {
         infostoreTestManager = new InfostoreTestManager(getClient());
         testFolder = folderTestManager.generatePrivateFolder("MWB1058Test_" + UUID.randomUUID().toString(), FolderObject.INFOSTORE, driveRootFolderId, userId);
         testFolder = folderTestManager.insertFolderOnServer(testFolder);
-        testFile = InfostoreTestManager.createFile(testFolder.getObjectID(), "MWB-1058-Test-File" + UUID.randomUUID().toString(), "text/plain");
-        infostoreTestManager.newAction(testFile, new java.io.File(FILE_NAME));
     }
 
     @Override
