@@ -7,7 +7,7 @@ BuildRequires:  open-xchange-core
 BuildRequires:  open-xchange-oauth
 BuildRequires: java-1.8.0-openjdk-devel
 Version:        @OXVERSION@
-%define         ox_release 13
+%define         ox_release 14
 Release:        %{ox_release}_<CI_CNT>.<B_CNT>
 Group:          Applications/Productivity
 License:        GPL-2.0
@@ -49,6 +49,8 @@ ant -lib build/lib -Dbasedir=build -DdestDir=%{buildroot} -DpackageName=%{name} 
 /opt/open-xchange/osgi/bundle.d/*
 
 %changelog
+* Tue Jun 08 2021 Thorben Betten <thorben.betten@open-xchange.com>
+Build for patch 2021-06-14 (6003)
 * Wed May 26 2021 Thorben Betten <thorben.betten@open-xchange.com>
 Build for patch 2021-06-01 (6000)
 * Fri May 21 2021 Thorben Betten <thorben.betten@open-xchange.com>

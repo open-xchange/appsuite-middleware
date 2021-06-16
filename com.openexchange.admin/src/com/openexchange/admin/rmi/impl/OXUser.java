@@ -1066,7 +1066,7 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
                         throw inde;
                     }
 
-                    Integer fsId = getData(ctx, usrdata, auth).getFilestoreId();
+                    Integer fsId = dbuser[0].getFilestoreId();
                     if (fsId == null || fsId.intValue() <= 0) {
                         final InvalidDataException inde = new InvalidDataException("Not allowed to change the filestore for user " + userid + " in context " + ctx.getId() + ". Please use appropriate method instead.");
                         log(LogLevel.ERROR, LOGGER, credentials, ctx.getIdAsString(), String.valueOf(userid), inde, EMPTY_STRING);
@@ -1088,7 +1088,7 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
                 long quota_max_temp = maxQuota.longValue();
                 if (quota_max_temp != -1) {
                     // A valid quota is specified - ensure an appropriate file storage is set
-                    Integer fsId = getData(ctx, usrdata, auth).getFilestoreId();
+                    Integer fsId = dbuser[0].getFilestoreId();
                     if (fsId == null || fsId.intValue() <= 0) {
                         if (!allowChangingQuotaIfNoFileStorageSet) {
                             throw new StorageException("Quota cannot be changed for user " + userid + " in context " + ctx.getId() + " since that user has no file storage set. See \"ALLOW_CHANGING_QUOTA_IF_NO_FILESTORE_SET\".");

@@ -2461,6 +2461,34 @@ public final class RdbMailAccountStorage implements MailAccountStorageService {
     }
 
     private void updateProperty(final int contextId, final int userId, final int accountId, final String name, final String newValue, final boolean transportProps, final Connection con) throws SQLException {
+        if (null == newValue || newValue.length() <= 0) {
+            deleteProperty(contextId, userId, accountId, name, transportProps, con);
+            return;
+        }
+        
+        PreparedStatement stmt = null;
+        try {
+            if (transportProps) {
+                stmt = con.prepareStatement("INSERT INTO user_transport_account_properties (cid, user, id, name, value) VALUES (?, ?, ?, ?, ?) ON DUPLICATE KEY UPDATE value=?");
+            } else {
+                stmt = con.prepareStatement("INSERT INTO user_mail_account_properties (cid, user, id, name, value) VALUES (?, ?, ?, ?, ?) ON DUPLICATE KEY UPDATE value=?");
+            }
+            int pos = 1;
+            stmt.setInt(pos++, contextId);
+            stmt.setInt(pos++, userId);
+            stmt.setInt(pos++, accountId);
+            stmt.setString(pos++, name);
+            stmt.setString(pos++, newValue);
+            stmt.setString(pos++, newValue);
+            stmt.executeUpdate();
+            closeSQLStuff(stmt);
+            stmt = null;
+        } finally {
+            closeSQLStuff(stmt);
+        }
+    }
+
+    private void deleteProperty(int contextId, int userId, int accountId, String name, boolean transportProps, Connection con) throws SQLException{
         PreparedStatement stmt = null;
         try {
             if (transportProps) {
@@ -2474,25 +2502,6 @@ public final class RdbMailAccountStorage implements MailAccountStorageService {
             stmt.setInt(pos++, accountId);
             stmt.setString(pos++, name);
             stmt.executeUpdate();
-            closeSQLStuff(stmt);
-            stmt = null;
-
-            if (null != newValue && newValue.length() > 0) {
-                if (transportProps) {
-                    stmt = con.prepareStatement("INSERT INTO user_transport_account_properties (cid, user, id, name, value) VALUES (?, ?, ?, ?, ?)");
-                } else {
-                    stmt = con.prepareStatement("INSERT INTO user_mail_account_properties (cid, user, id, name, value) VALUES (?, ?, ?, ?, ?)");
-                }
-                pos = 1;
-                stmt.setInt(pos++, contextId);
-                stmt.setInt(pos++, userId);
-                stmt.setInt(pos++, accountId);
-                stmt.setString(pos++, name);
-                stmt.setString(pos++, newValue);
-                stmt.executeUpdate();
-                closeSQLStuff(stmt);
-                stmt = null;
-            }
         } finally {
             closeSQLStuff(stmt);
         }

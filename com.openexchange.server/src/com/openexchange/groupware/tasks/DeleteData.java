@@ -55,12 +55,12 @@ import static com.openexchange.database.Databases.startTransaction;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.Date;
+import com.openexchange.database.RetryingTransactionClosure;
+import com.openexchange.database.SQLClosure;
 import com.openexchange.event.impl.EventClient;
 import com.openexchange.exception.OXException;
-import com.openexchange.groupware.Types;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
-import com.openexchange.groupware.impl.IDGenerator;
 import com.openexchange.groupware.userconfiguration.UserPermissionBits;
 import com.openexchange.server.impl.DBPool;
 import com.openexchange.session.Session;
@@ -126,43 +126,37 @@ public final class DeleteData {
     }
 
     public void doDelete() throws OXException {
-        final Connection con = DBPool.pickupWriteable(ctx);
-        try {
-            startTransaction(con);
-            // Try to block simultaneous deleting of tasks by generating a new identifier.
-            IDGenerator.getId(ctx, Types.TASK, con);
-            TaskLogic.deleteTask(ctx, con, user.getId(), TaskLogic.clone(getOrigTask()), lastModified);
-            deleteReminder(con);
-            con.commit();
-        } catch (SQLException e) {
-            rollback(con);
-            throw TaskExceptionCode.DELETE_FAILED.create(e, e.getMessage());
-        } catch (OXException e) {
-            rollback(con);
-            throw e;
-        } finally {
-            autocommit(con);
-            DBPool.closeWriterSilent(ctx, con);
-        }
+        delete(c -> {
+            TaskLogic.deleteTask(ctx, c, user.getId(), TaskLogic.clone(getOrigTask()), lastModified);
+            return null;
+        });
     }
 
     public void doDeleteHard(Session session, int folderId, StorageType type) throws OXException {
+        delete(c -> {
+            TaskLogic.removeTask(session, ctx, c, folderId, taskId, type);
+            return null;
+        });
+    }
+
+    private void delete(SQLClosure<Void> deleteClosure) throws OXException {
         Connection con = DBPool.pickupWriteable(ctx);
         int rollback = 0;
         try {
             startTransaction(con);
             rollback = 1;
-            // Try to block simultaneous deleting of tasks by generating a new identifier.
-            IDGenerator.getId(ctx, Types.TASK, con);
-            TaskLogic.removeTask(session, ctx, con, folderId, taskId, type);
-            deleteReminder(con);
+            RetryingTransactionClosure.execute(deleteClosure, 3, con);
+            RetryingTransactionClosure.execute(c -> {
+                Reminder.deleteReminder(ctx, c, task);
+                return null;
+            }, 3, con);
             con.commit();
             rollback = 2;
         } catch (SQLException e) {
             throw TaskExceptionCode.DELETE_FAILED.create(e, e.getMessage());
         } finally {
             if (rollback > 0) {
-                if (rollback==1) {
+                if (rollback == 1) {
                     rollback(con);
                 }
                 autocommit(con);
@@ -173,9 +167,5 @@ public final class DeleteData {
 
     public void sentEvent(Session session) throws OXException {
         new EventClient(session).delete(getOrigTask());
-    }
-
-    private void deleteReminder(Connection con) throws OXException {
-        Reminder.deleteReminder(ctx, con, task);
     }
 }
