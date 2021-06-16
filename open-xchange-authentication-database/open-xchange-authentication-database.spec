@@ -14,7 +14,7 @@ BuildRequires: java-1_8_0-openjdk-devel
 BuildRequires: java-1.8.0-openjdk-devel
 %endif
 Version:       @OXVERSION@
-%define        ox_release 34
+%define        ox_release 35
 Release:       %{ox_release}_<CI_CNT>.<B_CNT>
 Group:         Applications/Productivity
 License:       GPL-2.0
@@ -60,6 +60,8 @@ ant -lib build/lib -Dbasedir=build -DdestDir=%{buildroot} -DpackageName=%{name} 
 /opt/open-xchange/osgi/bundle.d/*
 
 %changelog
+* Wed Jun 16 2021 Marcus Klein <marcus.klein@open-xchange.com>
+Build for patch 2021-06-18 (6006)
 * Mon Mar 08 2021 Marcus Klein <marcus.klein@open-xchange.com>
 Build for patch 2021-03-15 (5971)
 * Mon Feb 22 2021 Marcus Klein <marcus.klein@open-xchange.com>

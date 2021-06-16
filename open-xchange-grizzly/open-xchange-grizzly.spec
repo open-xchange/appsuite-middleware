@@ -14,7 +14,7 @@ BuildRequires: java-1_8_0-openjdk-devel
 BuildRequires: java-1.8.0-openjdk-devel
 %endif
 Version:       @OXVERSION@
-%define        ox_release 34
+%define        ox_release 35
 Release:       %{ox_release}_<CI_CNT>.<B_CNT>
 Group:         Applications/Productivity
 License:       GPL-2.0
@@ -97,6 +97,8 @@ fi
 %config(noreplace) %attr(640,root,open-xchange) /opt/open-xchange/etc/grizzly.properties
 
 %changelog
+* Wed Jun 16 2021 Marc Arens <marc.arens@open-xchange.com>
+Build for patch 2021-06-18 (6006)
 * Mon Mar 08 2021 Marc Arens <marc.arens@open-xchange.com>
 Build for patch 2021-03-15 (5971)
 * Mon Feb 22 2021 Marc Arens <marc.arens@open-xchange.com>
