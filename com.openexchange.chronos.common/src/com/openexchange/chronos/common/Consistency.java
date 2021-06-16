@@ -59,6 +59,8 @@ public class Consistency {
      * <p/>
      * This includes the recurrence identifier itself, and additionally the event's collection of recurrence dates, exceptions dates, and
      * change exception dates, if set.
+     * <p/>
+     * Recurrence identifiers whose value is an <i>all-day</i> date are not changed.
      *
      * @param referenceDate The reference date to which the recurrence identifiers will be normalized to
      * @param event The event to normalize the recurrence identifiers in
