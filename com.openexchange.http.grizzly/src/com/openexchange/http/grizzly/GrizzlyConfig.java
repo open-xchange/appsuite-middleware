@@ -95,6 +95,10 @@ public class GrizzlyConfig {
         private boolean checkTrackingIdInRequestParameters = false;
         private int maxNumberOfConcurrentRequests = 0;
         private boolean supportHierachicalLookupOnNotFound = false;
+        private boolean keepAlive = true;
+        private boolean tcpNoDelay = true;
+        private int readTimeoutMillis = org.glassfish.grizzly.Transport.DEFAULT_READ_TIMEOUT * 1000;
+        private int writeTimeoutMillis = org.glassfish.grizzly.Transport.DEFAULT_WRITE_TIMEOUT * 1000;
 
         /**
          * Initializes a new {@link GrizzlyConfig.Builder}.
@@ -123,6 +127,10 @@ public class GrizzlyConfig {
             this.sessionUnjoinedThreshold = configService.getIntProperty("com.openexchange.http.grizzly.sessionUnjoinedThreshold", 120);
             this.maxNumberOfConcurrentRequests = configService.getIntProperty("com.openexchange.http.grizzly.maxNumberOfConcurrentRequests", 0);
             this.removeNonAuthenticatedSessions = configService.getBoolProperty("com.openexchange.http.grizzly.removeNonAuthenticatedSessions", true);
+            this.keepAlive = configService.getBoolProperty("com.openexchange.http.grizzly.keepAlive", true);
+            this.tcpNoDelay = configService.getBoolProperty("com.openexchange.http.grizzly.tcpNoDelay", true);
+            this.readTimeoutMillis = configService.getIntProperty("com.openexchange.http.grizzly.readTimeoutMillis", org.glassfish.grizzly.Transport.DEFAULT_READ_TIMEOUT * 1000);
+            this.writeTimeoutMillis = configService.getIntProperty("com.openexchange.http.grizzly.writeTimeoutMillis", org.glassfish.grizzly.Transport.DEFAULT_WRITE_TIMEOUT * 1000);
 
             // server properties
             this.cookieMaxAge = Integer.valueOf(ConfigTools.parseTimespanSecs(configService.getProperty("com.openexchange.cookie.ttl", "1W"))).intValue();
@@ -436,8 +444,28 @@ public class GrizzlyConfig {
             return this;
         }
 
+        public Builder setKeepAlive(boolean keepAlive) {
+            this.keepAlive = keepAlive;
+            return this;
+        }
+
+        public Builder setTcpNoDelay(boolean tcpNoDelay) {
+            this.tcpNoDelay = tcpNoDelay;
+            return this;
+        }
+
+        public Builder setReadTimeoutMillis(int readTimeoutMillis) {
+            this.readTimeoutMillis = readTimeoutMillis;
+            return this;
+        }
+
+        public Builder setWriteTimeoutMillis(int writeTimeoutMillis) {
+            this.writeTimeoutMillis = writeTimeoutMillis;
+            return this;
+        }
+
         public GrizzlyConfig build() {
-            return new GrizzlyConfig(httpHost, httpPort, httpsPort, livenessPort, isJMXEnabled, accessLogConfig, isWebsocketsEnabled, isCometEnabled, maxRequestParameters, backendRoute, isAbsoluteRedirect, shutdownFast, awaitShutDownSeconds, maxHttpHeaderSize, isSslEnabled, keystorePath, keystorePassword, sessionExpiryCheckInterval, sessionUnjoinedThreshold, removeNonAuthenticatedSessions, maxNumberOfConcurrentRequests, checkTrackingIdInRequestParameters, cookieMaxAge, cookieMaxInactivityInterval, isForceHttps, isCookieHttpOnly, contentSecurityPolicy, defaultEncoding, isConsiderXForwards, knownProxies, forHeader, protocolHeader, httpsProtoValue, httpProtoPort, httpsProtoPort, echoHeader, robotsMetaTag, maxBodySize, maxNumberOfHttpSessions, enabledCiphers, wsTimeoutMillis, supportHierachicalLookupOnNotFound);
+            return new GrizzlyConfig(httpHost, httpPort, httpsPort, livenessPort, isJMXEnabled, accessLogConfig, isWebsocketsEnabled, isCometEnabled, maxRequestParameters, backendRoute, isAbsoluteRedirect, shutdownFast, awaitShutDownSeconds, maxHttpHeaderSize, isSslEnabled, keystorePath, keystorePassword, sessionExpiryCheckInterval, sessionUnjoinedThreshold, removeNonAuthenticatedSessions, maxNumberOfConcurrentRequests, checkTrackingIdInRequestParameters, cookieMaxAge, cookieMaxInactivityInterval, isForceHttps, isCookieHttpOnly, contentSecurityPolicy, defaultEncoding, isConsiderXForwards, knownProxies, forHeader, protocolHeader, httpsProtoValue, httpProtoPort, httpsProtoPort, echoHeader, robotsMetaTag, maxBodySize, maxNumberOfHttpSessions, enabledCiphers, wsTimeoutMillis, supportHierachicalLookupOnNotFound, keepAlive, tcpNoDelay, readTimeoutMillis, writeTimeoutMillis);
         }
     }
 
@@ -575,13 +603,29 @@ public class GrizzlyConfig {
     /** Whether to remove non-authenticated HTTP sessions (no Open-Xchange session associated with it) */
     private final boolean removeNonAuthenticatedSessions;
 
-    GrizzlyConfig(String httpHost, int httpPort, int httpsPort, int livenessPort, boolean isJMXEnabled, GrizzlyAccessLogConfig accessLogConfig, boolean isWebsocketsEnabled, boolean isCometEnabled, int maxRequestParameters, String backendRoute, boolean isAbsoluteRedirect, boolean shutdownFast, int awaitShutDownSeconds, int maxHttpHeaderSize, boolean isSslEnabled, String keystorePath, String keystorePassword, int sessionExpiryCheckInterval, int sessionUnjoinedThreshold, boolean removeNonAuthenticatedSessions, int maxNumberOfConcurrentRequests, boolean checkTrackingIdInRequestParameters, int cookieMaxAge, int cookieMaxInactivityInterval, boolean isForceHttps, boolean isCookieHttpOnly, String contentSecurityPolicy, String defaultEncoding, boolean isConsiderXForwards, List<IPRange> knownProxies, String forHeader, String protocolHeader, String httpsProtoValue, int httpProtoPort, int httpsProtoPort, String echoHeader, String robotsMetaTag, int maxBodySize, int maxNumberOfHttpSessions, List<String> enabledCiphers, long wsTimeoutMillis, boolean supportHierachicalLookupOnNotFound) {
+    /** The keep-alive flag used when establishing a Grizzly network listener */
+    private final boolean keepAlive;
+
+    /** The TCP no-delay flag used when establishing a Grizzly network listener */
+    private final boolean tcpNoDelay;
+
+    /** The (socket) read timeout in milliseconds */
+    private final int readTimeoutMillis;
+
+    /** The (socket) write timeout in milliseconds */
+    private final int writeTimeoutMillis;
+
+    GrizzlyConfig(String httpHost, int httpPort, int httpsPort, int livenessPort, boolean isJMXEnabled, GrizzlyAccessLogConfig accessLogConfig, boolean isWebsocketsEnabled, boolean isCometEnabled, int maxRequestParameters, String backendRoute, boolean isAbsoluteRedirect, boolean shutdownFast, int awaitShutDownSeconds, int maxHttpHeaderSize, boolean isSslEnabled, String keystorePath, String keystorePassword, int sessionExpiryCheckInterval, int sessionUnjoinedThreshold, boolean removeNonAuthenticatedSessions, int maxNumberOfConcurrentRequests, boolean checkTrackingIdInRequestParameters, int cookieMaxAge, int cookieMaxInactivityInterval, boolean isForceHttps, boolean isCookieHttpOnly, String contentSecurityPolicy, String defaultEncoding, boolean isConsiderXForwards, List<IPRange> knownProxies, String forHeader, String protocolHeader, String httpsProtoValue, int httpProtoPort, int httpsProtoPort, String echoHeader, String robotsMetaTag, int maxBodySize, int maxNumberOfHttpSessions, List<String> enabledCiphers, long wsTimeoutMillis, boolean supportHierachicalLookupOnNotFound, boolean keepAlive, boolean tcpNoDelay, int readTimeoutMillis, int writeTimeoutMillis) {
         super();
         this.httpHost = httpHost;
         this.httpPort = httpPort;
         this.httpsPort = httpsPort;
         this.livenessPort = livenessPort;
         this.isJMXEnabled = isJMXEnabled;
+        this.keepAlive = keepAlive;
+        this.tcpNoDelay = tcpNoDelay;
+        this.readTimeoutMillis = readTimeoutMillis;
+        this.writeTimeoutMillis = writeTimeoutMillis;
         this.accessLogConfig = null == accessLogConfig ? GrizzlyAccessLogConfig.NOT_ENABLED_CONFIG : accessLogConfig;
         this.isWebsocketsEnabled = isWebsocketsEnabled;
         this.isCometEnabled = isCometEnabled;
@@ -619,6 +663,42 @@ public class GrizzlyConfig {
         this.enabledCiphers = enabledCiphers;
         this.wsTimeoutMillis = wsTimeoutMillis;
         this.supportHierachicalLookupOnNotFound = supportHierachicalLookupOnNotFound;
+    }
+
+    /**
+     * Gets the (socket) read timeout in milliseconds
+     *
+     * @return The (socket) read timeout in milliseconds
+     */
+    public int getReadTimeoutMillis() {
+        return readTimeoutMillis;
+    }
+
+    /**
+     * Gets the (socket) write timeout in milliseconds.
+     *
+     * @return The (socket) write timeout in milliseconds
+     */
+    public int getWriteTimeoutMillis() {
+        return writeTimeoutMillis;
+    }
+
+    /**
+     * Gets the keep-alive flag used when establishing a Grizzly network listener.
+     *
+     * @return <code>true</code> for keep-alive; otherwise <code>false</code>
+     */
+    public boolean isKeepAlive() {
+        return keepAlive;
+    }
+
+    /**
+     * Gets the TCP no-delay flag used when establishing a Grizzly network listener.
+     *
+     * @return <code>true</code> for TCP no-delay; otherwise <code>false</code>
+     */
+    public boolean isTcpNoDelay() {
+        return tcpNoDelay;
     }
 
     /**

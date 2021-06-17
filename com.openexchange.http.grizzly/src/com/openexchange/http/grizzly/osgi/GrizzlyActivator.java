@@ -239,7 +239,7 @@ public class GrizzlyActivator extends HousekeepingActivator {
                     networkLivenessListener.setMaxHttpHeaderSize(grizzlyConfig.getMaxHttpHeaderSize());
 
                     // Set the transport
-                    networkLivenessListener.setTransport(buildTcpNioTransport(configurationService, threadPool));
+                    networkLivenessListener.setTransport(buildTcpNioTransport(grizzlyConfig, threadPool));
 
                     // Add HTTP network listener to Grizzly server
                     grizzly.addListener(networkLivenessListener);
@@ -258,7 +258,7 @@ public class GrizzlyActivator extends HousekeepingActivator {
                 networkListener.setSessionManager(sessionManager);
 
                 // Set the transport
-                networkListener.setTransport(buildTcpNioTransport(configurationService, threadPool));
+                networkListener.setTransport(buildTcpNioTransport(grizzlyConfig, threadPool));
 
                 // Web Socket and Comet
                 if (websocketsEnabled) {
@@ -289,7 +289,7 @@ public class GrizzlyActivator extends HousekeepingActivator {
                 networkSslListener.setSecure(true);
 
                 // Set the transport
-                networkSslListener.setTransport(buildTcpNioTransport(configurationService, threadPool));
+                networkSslListener.setTransport(buildTcpNioTransport(grizzlyConfig, threadPool));
 
                 // Web Socket and Comet
                 if (websocketsEnabled) {
@@ -369,21 +369,21 @@ public class GrizzlyActivator extends HousekeepingActivator {
     /**
      * Builds a TCPNIOTransport using {c.o}.threadpool
      *
-     * @param configurationService The configuration service to use to read settings for TCP NIO connections
+     * @param grizzlyConfig The configuration to use to set settings for TCP NIO connections
      * @param threadPool The thread pool to use
      * @return The configured <code>TCPNIOTransport</code> instance
      * @throws OXException If the transport cannot be build
      */
-    private TCPNIOTransport buildTcpNioTransport(ConfigurationService configurationService, ThreadPoolService threadPool) throws OXException {
+    private TCPNIOTransport buildTcpNioTransport(GrizzlyConfig grizzlyConfig, ThreadPoolService threadPool) throws OXException {
         if (threadPool == null) {
             throw GrizzlyExceptionCode.NEEDED_SERVICE_MISSING.create(ThreadPoolService.class.getSimpleName());
         }
 
         // Determine settings for TCP NIO connections
-        boolean keepAlive = configurationService.getBoolProperty("com.openexchange.http.grizzly.keepAlive", true);
-        boolean tcpNoDelay = configurationService.getBoolProperty("com.openexchange.http.grizzly.tcpNoDelay", true);
-        int readTimeoutMillis = configurationService.getIntProperty("com.openexchange.http.grizzly.readTimeoutMillis", org.glassfish.grizzly.Transport.DEFAULT_READ_TIMEOUT * 1000);
-        int writeTimeoutMillis = configurationService.getIntProperty("com.openexchange.http.grizzly.writeTimeoutMillis", org.glassfish.grizzly.Transport.DEFAULT_WRITE_TIMEOUT * 1000);
+        boolean keepAlive = grizzlyConfig.isKeepAlive();
+        boolean tcpNoDelay = grizzlyConfig.isTcpNoDelay();
+        int readTimeoutMillis = grizzlyConfig.getReadTimeoutMillis();
+        int writeTimeoutMillis = grizzlyConfig.getWriteTimeoutMillis();
 
         // Build up the TCPNIOTransport to use
         TCPNIOTransportBuilder builder = TCPNIOTransportBuilder.newInstance();
