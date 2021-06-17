@@ -80,11 +80,11 @@ public class ConfigServer extends AbstractProxyAwareConfigSource {
     @Override
     public DefaultAutoconfig getAutoconfig(final String emailLocalPart, final String emailDomain, final String password, int userId, int contextId, boolean forceSecure) throws OXException {
         DefaultAutoconfig autoconfig = getAutoconfig(emailLocalPart, emailDomain, userId, contextId, forceSecure, true);
-        if (null == autoconfig && false == forceSecure) {
+        if (null == autoconfig) {
             /*
              * Fallback to HTTP
              */
-            LOG.debug("Trying to get configuration via HTTP because HTTPS failed and configuration allows unsecure connections.");
+            LOG.debug("Trying to get configuration via HTTP because establishing a HTTPS connection failed.");
             return getAutoconfig(emailLocalPart, emailDomain, userId, contextId, forceSecure, false);
         }
         return autoconfig;
