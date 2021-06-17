@@ -307,7 +307,12 @@ public class GrizzlyActivator extends HousekeepingActivator {
             // Start Grizzly server / Liveness end-point
             grizzly.start();
             if (networkLivenessListener != null) {
-                networkLivenessListener.start();
+                try {
+                    networkLivenessListener.start();
+                    log.error("Started Grizzly liveness network listener on host: {} and port: {}", grizzlyConfig.getHttpHost(), Integer.valueOf(grizzlyConfig.getLivenessPort()));
+                } catch (Exception e) {
+                    log.error("Failed to start Grizzly liveness network listener on host: {} and port: {}", grizzlyConfig.getHttpHost(), Integer.valueOf(grizzlyConfig.getLivenessPort()), e);
+                }
             }
 
             // The HttpService factory

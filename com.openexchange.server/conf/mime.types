@@ -95,6 +95,10 @@ application/vnd.anser-web-certificate-issue-initiation cii
 application/vnd.anser-web-funds-transfer-initiation fti
 application/vnd.antix.game-component atx
 application/vnd.apple.installer+xml mpkg
+application/vnd.apple.keynote key
+application/vnd.apple.mpegurl m3u8 m3u
+application/vnd.apple.numbers numbers
+application/vnd.apple.pages pages
 application/vnd.audiograph aep
 application/vnd.blueice.multipass mpm
 application/vnd.bmi bmi
