@@ -510,6 +510,27 @@ public class SearchEngineImpl extends DBService {
         }
     }
 
+    /**
+     * Appends a column to a SELECT statement
+     *
+     * @param sqlQuery The query containing the SELECT statement
+     * @param columnData The column to add to sqlQuery
+     * @param columnAlias The alias for the column, or null to omit an alias
+     */
+    protected static void appendSelectColumn(StringBuilder sqlQuery, Metadata columnData, String columnAlias) {
+        if (columnData != null) {
+            final String[] columns = switchMetadata2DBColumns(new Metadata[] { columnData });
+            if ((columns != null) && (columns[0] != null)) {
+                sqlQuery.append(", ");
+                sqlQuery.append(columns[0]);
+                if (Strings.isNotEmpty(columnAlias)) {
+                    sqlQuery.append(" AS ");
+                    sqlQuery.append(columnAlias);
+                }
+            }
+        }
+    }
+
     protected static void appendOrderBy(StringBuilder sqlQuery, Metadata sortedBy, int dir) {
         if (sortedBy != null && dir != NOT_SET) {
             final String[] orderColumn = switchMetadata2DBColumns(new Metadata[] { sortedBy });

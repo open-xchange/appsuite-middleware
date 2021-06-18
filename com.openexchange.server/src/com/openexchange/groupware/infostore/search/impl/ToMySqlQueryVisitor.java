@@ -92,6 +92,7 @@ public class ToMySqlQueryVisitor implements SearchTermVisitor {
     private static final Logger LOG = org.slf4j.LoggerFactory.getLogger(ToMySqlQueryVisitor.class);
     private static final String INFOSTORE = "infostore.";
     private static final String DOCUMENT = "infostore_document.";
+    private static final String ORDER_BY_COLUMN = "ORDER_BY";
     private static final String PREFIX = " FROM infostore JOIN infostore_document ON infostore_document.cid = infostore.cid AND infostore_document.infostore_id = infostore.id AND infostore_document.version_number = infostore.version";
     private static final Set<Class<? extends SearchTerm<?>>> UNSUPPORTED = ImmutableSet.<Class<? extends SearchTerm<?>>> of(ContentTerm.class, MetaTerm.class, SequenceNumberTerm.class);
 
@@ -244,7 +245,13 @@ public class ToMySqlQueryVisitor implements SearchTermVisitor {
      * @return Pair containing the number of times the passed <i>filter</i> query was actually appended as first element and number of union selects as second element
      */
     private Pair<Integer, Integer> appendMySqlQuery(StringBuilder queryBuilder) {
-        queryBuilder.append(cols).append(PREFIX);
+        String cols = this.cols;
+        queryBuilder.append(cols);
+        //Depending on the type of search, the SQL statement might become a UNION:
+        //Adding the sort column (if present) with an alias to the select statements of the UNION
+        //allows to specify it in the ORDER BY clause at the end
+        SearchEngineImpl.appendSelectColumn(queryBuilder, sortedBy, ORDER_BY_COLUMN);
+        queryBuilder.append(PREFIX);
         if (fulltextSearch) {
             if (Strings.isNotEmpty(fulltextSearchPattern)) {
                 StringBuilder fulltextBuilder = new StringBuilder(256);
@@ -258,7 +265,11 @@ public class ToMySqlQueryVisitor implements SearchTermVisitor {
             }
         }
         Pair<Integer, Integer> filterAndSelectCount = SearchEngineImpl.appendFoldersAsUnion(session, queryBuilder, filterBuilder.length() > 0 ? filterBuilder.toString() : null, readAllFolders, readOwnFolders);
-        SearchEngineImpl.appendOrderBy(queryBuilder, sortedBy, dir);
+        if(sortedBy != null && dir != InfostoreSearchEngine.NOT_SET) {
+            queryBuilder.append("ORDER BY ")
+                        .append(ORDER_BY_COLUMN)
+                        .append(dir == InfostoreSearchEngine.ASC ? " ASC" : " DESC");
+        }
         if (start >= 0 && end >= 0 && start < end) {
             queryBuilder.append(" LIMIT ").append(start).append(",").append(end);
         }

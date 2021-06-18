@@ -26,7 +26,7 @@ import org.junit.runners.Suite;
 import com.openexchange.mail.authenticity.test.bugs.BugsTestSuite;
 
 /**
- * {@link MailAuthenticityTestSuite}
+ * {@link UnitTests}
  *
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
@@ -38,12 +38,12 @@ import com.openexchange.mail.authenticity.test.bugs.BugsTestSuite;
     TestMailAuthenticityStatusMatrixV2.class,
     BugsTestSuite.class,
 })
-public class MailAuthenticityTestSuite {
+public class UnitTests {
 
     /**
-     * Initializes a new {@link MailAuthenticityTestSuite}.
+     * Initializes a new {@link UnitTests}.
      */
-    public MailAuthenticityTestSuite() {
+    public UnitTests() {
         super();
     }
 }
