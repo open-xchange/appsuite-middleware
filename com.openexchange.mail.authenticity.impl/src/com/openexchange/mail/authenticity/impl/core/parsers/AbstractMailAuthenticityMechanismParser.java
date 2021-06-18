@@ -130,16 +130,18 @@ abstract class AbstractMailAuthenticityMechanismParser implements BiFunction<Map
         if (Strings.isEmpty(domain)) {
             return domain;
         }
-
-        if (domain.indexOf(' ') < 0) {
-            return domain;
-        }
-
+        String cleansedDomain = domain;
         // Cleanse the optional version
-        String[] split = Strings.splitBy(domain, ' ', true);
-        String domein = split.length == 0 ? domain : split[0];
-        int index = domein.indexOf('@');
-        return index < 0 ? domein : domein.substring(index + 1);
+        if (domain.indexOf(' ') >= 0) {
+            String[] split = Strings.splitBy(domain, ' ', true);
+            cleansedDomain = split.length == 0 ? domain : split[0];
+        }
+        // Cleanse the preceding "at" symbol ('@')
+        if (domain.indexOf('@') >= 0) {
+            int index = cleansedDomain.indexOf('@');
+            cleansedDomain = cleansedDomain.substring(index + 1);
+        }
+        return cleansedDomain;
     }
 
     /**

@@ -110,7 +110,7 @@ final class StringUtil {
         String quotedString = "\"(?:(?:\\\\\\\")|[^\"])+?\"";
         String token = "[[\\p{L}\\p{ASCII}]&&[^\\p{Cntrl}()<>,;:\\\"/\\[\\]?={}\\p{Blank}]]+";
         String comment = "\\([^)]*\\)";
-        String value = "(?:" + quotedString + "|" + token + ")(?:" + comment + ")?";
+        String value = "(?:" + quotedString + "|" + token + ")(?:\\p{Space}?" + comment + ")?";
 
         REGEX_PAIR = Pattern.compile("([a-zA-Z0-9-._]+)=(" + value + ")(?:\r?\n)?( |;|$)");
     }
