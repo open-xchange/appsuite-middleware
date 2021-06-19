@@ -31,6 +31,9 @@ external attendees.
 **-e**, **--event** *eventId*
 : Required. The event identifier
 
+**-u**, **--userId** *userId*
+: Required. The user identifier to set as replacement
+
 **-A**, **--adminuser** *masterAdminUser*
 : Master admin user name for authentication. Optional, depending on your configuration.
 

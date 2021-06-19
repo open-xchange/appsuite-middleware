@@ -73,7 +73,7 @@ public abstract class AbstractGroupAction implements AJAXActionService {
             }
             return perform(groupRequest);
         } catch (JSONException e) {
-            throw AjaxExceptionCodes.JSON_ERROR.create(e, e.getMessage());
+            throw AjaxExceptionCodes.ILLEGAL_REQUEST_BODY.create(e, e.getMessage());
         }
     }
 

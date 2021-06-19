@@ -42,6 +42,7 @@ import com.openexchange.database.DatabaseService;
 import com.openexchange.database.cleanup.CleanUpInfo;
 import com.openexchange.database.cleanup.DatabaseCleanUpService;
 import com.openexchange.database.cleanup.DefaultCleanUpJob;
+import com.openexchange.exception.OXException;
 import com.openexchange.filestore.DatabaseAccessProvider;
 import com.openexchange.filestore.FileStorageService;
 import com.openexchange.gdpr.dataexport.DataExportConfig;
@@ -72,10 +73,13 @@ import com.openexchange.java.Strings;
 import com.openexchange.notification.mail.NotificationMailFactory;
 import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.reseller.ResellerService;
+import com.openexchange.server.ServiceLookup;
 import com.openexchange.serverconfig.ServerConfigService;
 import com.openexchange.session.Session;
 import com.openexchange.threadpool.ThreadPoolService;
 import com.openexchange.timer.TimerService;
+import com.openexchange.tools.session.ServerSession;
+import com.openexchange.user.User;
 import com.openexchange.user.UserService;
 
 /**
@@ -233,6 +237,7 @@ public class DataExportActivator extends HousekeepingActivator {
 
         // Announce GDPR data export available
         {
+            final ServiceLookup services = this;
             final String sCapability = "dataexport";
             Dictionary<String, Object> properties = new Hashtable<String, Object>(1);
             properties.put(CapabilityChecker.PROPERTY_CAPABILITIES, sCapability);
@@ -252,6 +257,11 @@ public class DataExportActivator extends HousekeepingActivator {
                             if (!enabled) {
                                 return FailureAwareCapabilityChecker.Result.DISABLED;
                             }
+
+                            User user = getUserFor(session, services);
+                            if (user.isAnonymousGuest() || user.isGuest()) {
+                                return FailureAwareCapabilityChecker.Result.DISABLED;
+                            }
                         } catch (Exception e) {
                             LOG.warn("Failed to check if GDPR data export is enabled for user {} in context {}", I(session.getUserId()), I(session.getContextId()), e);
                             return FailureAwareCapabilityChecker.Result.FAILURE;
@@ -260,6 +270,11 @@ public class DataExportActivator extends HousekeepingActivator {
 
                     return FailureAwareCapabilityChecker.Result.ENABLED;
                 }
+
+                private User getUserFor(Session session, ServiceLookup services) throws OXException {
+                    return session instanceof ServerSession ? ((ServerSession) session).getUser() : services.getServiceSafe(UserService.class).getUser(session.getUserId(), session.getContextId());
+                }
+
             }, properties);
             getService(CapabilityService.class).declareCapability(sCapability);
         }

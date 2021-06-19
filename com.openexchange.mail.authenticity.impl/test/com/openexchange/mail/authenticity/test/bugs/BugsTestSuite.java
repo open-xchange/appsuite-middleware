@@ -32,7 +32,7 @@ import org.junit.runners.Suite;
  */
 @RunWith(Suite.class)
 @Suite.SuiteClasses({
-    TestBug65199.class
+    TestBug65199.class, TestMWB900.class
 })
 public class BugsTestSuite {
 
