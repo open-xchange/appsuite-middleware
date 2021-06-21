@@ -11379,6 +11379,34 @@ msgstr ""
 msgid "Login"
 msgstr ""
 
+#. *
+#. * Header for other e-mail addresses in the contact's note section
+#.
+#: com.openexchange.subscribe.google/src/com/openexchange/subscribe/google/parser/ContactNoteStrings.java:65
+msgid "Other e-mail addresses:"
+msgstr ""
+
+#. *
+#. * Header for other instant messengers in the contact's note section
+#.
+#: com.openexchange.subscribe.google/src/com/openexchange/subscribe/google/parser/ContactNoteStrings.java:70
+msgid "Other instant messengers:"
+msgstr ""
+
+#. *
+#. * Header for other phone numbers in the contact's note section
+#.
+#: com.openexchange.subscribe.google/src/com/openexchange/subscribe/google/parser/ContactNoteStrings.java:75
+msgid "Other phone numbers:"
+msgstr ""
+
+#. *
+#. * Header for other addresses in the contact's note section
+#.
+#: com.openexchange.subscribe.google/src/com/openexchange/subscribe/google/parser/ContactNoteStrings.java:80
+msgid "Other addresses:"
+msgstr ""
+
 #. The message displayed if the requested subscription cannot be found from the server.
 #: com.openexchange.subscribe.json/src/com/openexchange/subscribe/json/SubscriptionJSONExceptionMessage.java:69
 msgid "The subscription you requested is unkonwn!"
