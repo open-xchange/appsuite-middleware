@@ -611,14 +611,17 @@ public class ToMySqlQueryVisitor implements SearchTermVisitor {
             return;
         }
         String pattern = searchTerm.getPattern();
-        if (Strings.isNotEmpty(fulltextSearchPattern) && false == fulltextSearchPattern.equals(pattern)) {
-            LOG.warn("FULLTEXT search pattern changed while processing search term.");
-        }
         if (Strings.isEmpty(pattern) || pattern.length() < minimumPatternLength) {
             LOG.warn("Search pattern is too short to use FULLTEXT search.");
             throw InfostoreExceptionCodes.PATTERN_NEEDS_MORE_CHARACTERS.create(I(minimumPatternLength));
         }
-        this.fulltextSearchPattern = pattern;
+
+        if(this.fulltextSearchPattern == null) {
+            this.fulltextSearchPattern = pattern;
+        }
+        else {
+            this.fulltextSearchPattern = this.fulltextSearchPattern + " " + pattern;
+        }
     }
 
     private boolean isExactMatchTerm(AbstractStringSearchTerm searchTerm) {
@@ -663,7 +666,7 @@ public class ToMySqlQueryVisitor implements SearchTermVisitor {
      * Gets the remembered and prepared constant operators from the visited search terms.
      * <p/>
      * <b>Note:</b> Only useful for tests.
-     * 
+     *
      * @return A preview of the remembered parameters, or an empty list if there are none
      */
     protected List<Object> previewParameters() {
@@ -685,7 +688,7 @@ public class ToMySqlQueryVisitor implements SearchTermVisitor {
 
     /**
      * Gets a preview of detected fulltext search pattern
-     * 
+     *
      * <b>Note:</b> Only useful for tests.
      *
      * @return A preview of fulltext search pattern
