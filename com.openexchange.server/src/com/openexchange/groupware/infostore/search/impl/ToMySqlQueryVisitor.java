@@ -287,7 +287,7 @@ public class ToMySqlQueryVisitor implements SearchTermVisitor {
         }
         Pair<Integer, Integer> filterAndSelectCount = SearchEngineImpl.appendFoldersAsUnion(session, queryBuilder, filterBuilder.length() > 0 ? filterBuilder.toString() : null, readAllFolders, readOwnFolders);
         if(sortedBy != null && dir != InfostoreSearchEngine.NOT_SET) {
-            queryBuilder.append("ORDER BY ")
+            queryBuilder.append(" ORDER BY ")
                         .append(ORDER_BY_COLUMN)
                         .append(dir == InfostoreSearchEngine.ASC ? " ASC" : " DESC");
         }
