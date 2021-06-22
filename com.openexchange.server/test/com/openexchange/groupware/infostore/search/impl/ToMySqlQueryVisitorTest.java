@@ -201,7 +201,7 @@ public class ToMySqlQueryVisitorTest {
         String result = visitor.previewMySqlQuery();
         assertFalse("Invalid SQL query", WRONG_OPERATORS.matcher(result).matches());
         assertFalse("Unneccessary whitespaces in query", MULTIPLE_WHITESPACE.matcher(result).matches());
-        assertTrue("Unexpected SQL query", result.endsWith("WHERE infostore.cid = 1 AND infostore.created_by=1 AND UPPER(infostore_document.filename) LIKE UPPER(?) ORDER BY infostore.last_modified ASC LIMIT 0,5"));
+        assertTrue("Unexpected SQL query", result.endsWith("WHERE infostore.cid = 1 AND infostore.created_by=1 AND UPPER(infostore_document.filename) LIKE UPPER(?) ORDER BY ORDER_BY ASC LIMIT 0,5"));
         assertEquals("Unexpected nnumber of constant operators", 1, visitor.previewParameters().size());
         assertEquals("Unexpected constant operator", "%test123%", visitor.previewParameters().get(0));
     }
