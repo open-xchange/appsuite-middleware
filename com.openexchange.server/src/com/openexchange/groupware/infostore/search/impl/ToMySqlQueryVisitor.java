@@ -93,6 +93,7 @@ public class ToMySqlQueryVisitor implements SearchTermVisitor {
     private static final String INFOSTORE = "infostore.";
     private static final String DOCUMENT = "infostore_document.";
     private static final String ORDER_BY_COLUMN = "ORDER_BY";
+    private static final String FULL_TEXT_OPERATORS_REGEX = "[+\\-><\\(\\)~\\*\\\"@]";
     private static final String PREFIX = " FROM infostore JOIN infostore_document ON infostore_document.cid = infostore.cid AND infostore_document.infostore_id = infostore.id AND infostore_document.version_number = infostore.version";
     private static final Set<Class<? extends SearchTerm<?>>> UNSUPPORTED = ImmutableSet.<Class<? extends SearchTerm<?>>> of(ContentTerm.class, MetaTerm.class, SequenceNumberTerm.class);
 
@@ -211,10 +212,7 @@ public class ToMySqlQueryVisitor implements SearchTermVisitor {
             close = true;
             int parameterIndex = 1;
             if (fulltextSearch && Strings.isNotEmpty(fulltextSearchPattern)) {
-                String pattern = fulltextSearchPattern;
-                if (false == fulltextSearchPattern.endsWith("*")) {
-                    pattern += "*";
-                }
+                String pattern = prepareFullTextPattern(fulltextSearchPattern);
                 for (int i = 0; i < selectCount; i++) {
                     stmt.setString(parameterIndex++, pattern);
                     for (Object parameter : parameters) {
@@ -236,6 +234,29 @@ public class ToMySqlQueryVisitor implements SearchTermVisitor {
             }
         }
     }
+
+    //@formatter:off
+    private String prepareFullTextPattern(String pattern) {
+
+        //replace all non-word characters in token
+        pattern = pattern.replaceAll(FULL_TEXT_OPERATORS_REGEX, " ").trim();
+
+        //split patterns
+        List<String> subPatterns = new ArrayList<>();
+        Arrays.asList(Strings.splitByWhitespaces(pattern)).forEach(subPattern -> {
+            if (Strings.isNotEmpty(subPattern)  && /* Skip empty patterns*/
+                !subPatterns.contains(subPattern)  /* Skip duplicate patterns*/) {
+                subPatterns.add(subPattern);
+            }
+        });
+
+        StringBuilder retPattern = new StringBuilder();
+        subPatterns.forEach( p ->
+            retPattern.append(p)
+                      .append("* "));
+        return retPattern.toString();
+    }
+    //@formatter:on
 
     /**
      * Constructs and appends this visitor's SQL query containing the prefix, the filters from the visited search terms, as well as further
@@ -611,14 +632,17 @@ public class ToMySqlQueryVisitor implements SearchTermVisitor {
             return;
         }
         String pattern = searchTerm.getPattern();
-        if (Strings.isNotEmpty(fulltextSearchPattern) && false == fulltextSearchPattern.equals(pattern)) {
-            LOG.warn("FULLTEXT search pattern changed while processing search term.");
-        }
         if (Strings.isEmpty(pattern) || pattern.length() < minimumPatternLength) {
             LOG.warn("Search pattern is too short to use FULLTEXT search.");
             throw InfostoreExceptionCodes.PATTERN_NEEDS_MORE_CHARACTERS.create(I(minimumPatternLength));
         }
-        this.fulltextSearchPattern = pattern;
+
+        if(this.fulltextSearchPattern == null) {
+            this.fulltextSearchPattern = pattern;
+        }
+        else {
+            this.fulltextSearchPattern = this.fulltextSearchPattern + " " + pattern;
+        }
     }
 
     private boolean isExactMatchTerm(AbstractStringSearchTerm searchTerm) {
@@ -663,7 +687,7 @@ public class ToMySqlQueryVisitor implements SearchTermVisitor {
      * Gets the remembered and prepared constant operators from the visited search terms.
      * <p/>
      * <b>Note:</b> Only useful for tests.
-     * 
+     *
      * @return A preview of the remembered parameters, or an empty list if there are none
      */
     protected List<Object> previewParameters() {
@@ -685,7 +709,7 @@ public class ToMySqlQueryVisitor implements SearchTermVisitor {
 
     /**
      * Gets a preview of detected fulltext search pattern
-     * 
+     *
      * <b>Note:</b> Only useful for tests.
      *
      * @return A preview of fulltext search pattern
