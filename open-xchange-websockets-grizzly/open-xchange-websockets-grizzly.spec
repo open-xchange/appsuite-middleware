@@ -7,7 +7,7 @@ BuildRequires: open-xchange-core
 BuildRequires: open-xchange-grizzly
 BuildRequires: java-1.8.0-openjdk-devel
 Version:       @OXVERSION@
-%define        ox_release 14
+%define        ox_release 15
 Release:       %{ox_release}_<CI_CNT>.<B_CNT>
 Group:         Applications/Productivity
 License:       GPL-2.0
@@ -56,6 +56,8 @@ GLOBIGNORE='*'
 %config(noreplace) /opt/open-xchange/etc/hazelcast/*
 
 %changelog
+* Wed Jun 23 2021 Thorben Betten <thorben.betten@open-xchange.com>
+Build for patch 2021-06-29 (6008)
 * Tue Jun 08 2021 Thorben Betten <thorben.betten@open-xchange.com>
 Build for patch 2021-06-14 (6003)
 * Wed May 26 2021 Thorben Betten <thorben.betten@open-xchange.com>

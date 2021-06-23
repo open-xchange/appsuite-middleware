@@ -6,7 +6,7 @@ BuildRequires: ant
 BuildRequires: open-xchange-core
 BuildRequires: java-1.8.0-openjdk-devel
 Version:       @OXVERSION@
-%define        ox_release 14
+%define        ox_release 15
 Release:       %{ox_release}_<CI_CNT>.<B_CNT>
 Group:         Applications/Productivity
 License:       GPL-2.0
@@ -56,6 +56,8 @@ ox_update_permissions "/opt/open-xchange/etc/ldapauth.properties" root:open-xcha
 %config(noreplace) %attr(640,root,open-xchange) /opt/open-xchange/etc/ldapauth.properties
 
 %changelog
+* Wed Jun 23 2021 Marcus Klein <marcus.klein@open-xchange.com>
+Build for patch 2021-06-29 (6008)
 * Tue Jun 08 2021 Marcus Klein <marcus.klein@open-xchange.com>
 Build for patch 2021-06-14 (6003)
 * Wed May 26 2021 Marcus Klein <marcus.klein@open-xchange.com>
