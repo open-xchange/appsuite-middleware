@@ -11432,28 +11432,28 @@ msgstr ""
 #. *
 #. * Header for other e-mail addresses in the contact's note section
 #.
-#: com.openexchange.subscribe.google/src/com/openexchange/subscribe/google/parser/ContactNoteStrings.java:65
+#: com.openexchange.subscribe.google/src/com/openexchange/subscribe/google/parser/ContactNoteStrings.java:36
 msgid "Other e-mail addresses:"
 msgstr ""
 
 #. *
 #. * Header for other instant messengers in the contact's note section
 #.
-#: com.openexchange.subscribe.google/src/com/openexchange/subscribe/google/parser/ContactNoteStrings.java:70
+#: com.openexchange.subscribe.google/src/com/openexchange/subscribe/google/parser/ContactNoteStrings.java:41
 msgid "Other instant messengers:"
 msgstr ""
 
 #. *
 #. * Header for other phone numbers in the contact's note section
 #.
-#: com.openexchange.subscribe.google/src/com/openexchange/subscribe/google/parser/ContactNoteStrings.java:75
+#: com.openexchange.subscribe.google/src/com/openexchange/subscribe/google/parser/ContactNoteStrings.java:46
 msgid "Other phone numbers:"
 msgstr ""
 
 #. *
 #. * Header for other addresses in the contact's note section
 #.
-#: com.openexchange.subscribe.google/src/com/openexchange/subscribe/google/parser/ContactNoteStrings.java:80
+#: com.openexchange.subscribe.google/src/com/openexchange/subscribe/google/parser/ContactNoteStrings.java:51
 msgid "Other addresses:"
 msgstr ""
 
