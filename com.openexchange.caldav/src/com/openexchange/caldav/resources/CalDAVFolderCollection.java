@@ -54,12 +54,12 @@ import static com.openexchange.chronos.provider.basic.CommonCalendarConfiguratio
 import static com.openexchange.chronos.provider.basic.CommonCalendarConfigurationFields.URI;
 import static com.openexchange.dav.DAVProtocol.protocolException;
 import static com.openexchange.folderstorage.CalendarFolderConverter.CALENDAR_CONFIG_FIELD;
+import static java.util.regex.Matcher.quoteReplacement;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
 import java.util.List;
-import java.util.Locale;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 import javax.servlet.http.HttpServletResponse;
@@ -260,16 +260,29 @@ public abstract class CalDAVFolderCollection<T> extends FolderCollection<T> impl
 
     @Override
     public String getDisplayName() throws WebdavProtocolException {
-        Locale locale = factory.getUser().getLocale();
-        String name = locale != null ? folder.getLocalizedName(locale) : folder.getName();
-        String ownerName = getOwnerName();
-
-        if (PrivateType.getInstance().equals(this.folder.getType()) && folder.isDefault()) {
-            return getStandardFolderDisplayNameTemplate().replaceAll("\\[foldername\\]", name).replaceAll("\\[owner\\]", ownerName);
-        } else if (SharedType.getInstance().equals(this.folder.getType())) {
-            return getSharedFolderDisplayNameTemplate().replaceAll("\\[foldername\\]", name).replaceAll("\\[owner\\]", ownerName);
+        /*
+         * derive localized folder name
+         */
+        String name = folder.getLocalizedName(factory.getUser().getLocale());
+        if (Strings.isEmpty(name)) {
+            name = folder.getName();
+            if (Strings.isEmpty(name)) {
+                LOG.warn("No display name available for folder {}, using generic fallback.", folder.getID());
+                name = "Folder " + folder.getID();
+            }
         }
-
+        /*
+         * adjust display name for specific folder type if needed
+         */
+        if (SharedType.getInstance().equals(folder.getType()) || PrivateType.getInstance().equals(folder.getType()) && folder.isDefault()) {
+            String ownerName = getOwnerName();
+            if (Strings.isEmpty(ownerName)) {
+                LOG.warn("No owner name available for folder {}, falling back to folder name as-is.", folder.getID());
+            } else {
+                String template = SharedType.getInstance().equals(folder.getType()) ? getSharedFolderDisplayNameTemplate() : getStandardFolderDisplayNameTemplate();
+                name = template.replaceAll("\\[foldername\\]", quoteReplacement(name)).replaceAll("\\[owner\\]", quoteReplacement(ownerName));
+            }
+        }
         return name;
     }
 
