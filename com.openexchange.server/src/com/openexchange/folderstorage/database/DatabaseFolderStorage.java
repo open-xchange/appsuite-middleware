@@ -2211,6 +2211,7 @@ public final class DatabaseFolderStorage implements AfterReadAwareFolderStorage,
         } else {
             folder.setPermissions(cleanupGuestGroupPermissions(parent.getPermissions()));
         }
+        folder.setPermissions(cleanupAnonymousShareLinkPermissionsWithTypeNormal(folder.getPermissions(), storageParameters));
         Optional<List<OCLPermission>> optPermissions = processInheritedPermissions(parent, Optional.of(folder.getPermissions()), Optional.empty());
         optPermissions.ifPresent(p -> folder.setPermissions(p));
 
@@ -2222,6 +2223,38 @@ public final class DatabaseFolderStorage implements AfterReadAwareFolderStorage,
                 inheritFolderPermissions(subfolder, parent, context, con, storageParameters, folderManager, millis, mergePermissions);
             }
         }
+    }
+
+    /**
+     * 
+     * Removes permissions for anonymous share links with FolderPermissionType.NORMAL from the permissions.
+     * See MWB-1119.
+     * Needs ShareService for valid result.
+     *
+     * @param perms The permissions.
+     * @param storageParameters The storage parameters.
+     * @return The cleaned list of permissions.
+     */
+    private List<OCLPermission> cleanupAnonymousShareLinkPermissionsWithTypeNormal(List<OCLPermission> perms, StorageParameters storageParameters) {
+        ShareService shareService = ServerServiceRegistry.getServize(ShareService.class);
+        Optional<OCLPermission> existingNormalSharingLinkPermission = perms.stream().filter(e -> {
+            try {
+                GuestInfo guestInfo = null;
+                //@formatter:off
+                return (FolderPermissionType.NORMAL == e.getType() 
+                    && shareService != null
+                    && (guestInfo = shareService.getGuestInfo(storageParameters.getSession(), e.getEntity())) != null 
+                    && RecipientType.ANONYMOUS.equals(guestInfo.getRecipientType()));
+                //@formatter:on
+            } catch (OXException exception) {
+                LOG.debug("Determination if the permission is a anonymous share link permission failed.", exception);
+                return false;
+            }
+        }).findAny();
+        if (existingNormalSharingLinkPermission.isPresent()) {
+            perms.remove(existingNormalSharingLinkPermission.get());
+        }
+        return perms;
     }
 
     private List<OCLPermission> cleanupGuestGroupPermissions(List<OCLPermission> perms) {

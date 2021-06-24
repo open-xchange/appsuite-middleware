@@ -128,7 +128,8 @@ import com.openexchange.test.concurrent.ParallelSuite;
 
     MWB682Test.class,
     MWB905Test.class,
-    MWB1030Test.class
+    MWB1030Test.class, 
+    MWB1119Test.class
 
 })
 public final class FolderTestSuite {
