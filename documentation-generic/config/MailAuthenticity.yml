@@ -8,7 +8,7 @@ properties:
       reloadable: true
       configcascadeAware: true
       file: mailAuthenticity.properties
-      packageName: open-xchange-mail-authenticity
+      packageName: open-xchange-core
       tags: ["Mail Authenticity","Mail"]
     - key: com.openexchange.mail.authenticity.threshold
       description: |
@@ -18,7 +18,7 @@ properties:
       reloadable: true
       configcascadeAware: true
       file: mailAuthenticity.properties
-      packageName: open-xchange-mail-authenticity
+      packageName: open-xchange-core
       tags: ["Mail Authenticity","Mail"]
     - key: com.openexchange.mail.authenticity.authServId
       description: |
@@ -32,7 +32,7 @@ properties:
       reloadable: true
       configcascadeAware: true
       file: mailAuthenticity.properties
-      packageName: open-xchange-mail-authenticity
+      packageName: open-xchange-core
       tags: ["Mail Authenticity","Mail"]
     - key: com.openexchange.mail.authenticity.logRawHeaders
       description: |
@@ -42,7 +42,7 @@ properties:
       reloadable: true
       configcascadeAware: false
       file: mailAuthenticity.properties
-      packageName: open-xchange-mail-authenticity
+      packageName: open-xchange-core
       tags: ["Mail Authenticity","Mail"]
     - key: com.openexchange.mail.authenticity.considerDMARCPolicy
       description: |
@@ -54,7 +54,7 @@ properties:
       reloadable: true
       configcascadeAware: false
       file: mailAuthenticity.properties
-      packageName: open-xchange-mail-authenticity
+      packageName: open-xchange-core
       tags: ["Mail Authenticity","Mail"]
     - key: com.openexchange.mail.authenticity.trusted.tenants
       description: |
@@ -68,7 +68,7 @@ properties:
         - "com.openexchange.mail.authenticity.trusted.[tenant].image.[imageId]"
         - "com.openexchange.mail.authenticity.trusted.[tenant].fallbackImage"
       file: mailAuthenticity.properties
-      packageName: open-xchange-mail-authenticity
+      packageName: open-xchange-core
       tags: ["Mail Authenticity","Mail"]
     - key: com.openexchange.mail.authenticity.trusted.[tenant].config
       description: |
@@ -109,7 +109,7 @@ properties:
         - "com.openexchange.mail.authenticity.trusted.[tenant].image.[imageId]"
         - "com.openexchange.mail.authenticity.trusted.[tenant].fallbackImage"
       file: mailAuthenticity.properties
-      packageName: open-xchange-mail-authenticity
+      packageName: open-xchange-core
       tags: ["Mail Authenticity","Mail"]
     - key: com.openexchange.mail.authenticity.trusted.[tenant.]image.[imageId]
       description: |
@@ -137,7 +137,7 @@ properties:
         - "com.openexchange.mail.authenticity.trusted.[tenant].config"
         - "com.openexchange.mail.authenticity.trusted.[tenant].fallbackImage"
       file: mailAuthenticity.properties
-      packageName: open-xchange-mail-authenticity
+      packageName: open-xchange-core
       tags: ["Mail Authenticity","Mail"]
     - key: com.openexchange.mail.authenticity.trusted.[tenant].fallbackImage
       description: |
@@ -161,7 +161,7 @@ properties:
         - "com.openexchange.mail.authenticity.trusted.[tenant].image.[imageId]"
         - "com.openexchange.mail.authenticity.trusted.[tenant].config"
       file: mailAuthenticity.properties
-      packageName: open-xchange-mail-authenticity
+      packageName: open-xchange-core
       tags: ["Mail Authenticity","Mail"]
     - key: com.openexchange.mail.authenticity.custom.rules.filename
       description: |
@@ -220,7 +220,7 @@ properties:
       reloadable: true
       configcascadeAware: true
       file: mailAuthenticity.properties
-      packageName: open-xchange-mail-authenticity
+      packageName: open-xchange-core
       tags: ["Mail Authenticity","Mail"]      
 
 
